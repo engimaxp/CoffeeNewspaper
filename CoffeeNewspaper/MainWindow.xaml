@@ -1,8 +1,13 @@
-﻿<Window x:Class="CoffeeNewspaper.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525">
+﻿<Controls:MetroWindow x:Class="CoffeeNewspaper.MainWindow"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      Title="MainWindow"
+                      Height="600"
+                      Width="800">
     <Grid>
-        
+
+        <!-- your content -->
+
     </Grid>
-</Window>
+</Controls:MetroWindow>
