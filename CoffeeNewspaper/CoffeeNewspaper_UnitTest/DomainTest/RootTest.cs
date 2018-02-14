@@ -128,26 +128,59 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         [Test]
         public void StartATask()
         {
+            CNRoot root = new CNRoot();
+            root.AddOrUpdateTask(DomainTestHelper.GetARandomTask(1));
+            root.StartTask(1);
+            Assert.AreEqual(root.GetTaskById(1).Status,CNTaskStatus.DOING);
         }
 
         [Test]
         public void EndATask()
         {
+            CNRoot root = new CNRoot();
+            root.AddOrUpdateTask(DomainTestHelper.GetARandomTask(1));
+            root.EndTask(1);
+            Assert.AreEqual(root.GetTaskById(1).Status, CNTaskStatus.DONE);
         }
 
         [Test]
-        public void UpdateAMemoOfTask()
+        public void UpdateAMemo_UpdateBothGlobalAndTasksMemo()
         {
+
+            CNRoot root = new CNRoot();
+            CNTask testTask1 = DomainTestHelper.GetARandomTask(1);
+            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo(2);
+            testTask1.AddOrUpdateMemo(testMemo1);
+            root.AddOrUpdateTask(testTask1);
+            root.AddOrUpdateGlobalMemo(testMemo1);
+            
+            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo(2);
+            root.UpdateMemo(testMemo2);
+
+            Assert.AreEqual(testMemo2,root.GetMemoById(2));
         }
 
-        [Test]
-        public void UpdateAMemoOfGlobal()
-        {
-        }
 
         [Test]
         public void ReplaceAWordOfATaskMemos()
         {
+
+            CNRoot root = new CNRoot();
+            CNTask testTask1 = DomainTestHelper.GetARandomTask(1);
+            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo(2);
+            testTask1.AddOrUpdateMemo(testMemo1);
+            root.AddOrUpdateTask(testTask1);
+            root.AddOrUpdateGlobalMemo(testMemo1);
+
+            CNMemo copy = testMemo1.Clone() as CNMemo;
+            if (copy != null)
+            {
+                copy.Content = copy.Content.Replace("Start with", "End with");
+            }
+
+            root.ReplaceAWordOfATaskMemos("Start with", "End with");
+
+            Assert.AreEqual(copy, root.GetMemoById(2));
         }
         
     }

@@ -10,6 +10,7 @@ namespace CN_Model
         public CNTask()
         {
             _memos = new List<CNMemo>();
+            Status = CNTaskStatus.TODO;
         }
 
         public bool Equals(CNTask other)
@@ -20,8 +21,9 @@ namespace CN_Model
                 string.Equals(Content, other.Content) && 
                 CreateTime.Equals(other.CreateTime) && 
                 StartTime.Equals(other.StartTime) &&
-                Priority == other.Priority && 
-                Urgency == other.Urgency && 
+                Priority == other.Priority &&
+                Urgency == other.Urgency &&
+                Status == other.Status && 
                 EstimatedDuration == other.EstimatedDuration &&
                 EndTime.Equals(other.EndTime) &&
                 (Memos == null && other.Memos == Memos) || (Memos != null && other.Memos != null && Memos.Count == other.Memos.Count && !Memos.Except(other.Memos).Any()) &&
@@ -47,16 +49,18 @@ namespace CN_Model
                 hashCode = (hashCode*397) ^ CreateTime.GetHashCode();
                 hashCode = (hashCode*397) ^ StartTime.GetHashCode();
                 hashCode = (hashCode*397) ^ (int) Priority;
-                hashCode = (hashCode*397) ^ (int) Urgency;
+                hashCode = (hashCode * 397) ^ (int)Urgency;
+                hashCode = (hashCode * 397) ^ (int)Status;
                 hashCode = (hashCode*397) ^ EstimatedDuration;
                 hashCode = (hashCode*397) ^ EndTime.GetHashCode();
                 hashCode = (hashCode*397) ^ (Memos != null ? Memos.GetHashCode() : 0);
                 hashCode = (hashCode*397) ^ (Tags != null ? Tags.GetHashCode() : 0);
-                hashCode = (hashCode*397) ^ (ParentTaskId != null ? ParentTaskId.GetHashCode() : 0);
+                hashCode = (hashCode*397) ^ (ParentTaskId.GetHashCode());
                 hashCode = (hashCode*397) ^ (PreTaskIds != null ? PreTaskIds.GetHashCode() : 0);
                 return hashCode;
             }
         }
+
 
         public int TaskId { get; set; }
         public string Content { get; set; }
@@ -91,6 +95,8 @@ namespace CN_Model
         private int ParentTaskId { get; set; }
         private List<int> PreTaskIds { get; set; }
 
+        public CNTaskStatus Status { get; set; }
+
         public CNTask AddOrUpdateMemo(CNMemo newMemo)
         {
             if (Memos.Exists(r => r.MemoId == newMemo.MemoId))
@@ -103,6 +109,10 @@ namespace CN_Model
         public bool HasMemo()
         {
             return Memos.Any();
+        }
+        public bool HasMemo(int memoId)
+        {
+            return Memos.Any(x=>x.MemoId == memoId);
         }
 
         public List<CNMemo> GetAllMemos()
@@ -118,6 +128,24 @@ namespace CN_Model
         public bool HasParentTask()
         {
             return this.ParentTaskId != 0;
+        }
+
+        public void ReplaceAWordOfATaskMemos(string originwords, string targetwords)
+        {
+            this.Memos.ForEach(r=>r.Content = r.Content.Replace(originwords,targetwords));
+        }
+
+        public void Start()
+        {
+            this.Status = CNTaskStatus.DOING;
+        }
+        public void Stop()
+        {
+            this.Status = CNTaskStatus.TODO;
+        }
+        public void End()
+        {
+            this.Status = CNTaskStatus.DONE;
         }
     }
 }

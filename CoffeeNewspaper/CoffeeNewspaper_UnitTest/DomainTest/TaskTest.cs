@@ -91,5 +91,29 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             }));
         }
 
+        [Test]
+        public void StartATaskWithPreTaskNotDone_throwException()
+        {
+            Assert.Fail();
+        }
+
+        [Test]
+        public void StartATaskWithPreTaskDone()
+        {
+            Assert.Fail();
+        }
+
+        [Test]
+        public void StartAndStopTaskMutipleTimes_HasCorrectDurationCount()
+        {
+            Assert.Fail();
+        }
+
+        [Test]
+        public void StartAndStopTaskMutipleTimes_HasCorrectWorkDaysCount()
+        {
+            Assert.Fail();
+        }
+
     }
 }

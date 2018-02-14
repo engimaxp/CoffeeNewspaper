@@ -44,6 +44,10 @@ namespace CN_Model
         {
             return TaskList.FirstOrDefault();
         }
+        public CNTask GetTaskById(int taskid)
+        {
+            return TaskList.FirstOrDefault(r=>r.TaskId == taskid)??new CNTask();
+        }
 
         public CNMemo GetMemoById(int memoid)
         {
@@ -94,6 +98,36 @@ namespace CN_Model
         public IEnumerable<CNMemo> SearchMemoByContent(string searchContent)
         {
             return this.GetAllUniqueMemo().Where(r => r.Content.Contains(searchContent));
+        }
+
+        public void UpdateMemo(CNMemo updateMemo)
+        {
+            if (MemoList.Exists(r => r.MemoId == updateMemo.MemoId))
+            {
+                MemoList[MemoList.FindIndex(x => x.MemoId == updateMemo.MemoId)] = updateMemo;
+            }
+
+            TaskList.Where(x=>x.HasMemo(updateMemo.MemoId)).ToList().ForEach(r=>r.AddOrUpdateMemo(updateMemo));
+        }
+
+        public void ReplaceAWordOfATaskMemos(string originwords, string targetwords)
+        {
+            TaskList.ForEach(r => r.ReplaceAWordOfATaskMemos(originwords,targetwords));
+            this.MemoList.ForEach(r=>r.Content = r.Content.Replace(originwords,targetwords));
+        }
+
+        public void StartTask(int taskid)
+        {
+            (TaskList.FirstOrDefault(r => r.TaskId == taskid) ?? new CNTask()).Start();
+        }
+        public void StopTask(int taskid)
+        {
+            (TaskList.FirstOrDefault(r => r.TaskId == taskid) ?? new CNTask()).Stop();
+        }
+
+        public void EndTask(int taskid)
+        {
+            (TaskList.FirstOrDefault(r => r.TaskId == taskid) ?? new CNTask()).End();
         }
     }
 }

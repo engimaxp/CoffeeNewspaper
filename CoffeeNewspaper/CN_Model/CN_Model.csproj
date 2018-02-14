@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CNMemo.cs" />
+    <Compile Include="CNTaskStatus.cs" />
     <Compile Include="CNRoot.cs" />
     <Compile Include="CNUrgency.cs" />
     <Compile Include="CNPriority.cs" />

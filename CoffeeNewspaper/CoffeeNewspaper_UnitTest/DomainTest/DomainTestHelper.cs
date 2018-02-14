@@ -21,6 +21,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 EndTime = null,
                 Priority = CNPriority.High,
                 Urgency = CNUrgency.High,
+                Status = CNTaskStatus.TODO,
                 EstimatedDuration = 3600,
                 Tags = new List<string>() {"Work"},
             };

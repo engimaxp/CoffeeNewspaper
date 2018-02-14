@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CN_Model
 {
-    public class CNMemo : IEquatable<CNMemo>
+    public class CNMemo : IEquatable<CNMemo>,ICloneable
     {
         public int MemoId { get; set; }
         public string Content { get; set; }
@@ -34,6 +34,16 @@ namespace CN_Model
                 hashCode = (hashCode*397) ^ (Tag != null ? Tag.GetHashCode() : 0);
                 return hashCode;
             }
+        }
+
+        public object Clone()
+        {
+            return new CNMemo()
+            {
+                Content = string.Copy(this.Content),
+                MemoId = this.MemoId,
+                Tag = string.Copy(this.Tag)
+            };
         }
     }
 }
