@@ -17,12 +17,12 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         {
             Assert.AreEqual(new CNMemo()
             {
-                ID = 1,
+                MemoId = 1,
                 Content = "Start with writing tests!",
                 Tag = ""
             }, new CNMemo()
             {
-                ID = 1,
+                MemoId = 1,
                 Content = "Start with writing tests!",
                 Tag = ""
             });
@@ -32,12 +32,12 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         {
             Assert.AreNotEqual(new CNMemo()
             {
-                ID = 1,
+                MemoId = 1,
                 Content = "Start with writing tests!",
                 Tag = ""
             }, new CNMemo()
             {
-                ID = 2,
+                MemoId = 2,
                 Content = "Start with writing tests!",
                 Tag = ""
             });

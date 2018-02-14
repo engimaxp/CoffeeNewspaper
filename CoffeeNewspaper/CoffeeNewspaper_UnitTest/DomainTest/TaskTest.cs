@@ -16,7 +16,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         {
             Assert.AreEqual(new CNTask()
             {
-                ID = 1,
+                TaskId = 1,
                 Content = "Write A Program",
                 CreateTime = DateTime.Now,
                 StartTime = null,
@@ -24,24 +24,20 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Priority = CNPriority.High,
                 Urgency = CNUrgency.High,
                 EstimatedDuration = 3600,
-                Memos = new List<CNMemo>() {new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                },
-                new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                }},
                 Tags = new List<string>() { "Work" },
-                Parent = null,
-                PreTask = null,
-            }, new CNTask()
+            }.AddOrUpdateMemo(new CNMemo()
             {
-                ID = 1,
+                MemoId = 1,
+                Content = "Start with writing tests!",
+                Tag = ""
+            }).AddOrUpdateMemo(new CNMemo()
+            {
+                MemoId = 1,
+                Content = "Start with writing tests!",
+                Tag = ""
+            }), new CNTask()
+            {
+                TaskId = 1,
                 Content = "Write A Program",
                 CreateTime = DateTime.Now,
                 StartTime = null,
@@ -49,29 +45,20 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Priority = CNPriority.High,
                 Urgency = CNUrgency.High,
                 EstimatedDuration = 3600,
-                Memos = new List<CNMemo>() {new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                },
-                new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                }},
                 Tags = new List<string>() { "Work" },
-                Parent = null,
-                PreTask = null,
-            });
+            }.AddOrUpdateMemo(new CNMemo()
+            {
+                MemoId = 1,
+                Content = "Start with writing tests!",
+                Tag = ""
+            }));
         }
         [Test]
         public void TaskAreNotEqual()
         {
             Assert.AreNotEqual(new CNTask()
             {
-                ID = 1,
+                TaskId = 1,
                 Content = "Write A Program",
                 CreateTime = DateTime.Now,
                 StartTime = null,
@@ -79,24 +66,15 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Priority = CNPriority.High,
                 Urgency = CNUrgency.High,
                 EstimatedDuration = 3600,
-                Memos = new List<CNMemo>() {new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                },
-                new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                }},
                 Tags = new List<string>() { "Work" },
-                Parent = null,
-                PreTask = null,
-            }, new CNTask()
+            }.AddOrUpdateMemo(new CNMemo()
             {
-                ID = 1,
+                MemoId = 1,
+                Content = "Start with writing tests!",
+                Tag = ""
+            }), new CNTask()
+            {
+                TaskId = 1,
                 Content = "Write A Program",
                 CreateTime = DateTime.Now,
                 StartTime = null,
@@ -104,54 +82,14 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Priority = CNPriority.High,
                 Urgency = CNUrgency.High,
                 EstimatedDuration = 3600,
-                Memos = new List<CNMemo>() {new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                },
-                new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                }},
-                Tags = new List<string>() { "Work" },
-                Parent = null,
-                PreTask = new List<CNTask>(),
-            });
+                Tags = new List<string>() { "Work2" },
+            }.AddOrUpdateMemo(new CNMemo()
+            {
+                MemoId = 1,
+                Content = "Start with writing tests!",
+                Tag = ""
+            }));
         }
 
-        [Test]
-        public void CreateTask()
-        {
-            var task = new CNTask()
-            {
-                ID = 1,
-                Content = "Write A Program",
-                CreateTime = DateTime.Now,
-                StartTime = null,
-                EndTime = null,
-                Priority = CNPriority.High,
-                Urgency = CNUrgency.High,
-                EstimatedDuration = 3600,
-                Memos = new List<CNMemo>() {new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                },
-                new CNMemo()
-                {
-                    ID = 1,
-                    Content = "Start with writing tests!",
-                    Tag = ""
-                }},
-                Tags = new List<string>() { "Work" },
-                Parent = null,
-                PreTask = null,
-            };
-            Assert.IsNotNull(task);
-        }
     }
 }

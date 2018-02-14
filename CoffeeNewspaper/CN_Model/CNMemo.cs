@@ -7,14 +7,14 @@ namespace CN_Model
 {
     public class CNMemo : IEquatable<CNMemo>
     {
-        public int ID { get; set; }
+        public int MemoId { get; set; }
         public string Content { get; set; }
         public string Tag { get; set; }
         public bool Equals(CNMemo other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return ID == other.ID && string.Equals(Content, other.Content) && string.Equals(Tag, other.Tag);
+            return MemoId == other.MemoId && string.Equals(Content, other.Content) && string.Equals(Tag, other.Tag);
         }
 
         public override bool Equals(object obj)
@@ -29,7 +29,7 @@ namespace CN_Model
         {
             unchecked
             {
-                var hashCode = ID;
+                var hashCode = MemoId;
                 hashCode = (hashCode*397) ^ (Content != null ? Content.GetHashCode() : 0);
                 hashCode = (hashCode*397) ^ (Tag != null ? Tag.GetHashCode() : 0);
                 return hashCode;
