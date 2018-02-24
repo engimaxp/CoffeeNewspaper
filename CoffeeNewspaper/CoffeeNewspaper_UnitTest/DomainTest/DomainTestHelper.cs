@@ -33,6 +33,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             return new CNMemo()
             {
                 MemoId = memoid,
+                Title = "NewMemo",
                 Content = "Start with writing tests!" + timestamp + Guid.NewGuid().ToString("N"),
                 Tag = ""
             };

@@ -132,7 +132,10 @@ namespace CN_Model
 
         public void ReplaceAWordOfATaskMemos(string originwords, string targetwords)
         {
-            this.Memos.ForEach(r=>r.Content = r.Content.Replace(originwords,targetwords));
+            this.Memos.ForEach(r=> {
+                r.Content = r.Content.Replace(originwords, targetwords);
+                r.Title = r.Title.Replace(originwords, targetwords);
+            });
         }
 
         public void Start()

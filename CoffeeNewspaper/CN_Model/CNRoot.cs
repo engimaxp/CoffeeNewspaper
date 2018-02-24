@@ -97,7 +97,7 @@ namespace CN_Model
 
         public IEnumerable<CNMemo> SearchMemoByContent(string searchContent)
         {
-            return this.GetAllUniqueMemo().Where(r => r.Content.Contains(searchContent));
+            return this.GetAllUniqueMemo().Where(r => r.Content.Contains(searchContent) || r.Title.Contains(searchContent));
         }
 
         public void UpdateMemo(CNMemo updateMemo)
@@ -113,7 +113,10 @@ namespace CN_Model
         public void ReplaceAWordOfATaskMemos(string originwords, string targetwords)
         {
             TaskList.ForEach(r => r.ReplaceAWordOfATaskMemos(originwords,targetwords));
-            this.MemoList.ForEach(r=>r.Content = r.Content.Replace(originwords,targetwords));
+            this.MemoList.ForEach(r=> {
+                r.Content = r.Content.Replace(originwords, targetwords);
+                r.Title = r.Title.Replace(originwords, targetwords);
+            });
         }
 
         public void StartTask(int taskid)
