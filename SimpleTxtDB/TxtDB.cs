@@ -17,10 +17,21 @@ namespace SimpleTxtDB
         public TxtDB(string dbname,string directory=null)
         {
             if (string.IsNullOrEmpty(directory))
-                directory = Directory.GetCurrentDirectory();
+                directory = AppDomain.CurrentDomain.BaseDirectory;
             if (!directory.EndsWith("\\"))
                 directory = directory + "\\";
-            dbfile = directory + dbname + ".txt"; 
+
+            if (dbname.Contains("\\"))
+            {
+                string parentDirectory =
+                    directory + dbname.Substring(0, dbname.LastIndexOf("\\", StringComparison.Ordinal));
+                if (!Directory.Exists(parentDirectory))
+                {
+                    Directory.CreateDirectory(parentDirectory);
+                }
+            }
+
+            dbfile = directory + dbname + ".json"; 
         }
         /// <summary>
         /// 插入最后一行
@@ -52,34 +63,40 @@ namespace SimpleTxtDB
             string lastline = null;
             int count = 1;
             int lineSearched = 0;
-
-            using (FileStream fs = new FileStream(dbfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
+            try
             {
-                while (lastline == null && lineSearched <= 1)
+                using (FileStream fs = new FileStream(dbfile, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
                 {
-                    if (fs.Length > count * BLOCKSTEP)
+                    while (lastline == null && lineSearched <= 1)
                     {
-                        fs.Position = fs.Length - count * BLOCKSTEP;
-                    }
-                    else
-                    {
-                        fs.Position = 0;
-                    }
-                    using (StreamReader sr = new StreamReader(fs, Encoding.UTF8))
-                    {
-                        string nextline = null;
-                        while ((nextline = sr.ReadLine()) != null)
+                        if (fs.Length > count * BLOCKSTEP)
                         {
-                            lineSearched++;
-                            lastline = nextline;
+                            fs.Position = fs.Length - count * BLOCKSTEP;
                         }
+                        else
+                        {
+                            fs.Position = 0;
+                        }
+                        using (StreamReader sr = new StreamReader(fs, Encoding.UTF8))
+                        {
+                            string nextline = null;
+                            while ((nextline = sr.ReadLine()) != null)
+                            {
+                                lineSearched++;
+                                lastline = nextline;
+                            }
+                        }
+                        if (dbfile.Length <= count * BLOCKSTEP)
+                        {
+                            break;
+                        }
+                        count++;
                     }
-                    if (dbfile.Length <= count * BLOCKSTEP)
-                    {
-                        break;
-                    }
-                    count++;
                 }
+            }
+            catch (Exception)
+            {
+                // ignored
             }
             return lastline??string.Empty;
         }
@@ -104,13 +121,21 @@ namespace SimpleTxtDB
                 return string.Empty;
             }
             string returnString = null;
-            using (FileStream fs = new FileStream(dbfile, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
+            try
             {
-                using (StreamReader sr = new StreamReader(fs, Encoding.UTF8))
+                using (FileStream fs = new FileStream(dbfile, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    returnString = sr.ReadToEnd();
+                    using (StreamReader sr = new StreamReader(fs, Encoding.UTF8))
+                    {
+                        returnString = sr.ReadToEnd();
+                    }
                 }
             }
+            catch (Exception)
+            {
+                // ignored
+            }
+
             return returnString;
         }
 

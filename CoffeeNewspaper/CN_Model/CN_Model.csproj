@@ -39,9 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CNConstants.cs" />
     <Compile Include="CNMemo.cs" />
     <Compile Include="CNTaskStatus.cs" />
     <Compile Include="CNRoot.cs" />
+    <Compile Include="CNTimeSlice.cs" />
     <Compile Include="CNUrgency.cs" />
     <Compile Include="CNPriority.cs" />
     <Compile Include="CNTask.cs" />

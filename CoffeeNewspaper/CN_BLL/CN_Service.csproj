@@ -30,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -39,8 +40,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ITimeSliceService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TimeSliceService.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CN_Model\CN_Model.csproj">
+      <Project>{20808918-8ade-4814-99f2-38de9c82cc5f}</Project>
+      <Name>CN_Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CN_Repository\CN_Repository.csproj">
+      <Project>{e2498fda-b391-461a-ae61-9bbef7c9582b}</Project>
+      <Name>CN_Repository</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

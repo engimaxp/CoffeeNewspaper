@@ -123,5 +123,16 @@ namespace CoffeeNewspaper_UnitTest
 
             txtDb.DumpFile();
         }
+
+        [Test]
+        public void CreateOrWriteToDirectoryTxt()
+        {
+            TxtDB txtDb = new TxtDB("TimeSlice\\info");
+            string teststring = "Testing" + Guid.NewGuid().ToString("N");
+            txtDb.AppendAndSave(teststring);
+            string lastline = txtDb.ReadLastLine();
+            Assert.AreEqual(lastline, teststring);
+            txtDb.DumpFile();
+        }
     }
 }

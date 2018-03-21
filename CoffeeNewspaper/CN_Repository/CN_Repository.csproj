@@ -30,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -39,8 +40,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IRootDataProvider.cs" />
+    <Compile Include="ITimeSliceProvider.cs" />
+    <Compile Include="RootDataProvider.cs" />
     <Compile Include="TimeSliceProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SimpleTxtDB\SimpleTxtDB.csproj">
+      <Project>{D8A75F43-5915-4E2C-B40D-2E472CF611D1}</Project>
+      <Name>SimpleTxtDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CN_Model\CN_Model.csproj">
+      <Project>{20808918-8ADE-4814-99F2-38DE9C82CC5F}</Project>
+      <Name>CN_Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
