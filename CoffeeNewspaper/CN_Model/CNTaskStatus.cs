@@ -11,5 +11,6 @@ namespace CN_Model
         TODO,
         DOING,
         DONE,
+        DELETE,
     }
 }
