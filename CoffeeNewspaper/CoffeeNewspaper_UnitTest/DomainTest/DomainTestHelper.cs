@@ -38,5 +38,15 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Tag = ""
             };
         }
+        /// <summary>
+        /// contain a task which id is 1
+        /// </summary>
+        /// <returns></returns>
+        public static CNRoot GetRandomRoot()
+        {
+            CNRoot root = new CNRoot();
+            root.AddOrUpdateTask(GetARandomTask(1));
+            return root;
+        }
     }
 }

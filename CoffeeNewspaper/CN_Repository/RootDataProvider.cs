@@ -16,7 +16,7 @@ namespace CN_Repository
 
         public string Today { get; set; }
 
-        private const string persistenceFileName = "tasksMemo";
+        public const string persistenceFileName = "tasksMemo";
 
         public static RootDataProvider GetProvider()
         {

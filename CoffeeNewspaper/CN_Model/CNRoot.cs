@@ -9,19 +9,15 @@ namespace CN_Model
     {
         public CNRoot()
         {
-            _taskList = new List<CNTask>();
+            TaskList = new List<CNTask>();
             _memoList = new List<CNMemo>();
         }
 
-        private List<CNTask> TaskList
-        {
-            get { return _taskList; }
-        }
+        public List<CNTask> TaskList { get; }
 
         private List<CNMemo> _memoList;
-        private readonly List<CNTask> _taskList;
 
-        private List<CNMemo> MemoList
+        public List<CNMemo> MemoList
         {
             get
             {
@@ -70,11 +66,35 @@ namespace CN_Model
 
         public void AddOrUpdateTask(CNTask newTask)
         {
+            if (!ValidateNewTask(newTask))
+            {
+                throw new ArgumentException("Task's Paremeter Is Not Corect!");
+            }
             if (TaskList.Exists(r => r.TaskId == newTask.TaskId))
             {
                 TaskList[TaskList.FindIndex(x => x.TaskId == newTask.TaskId)] = newTask;
             }
             else TaskList.Add(newTask);
+        }
+
+        /// <summary>
+        /// 1. Task's pretask & parenttask exists & must not be self
+        /// 2. Content is not null
+        /// </summary>
+        /// <param name="newTask"></param>
+        /// <returns></returns>
+        private bool ValidateNewTask(CNTask newTask)
+        {
+            if (string.IsNullOrEmpty(newTask?.Content)) return false;
+            if (newTask.PreTaskIds != null && newTask.PreTaskIds.Count > 0)
+            {
+                if (newTask.PreTaskIds.Exists(x => x == newTask.TaskId))
+                    return false;
+                if (!newTask.PreTaskIds.TrueForAll(x => TaskList.Exists(r => r.TaskId == x)))
+                    return false;
+            }
+            if (newTask.HasParentTask() && TaskList.All(x => x.TaskId != newTask.ParentTaskId)) return false;
+            return true;
         }
 
         public IEnumerable<CNMemo> GetAllUniqueMemo()
@@ -131,6 +151,11 @@ namespace CN_Model
         public void EndTask(int taskid)
         {
             (TaskList.FirstOrDefault(r => r.TaskId == taskid) ?? new CNTask()).End();
+        }
+
+        public int GetNextTaskID()
+        {
+            return TaskList.Max(x=>x.TaskId)+1;
         }
     }
 }

@@ -5,12 +5,12 @@ using System.Text;
 
 namespace CN_Model
 {
-    public enum CNUrgency
+    public enum CNUrgency:short
     {
-        High,
-        VeryHigh,
-        Normal,
-        Low,
-        VeryLow,
+        Normal = 30,
+        VeryHigh = 50,
+        High =40,
+        Low = 20,
+        VeryLow = 10,
     }
 }

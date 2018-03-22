@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CN_Model
 {
-    public class CNTask : IEquatable<CNTask>
+    public class CNTask : IEquatable<CNTask>,IComparable<CNTask>
     {
         public CNTask()
         {
@@ -26,10 +26,25 @@ namespace CN_Model
                 Status == other.Status && 
                 EstimatedDuration == other.EstimatedDuration &&
                 EndTime.Equals(other.EndTime) &&
+                   DeadLine.Equals(other.DeadLine) &&
                 (Memos == null && other.Memos == Memos) || (Memos != null && other.Memos != null && Memos.Count == other.Memos.Count && !Memos.Except(other.Memos).Any()) &&
                 (Tags == null && other.Tags == Tags) || (Tags != null && other.Tags != null && Tags.Count == other.Tags.Count && !Tags.Except(other.Tags).Any()) &&
                 Equals(ParentTaskId, other.ParentTaskId) &&
                 (PreTaskIds == null && other.PreTaskIds == PreTaskIds) || (PreTaskIds != null && other.PreTaskIds != null && PreTaskIds.Count == other.PreTaskIds.Count && !PreTaskIds.Except(other.PreTaskIds).Any());
+        }
+
+        public int CompareTo(CNTask other)
+        {
+            if (this.Urgency > other.Urgency) return 1;
+            if (this.Urgency < other.Urgency) return -1;
+            if (this.Priority > other.Priority) return 1;
+            if (this.Priority < other.Priority) return -1;
+            if (this.DeadLine == null && other.DeadLine == null) return 0;
+            if (this.DeadLine == null && other.DeadLine != null) return -1;
+            if (this.DeadLine != null && other.DeadLine == null) return 1;
+            if (this.DeadLine > other.DeadLine) return 1;
+            if(this.DeadLine < other.DeadLine) return -1;
+            return 0;
         }
 
         public override bool Equals(object obj)
@@ -53,6 +68,7 @@ namespace CN_Model
                 hashCode = (hashCode * 397) ^ (int)Status;
                 hashCode = (hashCode*397) ^ EstimatedDuration;
                 hashCode = (hashCode*397) ^ EndTime.GetHashCode();
+                hashCode = (hashCode * 397) ^ DeadLine.GetHashCode();
                 hashCode = (hashCode*397) ^ (Memos != null ? Memos.GetHashCode() : 0);
                 hashCode = (hashCode*397) ^ (Tags != null ? Tags.GetHashCode() : 0);
                 hashCode = (hashCode*397) ^ (ParentTaskId.GetHashCode());
@@ -73,9 +89,24 @@ namespace CN_Model
         /// </summary>
         public int EstimatedDuration { get; set; }
 
-        public DateTime? EndTime { get; set; }
+        /// <summary>
+        /// EndTime必须大于StartTime
+        /// </summary>
+        private DateTime? endTime;
+        public DateTime? EndTime {
+            get {
+                if (StartTime != null && StartTime > endTime)
+                {
+                    endTime = StartTime;
+                }
+
+                return endTime;
+            }
+            set => endTime = value;
+        }
+        public DateTime? DeadLine { get; set; }
         private List<CNMemo> _memos;
-        private List<CNMemo> Memos {
+        public List<CNMemo> Memos {
             get {
                 if (_memos != null && _memos.Count > 0)
                 {
@@ -89,11 +120,11 @@ namespace CN_Model
                 }
                 return _memos;
             }
-            set { _memos = value; }
+            private set { _memos = value; }
         }
         public List<string> Tags { get; set; }
-        private int ParentTaskId { get; set; }
-        private List<int> PreTaskIds { get; set; }
+        public int ParentTaskId { get; set; }
+        public List<int> PreTaskIds { get; set; }
 
         public CNTaskStatus Status { get; set; }
 

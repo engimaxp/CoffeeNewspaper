@@ -40,8 +40,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ITaskService.cs" />
     <Compile Include="ITimeSliceService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskService.cs" />
     <Compile Include="TimeSliceService.cs" />
   </ItemGroup>
   <ItemGroup>

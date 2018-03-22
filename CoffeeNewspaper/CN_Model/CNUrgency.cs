@@ -5,12 +5,12 @@ using System.Text;
 
 namespace CN_Model
 {
-    public enum CNPriority
+    public enum CNPriority:short
     {
-        High,
-        VeryHigh,
-        Normal,
-        Low,
-        VeryLow,
+        Normal = 30,
+        VeryHigh = 50,
+        High = 40,
+        Low = 20,
+        VeryLow = 10,
     }
 }
