@@ -45,14 +45,14 @@ namespace CN_Model
             return TaskList.FirstOrDefault(r=>r.TaskId == taskid)??new CNTask();
         }
 
-        public CNMemo GetMemoById(int memoid)
+        public CNMemo GetMemoById(string memoid)
         {
-            var globalMemo = MemoList.FirstOrDefault(r => r.MemoId == memoid);
+            var globalMemo = MemoList.FirstOrDefault(r => r.MemoId.Equals(memoid));
             if (globalMemo != null)
             {
                 return globalMemo;
             }
-            return (TaskList.Select(x => x.GetAllMemos()).Where(r => r != null && r.Count > 0).ToList().FirstOrDefault(x => x.FirstOrDefault(r => r.MemoId == memoid) != null)??new List<CNMemo>()).FirstOrDefault(t => t.MemoId == memoid);
+            return (TaskList.Select(x => x.GetAllMemos()).Where(r => r != null && r.Count > 0).ToList().FirstOrDefault(x => x.FirstOrDefault(r => r.MemoId.Equals(memoid) ) != null)??new List<CNMemo>()).FirstOrDefault(t => t.MemoId == memoid);
         }
 
         public void AddOrUpdateGlobalMemo(CNMemo newMemo)
@@ -101,7 +101,7 @@ namespace CN_Model
         {
             IEnumerable<CNMemo> memos = new List<CNMemo>();
             TaskList.Where(r=>r.HasMemo()).Select(x=>x.GetAllMemos()).ToList().ForEach(r=>memos = r.Union(memos));
-            memos = memos.Union(this.MemoList);
+            memos = memos.Union(MemoList);
             return memos;
         }
 
@@ -117,7 +117,7 @@ namespace CN_Model
 
         public IEnumerable<CNMemo> SearchMemoByContent(string searchContent)
         {
-            return this.GetAllUniqueMemo().Where(r => r.Content.Contains(searchContent) || r.Title.Contains(searchContent));
+            return GetAllUniqueMemo().Where(r => r.Content.Contains(searchContent) || r.Title.Contains(searchContent));
         }
 
         public void UpdateMemo(CNMemo updateMemo)
@@ -133,7 +133,7 @@ namespace CN_Model
         public void ReplaceAWordOfATaskMemos(string originwords, string targetwords)
         {
             TaskList.ForEach(r => r.ReplaceAWordOfATaskMemos(originwords,targetwords));
-            this.MemoList.ForEach(r=> {
+            MemoList.ForEach(r=> {
                 r.Content = r.Content.Replace(originwords, targetwords);
                 r.Title = r.Title.Replace(originwords, targetwords);
             });
@@ -156,6 +156,82 @@ namespace CN_Model
         public int GetNextTaskID()
         {
             return TaskList.Max(x=>x.TaskId)+1;
+        }
+
+        public bool HasChildTasks(int taskId)
+        {
+            return TaskList.Exists(x=>x.HasParentTask() && x.ParentTaskId == taskId);
+        }
+
+        public bool HasSufTasks(int taskId)
+        {
+            return TaskList.Exists(x => x.PreTaskIds!=null && x.PreTaskIds.Any(r => r == taskId));
+        }
+        /// <summary>
+        /// delete a task,it can be recoverd later
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns>how many task has been deleted</returns>
+        public int DeleteTaskById(int taskId)
+        {
+            int count = 0;
+            var task = GetTaskById(taskId);
+            if (string.IsNullOrEmpty(task?.Content)) return count;
+            if (task.IsDeleted) return count;
+            TaskList.Where(x => x.HasParentTask() && x.ParentTaskId == taskId).ToList().ForEach(x =>
+            {
+                count += DeleteTaskById(x.TaskId);
+            });
+            TaskList.Where(x => x.PreTaskIds != null && x.PreTaskIds.Exists(r => r == taskId)).ToList().ForEach(x =>
+            {
+                count += DeleteTaskById(x.TaskId);
+            });
+            task.IsDeleted = true;
+            AddOrUpdateTask(task);
+            return ++count;
+        }
+        public int RecoverTaskById(int taskId)
+        {
+            int count = 0;
+            var task = GetTaskById(taskId);
+            if (string.IsNullOrEmpty(task?.Content)) return count;
+            if (!task.IsDeleted) return count;
+            TaskList.Where(x => x.HasParentTask() && x.ParentTaskId == taskId).ToList().ForEach(x =>
+            {
+                count += RecoverTaskById(x.TaskId);
+            });
+            TaskList.Where(x => x.PreTaskIds != null && x.PreTaskIds.Exists(r => r == taskId)).ToList().ForEach(x =>
+            {
+                count += RecoverTaskById(x.TaskId);
+            });
+            task.IsDeleted = false;
+            AddOrUpdateTask(task);
+            return ++count;
+        }
+
+        /// <summary>
+        /// remove a task permenantly
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns>how many task has been removed</returns>
+        public int RemoveTaskById(int taskId)
+        {
+            int count = 0;
+            var task = GetTaskById(taskId);
+            if (string.IsNullOrEmpty(task?.Content)) return count;
+            TaskList.Where(x => x.HasParentTask() && x.ParentTaskId == taskId).ToList().ForEach(x =>
+            {
+                count += RemoveTaskById(x.TaskId);
+            });
+            TaskList.Where(x => x.PreTaskIds != null && x.PreTaskIds.Exists(r => r == taskId)).ToList().ForEach(x =>
+            {
+                count += RemoveTaskById(x.TaskId);
+            });
+            //1 Move tasks memo to global
+            task.GetAllMemos().ForEach(AddOrUpdateGlobalMemo);
+            //2 Remove current task
+            TaskList.Remove(task);
+            return ++count;
         }
     }
 }

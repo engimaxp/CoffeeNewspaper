@@ -14,11 +14,12 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         [Test]
         public void TaskAreEqual()
         {
+            var time = DateTime.Now;
             Assert.AreEqual(new CNTask()
             {
                 TaskId = 1,
                 Content = "Write A Program",
-                CreateTime = DateTime.Now,
+                CreateTime = time,
                 StartTime = null,
                 EndTime = null,
                 Priority = CNPriority.High,
@@ -27,19 +28,19 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Tags = new List<string>() { "Work" },
             }.AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }).AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }), new CNTask()
             {
                 TaskId = 1,
                 Content = "Write A Program",
-                CreateTime = DateTime.Now,
+                CreateTime = time,
                 StartTime = null,
                 EndTime = null,
                 Priority = CNPriority.High,
@@ -48,7 +49,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Tags = new List<string>() { "Work" },
             }.AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }));
@@ -69,7 +70,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Tags = new List<string>() { "Work" },
             }.AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }), new CNTask()
@@ -85,7 +86,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Tags = new List<string>() { "Work2" },
             }.AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }));
@@ -109,6 +110,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 
             var list = new List<CNTask>() { task1,task2,task3};
             list.Sort();
+            list.Reverse();
             Assert.AreEqual(task2,list.First());
             Assert.AreEqual(task1, list.Last());
         }
@@ -131,6 +133,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 
             var list = new List<CNTask>() { task1, task2, task3 };
             list.Sort();
+            list.Reverse();
             Assert.AreEqual(task1, list.First());
             Assert.AreEqual(task2, list.Last());
         }
@@ -152,6 +155,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 
             var list = new List<CNTask>() { task1, task2, task3 };
             list.Sort();
+            list.Reverse();
             Assert.AreEqual(task2, list.First());
             Assert.AreEqual(task3, list.Last());
         }
@@ -174,6 +178,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 
             var list = new List<CNTask>() { task1, task2, task3 };
             list.Sort();
+            list.Reverse();
             Assert.AreEqual(task1, list.First());
             Assert.AreEqual(task3, list.Last());
         }

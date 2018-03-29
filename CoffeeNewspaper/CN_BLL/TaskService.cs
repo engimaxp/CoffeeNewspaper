@@ -35,5 +35,72 @@ namespace CN_BLL
             rootDataProvider.Persistence(root);
             return task.TaskId;
         }
+
+        public bool DeleteTask(int taskId, bool force = false)
+        {
+            var root = rootDataProvider.GetRootData();
+            var targetTask = root.GetTaskById(taskId);
+            if (string.IsNullOrEmpty(targetTask?.Content))
+            {
+                throw new ArgumentException("TaskID does not exist!");
+            }
+            if (targetTask.IsDeleted)
+            {
+                return true;
+            }
+            if (root.HasChildTasks(taskId) && !force)
+            {
+                throw new TaskHasChildTasksException();
+            }
+            if (root.HasSufTasks(taskId) && !force){
+                throw new TaskHasSufTasksException();
+            }
+
+            root.DeleteTaskById(taskId);
+            rootDataProvider.Persistence(root);
+            return true;
+        }
+
+        public bool RecoverTask(int taskId)
+        {
+            var root = rootDataProvider.GetRootData();
+            var targetTask = root.GetTaskById(taskId);
+            if (string.IsNullOrEmpty(targetTask?.Content))
+            {
+                throw new ArgumentException("TaskID does not exist!");
+            }
+            if (!targetTask.IsDeleted)
+            {
+                return true;
+            }
+            root.RecoverTaskById(taskId);
+            rootDataProvider.Persistence(root);
+            return true;
+        }
+
+        public bool RemoveTask(int taskId, bool force = false)
+        {
+            var root = rootDataProvider.GetRootData();
+            var targetTask = root.GetTaskById(taskId);
+            if (string.IsNullOrEmpty(targetTask?.Content))
+            {
+                throw new ArgumentException("TaskID does not exist!");
+            }
+            if (!targetTask.IsDeleted)
+            {
+                throw new ArgumentException("Task is not deleted");
+            }
+            if (root.HasChildTasks(taskId) && !force)
+            {
+                throw new TaskHasChildTasksException();
+            }
+            if (root.HasSufTasks(taskId) && !force)
+            {
+                throw new TaskHasSufTasksException();
+            }
+            root.RemoveTaskById(taskId);
+            rootDataProvider.Persistence(root);
+            return true;
+        }
     }
 }

@@ -13,14 +13,14 @@ namespace CN_Model
         public DateTime StartDateTime { get; set; }
         public DateTime? EndDateTime { get; set; }
 
-        public string StartDate => this.StartDateTime.ToString(CNConstants.DIRECTORY_DATEFORMAT);
+        public string StartDate => StartDateTime.ToString(CNConstants.DIRECTORY_DATEFORMAT);
 
         public CNTimeSlice(DateTime startDateTime, DateTime? endDateTime = null)
         {
             StartDateTime = startDateTime;
             if (endDateTime != null && endDateTime <= startDateTime)
             {
-                throw new ArgumentException("A TImeSlice's EndTime Must Greater Than StartTime");
+                throw new ArgumentException("A TimeSlice's EndTime Must Greater Than StartTime");
             }
             EndDateTime = endDateTime;
         }
@@ -37,7 +37,7 @@ namespace CN_Model
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((CNTimeSlice) obj);
         }
 
@@ -62,21 +62,21 @@ namespace CN_Model
         public bool InterceptWith(CNTimeSlice timeSlice)
         {
             if (timeSlice == null) return false;
-            if (this.EndDateTime == null && timeSlice.EndDateTime == null)
+            if (EndDateTime == null && timeSlice.EndDateTime == null)
             {
                 return true;
             }
-            else if (this.EndDateTime == null || timeSlice.EndDateTime == null)
+            else if (EndDateTime == null || timeSlice.EndDateTime == null)
             {
-                var endtime = this.EndDateTime ?? timeSlice.EndDateTime;
-                var starttime = this.EndDateTime == null ? this.StartDateTime : timeSlice.StartDateTime;
+                var endtime = EndDateTime ?? timeSlice.EndDateTime;
+                var starttime = EndDateTime == null ? StartDateTime : timeSlice.StartDateTime;
                 return !endtime.HasValue || endtime.Value >= starttime;
             }
             else
             {
-                if (this.EndDateTime.Value <= timeSlice.StartDateTime)
+                if (EndDateTime.Value <= timeSlice.StartDateTime)
                     return false;
-                if (timeSlice.EndDateTime.Value <= this.StartDateTime)
+                if (timeSlice.EndDateTime.Value <= StartDateTime)
                     return false;
                 return true;
             }

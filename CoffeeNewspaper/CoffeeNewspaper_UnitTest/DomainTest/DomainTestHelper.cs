@@ -27,7 +27,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             };
         }
 
-        public static CNMemo GetARandomMemo(int memoid)
+        public static CNMemo GetARandomMemo(string memoid)
         {
             string timestamp = DateTime.Now.ToString("s");
             return new CNMemo()

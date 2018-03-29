@@ -40,6 +40,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CNConstants.cs" />
+    <Compile Include="CNExceptions\TaskHasChildTasksException.cs" />
+    <Compile Include="CNExceptions\TaskHasSufTasksException.cs" />
+    <Compile Include="CNExceptions\TaskStatusException.cs" />
     <Compile Include="CNMemo.cs" />
     <Compile Include="CNTaskStatus.cs" />
     <Compile Include="CNRoot.cs" />

@@ -111,6 +111,7 @@ namespace CN_BLL
         {
             var originRoot = rootDataProvider.GetRootData();
             var originDataTask = originRoot.GetTaskById(taskid);
+            if (originDataTask == null || string.IsNullOrEmpty(originDataTask.Content)) return;
             if(originDataTask.StartTime ==null || originDataTask.EndTime == null || originDataTask.StartTime > targetStartTime || originDataTask.EndTime < targetEndTime)
             {
                 if (originDataTask.StartTime == null || originDataTask.StartTime > targetStartTime)
