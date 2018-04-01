@@ -13,7 +13,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
     {
         #region Create Test
         [Test]
-        public void CreateATask_ParameterWrong_parentTaskNotExist_throwsArgException()
+        public void a_CreateATask_ParameterWrong_parentTaskNotExist_throwsArgException()
         {
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
             rootDataProvider.GetRootData().Returns(DomainTestHelper.GetRandomRoot());
@@ -28,7 +28,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
         }
 
         [Test]
-        public void CreateATask_ParameterWrong_pretaskNotExist_throwsArgException()
+        public void a_CreateATask_ParameterWrong_pretaskNotExist_throwsArgException()
         {
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
             rootDataProvider.GetRootData().Returns(DomainTestHelper.GetRandomRoot());
@@ -43,7 +43,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
         }
 
         [Test]
-        public void CreateATask_ParameterWrong_ContentEmpty_throwsArgException()
+        public void a_CreateATask_ParameterWrong_ContentEmpty_throwsArgException()
         {
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
             rootDataProvider.GetRootData().Returns(DomainTestHelper.GetRandomRoot());
@@ -58,7 +58,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
         }
 
         [Test]
-        public void CreateATask_ParameterCorrect()
+        public void a_CreateATask_ParameterCorrect()
         {
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
             rootDataProvider.GetRootData().Returns(DomainTestHelper.GetRandomRoot());
@@ -72,7 +72,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         #region Remove Test
         [Test]
-        public void RemoveATask_HasNoChildTask_TaskDidNotExist_throwsException()
+        public void b_RemoveATask_HasNoChildTask_TaskDidNotExist_throwsException()
         {
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
             rootDataProvider.GetRootData().Returns(DomainTestHelper.GetRandomRoot());
@@ -85,7 +85,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
         }
         [Test]
-        public void RemoveATask_HasNoChildTask_StatusNotDelete_throwsException()
+        public void b_RemoveATask_HasNoChildTask_StatusNotDelete_throwsException()
         {
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
             var arrangeRoot = DomainTestHelper.GetRandomRoot();
@@ -98,7 +98,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
         }
         [Test]
-        public void RemoveATask_HasNoChildTask()
+        public void b_RemoveATask_HasNoChildTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -118,7 +118,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x=>x.TaskList.Count == 1 && !taskToBeDeleted.Equals(x.GetTaskById(taskToBeDeleted.TaskId)) ));
         }
         [Test]
-        public void RemoveATask_HasChildTask()
+        public void b_RemoveATask_HasChildTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -144,7 +144,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             
         }
         [Test]
-        public void RemoveATask_HasSufTask()
+        public void b_RemoveATask_HasSufTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -170,7 +170,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         }
         [Test]
-        public void ForceRemoveATask_HasChildTask()
+        public void b_ForceRemoveATask_HasChildTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -196,7 +196,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         }
         [Test]
-        public void ForceRemoveATask_HasSufTask()
+        public void b_ForceRemoveATask_HasSufTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -222,7 +222,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         }
         [Test]
-        public void RemoveATaskWithMemo_MemoMoveToGlobal()
+        public void b_RemoveATaskWithMemo_MemoMoveToGlobal()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -245,7 +245,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.TaskList.Count == 1 && x.GetMemoById(testMemo.MemoId).Equals(testMemo) ));
         }
         [Test]
-        public void ForceRemoveATaskWithMemo_ChildTaskAlsoHasMemo_MemoMoveToGlobal()
+        public void b_ForceRemoveATaskWithMemo_ChildTaskAlsoHasMemo_MemoMoveToGlobal()
         {
 
             //Arrange
@@ -279,7 +279,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         #region Delete Test
         [Test]
-        public void DeleteATask_HasNoChildTask_TaskDidNotExist_throwsException()
+        public void c_DeleteATask_HasNoChildTask_TaskDidNotExist_throwsException()
         {
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
             rootDataProvider.GetRootData().Returns(DomainTestHelper.GetRandomRoot());
@@ -292,7 +292,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
         }
         [Test]
-        public void DeleteATask_HasNoChildTask()
+        public void c_DeleteATask_HasNoChildTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -311,7 +311,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(taskToBeDeleted.TaskId).IsDeleted));
         }
         [Test]
-        public void DeleteATask_HasChildTask()
+        public void c_DeleteATask_HasChildTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -335,7 +335,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         }
         [Test]
-        public void DeleteATask_HasSufTask()
+        public void c_DeleteATask_HasSufTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -359,7 +359,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         }
         [Test]
-        public void ForceDeleteATask_HasChildTask()
+        public void c_ForceDeleteATask_HasChildTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -383,7 +383,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         }
         [Test]
-        public void ForceDeleteATask_HasSufTask()
+        public void c_ForceDeleteATask_HasSufTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -410,7 +410,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         #region Recover Test
         [Test]
-        public void RecoverATask_HasNoChildTask_TaskDidNotExist_throwsException()
+        public void d_RecoverATask_HasNoChildTask_TaskDidNotExist_throwsException()
         {
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
             rootDataProvider.GetRootData().Returns(DomainTestHelper.GetRandomRoot());
@@ -423,7 +423,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
         }
         [Test]
-        public void RecoverATask_HasNoChildTask()
+        public void d_RecoverATask_HasNoChildTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -443,7 +443,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => !x.GetTaskById(taskToBeRecovered.TaskId).IsDeleted));
         }
         [Test]
-        public void RecoverATask_HasChildTask()
+        public void d_RecoverATask_HasChildTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -467,7 +467,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         }
         [Test]
-        public void RecoverATask_HasSufTask()
+        public void d_RecoverATask_HasSufTask()
         {
             //Arrange
             IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
@@ -491,29 +491,37 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
         }
         #endregion
+
+        #region Start Test
+
         [Test]
-        public void StartATaskWithPreTaskNotDone_throwException()
+        public void e_StartATaskWithPreTaskNotDone_throwException()
         {
             Assert.Fail();
         }
 
         [Test]
-        public void StartATaskWithPreTaskDone()
+        public void e_StartATaskWithPreTaskDone()
         {
             Assert.Fail();
         }
 
         [Test]
-        public void StartAndStopTaskMutipleTimes_HasCorrectDurationCount()
+        public void e_StartAndStopTaskMutipleTimes()
         {
             Assert.Fail();
         }
-
+        
         [Test]
-        public void StartAndStopTaskMutipleTimes_HasCorrectWorkDaysCount()
+        public void f_PauseATask()
         {
             Assert.Fail();
         }
-
+        [Test]
+        public void g_FinishATask()
+        {
+            Assert.Fail();
+        }
+        #endregion
     }
 }

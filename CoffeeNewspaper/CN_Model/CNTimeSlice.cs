@@ -14,7 +14,6 @@ namespace CN_Model
         public DateTime? EndDateTime { get; set; }
 
         public string StartDate => StartDateTime.ToString(CNConstants.DIRECTORY_DATEFORMAT);
-
         public CNTimeSlice(DateTime startDateTime, DateTime? endDateTime = null)
         {
             StartDateTime = startDateTime;
@@ -80,6 +79,49 @@ namespace CN_Model
                     return false;
                 return true;
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(StartDateTime)}: {StartDateTime}, {nameof(EndDateTime)}: {EndDateTime}";
+        }
+
+        private CNTimeSlice dayDuration;
+        /// <summary>
+        /// Change current timeslice to normalized form like yyyy-MM-dd 00:00:00 - yyyy-MM-dd+N 23:59:59.999
+        /// </summary>
+        /// <returns></returns>
+        public CNTimeSlice GetDayDuration()
+        {
+            if (StartDateTime > DateTime.Now) return null;
+            if (dayDuration == null)
+            {
+                dayDuration = new CNTimeSlice(StartDateTime.Date,
+                    ((EndDateTime ?? DateTime.Now).Date > StartDateTime.Date) ? 
+                        (EndDateTime ?? DateTime.Now).Date.AddDays(1).AddMilliseconds(-1)
+                        : StartDateTime.Date.AddDays(1).AddMilliseconds(-1));
+            }
+            return dayDuration;
+        }
+        /// <summary>
+        /// Means otherTimeSlice is a SubSet of this timeSlice, if a equals b means they contain each other
+        /// </summary>
+        /// <param name="otherTimeSlice"></param>
+        /// <returns></returns>
+        public bool IsContaining(CNTimeSlice otherTimeSlice)
+        {
+            if (!this.EndDateTime.HasValue || !otherTimeSlice.EndDateTime.HasValue) return false;
+            return this.StartDateTime <= otherTimeSlice.StartDateTime &&
+                   this.EndDateTime.Value >= otherTimeSlice.EndDateTime.Value;
+        }
+        /// <summary>
+        /// Get timeSlice's using days,start today end tomorrow means two days
+        /// </summary>
+        /// <returns></returns>
+        public int GetWorkDays()
+        {
+            if(EndDateTime == null)return 0;
+            return Convert.ToInt32(Math.Ceiling(Convert.ToDecimal((EndDateTime.Value - StartDateTime).TotalDays)));
         }
     }
 

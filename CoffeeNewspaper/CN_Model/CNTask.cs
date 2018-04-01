@@ -97,7 +97,7 @@ namespace CN_Model
         public CNPriority Priority { get; set; }
         public CNUrgency Urgency { get; set; }
         /// <summary>
-        /// 预计耗时，-1代表不知道，-2代表永远不会完成
+        /// 预计耗时，按分钟计数，-1代表不知道，-2代表永远不会完成，0代表没有填写预估值
         /// </summary>
         public int EstimatedDuration { get; set; }
 
