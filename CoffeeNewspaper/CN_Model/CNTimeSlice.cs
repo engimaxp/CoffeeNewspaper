@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CN_Model
 {
-    public class CNTimeSlice:IEquatable<CNTimeSlice>,ICloneable
+    public class CNTimeSlice:IEquatable<CNTimeSlice>,ICloneable, IComparable<CNTimeSlice>
     {
         /// <summary>
         /// must have start date to create a timeslice
@@ -13,14 +13,13 @@ namespace CN_Model
         public DateTime StartDateTime { get; set; }
         public DateTime? EndDateTime { get; set; }
 
-        public string StartDate => this.StartDateTime.ToString(CNConstants.DIRECTORY_DATEFORMAT);
-
+        public string StartDate => StartDateTime.ToString(CNConstants.DIRECTORY_DATEFORMAT);
         public CNTimeSlice(DateTime startDateTime, DateTime? endDateTime = null)
         {
             StartDateTime = startDateTime;
             if (endDateTime != null && endDateTime <= startDateTime)
             {
-                throw new ArgumentException("A TImeSlice's EndTime Must Greater Than StartTime");
+                throw new ArgumentException("A TimeSlice's EndTime Must Greater Than StartTime");
             }
             EndDateTime = endDateTime;
         }
@@ -37,7 +36,7 @@ namespace CN_Model
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((CNTimeSlice) obj);
         }
 
@@ -62,24 +61,74 @@ namespace CN_Model
         public bool InterceptWith(CNTimeSlice timeSlice)
         {
             if (timeSlice == null) return false;
-            if (this.EndDateTime == null && timeSlice.EndDateTime == null)
+            if (EndDateTime == null && timeSlice.EndDateTime == null)
             {
                 return true;
             }
-            else if (this.EndDateTime == null || timeSlice.EndDateTime == null)
+            else if (EndDateTime == null || timeSlice.EndDateTime == null)
             {
-                var endtime = this.EndDateTime ?? timeSlice.EndDateTime;
-                var starttime = this.EndDateTime == null ? this.StartDateTime : timeSlice.StartDateTime;
+                var endtime = EndDateTime ?? timeSlice.EndDateTime;
+                var starttime = EndDateTime == null ? StartDateTime : timeSlice.StartDateTime;
                 return !endtime.HasValue || endtime.Value >= starttime;
             }
             else
             {
-                if (this.EndDateTime.Value <= timeSlice.StartDateTime)
+                if (EndDateTime.Value <= timeSlice.StartDateTime)
                     return false;
-                if (timeSlice.EndDateTime.Value <= this.StartDateTime)
+                if (timeSlice.EndDateTime.Value <= StartDateTime)
                     return false;
                 return true;
             }
+        }
+
+        public int CompareTo(CNTimeSlice other)
+        {
+            if (this.StartDateTime > other.StartDateTime) return 1;
+            else if (this.StartDateTime.Equals(other.StartDateTime)) return 0;
+            return -1;
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(StartDateTime)}: {StartDateTime}, {nameof(EndDateTime)}: {EndDateTime}";
+        }
+
+        private CNTimeSlice dayDuration;
+        /// <summary>
+        /// Change current timeslice to normalized form like yyyy-MM-dd 00:00:00 - yyyy-MM-dd+N 23:59:59.999
+        /// </summary>
+        /// <returns></returns>
+        public CNTimeSlice GetDayDuration()
+        {
+            if (StartDateTime > DateTime.Now) return null;
+            if (dayDuration == null)
+            {
+                dayDuration = new CNTimeSlice(StartDateTime.Date,
+                    ((EndDateTime ?? DateTime.Now).Date > StartDateTime.Date) ? 
+                        (EndDateTime ?? DateTime.Now).Date.AddDays(1).AddMilliseconds(-1)
+                        : StartDateTime.Date.AddDays(1).AddMilliseconds(-1));
+            }
+            return dayDuration;
+        }
+        /// <summary>
+        /// Means otherTimeSlice is a SubSet of this timeSlice, if a equals b means they contain each other
+        /// </summary>
+        /// <param name="otherTimeSlice"></param>
+        /// <returns></returns>
+        public bool IsContaining(CNTimeSlice otherTimeSlice)
+        {
+            if (!this.EndDateTime.HasValue || !otherTimeSlice.EndDateTime.HasValue) return false;
+            return this.StartDateTime <= otherTimeSlice.StartDateTime &&
+                   this.EndDateTime.Value >= otherTimeSlice.EndDateTime.Value;
+        }
+        /// <summary>
+        /// Get timeSlice's using days,start today end tomorrow means two days
+        /// </summary>
+        /// <returns></returns>
+        public int GetWorkDays()
+        {
+            if(EndDateTime == null)return 0;
+            return Convert.ToInt32(Math.Ceiling(Convert.ToDecimal((EndDateTime.Value - StartDateTime).TotalDays)));
         }
     }
 

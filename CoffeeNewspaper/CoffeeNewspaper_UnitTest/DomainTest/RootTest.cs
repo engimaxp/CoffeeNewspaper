@@ -24,20 +24,20 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         public void AddAGlobalMemo()
         {
             CNRoot root = new CNRoot();
-            CNMemo testMemo = DomainTestHelper.GetARandomMemo(1);
+            CNMemo testMemo = DomainTestHelper.GetARandomMemo("1");
             root.AddOrUpdateGlobalMemo(testMemo);
-            Assert.AreEqual(root.GetMemoById(1), testMemo);
+            Assert.AreEqual(root.GetMemoById("1"), testMemo);
         }
 
         [Test]
         public void AddTwoGlobalMemoWithSameID_ReturnTheFirstOne()
         {
             CNRoot root = new CNRoot();
-            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo(1);
+            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo("1");
             root.AddOrUpdateGlobalMemo(testMemo1);
-            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo(1);
+            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo("1");
             root.AddOrUpdateGlobalMemo(testMemo2);
-            Assert.AreEqual(root.GetMemoById(1), testMemo2);
+            Assert.AreEqual(root.GetMemoById("1"), testMemo2);
         }
 
         [Test]
@@ -45,10 +45,10 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         {
             CNRoot root = new CNRoot();
             CNTask testTask = DomainTestHelper.GetARandomTask(1);
-            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo(2);
+            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo("2");
             testTask.AddOrUpdateMemo(testMemo1);
             root.AddOrUpdateTask(testTask);
-            Assert.AreEqual(root.GetMemoById(2), testMemo1);
+            Assert.AreEqual(root.GetMemoById("2"), testMemo1);
         }
 
         [Test]
@@ -56,15 +56,19 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         {
             CNRoot root = new CNRoot();
             CNTask testTask = DomainTestHelper.GetARandomTask(1);
-            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo(2);
-            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo(2);
+            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo("2");
+            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo("2");
             testTask.AddOrUpdateMemo(testMemo1).AddOrUpdateMemo(testMemo2);
             root.AddOrUpdateTask(testTask);
-            CNMemo testMemo3 = DomainTestHelper.GetARandomMemo(1);
-            CNMemo testMemo4 = DomainTestHelper.GetARandomMemo(1);
+            CNMemo testMemo3 = DomainTestHelper.GetARandomMemo("1");
+            CNMemo testMemo4 = DomainTestHelper.GetARandomMemo("1");
+            root.AddOrUpdateGlobalMemo(testMemo1);
             root.AddOrUpdateGlobalMemo(testMemo3);
             root.AddOrUpdateGlobalMemo(testMemo4);
-            Assert.AreEqual(new List<CNMemo>(){testMemo2,testMemo4}.Except(root.GetAllUniqueMemo()).ToList().Count,0);
+            var result = root.GetAllUniqueMemo().ToList();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(3,result.Count());
+            Assert.AreEqual(new List<CNMemo>(){testMemo2,testMemo4}.Except(result).ToList().Count,0);
         }
 
         [Test]
@@ -89,8 +93,8 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         {
             CNRoot root = new CNRoot();
             CNTask testTask1 = DomainTestHelper.GetARandomTask(1);
-            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo(2);
-            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo(2);
+            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo("2");
+            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo("2");
             testTask1.AddOrUpdateMemo(testMemo1).AddOrUpdateMemo(testMemo2);
             root.AddOrUpdateTask(testTask1);
             Assert.AreEqual( new List<CNMemo>() {testMemo2}.Except(root.GetTaskMemo(1)).ToList().Count , 0);
@@ -103,18 +107,18 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 
             CNRoot root = new CNRoot();
             CNTask testTask = DomainTestHelper.GetARandomTask(1);
-            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo(2);
-            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo(2);
+            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo("2");
+            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo("2");
             testMemo2.Content += searchcontent;
             testTask.AddOrUpdateMemo(testMemo1).AddOrUpdateMemo(testMemo2);
             root.AddOrUpdateTask(testTask);
-            CNMemo testMemo3 = DomainTestHelper.GetARandomMemo(1);
+            CNMemo testMemo3 = DomainTestHelper.GetARandomMemo("1");
             testMemo3.Content += searchcontent;
-            CNMemo testMemo4 = DomainTestHelper.GetARandomMemo(1);
+            CNMemo testMemo4 = DomainTestHelper.GetARandomMemo("1");
             root.AddOrUpdateGlobalMemo(testMemo3);
             root.AddOrUpdateGlobalMemo(testMemo4);
 
-            CNMemo testMemo5 = DomainTestHelper.GetARandomMemo(3);
+            CNMemo testMemo5 = DomainTestHelper.GetARandomMemo("3");
             testMemo5.Content += searchcontent;
             root.AddOrUpdateGlobalMemo(testMemo5);
             Assert.AreEqual(new List<CNMemo>() { testMemo2,testMemo5 }.Except(root.SearchMemoByContent(searchcontent)).ToList().Count, 0);
@@ -149,15 +153,15 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 
             CNRoot root = new CNRoot();
             CNTask testTask1 = DomainTestHelper.GetARandomTask(1);
-            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo(2);
+            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo("2");
             testTask1.AddOrUpdateMemo(testMemo1);
             root.AddOrUpdateTask(testTask1);
             root.AddOrUpdateGlobalMemo(testMemo1);
             
-            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo(2);
+            CNMemo testMemo2 = DomainTestHelper.GetARandomMemo("2");
             root.UpdateMemo(testMemo2);
 
-            Assert.AreEqual(testMemo2,root.GetMemoById(2));
+            Assert.AreEqual(testMemo2,root.GetMemoById("2"));
         }
 
 
@@ -167,7 +171,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 
             CNRoot root = new CNRoot();
             CNTask testTask1 = DomainTestHelper.GetARandomTask(1);
-            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo(2);
+            CNMemo testMemo1 = DomainTestHelper.GetARandomMemo("2");
             testTask1.AddOrUpdateMemo(testMemo1);
             root.AddOrUpdateTask(testTask1);
             root.AddOrUpdateGlobalMemo(testMemo1);
@@ -180,8 +184,25 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 
             root.ReplaceAWordOfATaskMemos("Start with", "End with");
 
-            Assert.AreEqual(copy, root.GetMemoById(2));
+            Assert.AreEqual(copy, root.GetMemoById("2"));
         }
-        
+
+        [Test]
+        public void RemoveTest()
+        {
+            var root  = DomainTestHelper.GetRandomRoot();
+            var testTask = DomainTestHelper.GetARandomTask(2);
+            var testMemo = DomainTestHelper.GetARandomMemo("2");
+            testTask.AddOrUpdateMemo(testMemo);
+            root.AddOrUpdateTask(testTask);
+
+            Assert.IsTrue(root.TaskList.Contains(testTask));
+
+            //act
+            int index = root.TaskList.FindIndex(x=>x.TaskId == testTask.TaskId);
+            root.TaskList.RemoveAt(index);
+            Assert.IsFalse(root.TaskList.Contains(testTask));
+        }
+
     }
 }

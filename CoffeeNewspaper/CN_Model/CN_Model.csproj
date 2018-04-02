@@ -40,14 +40,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CNConstants.cs" />
+    <Compile Include="CNExceptions\TaskHasChildTasksException.cs" />
+    <Compile Include="CNExceptions\TaskHasSufTasksException.cs" />
+    <Compile Include="CNExceptions\PreTaskNotEndedException.cs" />
+    <Compile Include="CNExceptions\TaskStatusException.cs" />
     <Compile Include="CNMemo.cs" />
-    <Compile Include="CNTaskStatus.cs" />
+    <Compile Include="Enumeration\CNTaskStatus.cs" />
     <Compile Include="CNRoot.cs" />
     <Compile Include="CNTimeSlice.cs" />
-    <Compile Include="CNUrgency.cs" />
-    <Compile Include="CNPriority.cs" />
+    <Compile Include="Enumeration\CNUrgency.cs" />
+    <Compile Include="Enumeration\CNPriority.cs" />
     <Compile Include="CNTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\TimeSlicesStatistics.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

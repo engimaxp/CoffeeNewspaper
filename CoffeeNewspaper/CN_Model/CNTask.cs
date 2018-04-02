@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace CN_Model
 {
-    public class CNTask : IEquatable<CNTask>
+    public class CNTask : IEquatable<CNTask>,IComparable<CNTask>
     {
         public CNTask()
         {
             _memos = new List<CNMemo>();
             Status = CNTaskStatus.TODO;
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(TaskId)}: {TaskId}, {nameof(Content)}: {Content}";
         }
 
         public bool Equals(CNTask other)
@@ -24,12 +28,34 @@ namespace CN_Model
                 Priority == other.Priority &&
                 Urgency == other.Urgency &&
                 Status == other.Status && 
+                IsDeleted == other.IsDeleted &&
                 EstimatedDuration == other.EstimatedDuration &&
                 EndTime.Equals(other.EndTime) &&
-                (Memos == null && other.Memos == Memos) || (Memos != null && other.Memos != null && Memos.Count == other.Memos.Count && !Memos.Except(other.Memos).Any()) &&
-                (Tags == null && other.Tags == Tags) || (Tags != null && other.Tags != null && Tags.Count == other.Tags.Count && !Tags.Except(other.Tags).Any()) &&
+                   DeadLine.Equals(other.DeadLine) &&
+                   ((Memos == null && other.Memos == Memos) ||
+                    (Memos != null && other.Memos != null && Memos.Count == other.Memos.Count &&
+                     !Memos.Except(other.Memos).Any())) &&
+                   ((Tags == null && other.Tags == Tags) ||
+                    (Tags != null && other.Tags != null && Tags.Count == other.Tags.Count &&
+                     !Tags.Except(other.Tags).Any())) &&
                 Equals(ParentTaskId, other.ParentTaskId) &&
-                (PreTaskIds == null && other.PreTaskIds == PreTaskIds) || (PreTaskIds != null && other.PreTaskIds != null && PreTaskIds.Count == other.PreTaskIds.Count && !PreTaskIds.Except(other.PreTaskIds).Any());
+                   ((PreTaskIds == null && other.PreTaskIds == PreTaskIds) ||
+                    (PreTaskIds != null && other.PreTaskIds != null && PreTaskIds.Count == other.PreTaskIds.Count &&
+                     !PreTaskIds.Except(other.PreTaskIds).Any()));
+        }
+
+        public int CompareTo(CNTask other)
+        {
+            if (Urgency > other.Urgency) return 1;
+            if (Urgency < other.Urgency) return -1;
+            if (Priority > other.Priority) return 1;
+            if (Priority < other.Priority) return -1;
+            if (DeadLine == null && other.DeadLine == null) return 0;
+            if (DeadLine == null && other.DeadLine != null) return -1;
+            if (DeadLine != null && other.DeadLine == null) return 1;
+            if (DeadLine > other.DeadLine) return -1;
+            if(DeadLine < other.DeadLine) return 1;
+            return 0;
         }
 
         public override bool Equals(object obj)
@@ -51,8 +77,10 @@ namespace CN_Model
                 hashCode = (hashCode*397) ^ (int) Priority;
                 hashCode = (hashCode * 397) ^ (int)Urgency;
                 hashCode = (hashCode * 397) ^ (int)Status;
+                hashCode = (hashCode * 397) ^ (IsDeleted ? 1 : 0);
                 hashCode = (hashCode*397) ^ EstimatedDuration;
                 hashCode = (hashCode*397) ^ EndTime.GetHashCode();
+                hashCode = (hashCode * 397) ^ DeadLine.GetHashCode();
                 hashCode = (hashCode*397) ^ (Memos != null ? Memos.GetHashCode() : 0);
                 hashCode = (hashCode*397) ^ (Tags != null ? Tags.GetHashCode() : 0);
                 hashCode = (hashCode*397) ^ (ParentTaskId.GetHashCode());
@@ -69,33 +97,46 @@ namespace CN_Model
         public CNPriority Priority { get; set; }
         public CNUrgency Urgency { get; set; }
         /// <summary>
-        /// 预计耗时，-1代表不知道，-2代表永远不会完成
+        /// 预计耗时，按分钟计数，-1代表不知道，-2代表永远不会完成，0代表没有填写预估值
         /// </summary>
         public int EstimatedDuration { get; set; }
 
-        public DateTime? EndTime { get; set; }
-        private List<CNMemo> _memos;
-        private List<CNMemo> Memos {
+        /// <summary>
+        /// EndTime必须大于StartTime
+        /// </summary>
+        private DateTime? endTime;
+        public DateTime? EndTime {
             get {
-                if (_memos != null && _memos.Count > 0)
+                if (StartTime != null && StartTime > endTime)
                 {
-                    var distcount = _memos.Select(r => r.MemoId).Distinct().ToList();
-                    if (distcount.Count() != _memos.Count)
-                    {
-                        List<CNMemo> distinctMemos = new List<CNMemo>();
-                        distcount.ForEach(x => distinctMemos.Add(_memos.FirstOrDefault(y => y.MemoId == x)));
-                        _memos = distinctMemos;
-                    }
+                    endTime = StartTime;
+                }
+
+                return endTime;
+            }
+            set => endTime = value;
+        }
+        public DateTime? DeadLine { get; set; }
+        private List<CNMemo> _memos;
+        public List<CNMemo> Memos {
+            get {
+                if (_memos == null || _memos.Count <= 0) return _memos;
+                var distcount = _memos.Select(r => r.MemoId).Distinct().ToList();
+                if (distcount.Count() != _memos.Count)
+                {
+                    List<CNMemo> distinctMemos = new List<CNMemo>();
+                    distcount.ForEach(x => distinctMemos.Add(_memos.FirstOrDefault(y => y.MemoId == x)));
+                    _memos = distinctMemos;
                 }
                 return _memos;
             }
-            set { _memos = value; }
         }
         public List<string> Tags { get; set; }
-        private int ParentTaskId { get; set; }
-        private List<int> PreTaskIds { get; set; }
+        public int ParentTaskId { get; set; }
+        public List<int> PreTaskIds { get; set; }
 
         public CNTaskStatus Status { get; set; }
+        public bool IsDeleted { get; set; }
 
         public CNTask AddOrUpdateMemo(CNMemo newMemo)
         {
@@ -110,9 +151,9 @@ namespace CN_Model
         {
             return Memos.Any();
         }
-        public bool HasMemo(int memoId)
+        public bool HasMemo(string memoId)
         {
-            return Memos.Any(x=>x.MemoId == memoId);
+            return Memos.Any(x=>x.MemoId.Equals(memoId) );
         }
 
         public List<CNMemo> GetAllMemos()
@@ -122,17 +163,17 @@ namespace CN_Model
 
         public void SetParentTask(CNTask parentTask)
         {
-            this.ParentTaskId = parentTask.TaskId;
+            ParentTaskId = parentTask.TaskId;
         }
 
         public bool HasParentTask()
         {
-            return this.ParentTaskId != 0;
+            return ParentTaskId != 0;
         }
 
         public void ReplaceAWordOfATaskMemos(string originwords, string targetwords)
         {
-            this.Memos.ForEach(r=> {
+            Memos.ForEach(r=> {
                 r.Content = r.Content.Replace(originwords, targetwords);
                 r.Title = r.Title.Replace(originwords, targetwords);
             });
@@ -140,15 +181,15 @@ namespace CN_Model
 
         public void Start()
         {
-            this.Status = CNTaskStatus.DOING;
+            Status = CNTaskStatus.DOING;
         }
         public void Stop()
         {
-            this.Status = CNTaskStatus.TODO;
+            Status = CNTaskStatus.TODO;
         }
         public void End()
         {
-            this.Status = CNTaskStatus.DONE;
+            Status = CNTaskStatus.DONE;
         }
     }
 }

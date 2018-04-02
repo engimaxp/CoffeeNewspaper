@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CN_Model;
 using NUnit.Framework;
 
@@ -130,6 +132,92 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 
             Assert.IsFalse(a.InterceptWith(b));
             Assert.IsFalse(b.InterceptWith(a));
+        }
+
+        [Test]
+        public void GetDayDuration_SingleDay()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.ToShortDateString()).AddMilliseconds(-1));
+            Assert.AreEqual(b,a.GetDayDuration());
+        }
+        [Test]
+        public void GetDayDuration_MutipleDay()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.AddDays(1).ToShortDateString()).AddMilliseconds(-1));
+            Assert.AreEqual(b, a.GetDayDuration());
+        }
+
+        [Test]
+        public void IsContaining_BWrapA()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.ToShortDateString()));
+            Assert.IsTrue(b.IsContaining(a));
+        }
+        [Test]
+        public void IsContaining_CEqualD()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice c = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice d = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsTrue(c.IsContaining(d));
+            Assert.IsTrue(d.IsContaining(c));
+        }
+        [Test]
+        public void IsContaining_EColideF()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice e = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(1));
+            CNTimeSlice f = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsFalse(e.IsContaining(f));
+            Assert.IsFalse(f.IsContaining(e));
+        }
+        [Test]
+        public void IsContaining_GWithinHWithBoundaries()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice g = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(1));
+            CNTimeSlice h = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsFalse(g.IsContaining(h));
+            Assert.IsTrue(h.IsContaining(g));
+            g = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            h = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsFalse(g.IsContaining(h));
+            Assert.IsTrue(h.IsContaining(g));
+        }
+
+        [Test]
+        public void GetWorkDays()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = a.GetDayDuration();
+            Assert.AreEqual(1,b.GetWorkDays());
+            a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(1).AddMinutes(2));
+            b = a.GetDayDuration();
+            Assert.AreEqual(3, b.GetWorkDays());
+            a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), DateTime.Now.Date);
+            b = a.GetDayDuration();
+            Assert.AreEqual(2, b.GetWorkDays());
+        }
+
+        [Test]
+        public void SortTest()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2)); 
+            CNTimeSlice c = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-4), currentTime.AddDays(-1).AddMinutes(2));
+
+            var result = new List<CNTimeSlice>() {a, b, c};
+            result.Sort();
+            Assert.AreEqual(c, result.First());
+            Assert.AreEqual(a, result.Last());
         }
     }
 }

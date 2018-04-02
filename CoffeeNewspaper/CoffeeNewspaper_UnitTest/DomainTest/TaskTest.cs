@@ -14,11 +14,12 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         [Test]
         public void TaskAreEqual()
         {
+            var time = DateTime.Now;
             Assert.AreEqual(new CNTask()
             {
                 TaskId = 1,
                 Content = "Write A Program",
-                CreateTime = DateTime.Now,
+                CreateTime = time,
                 StartTime = null,
                 EndTime = null,
                 Priority = CNPriority.High,
@@ -27,19 +28,19 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Tags = new List<string>() { "Work" },
             }.AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }).AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }), new CNTask()
             {
                 TaskId = 1,
                 Content = "Write A Program",
-                CreateTime = DateTime.Now,
+                CreateTime = time,
                 StartTime = null,
                 EndTime = null,
                 Priority = CNPriority.High,
@@ -48,7 +49,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Tags = new List<string>() { "Work" },
             }.AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }));
@@ -69,7 +70,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Tags = new List<string>() { "Work" },
             }.AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }), new CNTask()
@@ -85,34 +86,101 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Tags = new List<string>() { "Work2" },
             }.AddOrUpdateMemo(new CNMemo()
             {
-                MemoId = 1,
+                MemoId = "1",
                 Content = "Start with writing tests!",
                 Tag = ""
             }));
         }
 
         [Test]
-        public void StartATaskWithPreTaskNotDone_throwException()
+        public void TaskCompare_SameUrgent_SameImportance_OrderByDeadLine()
         {
-            Assert.Fail();
+            var task1 = DomainTestHelper.GetARandomTask(1);
+            var task2 = DomainTestHelper.GetARandomTask(2);
+            var task3 = DomainTestHelper.GetARandomTask(3);
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.Normal;
+            task3.Urgency = CNUrgency.Normal;
+            task1.Priority = CNPriority.Normal;
+            task2.Priority = CNPriority.Normal;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
+
+            var list = new List<CNTask>() { task1,task2,task3};
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task2,list.First());
+            Assert.AreEqual(task1, list.Last());
         }
 
         [Test]
-        public void StartATaskWithPreTaskDone()
+        public void TaskCompare_SameUrgent_OrderByImportance()
         {
-            Assert.Fail();
+            var task1 = DomainTestHelper.GetARandomTask(1);
+            var task2 = DomainTestHelper.GetARandomTask(2);
+            var task3 = DomainTestHelper.GetARandomTask(3);
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.Normal;
+            task3.Urgency = CNUrgency.Normal;
+            task1.Priority = CNPriority.High;
+            task2.Priority = CNPriority.Low;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
+
+            var list = new List<CNTask>() { task1, task2, task3 };
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task1, list.First());
+            Assert.AreEqual(task2, list.Last());
+        }
+        [Test]
+        public void TaskCompare_OrderByUrgent()
+        {
+            var task1 = DomainTestHelper.GetARandomTask(1);
+            var task2 = DomainTestHelper.GetARandomTask(2);
+            var task3 = DomainTestHelper.GetARandomTask(3);
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.High;
+            task3.Urgency = CNUrgency.Low;
+            task1.Priority = CNPriority.High;
+            task2.Priority = CNPriority.Low;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
+
+            var list = new List<CNTask>() { task1, task2, task3 };
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task2, list.First());
+            Assert.AreEqual(task3, list.Last());
         }
 
         [Test]
-        public void StartAndStopTaskMutipleTimes_HasCorrectDurationCount()
+        public void TaskCompare_OrderByMixed()
         {
-            Assert.Fail();
-        }
+            var task1 = DomainTestHelper.GetARandomTask(1);
+            var task2 = DomainTestHelper.GetARandomTask(2);
+            var task3 = DomainTestHelper.GetARandomTask(3);
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.Normal;
+            task3.Urgency = CNUrgency.Low;
+            task1.Priority = CNPriority.High;
+            task2.Priority = CNPriority.Normal;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
 
-        [Test]
-        public void StartAndStopTaskMutipleTimes_HasCorrectWorkDaysCount()
-        {
-            Assert.Fail();
+            var list = new List<CNTask>() { task1, task2, task3 };
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task1, list.First());
+            Assert.AreEqual(task3, list.Last());
         }
 
     }

@@ -27,7 +27,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             };
         }
 
-        public static CNMemo GetARandomMemo(int memoid)
+        public static CNMemo GetARandomMemo(string memoid)
         {
             string timestamp = DateTime.Now.ToString("s");
             return new CNMemo()
@@ -37,6 +37,16 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Content = "Start with writing tests!" + timestamp + Guid.NewGuid().ToString("N"),
                 Tag = ""
             };
+        }
+        /// <summary>
+        /// contain a task which id is 1
+        /// </summary>
+        /// <returns></returns>
+        public static CNRoot GetRandomRoot()
+        {
+            CNRoot root = new CNRoot();
+            root.AddOrUpdateTask(GetARandomTask(1));
+            return root;
         }
     }
 }
