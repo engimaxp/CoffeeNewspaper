@@ -150,7 +150,18 @@ namespace CN_Model
 
         public void EndTask(int taskid)
         {
-            (TaskList.FirstOrDefault(r => r.TaskId == taskid) ?? new CNTask()).End();
+            var targetTask = TaskList.FirstOrDefault(r => r.TaskId == taskid);
+            if (targetTask == null) return;
+            if (targetTask.PreTaskIds != null && targetTask.PreTaskIds.Count > 0)
+            {
+                var notEndedPreTasks = targetTask.PreTaskIds.Where(x => !string.IsNullOrEmpty(this.GetTaskById(x).Content)
+                                                                        && this.GetTaskById(x).Status != CNTaskStatus.DONE).ToList();
+                if (notEndedPreTasks.Count > 0)
+                {
+                    throw new PreTaskNotEndedException(notEndedPreTasks.Select(x=>TaskList.First(r=>r.TaskId == x)).ToList(),targetTask);
+                }
+            }
+            targetTask.End();
         }
 
         public int GetNextTaskID()

@@ -495,33 +495,347 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
         #region Start Test
 
         [Test]
-        public void e_StartATaskWithPreTaskNotDone_throwException()
+        public void e_StartATask()
         {
-            Assert.Fail();
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.Status = CNTaskStatus.TODO;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act
+            var result = targetService.StartATask(targetTask.TaskId);
+
+            //assert
+            Assert.IsTrue(result);
+            rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(targetTask.TaskId).Status == CNTaskStatus.DOING));
+            timeSliceService.Received().AddATimeSlice(Arg.Is<CNTask>(x => x.TaskId == targetTask.TaskId), Arg.Is<CNTimeSlice>(x => x.EndDateTime == null && DateTime.Now - x.StartDateTime <= TimeSpan.FromSeconds(1)));
         }
 
         [Test]
-        public void e_StartATaskWithPreTaskDone()
+        public void e_StartATask_TaskStateInvalid_throwsException()
         {
-            Assert.Fail();
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.Status = CNTaskStatus.DOING;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act assert
+            Assert.Throws<TaskStatusException>(() => {
+                var result = targetService.StartATask(targetTask.TaskId);
+                Assert.IsFalse(result);
+            });
+
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().AddATimeSlice(Arg.Any<CNTask>(),Arg.Any<CNTimeSlice>());
         }
 
         [Test]
-        public void e_StartAndStopTaskMutipleTimes()
+        public void e_StartATask_TaskIsDeleted_throwsException()
         {
-            Assert.Fail();
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.IsDeleted = true;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act assert
+            Assert.Throws<ArgumentException>(() => {
+                var result = targetService.StartATask(targetTask.TaskId);
+                Assert.IsFalse(result);
+            });
+
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().AddATimeSlice(Arg.Any<CNTask>(), Arg.Any<CNTimeSlice>());
         }
-        
+
+        [Test]
+        public void e_StartATask_TaskNotExisit_throwsException()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.IsDeleted = true;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act assert
+            Assert.Throws<ArgumentException>(() => {
+                var result = targetService.StartATask(2);
+                Assert.IsFalse(result);
+            });
+
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().AddATimeSlice(Arg.Any<CNTask>(), Arg.Any<CNTimeSlice>());
+        }
+        #endregion
+
+        #region Pause Test
+
         [Test]
         public void f_PauseATask()
         {
-            Assert.Fail();
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.Status = CNTaskStatus.DOING;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act
+            var result = targetService.PauseATask(targetTask.TaskId);
+
+            //assert
+            Assert.IsTrue(result);
+            rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(targetTask.TaskId).Status == CNTaskStatus.TODO));
+            timeSliceService.Received().EndTimeSlice(Arg.Is<CNTask>(x => x.TaskId == targetTask.TaskId), Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
         }
+
         [Test]
-        public void g_FinishATask()
+        public void f_PauseATask_TaskStateInvalid_throwsException()
         {
-            Assert.Fail();
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.Status = CNTaskStatus.DONE;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act assert
+            Assert.Throws<TaskStatusException>(() => {
+                var result = targetService.PauseATask(targetTask.TaskId);
+                Assert.IsFalse(result);
+            });
+
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().AddATimeSlice(Arg.Any<CNTask>(), Arg.Any<CNTimeSlice>());
+        }
+
+        [Test]
+        public void f_PauseATask_TaskIsDeleted_throwsException()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.IsDeleted = true;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act assert
+            Assert.Throws<ArgumentException>(() => {
+                var result = targetService.PauseATask(targetTask.TaskId);
+                Assert.IsFalse(result);
+            });
+
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().AddATimeSlice(Arg.Any<CNTask>(), Arg.Any<CNTimeSlice>());
+        }
+
+        [Test]
+        public void f_PauseATask_TaskNotExisit_throwsException()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.IsDeleted = true;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act assert
+            Assert.Throws<ArgumentException>(() => {
+                var result = targetService.PauseATask(2);
+                Assert.IsFalse(result);
+            });
+
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().AddATimeSlice(Arg.Any<CNTask>(), Arg.Any<CNTimeSlice>());
         }
         #endregion
+
+        #region Finish Test
+
+        [Test]
+        public void g_FinishATaskWithPreTaskNotFinish_throwException()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var preTask = DomainTestHelper.GetARandomTask(2);
+            var sufTask = DomainTestHelper.GetARandomTask(3);
+            sufTask.PreTaskIds = new List<int>(){ preTask.TaskId };
+            preTask.Status = CNTaskStatus.DOING;
+            sufTask.Status = CNTaskStatus.DOING;
+            arrangeRoot.AddOrUpdateTask(preTask);
+            arrangeRoot.AddOrUpdateTask(sufTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act
+            var exception = Assert.Throws<PreTaskNotEndedException>(() =>
+            {
+                var result = targetService.FinishATask(sufTask.TaskId);
+                Assert.IsFalse(result);
+            }).ToString();
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().EndTimeSlice(Arg.Any<CNTask>(), Arg.Any<DateTime>());
+        }
+
+        [Test]
+        public void g_FinishATaskWithPreTaskFinish()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var preTask = DomainTestHelper.GetARandomTask(2);
+            var sufTask = DomainTestHelper.GetARandomTask(3);
+            sufTask.PreTaskIds = new List<int>() { preTask.TaskId };
+            preTask.Status = CNTaskStatus.DONE;
+            sufTask.Status = CNTaskStatus.DOING;
+            arrangeRoot.AddOrUpdateTask(preTask);
+            arrangeRoot.AddOrUpdateTask(sufTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act
+            var result = targetService.FinishATask(sufTask.TaskId);
+
+            //assert
+            Assert.IsTrue(result);
+            rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(sufTask.TaskId).Status == CNTaskStatus.DONE));
+            timeSliceService.Received().EndTimeSlice(Arg.Is<CNTask>(x => x.TaskId == sufTask.TaskId), Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
+        }
+
+        [Test]
+        public void g_FinishATaskWithNoPreTask()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.Status = CNTaskStatus.DOING;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act
+            var result = targetService.FinishATask(targetTask.TaskId);
+
+            //assert
+            Assert.IsTrue(result);
+            rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(targetTask.TaskId).Status == CNTaskStatus.DONE));
+            timeSliceService.Received().EndTimeSlice(Arg.Is<CNTask>(x => x.TaskId == targetTask.TaskId), Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
+        }
+
+        [Test]
+        public void g_FinishATask_TaskStateInvalid_throwsException()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.Status = CNTaskStatus.DONE;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act assert
+            Assert.Throws<TaskStatusException>(() => {
+                var result = targetService.FinishATask(targetTask.TaskId);
+                Assert.IsFalse(result);
+            });
+
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().AddATimeSlice(Arg.Any<CNTask>(), Arg.Any<CNTimeSlice>());
+        }
+
+        [Test]
+        public void g_FinishATask_TaskIsDeleted_throwsException()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.IsDeleted = true;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act assert
+            Assert.Throws<ArgumentException>(() => {
+                var result = targetService.FinishATask(targetTask.TaskId);
+                Assert.IsFalse(result);
+            });
+
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().AddATimeSlice(Arg.Any<CNTask>(), Arg.Any<CNTimeSlice>());
+        }
+
+        [Test]
+        public void g_FinishATask_TaskNotExisit_throwsException()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.IsDeleted = true;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act assert
+            Assert.Throws<ArgumentException>(() => {
+                var result = targetService.FinishATask(2);
+                Assert.IsFalse(result);
+            });
+
+            //assert
+            rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
+            timeSliceService.DidNotReceive().AddATimeSlice(Arg.Any<CNTask>(), Arg.Any<CNTimeSlice>());
+        }
+        #endregion
+
     }
 }

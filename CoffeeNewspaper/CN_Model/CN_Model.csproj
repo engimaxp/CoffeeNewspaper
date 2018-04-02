@@ -42,6 +42,7 @@
     <Compile Include="CNConstants.cs" />
     <Compile Include="CNExceptions\TaskHasChildTasksException.cs" />
     <Compile Include="CNExceptions\TaskHasSufTasksException.cs" />
+    <Compile Include="CNExceptions\PreTaskNotEndedException.cs" />
     <Compile Include="CNExceptions\TaskStatusException.cs" />
     <Compile Include="CNMemo.cs" />
     <Compile Include="Enumeration\CNTaskStatus.cs" />

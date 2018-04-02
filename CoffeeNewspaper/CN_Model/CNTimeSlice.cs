@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CN_Model
 {
-    public class CNTimeSlice:IEquatable<CNTimeSlice>,ICloneable
+    public class CNTimeSlice:IEquatable<CNTimeSlice>,ICloneable, IComparable<CNTimeSlice>
     {
         /// <summary>
         /// must have start date to create a timeslice
@@ -79,6 +79,13 @@ namespace CN_Model
                     return false;
                 return true;
             }
+        }
+
+        public int CompareTo(CNTimeSlice other)
+        {
+            if (this.StartDateTime > other.StartDateTime) return 1;
+            else if (this.StartDateTime.Equals(other.StartDateTime)) return 0;
+            return -1;
         }
 
         public override string ToString()

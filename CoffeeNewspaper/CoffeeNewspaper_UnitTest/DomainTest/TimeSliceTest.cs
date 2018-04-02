@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CN_Model;
 using NUnit.Framework;
 
@@ -202,6 +204,20 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), DateTime.Now.Date);
             b = a.GetDayDuration();
             Assert.AreEqual(2, b.GetWorkDays());
+        }
+
+        [Test]
+        public void SortTest()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2)); 
+            CNTimeSlice c = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-4), currentTime.AddDays(-1).AddMinutes(2));
+
+            var result = new List<CNTimeSlice>() {a, b, c};
+            result.Sort();
+            Assert.AreEqual(c, result.First());
+            Assert.AreEqual(a, result.Last());
         }
     }
 }

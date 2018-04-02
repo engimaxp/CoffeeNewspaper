@@ -21,14 +21,14 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             var currentTime = DateTime.Now;
             var testslice = new CNTimeSlice(currentTime.AddMinutes(-3), currentTime);
             var expected = new Dictionary<int, List<CNTimeSlice>> {{ testTask.TaskId, new List<CNTimeSlice>() {testslice}}};
-            targetRespository.GetOriginalDataByDate(DateTime.Now.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT))
+            targetRespository.GetOriginalDataByDate(currentTime.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT))
                 .Returns(expected);
 
-            testTask.StartTime = DateTime.Now.AddDays(-1);
+            testTask.StartTime = currentTime.AddDays(-1);
 
             var result = targetService.GetTaskTimeSlices(testTask);
             targetRespository.Received()
-                .GetOriginalDataByDate(DateTime.Now.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT));
+                .GetOriginalDataByDate(currentTime.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT));
             Assert.AreEqual(result, expected[testTask.TaskId]);
         }
         [Test]
@@ -72,11 +72,11 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
                 .Returns(expected2);
             targetRespository.GetOriginalDataByDate(testslice3.StartDate)
                 .Returns(expected3);
-            testTask.StartTime = DateTime.Now.AddDays(-1);
+            testTask.StartTime = currentTime.AddDays(-1);
 
             var result = targetService.GetTaskTimeSlices(testTask);
             targetRespository.Received()
-                .GetOriginalDataByDate(DateTime.Now.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT));
+                .GetOriginalDataByDate(currentTime.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT));
             Assert.AreEqual(0, result.Except(expected[testTask.TaskId]).Count());
         }
 
@@ -90,22 +90,27 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             var testslice1 = new CNTimeSlice(currentTime.AddDays(-2).AddMinutes(-3), currentTime.AddDays(-2));
             var testslice2 = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-3), currentTime.AddDays(-1));
             var testslice3 = new CNTimeSlice(currentTime.AddMinutes(-3), currentTime);
-            var expected = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice1, testslice2 } } };
+            //performance enhance test
+            var testslice4 = new CNTimeSlice(currentTime.AddDays(-100000).AddMinutes(-3), currentTime.AddDays(-3));
+            var expected = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice1, testslice2 , testslice4} } };
             var expected1 = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice1 } } };
             var expected2 = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice2 } } };
             var expected3 = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice3 } } };
+            var expected4 = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice4 } } };
             targetRespository.GetOriginalDataByDate(testslice1.StartDate)
                 .Returns(expected1);
             targetRespository.GetOriginalDataByDate(testslice2.StartDate)
                 .Returns(expected2);
             targetRespository.GetOriginalDataByDate(testslice3.StartDate)
                 .Returns(expected3);
-            testTask.StartTime = DateTime.Now.AddDays(-2);
-            testTask.EndTime = DateTime.Now.AddDays(-1);
+            targetRespository.GetOriginalDataByDate(testslice4.StartDate)
+                .Returns(expected4);
+            testTask.StartTime = testslice4.StartDateTime;
+            testTask.EndTime = currentTime.AddDays(-1);
 
             var result = targetService.GetTaskTimeSlices(testTask);
             targetRespository.Received()
-                .GetOriginalDataByDate(DateTime.Now.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT));
+                .GetOriginalDataByDate(currentTime.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT));
             Assert.AreEqual(0, result.Except(expected[testTask.TaskId]).Count());
         }
         [Test]
@@ -321,6 +326,70 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             targetRespository.Received().OverWriteToDataSourceByDate(testslice2.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice2 }.Except(x[testTask.TaskId]).Any()));
             rootDataRepository.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(testTask.TaskId).StartTime == testTask.StartTime &&
                                                                           x.GetTaskById(testTask.TaskId).EndTime == testslice2.EndDateTime));
+        }
+
+        [Test]
+        public void EndTimeSlice_WithAUnFinishedSlice()
+        {
+            //Arrange
+            var rootDataRepository = Substitute.For<IRootDataProvider>();
+            var targetRespository = Substitute.For<ITimeSliceProvider>();
+            TimeSliceService targetService = new TimeSliceService(targetRespository, rootDataRepository);
+            var testTask = DomainTestHelper.GetARandomTask(1);
+            var currentTime = DateTime.Now;
+            var testslice1 = new CNTimeSlice(currentTime.AddDays(-2).AddMinutes(-3), currentTime.AddDays(-1).AddMinutes(-2));
+            var testslice2 = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(-1));
+            var testslice3 = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1));
+            testTask.StartTime = testslice1.StartDateTime;
+            testTask.EndTime = testslice3.EndDateTime;
+            var expected1 = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice1 } } };
+            var expected2 = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice2, testslice3 } } };
+            targetRespository.GetOriginalDataByDate(testslice1.StartDate)
+                .Returns(expected1);
+            targetRespository.GetOriginalDataByDate(testslice2.StartDate)
+                .Returns(expected2);
+            var expectedRoot = new CNRoot();
+            expectedRoot.AddOrUpdateTask(testTask);
+            rootDataRepository.GetRootData().Returns(expectedRoot);
+            //Act
+            var testslice4 = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(3));
+            targetService.EndTimeSlice(testTask, testslice4.EndDateTime ?? currentTime);
+
+            //Assert
+            targetRespository.Received().OverWriteToDataSourceByDate(testslice2.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice2, testslice4 }.Except(x[testTask.TaskId]).Any()));
+            rootDataRepository.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(testTask.TaskId).StartTime == testTask.StartTime &&
+                                                                          x.GetTaskById(testTask.TaskId).EndTime == testslice4.EndDateTime));
+        }
+
+        [Test]
+        public void EndTimeSlice_WithOutUnFinishedSlice()
+        {
+            //Arrange
+            var rootDataRepository = Substitute.For<IRootDataProvider>();
+            var targetRespository = Substitute.For<ITimeSliceProvider>();
+            TimeSliceService targetService = new TimeSliceService(targetRespository, rootDataRepository);
+            var testTask = DomainTestHelper.GetARandomTask(1);
+            var currentTime = DateTime.Now;
+            var testslice1 = new CNTimeSlice(currentTime.AddDays(-2).AddMinutes(-3), currentTime.AddDays(-1).AddMinutes(-2));
+            var testslice2 = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(-1));
+            var testslice3 = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(3));
+            testTask.StartTime = testslice1.StartDateTime;
+            testTask.EndTime = testslice3.EndDateTime;
+            var expected1 = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice1 } } };
+            var expected2 = new Dictionary<int, List<CNTimeSlice>> { { testTask.TaskId, new List<CNTimeSlice>() { testslice2, testslice3 } } };
+            targetRespository.GetOriginalDataByDate(testslice1.StartDate)
+                .Returns(expected1);
+            targetRespository.GetOriginalDataByDate(testslice2.StartDate)
+                .Returns(expected2);
+            var expectedRoot = new CNRoot();
+            expectedRoot.AddOrUpdateTask(testTask);
+            rootDataRepository.GetRootData().Returns(expectedRoot);
+            //Act
+            targetService.EndTimeSlice(testTask, currentTime.AddDays(-1).AddMinutes(6));
+
+            //Assert
+            targetRespository.DidNotReceive().OverWriteToDataSourceByDate(testslice2.StartDate, Arg.Any<Dictionary<int, List<CNTimeSlice>>>());
+            rootDataRepository.DidNotReceive().Persistence(Arg.Any<CNRoot>());
         }
     }
 }

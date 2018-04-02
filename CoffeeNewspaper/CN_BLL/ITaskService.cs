@@ -15,5 +15,11 @@ namespace CN_BLL
         bool RemoveTask(int taskId, bool force = false);
 
         bool RecoverTask(int taskId);
+
+        bool StartATask(int taskId);
+
+        bool PauseATask(int taskId);
+
+        bool FinishATask(int taskId);
     }
 }

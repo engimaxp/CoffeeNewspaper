@@ -48,12 +48,22 @@ namespace CN_BLL
             {
                     var datasourceDictionary = timeSliceProvider.GetOriginalDataByDate(
                         currentPointer.ToString(CNConstants.DIRECTORY_DATEFORMAT));
-                if (datasourceDictionary != null && datasourceDictionary.ContainsKey(task.TaskId))
+                if (datasourceDictionary != null &&
+                    datasourceDictionary.ContainsKey(task.TaskId) && 
+                    datasourceDictionary[task.TaskId]!=null && 
+                    datasourceDictionary[task.TaskId].Count>0)
                 {
+                    datasourceDictionary[task.TaskId].Sort();
+                    var last = datasourceDictionary[task.TaskId].Last();
+                    if (last.EndDateTime != null && last.EndDateTime.Value.Date >= last.StartDateTime.Date.AddDays(2))
+                    {
+                        currentPointer = last.EndDateTime.Value.Date.AddDays(-1);
+                    }
+
                     result.AddRange(datasourceDictionary[task.TaskId]);
                 }
             }
-            return result.OrderBy(r=>r.StartDateTime);
+            return result;
         }
 
 
@@ -67,7 +77,7 @@ namespace CN_BLL
             if (source.ContainsKey(task.TaskId))
             {
                 source[task.TaskId].Add(timeSlice);
-                source[task.TaskId] = source[task.TaskId].OrderBy(r => r.StartDateTime).ToList();
+                source[task.TaskId].Sort();
                 ExpandTaskTime(task.TaskId, source[task.TaskId].First().StartDateTime, source[task.TaskId].Last().EndDateTime);
             }
             else
@@ -89,14 +99,14 @@ namespace CN_BLL
                 if (source.ContainsKey(task.TaskId))
                 {
                     source[task.TaskId].Remove(timeSlice);
-                    source[task.TaskId] = source[task.TaskId].OrderBy(r => r.StartDateTime).ToList();
+                    source[task.TaskId].Sort();
                     if (Equals(originDatas.First(), timeSlice) )
                     {
-                        ShrinkStartTaskTime(task.TaskId, source[task.TaskId].First().StartDateTime);
+                        UpdateStartTaskTime(task.TaskId, source[task.TaskId].First().StartDateTime);
                     }
                     else if (Equals(originDatas.Last(), timeSlice))
                     {
-                        ShrinkEndTaskTime(task.TaskId, source[task.TaskId].Last().EndDateTime);
+                        UpdateEndTaskTime(task.TaskId, source[task.TaskId].Last().EndDateTime);
                     }
                     else
                     {
@@ -107,18 +117,34 @@ namespace CN_BLL
             }
         }
 
+        public void EndTimeSlice(CNTask task,DateTime endTime)
+        {
+            var originDatas = GetTaskTimeSlices(task).ToList();
+            originDatas.Sort();
+            if (!(originDatas.Last().Clone() is CNTimeSlice lastSlice) || lastSlice.EndDateTime != null) return;
+            lastSlice.EndDateTime = endTime;
+            var source = timeSliceProvider.GetOriginalDataByDate(lastSlice.StartDate);
+            source[task.TaskId].Remove(source[task.TaskId].Last());
+            source[task.TaskId].Add(lastSlice);
+            source[task.TaskId].Sort();
+            timeSliceProvider.OverWriteToDataSourceByDate(lastSlice.StartDate, source);
+            UpdateEndTaskTime(task.TaskId, source[task.TaskId].Last().EndDateTime);
+        }
+
         private void ExpandTaskTime(int taskid, DateTime? targetStartTime, DateTime? targetEndTime)
         {
             var originRoot = rootDataProvider.GetRootData();
             var originDataTask = originRoot.GetTaskById(taskid);
-            if (originDataTask == null || string.IsNullOrEmpty(originDataTask.Content)) return;
-            if(originDataTask.StartTime ==null || originDataTask.EndTime == null || originDataTask.StartTime > targetStartTime || originDataTask.EndTime < targetEndTime)
+            if (string.IsNullOrEmpty(originDataTask?.Content)) return;
+            if(originDataTask.StartTime ==null || originDataTask.EndTime == null || originDataTask.StartTime > targetStartTime || originDataTask.EndTime < targetEndTime || targetEndTime == null)
             {
                 if (originDataTask.StartTime == null || originDataTask.StartTime > targetStartTime)
                 {
                     originDataTask.StartTime = targetStartTime;
                 }
-                if (originDataTask.EndTime == null || originDataTask.EndTime < targetEndTime)
+                if ((originDataTask.EndTime == null && targetEndTime != null) ||//Pause A Task
+                    (originDataTask.EndTime != null && targetEndTime == null) ||//Start A Task
+                    (originDataTask.EndTime != null && targetEndTime != null && originDataTask.EndTime < targetEndTime))//Update A Task timeslice
                 {
                     originDataTask.EndTime = targetEndTime;
                 }
@@ -127,7 +153,7 @@ namespace CN_BLL
             }
         }
 
-        private void ShrinkStartTaskTime(int taskid, DateTime? targetStartTime)
+        private void UpdateStartTaskTime(int taskid, DateTime? targetStartTime)
         {
             var originRoot = rootDataProvider.GetRootData();
             var originDataTask = originRoot.GetTaskById(taskid);
@@ -135,7 +161,7 @@ namespace CN_BLL
                 originRoot.AddOrUpdateTask(originDataTask);
                 rootDataProvider.Persistence(originRoot);
         }
-        private void ShrinkEndTaskTime(int taskid, DateTime? targetEndTime)
+        private void UpdateEndTaskTime(int taskid, DateTime? targetEndTime)
         {
             var originRoot = rootDataProvider.GetRootData();
             var originDataTask = originRoot.GetTaskById(taskid);

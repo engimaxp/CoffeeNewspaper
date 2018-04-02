@@ -28,5 +28,12 @@ namespace CN_BLL
         /// <param name="task"></param>
         /// <param name="timeSlice"></param>
         void DeleteTimeSlices(CNTask task, CNTimeSlice timeSlice);
+
+        /// <summary>
+        /// End a null endTime task
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="endTime"></param>
+        void EndTimeSlice(CNTask task, DateTime endTime);
     }
 }

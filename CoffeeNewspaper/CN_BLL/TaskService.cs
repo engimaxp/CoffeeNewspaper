@@ -78,6 +78,50 @@ namespace CN_BLL
             return true;
         }
 
+        public bool StartATask(int taskId)
+        {
+            var root = rootDataProvider.GetRootData();
+            var targetTask = root.GetTaskById(taskId);
+            if (string.IsNullOrEmpty(targetTask?.Content))
+            {
+                throw new ArgumentException("TaskID does not exist!");
+            }
+            if (targetTask.IsDeleted)
+            {
+                throw new ArgumentException("Task is deleted");
+            }
+            if (targetTask.Status != CNTaskStatus.TODO && targetTask.Status != CNTaskStatus.DONE)
+            {
+                throw new TaskStatusException(new List<CNTaskStatus>(){ CNTaskStatus.TODO, CNTaskStatus.DONE },targetTask.Status);
+            }
+            root.StartTask(taskId);
+            rootDataProvider.Persistence(root);
+            timeSliceService.AddATimeSlice(targetTask,new CNTimeSlice(DateTime.Now));
+            return true;
+        }
+
+        public bool PauseATask(int taskId)
+        {
+            var root = rootDataProvider.GetRootData();
+            var targetTask = root.GetTaskById(taskId);
+            if (string.IsNullOrEmpty(targetTask?.Content))
+            {
+                throw new ArgumentException("TaskID does not exist!");
+            }
+            if (targetTask.IsDeleted)
+            {
+                throw new ArgumentException("Task is deleted");
+            }
+            if (targetTask.Status != CNTaskStatus.DOING)
+            {
+                throw new TaskStatusException(new List<CNTaskStatus>() { CNTaskStatus.DOING }, targetTask.Status);
+            }
+            root.StopTask(taskId);
+            rootDataProvider.Persistence(root);
+            timeSliceService.EndTimeSlice(targetTask,DateTime.Now);
+            return true;
+        }
+
         public bool RemoveTask(int taskId, bool force = false)
         {
             var root = rootDataProvider.GetRootData();
@@ -100,6 +144,28 @@ namespace CN_BLL
             }
             root.RemoveTaskById(taskId);
             rootDataProvider.Persistence(root);
+            return true;
+        }
+
+        public bool FinishATask(int taskId)
+        {
+            var root = rootDataProvider.GetRootData();
+            var targetTask = root.GetTaskById(taskId);
+            if (string.IsNullOrEmpty(targetTask?.Content))
+            {
+                throw new ArgumentException("TaskID does not exist!");
+            }
+            if (targetTask.IsDeleted)
+            {
+                throw new ArgumentException("Task is deleted");
+            }
+            if (targetTask.Status == CNTaskStatus.DONE)
+            {
+                throw new TaskStatusException(new List<CNTaskStatus>() { CNTaskStatus.DOING,CNTaskStatus.TODO }, targetTask.Status);
+            }
+            root.EndTask(taskId);
+            rootDataProvider.Persistence(root);
+            timeSliceService.EndTimeSlice(targetTask, DateTime.Now);
             return true;
         }
     }
