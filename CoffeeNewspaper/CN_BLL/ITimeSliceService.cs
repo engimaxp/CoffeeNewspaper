@@ -30,10 +30,16 @@ namespace CN_BLL
         void DeleteTimeSlices(CNTask task, CNTimeSlice timeSlice);
 
         /// <summary>
-        /// End a null endTime task
+        /// End all null endTime of a task and its child tasks or suf tasks
         /// </summary>
-        /// <param name="task"></param>
+        /// <param name="taskId"></param>
         /// <param name="endTime"></param>
-        void EndTimeSlice(CNTask task, DateTime endTime);
+        void EndTimeSlice(int taskId, DateTime endTime);
+
+        /// <summary>
+        /// Remove all timeslices of a task and its child tasks or suf tasks permanently
+        /// </summary>
+        /// <param name="taskId"></param>
+        void DeleteAllTimeSlices(int taskId);
     }
 }

@@ -79,7 +79,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             TaskService targetService = new TaskService(rootDataProvider);
             var testTask = DomainTestHelper.GetARandomTask(2);
             Assert.Throws<ArgumentException>(() => {
-                bool result = targetService.RemoveTask(testTask.TaskId);
+                bool result = targetService.RemoveATask(testTask.TaskId);
                 Assert.IsFalse(result);
             });
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
@@ -92,7 +92,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             rootDataProvider.GetRootData().Returns(arrangeRoot);
             TaskService targetService = new TaskService(rootDataProvider);
             Assert.Throws<ArgumentException>(() => {
-                bool result = targetService.RemoveTask(1);
+                bool result = targetService.RemoveATask(1);
                 Assert.IsFalse(result);
             });
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
@@ -111,7 +111,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.IsTrue(arrangeRoot.TaskList.Contains(taskToBeDeleted));
 
             //Act
-            bool result = targetService.RemoveTask(taskToBeDeleted.TaskId);
+            bool result = targetService.RemoveATask(taskToBeDeleted.TaskId);
             
             //Assert
             Assert.IsTrue(result);
@@ -137,7 +137,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Act Assert
             Assert.Throws<TaskHasChildTasksException>(() => {
-                bool result = targetService.RemoveTask(taskToBeDeleted.TaskId);
+                bool result = targetService.RemoveATask(taskToBeDeleted.TaskId);
                 Assert.IsFalse(result);
             });
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
@@ -163,7 +163,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Act Assert
             Assert.Throws<TaskHasSufTasksException>(() => {
-                bool result = targetService.RemoveTask(taskToBeDeleted.TaskId);
+                bool result = targetService.RemoveATask(taskToBeDeleted.TaskId);
                 Assert.IsFalse(result);
             });
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
@@ -188,7 +188,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.IsTrue(arrangeRoot.TaskList.Contains(childTask));
 
             //Act
-            bool result = targetService.RemoveTask(taskToBeDeleted.TaskId,true);
+            bool result = targetService.RemoveATask(taskToBeDeleted.TaskId,true);
 
             //Assert
             Assert.IsTrue(result);
@@ -214,7 +214,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.IsTrue(arrangeRoot.TaskList.Contains(sufTask));
 
             //Act
-            bool result = targetService.RemoveTask(taskToBeDeleted.TaskId, true);
+            bool result = targetService.RemoveATask(taskToBeDeleted.TaskId, true);
 
             //Assert
             Assert.IsTrue(result);
@@ -238,7 +238,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.IsTrue(arrangeRoot.TaskList.Contains(taskToBeDeleted));
 
             //Act
-            bool result = targetService.RemoveTask(taskToBeDeleted.TaskId);
+            bool result = targetService.RemoveATask(taskToBeDeleted.TaskId);
 
             //Assert
             Assert.IsTrue(result);
@@ -268,7 +268,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.IsTrue(arrangeRoot.TaskList.Contains(childTask));
 
             //Act
-            bool result = targetService.RemoveTask(taskToBeDeleted.TaskId, true);
+            bool result = targetService.RemoveATask(taskToBeDeleted.TaskId, true);
 
             //Assert
             Assert.IsTrue(result);
@@ -417,7 +417,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             TaskService targetService = new TaskService(rootDataProvider);
             var testTask = DomainTestHelper.GetARandomTask(2);
             Assert.Throws<ArgumentException>(() => {
-                bool result = targetService.RecoverTask(testTask.TaskId);
+                bool result = targetService.RecoverATask(testTask.TaskId);
                 Assert.IsFalse(result);
             });
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
@@ -436,7 +436,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.IsTrue(arrangeRoot.TaskList.Contains(taskToBeRecovered));
 
             //Act
-            bool result = targetService.RecoverTask(taskToBeRecovered.TaskId);
+            bool result = targetService.RecoverATask(taskToBeRecovered.TaskId);
 
             //Assert
             Assert.IsTrue(result);
@@ -461,7 +461,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.IsTrue(arrangeRoot.TaskList.Contains(childTask));
 
             //Act Assert
-                bool result = targetService.RecoverTask(taskToBeRecovered.TaskId);
+                bool result = targetService.RecoverATask(taskToBeRecovered.TaskId);
                 Assert.IsTrue(result);
             rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => !x.GetTaskById(taskToBeRecovered.TaskId).IsDeleted && !x.GetTaskById(childTask.TaskId).IsDeleted) );
 
@@ -485,7 +485,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.IsTrue(arrangeRoot.TaskList.Contains(sufTask));
 
             //Act Assert
-            bool result = targetService.RecoverTask(taskToBeRecovered.TaskId);
+            bool result = targetService.RecoverATask(taskToBeRecovered.TaskId);
             Assert.IsTrue(result);
             rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => !x.GetTaskById(taskToBeRecovered.TaskId).IsDeleted && !x.GetTaskById(sufTask.TaskId).IsDeleted));
 
@@ -610,7 +610,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //assert
             Assert.IsTrue(result);
             rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(targetTask.TaskId).Status == CNTaskStatus.TODO));
-            timeSliceService.Received().EndTimeSlice(Arg.Is<CNTask>(x => x.TaskId == targetTask.TaskId), Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
+            timeSliceService.Received().EndTimeSlice(targetTask.TaskId, Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
         }
 
         [Test]
@@ -713,7 +713,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             }).ToString();
             //assert
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
-            timeSliceService.DidNotReceive().EndTimeSlice(Arg.Any<CNTask>(), Arg.Any<DateTime>());
+            timeSliceService.DidNotReceive().EndTimeSlice(Arg.Any<int>(), Arg.Any<DateTime>());
         }
 
         [Test]
@@ -739,7 +739,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //assert
             Assert.IsTrue(result);
             rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(sufTask.TaskId).Status == CNTaskStatus.DONE));
-            timeSliceService.Received().EndTimeSlice(Arg.Is<CNTask>(x => x.TaskId == sufTask.TaskId), Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
+            timeSliceService.Received().EndTimeSlice(sufTask.TaskId, Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
         }
 
         [Test]
@@ -761,7 +761,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //assert
             Assert.IsTrue(result);
             rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(targetTask.TaskId).Status == CNTaskStatus.DONE));
-            timeSliceService.Received().EndTimeSlice(Arg.Is<CNTask>(x => x.TaskId == targetTask.TaskId), Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
+            timeSliceService.Received().EndTimeSlice(targetTask.TaskId, Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
         }
 
         [Test]
@@ -837,5 +837,42 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
         }
         #endregion
 
+        #region Fail Tesst
+
+        [Test]
+        public void h_FailATask()
+        {
+            //arrange
+            IRootDataProvider rootDataProvider = Substitute.For<IRootDataProvider>();
+            var arrangeRoot = DomainTestHelper.GetRandomRoot();
+            var targetTask = arrangeRoot.GetFirstTask();
+            targetTask.Status = CNTaskStatus.DOING;
+            arrangeRoot.AddOrUpdateTask(targetTask);
+            rootDataProvider.GetRootData().Returns(arrangeRoot);
+            ITimeSliceService timeSliceService = Substitute.For<ITimeSliceService>();
+            TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
+
+            //act
+            var failReason = "Fail for a Reason blabla";
+            var result = targetService.FailATask(targetTask.TaskId,failReason);
+
+            //assert
+            Assert.IsTrue(result);
+            rootDataProvider.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(targetTask.TaskId).IsFail &&
+                                                                        failReason.Equals(x.GetTaskById(targetTask.TaskId).FailReason) &&
+                                                                        x.GetTaskById(targetTask.TaskId).Status == CNTaskStatus.TODO));
+            timeSliceService.Received().EndTimeSlice(targetTask.TaskId, Arg.Is<DateTime>(x => DateTime.Now - x <= TimeSpan.FromSeconds(1)));
+        }
+
+        [Test]
+        public void h_FailATask_WithChildTask_throwsException()
+        {
+        }
+        [Test]
+        public void h_FailATask_WithSufTask_throwsException()
+        {
+        }
+
+        #endregion
     }
 }
