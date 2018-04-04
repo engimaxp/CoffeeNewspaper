@@ -11,6 +11,25 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
     [TestFixture]
     public class MemoTest
     {
+        [Test]
+        public void MemosListEqualTest()
+        {
+            var memo1 = new CNMemo()
+            {
+                MemoId = "1",
+                Content = "Start with writing tests!",
+                Tags = new List<string>() {""}
+            };
+            var memo2 = new CNMemo()
+            {
+                MemoId = "1",
+                Content = "Start with writing tests!",
+                Tags = new List<string>() { "" }
+            };
+            
+            Assert.AreEqual(1, new List<CNMemo>() { memo1 }.Intersect(new List<CNMemo>() { memo2 },CNMemo.CnMemoComparer).Count());
+            Assert.AreEqual(0,new List<CNMemo>() { memo1 }.Except(new List<CNMemo>() { memo2 }, CNMemo.CnMemoComparer).Count()); 
+        }
 
         [Test]
         public void MemosAreEqual()
@@ -19,12 +38,12 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             {
                 MemoId ="1",
                 Content = "Start with writing tests!",
-                Tag = ""
+                Tags = new List<string>(){ "" }
             }, new CNMemo()
             {
                 MemoId = "1",
                 Content = "Start with writing tests!",
-                Tag = ""
+                Tags = new List<string>() { "" }
             });
         }
         [Test]
@@ -34,12 +53,12 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             {
                 MemoId = "1",
                 Content = "Start with writing tests!",
-                Tag = ""
+                Tags = new List<string>() { "" }
             }, new CNMemo()
             {
                 MemoId = "2",
                 Content = "Start with writing tests!",
-                Tag = ""
+                Tags = new List<string>() { "" }
             });
         }
 

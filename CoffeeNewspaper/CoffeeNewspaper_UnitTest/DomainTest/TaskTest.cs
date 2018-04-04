@@ -15,7 +15,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         public void TaskAreEqual()
         {
             var time = DateTime.Now;
-            Assert.AreEqual(new CNTask()
+            var task1 = new CNTask()
             {
                 TaskId = 1,
                 Content = "Write A Program",
@@ -25,18 +25,19 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Priority = CNPriority.High,
                 Urgency = CNUrgency.High,
                 EstimatedDuration = 3600,
-                Tags = new List<string>() { "Work" },
+                Tags = new List<string>() {"Work"},
             }.AddOrUpdateMemo(new CNMemo()
             {
                 MemoId = "1",
                 Content = "Start with writing tests!",
-                Tag = ""
+                Tags = new List<string>() {""}
             }).AddOrUpdateMemo(new CNMemo()
             {
                 MemoId = "1",
                 Content = "Start with writing tests!",
-                Tag = ""
-            }), new CNTask()
+                Tags = new List<string>() {""}
+            });
+            var task2 = new CNTask()
             {
                 TaskId = 1,
                 Content = "Write A Program",
@@ -46,13 +47,15 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Priority = CNPriority.High,
                 Urgency = CNUrgency.High,
                 EstimatedDuration = 3600,
-                Tags = new List<string>() { "Work" },
+                Tags = new List<string>() {"Work"},
             }.AddOrUpdateMemo(new CNMemo()
             {
                 MemoId = "1",
                 Content = "Start with writing tests!",
-                Tag = ""
-            }));
+                Tags = new List<string>() {""}
+            });
+            Assert.AreEqual(1, new List<CNTask>() { task1 }.Intersect(new List<CNTask>() { task2 }, CNTask.CnTaskComparer).Count());
+            Assert.AreEqual(task1,task2);
         }
         [Test]
         public void TaskAreNotEqual()
@@ -72,7 +75,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             {
                 MemoId = "1",
                 Content = "Start with writing tests!",
-                Tag = ""
+                Tags = new List<string>() { "" }
             }), new CNTask()
             {
                 TaskId = 1,
@@ -88,7 +91,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             {
                 MemoId = "1",
                 Content = "Start with writing tests!",
-                Tag = ""
+                Tags = new List<string>() { "" }
             }));
         }
 

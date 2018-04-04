@@ -31,7 +31,7 @@ namespace CoffeeNewspaper_UnitTest
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(property1, other.property1) && ChildObjs.Count == other.ChildObjs.Count && !ChildObjs.Except(other.ChildObjs).Any();
+            return string.Equals(property1, other.property1) && ChildObjs.Count == other.ChildObjs.Count && !ChildObjs.Except(other.ChildObjs,TestChildObj.Property2Comparer).Any();
         }
 
         public override bool Equals(object obj)
@@ -53,6 +53,25 @@ namespace CoffeeNewspaper_UnitTest
 
     public class TestChildObj : IEquatable<TestChildObj>
     {
+        private sealed class Property2EqualityComparer : IEqualityComparer<TestChildObj>
+        {
+            public bool Equals(TestChildObj x, TestChildObj y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return string.Equals(x.property2, y.property2);
+            }
+
+            public int GetHashCode(TestChildObj obj)
+            {
+                return obj.ToString().GetHashCode();
+            }
+        }
+
+        public static IEqualityComparer<TestChildObj> Property2Comparer { get; } = new Property2EqualityComparer();
+
         public bool Equals(TestChildObj other)
         {
             if (ReferenceEquals(null, other)) return false;

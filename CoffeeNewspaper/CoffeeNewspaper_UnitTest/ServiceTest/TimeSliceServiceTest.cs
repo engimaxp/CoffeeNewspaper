@@ -77,7 +77,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             var result = targetService.GetTaskTimeSlices(testTask);
             targetRespository.Received()
                 .GetOriginalDataByDate(currentTime.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT));
-            Assert.AreEqual(0, result.Except(expected[testTask.TaskId]).Count());
+            Assert.AreEqual(0, result.Except(expected[testTask.TaskId],CNTimeSlice.StartDateTimeEndDateTimeComparer).Count());
         }
 
         [Test]
@@ -111,7 +111,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             var result = targetService.GetTaskTimeSlices(testTask);
             targetRespository.Received()
                 .GetOriginalDataByDate(currentTime.AddDays(-1).ToString(CNConstants.DIRECTORY_DATEFORMAT));
-            Assert.AreEqual(0, result.Except(expected[testTask.TaskId]).Count());
+            Assert.AreEqual(0, result.Except(expected[testTask.TaskId], CNTimeSlice.StartDateTimeEndDateTimeComparer).Count());
         }
         [Test]
         public void AddATimeSlice_InterceptNotExists()
@@ -130,7 +130,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             targetService.AddATimeSlice(testTask, addedData);
             //Assert
             targetRespository.Received()
-                .OverWriteToDataSourceByDate(testslice.StartDate, Arg.Is< Dictionary<int, List<CNTimeSlice>>>(x=>x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice, addedData }.Except(x[testTask.TaskId]).Any() ));
+                .OverWriteToDataSourceByDate(testslice.StartDate, Arg.Is< Dictionary<int, List<CNTimeSlice>>>(x=>x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice, addedData }.Except(x[testTask.TaskId], CNTimeSlice.StartDateTimeEndDateTimeComparer).Any() ));
         }
         [Test]
         public void AddATimeSlice_InterceptExists_throwsArgException()
@@ -176,7 +176,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
                 targetService.AddATimeSlice(testTask, addedData);
 
             targetRespository.Received()
-                .OverWriteToDataSourceByDate(addedData.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice2, addedData }.Except(x[testTask.TaskId]).Any()));
+                .OverWriteToDataSourceByDate(addedData.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice2, addedData }.Except(x[testTask.TaskId], CNTimeSlice.StartDateTimeEndDateTimeComparer).Any()));
         }
         [Test]
         public void AddATimeSlice_MutipleDay_InterceptExists_throwException()
@@ -290,7 +290,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             targetService.DeleteTimeSlices(testTask,  testslice2 );
 
             //Assert
-            targetRespository.Received().OverWriteToDataSourceByDate(testslice2.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice3 }.Except(x[testTask.TaskId]).Any()));
+            targetRespository.Received().OverWriteToDataSourceByDate(testslice2.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice3 }.Except(x[testTask.TaskId], CNTimeSlice.StartDateTimeEndDateTimeComparer).Any()));
             rootDataRepository.DidNotReceive().Persistence(Arg.Any<CNRoot>());
         }
         [Test]
@@ -320,7 +320,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             targetService.DeleteTimeSlices(testTask,  testslice3 );
 
             //Assert
-            targetRespository.Received().OverWriteToDataSourceByDate(testslice2.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice2 }.Except(x[testTask.TaskId]).Any()));
+            targetRespository.Received().OverWriteToDataSourceByDate(testslice2.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice2 }.Except(x[testTask.TaskId], CNTimeSlice.StartDateTimeEndDateTimeComparer).Any()));
             rootDataRepository.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(testTask.TaskId).StartTime == testTask.StartTime &&
                                                                           x.GetTaskById(testTask.TaskId).EndTime == testslice2.EndDateTime));
         }
@@ -353,7 +353,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             targetService.EndTimeSlice(testTask.TaskId, testslice4.EndDateTime ?? currentTime);
 
             //Assert
-            targetRespository.Received().OverWriteToDataSourceByDate(testslice2.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice2, testslice4 }.Except(x[testTask.TaskId]).Any()));
+            targetRespository.Received().OverWriteToDataSourceByDate(testslice2.StartDate, Arg.Is<Dictionary<int, List<CNTimeSlice>>>(x => x.ContainsKey(testTask.TaskId) && !new List<CNTimeSlice>() { testslice2, testslice4 }.Except(x[testTask.TaskId], CNTimeSlice.StartDateTimeEndDateTimeComparer).Any()));
             rootDataRepository.Received().Persistence(Arg.Is<CNRoot>(x => x.GetTaskById(testTask.TaskId).StartTime == testTask.StartTime &&
                                                                           x.GetTaskById(testTask.TaskId).EndTime == testslice4.EndDateTime));
         }

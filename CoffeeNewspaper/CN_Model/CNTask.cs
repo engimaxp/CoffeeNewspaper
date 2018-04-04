@@ -6,6 +6,35 @@ namespace CN_Model
 {
     public class CNTask : IEquatable<CNTask>,IComparable<CNTask>
     {
+        private sealed class CnTaskEqualityComparer : IEqualityComparer<CNTask>
+        {
+            public bool Equals(CNTask x, CNTask y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return x.endTime.Equals(y.endTime)  && x.TaskId == y.TaskId && string.Equals(x.Content, y.Content) && x.CreateTime.Equals(y.CreateTime) && x.StartTime.Equals(y.StartTime) && x.Priority == y.Priority && x.Urgency == y.Urgency && x.EstimatedDuration == y.EstimatedDuration && x.DeadLine.Equals(y.DeadLine)  && x.ParentTaskId == y.ParentTaskId  && x.Status == y.Status && x.IsDeleted == y.IsDeleted && x.IsFail == y.IsFail && string.Equals(x.FailReason, y.FailReason) &&
+                       ((x.Memos == null && y.Memos == x.Memos) ||
+                        (x.Memos != null && y.Memos != null && x.Memos.Count == y.Memos.Count &&
+                         !x.Memos.Except(y.Memos,CNMemo.CnMemoComparer).Any())) &&
+                       ((x.Tags == null && y.Tags == x.Tags) ||
+                        (x.Tags != null && y.Tags != null && x.Tags.Count == y.Tags.Count &&
+                         !x.Tags.Except(y.Tags).Any())) &&
+                       Equals(x.ParentTaskId, y.ParentTaskId) &&
+                       ((x.PreTaskIds == null && y.PreTaskIds == x.PreTaskIds) ||
+                        (x.PreTaskIds != null && y.PreTaskIds != null && x.PreTaskIds.Count == y.PreTaskIds.Count &&
+                         !x.PreTaskIds.Except(y.PreTaskIds).Any()));
+            }
+
+            public int GetHashCode(CNTask obj)
+            {
+                return obj.ToString().GetHashCode();
+            }
+        }
+
+        public static IEqualityComparer<CNTask> CnTaskComparer { get; } = new CnTaskEqualityComparer();
+
         public CNTask()
         {
             _memos = new List<CNMemo>();
@@ -36,7 +65,7 @@ namespace CN_Model
                    DeadLine.Equals(other.DeadLine) &&
                    ((Memos == null && other.Memos == Memos) ||
                     (Memos != null && other.Memos != null && Memos.Count == other.Memos.Count &&
-                     !Memos.Except(other.Memos).Any())) &&
+                     !Memos.Except(other.Memos, CNMemo.CnMemoComparer).Any())) &&
                    ((Tags == null && other.Tags == Tags) ||
                     (Tags != null && other.Tags != null && Tags.Count == other.Tags.Count &&
                      !Tags.Except(other.Tags).Any())) &&

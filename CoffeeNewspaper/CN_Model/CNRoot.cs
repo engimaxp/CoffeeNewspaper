@@ -104,8 +104,8 @@ namespace CN_Model
         public IEnumerable<CNMemo> GetAllUniqueMemo()
         {
             IEnumerable<CNMemo> memos = new List<CNMemo>();
-            TaskList.Where(r=>r.HasMemo()).Select(x=>x.GetAllMemos()).ToList().ForEach(r=>memos = r.Union(memos));
-            memos = memos.Union(MemoList);
+            TaskList.Where(r=>r.HasMemo()).Select(x=>x.GetAllMemos()).ToList().ForEach(r=>memos = r.Union(memos, CNMemo.CnMemoComparer));
+            memos = memos.Union(MemoList,CNMemo.CnMemoComparer);
             return memos;
         }
 
