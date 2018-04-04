@@ -117,18 +117,40 @@ namespace CN_BLL
             }
         }
 
-        public void EndTimeSlice(CNTask task,DateTime endTime)
+        public void EndTimeSlice(int taskId, DateTime endTime)
         {
-            var originDatas = GetTaskTimeSlices(task).ToList();
-            originDatas.Sort();
-            if (!(originDatas.Last().Clone() is CNTimeSlice lastSlice) || lastSlice.EndDateTime != null) return;
-            lastSlice.EndDateTime = endTime;
-            var source = timeSliceProvider.GetOriginalDataByDate(lastSlice.StartDate);
-            source[task.TaskId].Remove(source[task.TaskId].Last());
-            source[task.TaskId].Add(lastSlice);
-            source[task.TaskId].Sort();
-            timeSliceProvider.OverWriteToDataSourceByDate(lastSlice.StartDate, source);
-            UpdateEndTaskTime(task.TaskId, source[task.TaskId].Last().EndDateTime);
+            var originRoot = rootDataProvider.GetRootData();
+            var tasks = originRoot.GetTaskAndChildSufTasksById(taskId);
+            foreach (var task in tasks)
+            {
+                var originDatas = GetTaskTimeSlices(task).ToList();
+                originDatas.Sort();
+                if (!(originDatas.Last().Clone() is CNTimeSlice lastSlice) || lastSlice.EndDateTime != null) return;
+                lastSlice.EndDateTime = endTime;
+                var source = timeSliceProvider.GetOriginalDataByDate(lastSlice.StartDate);
+                source[task.TaskId].Remove(source[task.TaskId].Last());
+                source[task.TaskId].Add(lastSlice);
+                source[task.TaskId].Sort();
+                timeSliceProvider.OverWriteToDataSourceByDate(lastSlice.StartDate, source);
+                UpdateEndTaskTime(task.TaskId, source[task.TaskId].Last().EndDateTime);
+            }
+        }
+
+        public void DeleteAllTimeSlices(int taskId)
+        {
+            var originRoot = rootDataProvider.GetRootData();
+            var tasks = originRoot.GetTaskAndChildSufTasksById(taskId);
+            foreach (var task in tasks)
+            {
+                var originDatas = GetTaskTimeSlices(task).ToList();
+                var dates = originDatas.Select(x => x.StartDate).Distinct();
+                foreach (var date in dates)
+                {
+                    var source = timeSliceProvider.GetOriginalDataByDate(date);
+                    source.Remove(task.TaskId);
+                    timeSliceProvider.OverWriteToDataSourceByDate(date, source);
+                }
+            }
         }
 
         private void ExpandTaskTime(int taskid, DateTime? targetStartTime, DateTime? targetEndTime)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using CN_Model;
 using CN_Repository;
 
@@ -18,7 +17,7 @@ namespace CN_BLL
         }
         public TaskService(IRootDataProvider rootDataProvider)
         {
-            this.timeSliceService = new TimeSliceService(); ;
+            timeSliceService = new TimeSliceService(); 
             this.rootDataProvider = rootDataProvider;
         }
         public TaskService(ITimeSliceService timeSliceService, IRootDataProvider rootDataProvider)
@@ -61,7 +60,7 @@ namespace CN_BLL
             return true;
         }
 
-        public bool RecoverTask(int taskId)
+        public bool RecoverATask(int taskId)
         {
             var root = rootDataProvider.GetRootData();
             var targetTask = root.GetTaskById(taskId);
@@ -118,11 +117,11 @@ namespace CN_BLL
             }
             root.StopTask(taskId);
             rootDataProvider.Persistence(root);
-            timeSliceService.EndTimeSlice(targetTask,DateTime.Now);
+            timeSliceService.EndTimeSlice(targetTask.TaskId,DateTime.Now);
             return true;
         }
 
-        public bool RemoveTask(int taskId, bool force = false)
+        public bool RemoveATask(int taskId, bool force = false)
         {
             var root = rootDataProvider.GetRootData();
             var targetTask = root.GetTaskById(taskId);
@@ -142,6 +141,7 @@ namespace CN_BLL
             {
                 throw new TaskHasSufTasksException();
             }
+            timeSliceService.DeleteAllTimeSlices(taskId);
             root.RemoveTaskById(taskId);
             rootDataProvider.Persistence(root);
             return true;
@@ -165,7 +165,22 @@ namespace CN_BLL
             }
             root.EndTask(taskId);
             rootDataProvider.Persistence(root);
-            timeSliceService.EndTimeSlice(targetTask, DateTime.Now);
+            timeSliceService.EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            return true;
+        }
+
+        public bool FailATask(int taskId,string reason)
+        {
+            var root = rootDataProvider.GetRootData();
+            var targetTask = root.GetTaskById(taskId);
+            if (string.IsNullOrEmpty(targetTask?.Content))
+            {
+                throw new ArgumentException("TaskID does not exist!");
+            }
+            if (targetTask.IsFail) return true;
+            root.FailTaskByTaskId(taskId,reason);
+            rootDataProvider.Persistence(root);
+            timeSliceService.EndTimeSlice(targetTask.TaskId, DateTime.Now);
             return true;
         }
     }

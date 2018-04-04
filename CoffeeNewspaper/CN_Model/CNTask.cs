@@ -29,6 +29,8 @@ namespace CN_Model
                 Urgency == other.Urgency &&
                 Status == other.Status && 
                 IsDeleted == other.IsDeleted &&
+                   IsFail == other.IsFail &&
+                   string.Equals(FailReason, other.FailReason) &&
                 EstimatedDuration == other.EstimatedDuration &&
                 EndTime.Equals(other.EndTime) &&
                    DeadLine.Equals(other.DeadLine) &&
@@ -78,6 +80,8 @@ namespace CN_Model
                 hashCode = (hashCode * 397) ^ (int)Urgency;
                 hashCode = (hashCode * 397) ^ (int)Status;
                 hashCode = (hashCode * 397) ^ (IsDeleted ? 1 : 0);
+                hashCode = (hashCode * 397) ^ (IsFail ? 1 : 0);
+                hashCode = (hashCode * 397) ^ (FailReason != null ? FailReason.GetHashCode() : 0);
                 hashCode = (hashCode*397) ^ EstimatedDuration;
                 hashCode = (hashCode*397) ^ EndTime.GetHashCode();
                 hashCode = (hashCode * 397) ^ DeadLine.GetHashCode();
@@ -137,6 +141,8 @@ namespace CN_Model
 
         public CNTaskStatus Status { get; set; }
         public bool IsDeleted { get; set; }
+        public bool IsFail { get; set; }
+        public string FailReason { get; set; }
 
         public CNTask AddOrUpdateMemo(CNMemo newMemo)
         {

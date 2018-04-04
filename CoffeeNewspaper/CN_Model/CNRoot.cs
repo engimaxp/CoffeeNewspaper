@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace CN_Model
 {
@@ -45,6 +44,11 @@ namespace CN_Model
             return TaskList.FirstOrDefault(r=>r.TaskId == taskid)??new CNTask();
         }
 
+        /// <summary>
+        /// if no memo is found return new memo
+        /// </summary>
+        /// <param name="memoid"></param>
+        /// <returns></returns>
         public CNMemo GetMemoById(string memoid)
         {
             var globalMemo = MemoList.FirstOrDefault(r => r.MemoId.Equals(memoid));
@@ -154,8 +158,8 @@ namespace CN_Model
             if (targetTask == null) return;
             if (targetTask.PreTaskIds != null && targetTask.PreTaskIds.Count > 0)
             {
-                var notEndedPreTasks = targetTask.PreTaskIds.Where(x => !string.IsNullOrEmpty(this.GetTaskById(x).Content)
-                                                                        && this.GetTaskById(x).Status != CNTaskStatus.DONE).ToList();
+                var notEndedPreTasks = targetTask.PreTaskIds.Where(x => !string.IsNullOrEmpty(GetTaskById(x).Content)
+                                                                        && GetTaskById(x).Status != CNTaskStatus.DONE).ToList();
                 if (notEndedPreTasks.Count > 0)
                 {
                     throw new PreTaskNotEndedException(notEndedPreTasks.Select(x=>TaskList.First(r=>r.TaskId == x)).ToList(),targetTask);
@@ -243,6 +247,32 @@ namespace CN_Model
             //2 Remove current task
             TaskList.Remove(task);
             return ++count;
+        }
+
+        public void FailTaskByTaskId(int taskId,string reason)
+        {
+            var task = GetTaskById(taskId);
+            if (string.IsNullOrEmpty(task?.Content)) return;
+            task.Stop();
+            task.IsFail = true;
+            task.FailReason = reason;
+        }
+
+        public HashSet<CNTask> GetTaskAndChildSufTasksById(int taskId)
+        {
+            HashSet<CNTask> tasklist = new HashSet<CNTask>();
+            var task = GetTaskById(taskId);
+            if (string.IsNullOrEmpty(task?.Content)) return tasklist;
+            TaskList.Where(x => x.HasParentTask() && x.ParentTaskId == taskId).ToList().ForEach(x =>
+            {
+                GetTaskAndChildSufTasksById(x.TaskId).ToList().ForEach(r=> tasklist.Add(r));
+            });
+            TaskList.Where(x => x.PreTaskIds != null && x.PreTaskIds.Exists(r => r == taskId)).ToList().ForEach(x =>
+            {
+                GetTaskAndChildSufTasksById(x.TaskId).ToList().ForEach(r => tasklist.Add(r));
+            });
+            tasklist.Add(task);
+            return tasklist;
         }
     }
 }

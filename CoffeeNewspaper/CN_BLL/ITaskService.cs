@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using CN_Model;
+﻿using CN_Model;
 
 namespace CN_BLL
 {
@@ -12,14 +8,16 @@ namespace CN_BLL
 
         bool DeleteTask(int taskId, bool force = false);
 
-        bool RemoveTask(int taskId, bool force = false);
+        bool RemoveATask(int taskId, bool force = false);
 
-        bool RecoverTask(int taskId);
+        bool RecoverATask(int taskId);
 
         bool StartATask(int taskId);
 
         bool PauseATask(int taskId);
 
         bool FinishATask(int taskId);
+
+        bool FailATask(int taskId,string reason);
     }
 }

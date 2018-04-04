@@ -46,12 +46,12 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             TxtDB fileDb = new TxtDB(TimeSliceProvider.parentDirectoryName + "\\" + testslice.StartDate);
             fileDb.DumpFile();
 
-            tsProvider.OverWriteToDataSourceByDate(testslice.StartDate, new Dictionary<int, List<CNTimeSlice>>{{ 1, new List<CNTimeSlice>(){ testslice } }});
+            tsProvider.OverWriteToDataSourceByDate(testslice.StartDate, new Dictionary<int, List<CNTimeSlice>>{ [1]=new List<CNTimeSlice>(){ testslice } });
 
             var result = fileDb.ReadAll().Trim();//Write Operation Add a breakline
             Assert.IsFalse(string.IsNullOrEmpty(result));
 
-            Assert.AreEqual(result,JsonConvert.SerializeObject(new Dictionary<int, List<CNTimeSlice>> { { 1, new List<CNTimeSlice>() { testslice } } },Formatting.Indented));
+            Assert.AreEqual(result,JsonConvert.SerializeObject(new Dictionary<int, List<CNTimeSlice>> { [1]= new List<CNTimeSlice>() { testslice }  },Formatting.Indented));
             fileDb.DumpFile();
         }
 
@@ -64,11 +64,11 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             TxtDB fileDb = new TxtDB(TimeSliceProvider.parentDirectoryName + "\\" + testslice.StartDate);
             fileDb.DumpFile();
 
-            tsProvider.OverWriteToDataSourceByDate(testslice.StartDate, new Dictionary<int, List<CNTimeSlice>> { { 1, new List<CNTimeSlice>() { testslice } } });
+            tsProvider.OverWriteToDataSourceByDate(testslice.StartDate, new Dictionary<int, List<CNTimeSlice>> { [1]= new List<CNTimeSlice>() { testslice } } );
 
             var result = tsProvider.GetOriginalDataByDate(testslice.StartDate);
 
-            Assert.AreEqual(result, new Dictionary<int, List<CNTimeSlice>> { { 1, new List<CNTimeSlice>() { testslice } } });
+            Assert.AreEqual(result, new Dictionary<int, List<CNTimeSlice>> { [1] = new List<CNTimeSlice>() { testslice }  });
             fileDb.DumpFile();
         }
 

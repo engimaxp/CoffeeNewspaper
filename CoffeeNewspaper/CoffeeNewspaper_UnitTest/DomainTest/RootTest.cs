@@ -204,5 +204,26 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             Assert.IsFalse(root.TaskList.Contains(testTask));
         }
 
+        [Test]
+        public void GetTaskAndChildSufTasksById()
+        {
+            var root = DomainTestHelper.GetRandomRoot();
+            var testtask1 = DomainTestHelper.GetARandomTask(1);
+            var testtask2 = DomainTestHelper.GetARandomTask(2);
+            var testtask3 = DomainTestHelper.GetARandomTask(3);
+            var testtask4 = DomainTestHelper.GetARandomTask(4);
+            testtask2.ParentTaskId = testtask1.TaskId;
+            testtask3.ParentTaskId = testtask1.TaskId;
+            testtask4.ParentTaskId = testtask2.TaskId;
+            testtask4.PreTaskIds = new List<int>(){ testtask3.TaskId };
+            root.AddOrUpdateTask(testtask1);
+            root.AddOrUpdateTask(testtask2);
+            root.AddOrUpdateTask(testtask3);
+            root.AddOrUpdateTask(testtask4);
+            var result = root.GetTaskAndChildSufTasksById(1);
+
+            Assert.AreEqual(4,result.Count);
+            Assert.AreEqual(0,result.Except(new List<CNTask>(){testtask1, testtask2 , testtask3 , testtask4 }).Count());
+        }
     }
 }
