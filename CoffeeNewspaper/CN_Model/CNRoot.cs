@@ -44,6 +44,11 @@ namespace CN_Model
             return TaskList.FirstOrDefault(r=>r.TaskId == taskid)??new CNTask();
         }
 
+        /// <summary>
+        /// if no memo is found return new memo
+        /// </summary>
+        /// <param name="memoid"></param>
+        /// <returns></returns>
         public CNMemo GetMemoById(string memoid)
         {
             var globalMemo = MemoList.FirstOrDefault(r => r.MemoId.Equals(memoid));

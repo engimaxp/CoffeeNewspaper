@@ -706,11 +706,11 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             TaskService targetService = new TaskService(timeSliceService, rootDataProvider);
 
             //act
-            var exception = Assert.Throws<PreTaskNotEndedException>(() =>
+            Assert.Throws<PreTaskNotEndedException>(() =>
             {
                 var result = targetService.FinishATask(sufTask.TaskId);
                 Assert.IsFalse(result);
-            }).ToString();
+            });
             //assert
             rootDataProvider.DidNotReceive().Persistence(Arg.Any<CNRoot>());
             timeSliceService.DidNotReceive().EndTimeSlice(Arg.Any<int>(), Arg.Any<DateTime>());

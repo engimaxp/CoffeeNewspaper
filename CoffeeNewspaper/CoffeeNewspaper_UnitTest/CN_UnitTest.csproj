@@ -72,6 +72,7 @@
     <Compile Include="RepositoryTest\TimeSliceProviderTest.cs" />
     <Compile Include="DomainTest\TimeSliceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceTest\MemoServiceTest.cs" />
     <Compile Include="ServiceTest\TaskServiceTest.cs" />
     <Compile Include="ServiceTest\TimeSliceServiceTest.cs" />
     <Compile Include="TxtDBTest.cs" />
