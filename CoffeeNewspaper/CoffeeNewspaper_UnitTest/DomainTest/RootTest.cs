@@ -68,7 +68,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             var result = root.GetAllUniqueMemo().ToList();
             Assert.IsNotNull(result);
             Assert.AreEqual(3,result.Count());
-            Assert.AreEqual(new List<CNMemo>(){testMemo2,testMemo4}.Except(result).ToList().Count,0);
+            Assert.AreEqual(new List<CNMemo>(){testMemo2,testMemo4}.Except(result,CNMemo.CnMemoComparer).Count(),0);
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             root.AddOrUpdateTask(testTask2);
             root.AddOrUpdateTask(testTask3);
             root.AddOrUpdateTask(testTask4);
-            Assert.AreEqual(new List<CNTask>() { testTask2, testTask3 }.Except(root.GetAllRootTasks()).ToList().Count, 0);
+            Assert.AreEqual(new List<CNTask>() { testTask2, testTask3 }.Except(root.GetAllRootTasks(), CNTask.CnTaskComparer).ToList().Count, 0);
         }
 
         [Test]
@@ -97,7 +97,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             CNMemo testMemo2 = DomainTestHelper.GetARandomMemo("2");
             testTask1.AddOrUpdateMemo(testMemo1).AddOrUpdateMemo(testMemo2);
             root.AddOrUpdateTask(testTask1);
-            Assert.AreEqual( new List<CNMemo>() {testMemo2}.Except(root.GetTaskMemo(1)).ToList().Count , 0);
+            Assert.AreEqual( new List<CNMemo>() {testMemo2}.Except(root.GetTaskMemo(1),CNMemo.CnMemoComparer).ToList().Count , 0);
         }
 
         [Test]
@@ -121,7 +121,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             CNMemo testMemo5 = DomainTestHelper.GetARandomMemo("3");
             testMemo5.Content += searchcontent;
             root.AddOrUpdateGlobalMemo(testMemo5);
-            Assert.AreEqual(new List<CNMemo>() { testMemo2,testMemo5 }.Except(root.SearchMemoByContent(searchcontent)).ToList().Count, 0);
+            Assert.AreEqual(new List<CNMemo>() { testMemo2,testMemo5 }.Except(root.SearchMemoByContent(searchcontent),CNMemo.CnMemoComparer).ToList().Count, 0);
         }
 
         [Test]
@@ -223,7 +223,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             var result = root.GetTaskAndChildSufTasksById(1);
 
             Assert.AreEqual(4,result.Count);
-            Assert.AreEqual(0,result.Except(new List<CNTask>(){testtask1, testtask2 , testtask3 , testtask4 }).Count());
+            Assert.AreEqual(0,result.Except(new List<CNTask>(){testtask1, testtask2 , testtask3 , testtask4 },CNTask.CnTaskComparer).Count());
         }
     }
 }

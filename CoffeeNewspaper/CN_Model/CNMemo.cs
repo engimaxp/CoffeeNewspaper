@@ -1,30 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace CN_Model
 {
     public class CNMemo : IEquatable<CNMemo>,ICloneable
     {
-        public string MemoId { get; set; }
+        private sealed class CnMemoEqualityComparer : IEqualityComparer<CNMemo>
+        {
+            public bool Equals(CNMemo x, CNMemo y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return string.Equals(x.MemoId, y.MemoId) && string.Equals(x.Content, y.Content) && string.Equals(x.Title, y.Title) && ((x.Tags == null && y.Tags == x.Tags) ||
+                    (x.Tags != null && y.Tags != null && x.Tags.Count == y.Tags.Count &&
+                     !x.Tags.Except(y.Tags).Any()));
+            }
 
-        private string _content;
-        public string Content { get { if (_content == null) { _content = "memo content here"; }return _content; } set { _content = value; } }
+            public int GetHashCode(CNMemo obj)
+            {
+                return obj.ToString().GetHashCode();
+            }
+        }
+
+        public static IEqualityComparer<CNMemo> CnMemoComparer { get; } = new CnMemoEqualityComparer();
+
+        public CNMemo()
+        {
+            Tags = new List<string>();
+        }
+
+        public string MemoId { get; set; }
+        
+        public string Content { get; set; }
 
         public override string ToString()
         {
             return $"{nameof(MemoId)}: {MemoId}, {nameof(Title)}: {Title}";
         }
-
-        private string _title;
-        public string Title { get { if (_title == null) { _title = "NewTitle"; } return _title; } set { _title = value; } }
-        public string Tag { get; set; }
+        
+        public string Title { get; set; }
+        public List<string> Tags { get; set; }
         public bool Equals(CNMemo other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(MemoId, other.MemoId) && string.Equals(Content, other.Content) && string.Equals(Title, other.Title) && string.Equals(Tag, other.Tag);
+            return string.Equals(MemoId, other.MemoId) 
+                   && string.Equals(Content, other.Content) 
+                   && string.Equals(Title, other.Title) 
+                   && ((Tags == null && other.Tags == Tags) ||
+                    (Tags != null && other.Tags != null && Tags.Count == other.Tags.Count &&
+                     !Tags.Except(other.Tags).Any())) ;
         }
 
         public override bool Equals(object obj)
@@ -42,19 +70,21 @@ namespace CN_Model
                 var hashCode = (MemoId != null ? MemoId.GetHashCode() : 0);
                 hashCode = (hashCode*397) ^ (Content != null ? Content.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (Title != null ? Title.GetHashCode() : 0);
-                hashCode = (hashCode*397) ^ (Tag != null ? Tag.GetHashCode() : 0);
+                hashCode = (hashCode*397) ^ (Tags != null ? Tags.GetHashCode() : 0);
                 return hashCode;
             }
         }
 
         public object Clone()
         {
+            string[] tagarrays = new string[Tags.Count];
+            Tags.CopyTo(tagarrays);
             return new CNMemo()
             {
                 Content = string.Copy(Content),
                 Title = string.Copy(Title),
                 MemoId = MemoId,
-                Tag = string.Copy(Tag)
+                Tags = tagarrays.ToList()
             };
         }
     }

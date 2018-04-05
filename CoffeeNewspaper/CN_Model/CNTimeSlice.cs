@@ -7,6 +7,25 @@ namespace CN_Model
 {
     public class CNTimeSlice:IEquatable<CNTimeSlice>,ICloneable, IComparable<CNTimeSlice>
     {
+        private sealed class StartDateTimeEndDateTimeEqualityComparer : IEqualityComparer<CNTimeSlice>
+        {
+            public bool Equals(CNTimeSlice x, CNTimeSlice y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return x.StartDateTime.Equals(y.StartDateTime) && x.EndDateTime.Equals(y.EndDateTime);
+            }
+
+            public int GetHashCode(CNTimeSlice obj)
+            {
+                return obj.ToString().GetHashCode();
+            }
+        }
+
+        public static IEqualityComparer<CNTimeSlice> StartDateTimeEndDateTimeComparer { get; } = new StartDateTimeEndDateTimeEqualityComparer();
+
         /// <summary>
         /// must have start date to create a timeslice
         /// </summary>

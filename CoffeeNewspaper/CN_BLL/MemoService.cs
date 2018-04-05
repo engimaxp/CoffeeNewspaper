@@ -26,6 +26,12 @@ namespace CN_BLL
             var root = rootDataProvider.GetRootData();
             var task = root.GetTaskById(taskid);
             if (string.IsNullOrEmpty(task?.Content)) return string.Empty;
+
+            if (task.Tags != null && task.Tags.Count > 0)
+            {
+                memo.Tags = memo.Tags.Union(task.Tags).ToList();
+            }
+
             task.AddOrUpdateMemo(memo);
             root.AddOrUpdateTask(task);
             rootDataProvider.Persistence(root);

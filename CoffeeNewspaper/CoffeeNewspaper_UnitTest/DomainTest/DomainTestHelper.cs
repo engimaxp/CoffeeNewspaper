@@ -35,7 +35,7 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 MemoId = memoid,
                 Title = "NewMemo",
                 Content = "Start with writing tests!" + timestamp + Guid.NewGuid().ToString("N"),
-                Tag = ""
+                Tags = new List<string>() { "" }
             };
         }
         /// <summary>
