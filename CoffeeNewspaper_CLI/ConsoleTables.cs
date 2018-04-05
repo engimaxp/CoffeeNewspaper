@@ -75,7 +75,7 @@ namespace CoffeeNewspaper_CLI
 
                 // create the string format with padding
                 var format = Enumerable.Range(0, Columns.Count)
-                                 .Select(i => " | {" + i + ",-" + columnLengths[i] + "}")
+                                 .Select(i => " | {" + i + "," + columnLengths[i] + "}")
                                  .Aggregate((s, a) => s + a) + " |";
 
                 // find the longest formatted line

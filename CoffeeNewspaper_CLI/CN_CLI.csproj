@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleTables.cs" />
+    <Compile Include="Navigation\BaseView.cs" />
+    <Compile Include="Navigation\Nav.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
