@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Console = System.Console;
 
 namespace CoffeeNewspaper_CLI
 {
@@ -90,7 +92,6 @@ namespace CoffeeNewspaper_CLI
 
                 // create the divider
                 var divider = " " + string.Join("", Enumerable.Repeat("-", longestLine - 1)) + " ";
-
                 builder.AppendLine(divider);
                 builder.AppendLine(columnHeaders);
 
@@ -179,6 +180,32 @@ namespace CoffeeNewspaper_CLI
                 builder.AppendLine(dividerPlus);
 
                 return builder.ToString();
+            }
+
+            public void WriteAlternateColorTable(Color lineColor1, Color LineColor2)
+            {
+                // find the longest column by searching each row
+                var columnLengths = ColumnLengths();
+
+                // create the string format with padding
+                var format = Format(columnLengths, char.MinValue);
+
+                // find the longest formatted line
+                var columnHeaders = string.Format(format, Columns.ToArray());
+
+                // add each row
+                var results = Rows.Select(row => string.Format(format, row)).ToList();
+
+                // create the divider
+                var divider = Regex.Replace(columnHeaders, @"[^|]", "-");
+                
+                Colorful.Console.WriteLine(columnHeaders);
+                Colorful.Console.WriteLine(divider);
+                for (var index = 0; index < results.Count; index++)
+                {
+                    var row = results[index];
+                    Colorful.Console.WriteLine(row, index%2==0?lineColor1: LineColor2);
+                }
             }
 
             private string Format(List<int> columnLengths, char delimiter = '|')

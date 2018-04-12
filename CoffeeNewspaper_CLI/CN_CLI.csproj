@@ -11,6 +11,7 @@
     <AssemblyName>CoffeeNewspaper_CLI</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -21,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Colorful.Console, Version=1.2.6.0, Culture=neutral, processorArchitecture=MSIL">
@@ -45,14 +48,34 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArgumentParser.cs" />
+    <Compile Include="Command\SaveTaskCommand.cs" />
+    <Compile Include="Command\TagCommand.cs" />
+    <Compile Include="Command\TaskEditCommand.cs" />
+    <Compile Include="Command\TaskCommand.cs" />
+    <Compile Include="Command\BackCommand.cs" />
+    <Compile Include="Command\HelpCommand.cs" />
+    <Compile Include="Command\BaseCommand.cs" />
     <Compile Include="ConsoleTables.cs" />
-    <Compile Include="Navigation\BaseView.cs" />
-    <Compile Include="Navigation\Nav.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="State\BaseState.cs" />
+    <Compile Include="State\TaskEditState.cs" />
+    <Compile Include="State\StartState.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CoffeeNewspaper\CN_BLL\CN_Service.csproj">
+      <Project>{05792966-c231-42eb-97e0-186d1cec8195}</Project>
+      <Name>CN_Service</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CoffeeNewspaper\CN_Model\CN_Model.csproj">
+      <Project>{20808918-8ade-4814-99f2-38de9c82cc5f}</Project>
+      <Name>CN_Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

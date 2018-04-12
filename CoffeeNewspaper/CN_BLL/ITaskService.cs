@@ -1,4 +1,5 @@
-﻿using CN_Model;
+﻿using System.Collections.Generic;
+using CN_Model;
 
 namespace CN_BLL
 {
@@ -19,5 +20,11 @@ namespace CN_BLL
         bool FinishATask(int taskId);
 
         bool FailATask(int taskId,string reason);
+
+        bool EditATask(CNTask task);
+
+        List<CNTask> GetAllTasks();
+
+        CNTask GetTaskById(int taskId);
     }
 }

@@ -61,8 +61,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CLITest\CommandBaseTest.cs" />
-    <Compile Include="CLITest\TaskCommand.cs" />
+    <Compile Include="CLITest\ArgumentParserTest.cs" />
     <Compile Include="DomainTest\DomainTestHelper.cs" />
     <Compile Include="DomainTest\MemoTest.cs" />
     <Compile Include="DomainTest\RootTest.cs" />
@@ -86,6 +85,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\CoffeeNewspaper_CLI\CN_CLI.csproj">
+      <Project>{b41dc762-acae-46c4-857d-5601cc0c33c6}</Project>
+      <Name>CN_CLI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\SimpleTxtDB\SimpleTxtDB.csproj">
       <Project>{d8a75f43-5915-4e2c-b40d-2e472cf611d1}</Project>
       <Name>SimpleTxtDB</Name>

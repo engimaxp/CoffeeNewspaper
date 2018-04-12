@@ -170,7 +170,7 @@ namespace CN_Model
 
         public int GetNextTaskID()
         {
-            return TaskList.Max(x=>x.TaskId)+1;
+            return (TaskList == null || TaskList.Count == 0)?1: TaskList.Max(x=>x.TaskId)+1;
         }
 
         public bool HasChildTasks(int taskId)

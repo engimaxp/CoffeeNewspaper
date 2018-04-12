@@ -145,6 +145,7 @@ namespace SimpleTxtDB
         /// <param name="alltext"></param>
         public void OverWrite(string alltext)
         {
+            DumpFile();
             if (string.IsNullOrEmpty(alltext)) return;
             using (FileStream fs = new FileStream(dbfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
             {
