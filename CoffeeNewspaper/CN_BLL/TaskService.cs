@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CN_Model;
 using CN_Repository;
 
@@ -24,6 +25,27 @@ namespace CN_BLL
         {
             this.timeSliceService = timeSliceService;
             this.rootDataProvider = rootDataProvider;
+        }
+
+        public bool EditATask(CNTask task)
+        {
+            if (task.TaskId == 0) return false;
+            var root = rootDataProvider.GetRootData();
+            root.AddOrUpdateTask(task);
+            rootDataProvider.Persistence(root);
+            return true;
+        }
+
+        public List<CNTask> GetAllTasks()
+        {
+            var root = rootDataProvider.GetRootData();
+            return root.TaskList.ToList();
+        }
+
+        public CNTask GetTaskById(int taskId)
+        {
+            var root = rootDataProvider.GetRootData();
+            return root.GetTaskById(taskId);
         }
 
         public int CreateATask(CNTask task)
