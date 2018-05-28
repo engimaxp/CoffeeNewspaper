@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CoffeeNewspaper_CLI</RootNamespace>
     <AssemblyName>CoffeeNewspaper_CLI</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -71,10 +71,6 @@
     <ProjectReference Include="..\CoffeeNewspaper\CN_BLL\CN_Service.csproj">
       <Project>{05792966-c231-42eb-97e0-186d1cec8195}</Project>
       <Name>CN_Service</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CoffeeNewspaper\CN_Model\CN_Model.csproj">
-      <Project>{20808918-8ade-4814-99f2-38de9c82cc5f}</Project>
-      <Name>CN_Model</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

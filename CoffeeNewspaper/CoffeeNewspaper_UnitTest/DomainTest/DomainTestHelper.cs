@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CN_Model;
+using CN_Core;
 
 namespace CoffeeNewspaper_UnitTest.DomainTest
 {
     public static class DomainTestHelper
     {
-        public static CNTask GetARandomTask(int taskid)
+        public static CNTask GetARandomTask()
         {
             string timestamp = DateTime.Now.ToString("s");
             return new CNTask()
             {
-                TaskId = taskid,
                 Content = "Write A Program" + timestamp + Guid.NewGuid().ToString("N"),
                 CreateTime = DateTime.Now,
                 StartTime = null,
@@ -23,7 +18,6 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Urgency = CNUrgency.High,
                 Status = CNTaskStatus.TODO,
                 EstimatedDuration = 3600,
-                Tags = new List<string>() {"Work"},
             };
         }
 
@@ -35,18 +29,16 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 MemoId = memoid,
                 Title = "NewMemo",
                 Content = "Start with writing tests!" + timestamp + Guid.NewGuid().ToString("N"),
-                Tags = new List<string>() { "" }
             };
         }
-        /// <summary>
-        /// contain a task which id is 1
-        /// </summary>
-        /// <returns></returns>
-        public static CNRoot GetRandomRoot()
+
+        public static CNTag GetARandomTag()
         {
-            CNRoot root = new CNRoot();
-            root.AddOrUpdateTask(GetARandomTask(1));
-            return root;
+            string timestamp = DateTime.Now.ToString("s");
+            return new CNTag()
+            {
+                Title = $"randomtag{timestamp}"
+            };
         }
     }
 }

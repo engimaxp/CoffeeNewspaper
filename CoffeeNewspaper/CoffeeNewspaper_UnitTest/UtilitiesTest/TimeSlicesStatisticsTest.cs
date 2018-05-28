@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using CN_Model;
+using CN_Core;
 using NUnit.Framework;
 
 namespace CoffeeNewspaper_UnitTest.UtilitiesTest

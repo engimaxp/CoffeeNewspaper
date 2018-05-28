@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CN_Model;
+using CN_Core;
 using NUnit.Framework;
 
 namespace CoffeeNewspaper_UnitTest.DomainTest
