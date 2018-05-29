@@ -1,4 +1,5 @@
 ﻿using CN_Core;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace CN_Repository
@@ -10,6 +11,9 @@ namespace CN_Repository
         /// TODO:May change the config to configfile
         /// </summary>
         public const string dbfilename = "testing.db";
+
+        public bool InMemoryMode { get; set; } = false;
+        
         #region DbSets 
 
         public DbSet<CNTag> Tags { get; set; }
@@ -21,11 +25,39 @@ namespace CN_Repository
         public DbSet<CNTaskTagger> TaskTaggers { get; set; }
         public DbSet<CNTaskMemo> TaskMemos { get; set; }
 
+
         #endregion
 
         #region Constructor
 
-        public CNDbContext(DbContextOptions<CNDbContext> options) : base(options)
+        /// <summary>
+        /// Get a File Sqlite Database context
+        /// </summary>
+        /// <returns></returns>
+        public static CNDbContext GetFileSqlDatabase()
+        {
+            var builder = new DbContextOptionsBuilder<CNDbContext>();
+            builder.UseSqlite($"Data Source={dbfilename}");
+            DbContextOptions<CNDbContext> options = builder.Options;
+            return new CNDbContext(options);
+        }
+        /// <summary>
+        /// Get a In-Memory Sqlite Database context
+        /// </summary>
+        /// <returns></returns>
+        public static CNDbContext GetMemorySqlDatabase()
+        {
+            var connectionStringBuilder =
+                new SqliteConnectionStringBuilder { DataSource = ":memory:" };
+            var connectionString = connectionStringBuilder.ToString();
+            var connection = new SqliteConnection(connectionString);
+            var builder = new DbContextOptionsBuilder<CNDbContext>();
+            builder.UseSqlite(connection);
+            DbContextOptions<CNDbContext> options = builder.Options;
+            return new CNDbContext(options);
+        }
+
+        private CNDbContext(DbContextOptions<CNDbContext> options) : base(options)
         {
 
         }
@@ -36,7 +68,6 @@ namespace CN_Repository
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite($"Data Source={dbfilename}");
         }
         #endregion
 

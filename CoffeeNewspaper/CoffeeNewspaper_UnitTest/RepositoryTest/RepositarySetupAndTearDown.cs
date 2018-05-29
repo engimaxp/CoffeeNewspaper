@@ -1,46 +1,31 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
-using CN_Core;
-using CN_Core.IoC;
 using CN_Repository;
-using NUnit.Framework;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoffeeNewspaper_UnitTest.RepositoryTest
 {
     public class RepositarySetupAndTearDown
     {
-        [SetUp]
-        public void Setup()
+        /// <summary>
+        ///     derivative class use this function to to use the database link
+        /// </summary>
+        /// <param name="function"></param>
+        /// <returns></returns>
+        public async Task UseMemoryContextRun(Func<CNDbContext, Task> function)
         {
-            //Bind the Ioc
-            IoC.Kernel.BindCNDBContext();
-
-            // Ensure the Database is Created
-            var task = Task.Run(async () =>
+            //In-Memory sqlite db will vanish per connection
+            using (var context = CNDbContext.GetMemorySqlDatabase())
             {
-                try
-                {
-                    var dbContext = IoC.Get<CNDbContext>();
-                    return await dbContext.Database.EnsureCreatedAsync();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
-            });
-            task.Wait();
-        }
+                if (context == null) return;
+                context.Database.OpenConnection();
+                context.Database.EnsureCreated();
 
-        [TearDown]
-        public void TearDown()
-        {
-            //Unbind the Ioc
-//            IoC.Kernel.UnBindCNDBContext();
+                //Do that task
+                await function.Invoke(context);
 
-            //Delete the databaase file
-//            FileHelper.DumpFile(CNDbContext.dbfilename);
+                context.Database.CloseConnection();
+            }
         }
     }
 }
