@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CN_BLL;
+using CN_Service;
 using CN_Model;
 using CN_Repository;
 using CoffeeNewspaper_UnitTest.DomainTest;
