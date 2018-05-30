@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CN_Core.IoC.Interfaces.Repository
+namespace CN_Core.Interfaces.Repository
 {
     public interface IMemoDataStore
     {

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace CN_Core.IoC.Interfaces.Repository
+namespace CN_Core.Interfaces.Repository
 {
     public interface ITimeSliceDataStore
     {

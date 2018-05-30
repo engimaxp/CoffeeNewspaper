@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
-using CN_Core.IoC.Interfaces.Repository;
+using CN_Core.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace CN_Repository

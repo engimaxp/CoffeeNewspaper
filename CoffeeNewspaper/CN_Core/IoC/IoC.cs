@@ -1,6 +1,8 @@
-﻿using Ninject;
+﻿using CN_Core.Interfaces;
+using CN_Core.Logging;
+using Ninject;
 
-namespace CN_Core.IoC
+namespace CN_Core
 {
     /// <summary>
     ///     The IoC container for our application
@@ -13,6 +15,21 @@ namespace CN_Core.IoC
         ///     The kernel for our IoC container
         /// </summary>
         public static IKernel Kernel { get; } = new StandardKernel();
+
+        /// <summary>
+        ///     A shortcut to access the <see cref="ILogFactory" />
+        /// </summary>
+        public static ILogFactory Logger => Get<ILogFactory>();
+
+        /// <summary>
+        ///     A shortcut to access the <see cref="IFileManager" />
+        /// </summary>
+        public static IFileManager File => Get<IFileManager>();
+
+        /// <summary>
+        ///     A shortcut to access the <see cref="ITaskManager" />
+        /// </summary>
+        public static ITaskManager Task => Get<ITaskManager>();
 
         #endregion
 
@@ -44,6 +61,10 @@ namespace CN_Core.IoC
         /// </summary>
         private static void BindViewModels()
         {
+            // Add our file logger factory
+            Kernel.Bind<ILogFactory>().ToConstant(new BaseLogFactory());
+            // Add our task manager
+            Kernel.Bind<ITaskManager>().ToConstant(new TaskManager());
         }
 
         #endregion

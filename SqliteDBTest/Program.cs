@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
-using CN_Core.IoC;
 using CN_Repository;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,4 +1,5 @@
-﻿using Ninject;
+﻿using CN_Core.Interfaces.Service;
+using Ninject;
 
 namespace CN_Service
 {

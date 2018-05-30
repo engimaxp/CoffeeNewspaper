@@ -161,8 +161,8 @@
     <Compile Include="DomainTest\DomainTestHelper.cs" />
     <Compile Include="DomainTest\TaskTest.cs" />
     <Compile Include="DomainTest\TimeSliceTest.cs" />
-    <Compile Include="RepositoryTest\RepositarySetupAndTearDown.cs" />
-    <Compile Include="RepositoryTest\TaskDataStoreTest.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\RepositarySetupAndTearDown.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\TaskDataStoreTest.cs" />
     <Compile Include="UtilitiesTest\TimeSlicesStatisticsTest.cs" />
   </ItemGroup>
   <ItemGroup>

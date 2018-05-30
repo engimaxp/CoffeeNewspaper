@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using CN_Core;
 
-namespace CN_Service
+namespace CN_Core.Interfaces.Service
 {
     public interface IMemoService
     {
