@@ -59,8 +59,8 @@ namespace CN_Core.Logging
         public BaseLogFactory(ILogger[] loggers = null)
         {
             // Add console logger
-            AddLogger(new FileLogger("log.txt"));
-
+            //            AddLogger(new FileLogger("log.txt"));
+            AddLogger(new ConsoleLogger());
             // Add any others passed in
             if (loggers != null)
                 foreach (var logger in loggers)

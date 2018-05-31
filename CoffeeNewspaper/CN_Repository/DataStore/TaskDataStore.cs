@@ -21,7 +21,7 @@ namespace CN_Repository
                 {
                     mDbContext.Tasks.Remove(targetTask);
                     return await mDbContext.SaveChangesAsync() > 0;
-                });
+                }, exceptionDefaultResult: false);
         }
 
         #endregion

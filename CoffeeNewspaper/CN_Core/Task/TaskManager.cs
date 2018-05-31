@@ -31,6 +31,24 @@ namespace CN_Core
             }
         }
 
+        public async Task<TResult> Run<TResult>(Func<Task<TResult>> function, TResult exceptionDefaultResult, string origin = "", string filePath = "",
+            int lineNumber = 0)
+        {
+            try
+            {
+                // Try and run the task
+                return await Task.Run(function);
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                LogError(ex, origin, filePath, lineNumber);
+
+                // Throw it as normal
+                return exceptionDefaultResult;
+            }
+        }
+
         public async Task<TResult> Run<TResult>(Func<Task<TResult>> function, CancellationToken cancellationToken, [CallerMemberName]string origin = "", [CallerFilePath]string filePath = "", [CallerLineNumber]int lineNumber = 0)
         {
             try

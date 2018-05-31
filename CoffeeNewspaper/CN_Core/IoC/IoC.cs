@@ -65,6 +65,8 @@ namespace CN_Core
             Kernel.Bind<ILogFactory>().ToConstant(new BaseLogFactory());
             // Add our task manager
             Kernel.Bind<ITaskManager>().ToConstant(new TaskManager());
+
+            Kernel.Bind<IFileManager>().ToConstant(new FileManager());
         }
 
         #endregion

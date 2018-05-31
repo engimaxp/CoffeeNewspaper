@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using CN_Core;
 using CN_Repository;
 using CoffeeNewspaper_UnitTest.DomainTest;
@@ -14,9 +15,9 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
     public class TaskDataStoreTest : RepositarySetupAndTearDown
     {
         [Test]
-        public void AddTask_QueryAllTask_QuerySpecifiedTask_AllPass()
+        public async Task AddTask_QueryAllTask_QuerySpecifiedTask_AllPass()
         {
-            var task = UseMemoryContextRun(async dbcontext =>
+            await  UseMemoryContextRun(async dbcontext =>
             {
                 //Arrange argument to be tested
                 var assesTask = DomainTestHelper.GetARandomTask();
@@ -37,26 +38,24 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 //assert it
                 Assert.AreEqual(tasks.FirstOrDefault(), assesTask);
             });
-            task.Wait();
         }
 
         [Test]
-        public void QuerySpecifiedTaskDoesntExist_ReturnNull()
+        public async Task QuerySpecifiedTaskDoesntExist_ReturnNull()
         {
-            var task = UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async dbcontext =>
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var firstTask = await taskDataStore.GetTask(1);
 
                 Assert.IsNull(firstTask);
             });
-            task.Wait();
         }
 
         [Test]
-        public void DeleteATask_Success()
+        public async Task DeleteATask_Success()
         {
-            var task = UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async dbcontext =>
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var assesTask = DomainTestHelper.GetARandomTask();
@@ -69,13 +68,12 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var afterDeleteResult = await taskDataStore.GetTask(addedTask.TaskId);
                 Assert.IsNull(afterDeleteResult);
             });
-            task.Wait();
         }
 
         [Test]
-        public void DeleteATask_Fail()
+        public async Task DeleteATask_Fail()
         {
-            var task = UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async dbcontext =>
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var assesTask = DomainTestHelper.GetARandomTask();
@@ -83,13 +81,12 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var beforeDeleteResult = await taskDataStore.RemoveTask(assesTask);
                 Assert.IsFalse(beforeDeleteResult);
             });
-            task.Wait();
         }
 
         [Test]
-        public void UpdateTask()
+        public async Task UpdateTask()
         {
-            var task = UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async dbcontext =>
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 CNTask assesTask = DomainTestHelper.GetARandomTask();
@@ -106,7 +103,6 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var selectedTask = await taskDataStore.GetTask(addedTask.TaskId);
                 Assert.AreEqual(selectedTask, addedTask);
             });
-            task.Wait();
         }
     }
 }

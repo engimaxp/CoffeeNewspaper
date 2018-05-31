@@ -10,7 +10,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
     [TestFixture]
     public class RepositarySetupAndTearDown
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void IntegretestSetup()
         {
             IoC.Setup();
