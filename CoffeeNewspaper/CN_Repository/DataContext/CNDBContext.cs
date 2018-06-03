@@ -165,12 +165,12 @@ namespace CN_Repository
             modelBuilder.Entity<CNTaskConnector>().Property(x => x.TaskConnectorId).HasColumnType("VARCHAR");
             modelBuilder.Entity<CNTaskConnector>().Property(x => x.TaskConnectorId).ValueGeneratedOnAdd();
             modelBuilder.Entity<CNTaskConnector>().HasOne(x => x.PreTask)
-                .WithMany(y => y.PreTaskConnectors)
+                .WithMany(y => y.SufTaskConnectors)
                 .HasForeignKey(z => z.PreTaskId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<CNTaskConnector>().HasOne(x => x.SufTask)
-                .WithMany(y => y.SufTaskConnectors)
+                .WithMany(y => y.PreTaskConnectors)
                 .HasForeignKey(z => z.SufTaskId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);

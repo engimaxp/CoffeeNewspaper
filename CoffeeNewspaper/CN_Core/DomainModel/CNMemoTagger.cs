@@ -18,5 +18,12 @@
         public CNMemo Memo { get; set; }
 
         #endregion
+        #region Formatting implement
+
+        public override string ToString()
+        {
+            return $"{nameof(TagId)}: {TagId}, {nameof(MemoId)}: {MemoId}";
+        } 
+        #endregion
     }
 }

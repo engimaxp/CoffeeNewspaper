@@ -82,12 +82,14 @@ namespace CN_Core
         /// <summary>
         ///     the tasks memos relation entites
         /// </summary>
-        public virtual ICollection<CNTaskMemo> TaskMemos { get; set; } = new List<CNTaskMemo>();
+        public virtual ICollection<CNTaskMemo> TaskMemos { get; set; } =
+            new HashSet<CNTaskMemo>();
 
         /// <summary>
         ///     Tags of this task
         /// </summary>
-        public virtual ICollection<CNTaskTagger> TaskTaggers { get; set; } = new List<CNTaskTagger>();
+        public virtual ICollection<CNTaskTagger> TaskTaggers { get; set; } =
+            new HashSet<CNTaskTagger>();
 
         /// <summary>
         ///     ParentTaskId
@@ -104,27 +106,31 @@ namespace CN_Core
         ///     PreTasks of this task
         ///     one task may have many pretasks , only when these tasks is done when this task can start
         /// </summary>
-        public virtual ICollection<CNTaskConnector> PreTaskConnectors { get; set; } = new List<CNTaskConnector>();
+        public virtual ICollection<CNTaskConnector> PreTaskConnectors { get; set; } =
+            new List<CNTaskConnector>();
+        
 
         /// <summary>
         ///     SufTasks of this task
         ///     one task may have many Suftasks , only this task is done when these tasks can start
         /// </summary>
-        public virtual ICollection<CNTaskConnector> SufTaskConnectors { get; set; } = new List<CNTaskConnector>();
-
+        public virtual ICollection<CNTaskConnector> SufTaskConnectors { get; set; } =
+            new List<CNTaskConnector>();
+        
         /// <summary>
         ///     ChildTasks of this task
         /// </summary>
-        public virtual ICollection<CNTask> ChildTasks { get; set; } = new List<CNTask>();
+        public virtual ICollection<CNTask> ChildTasks { get; set; } = new HashSet<CNTask>();
 
         /// <summary>
         ///     The timeslices this task has used
         /// </summary>
-        public virtual ICollection<CNTimeSlice> UsedTimeSlices { get; set; } = new List<CNTimeSlice>();
+        public virtual ICollection<CNTimeSlice> UsedTimeSlices { get; set; } = new HashSet<CNTimeSlice>(CNTimeSlice.StartDateTimeEndDateTimeComparer);
 
         #endregion
 
         #region Interface Implementation
+        
 
         #region Formatting implement
 

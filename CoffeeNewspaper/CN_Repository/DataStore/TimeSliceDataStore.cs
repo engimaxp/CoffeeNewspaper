@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
@@ -17,9 +18,13 @@ namespace CN_Repository
 
         public async Task<CNTimeSlice> AddTimeSlice(CNTimeSlice timeSlice)
         {
-            mDbContext.TimeSlices.Add(timeSlice);
-            await mDbContext.SaveChangesAsync();
-            return timeSlice;
+            return await IoC.Task.Run(
+                async () =>
+                {
+                    mDbContext.TimeSlices.Add(timeSlice);
+                    await mDbContext.SaveChangesAsync();
+                    return timeSlice;
+                },(CNTimeSlice)null);
         }
 
         #endregion
@@ -28,8 +33,12 @@ namespace CN_Repository
 
         public async Task<bool> UpdateTimeSlice(CNTimeSlice lastSlice)
         {
-            mDbContext.TimeSlices.Update(lastSlice);
-            return await mDbContext.SaveChangesAsync() > 0;
+            return await IoC.Task.Run(
+                async () =>
+                {
+                    mDbContext.TimeSlices.Update(lastSlice);
+                    return await mDbContext.SaveChangesAsync() > 0;
+                }, false);
         }
 
         #endregion
@@ -38,8 +47,18 @@ namespace CN_Repository
 
         public async Task<CNTimeSlice> GetTimeSliceById(string timeSliceTimeSliceId)
         {
-            return await mDbContext.TimeSlices.FirstOrDefaultAsync(r =>
-                string.Equals(r.TimeSliceId, timeSliceTimeSliceId, StringComparison.Ordinal));
+            return await IoC.Task.Run(
+                async () =>
+                {
+                    return await mDbContext.TimeSlices.FirstOrDefaultAsync(r =>
+                        string.Equals(r.TimeSliceId, timeSliceTimeSliceId, StringComparison.Ordinal));
+                });
+        }
+
+        public async Task<ICollection<CNTimeSlice>> GetTimeSliceByTaskID(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () => { return await mDbContext.TimeSlices.Where(r => r.TaskId == taskid).ToListAsync(); });
         }
 
         #endregion
@@ -48,14 +67,23 @@ namespace CN_Repository
 
         public async Task<bool> DeleteTimeSlice(CNTimeSlice originSlice)
         {
-            mDbContext.TimeSlices.Remove(originSlice);
-            return await mDbContext.SaveChangesAsync() > 0;
+            return await IoC.Task.Run(
+                async () =>
+                {
+                    mDbContext.TimeSlices.Remove(originSlice);
+                    return await mDbContext.SaveChangesAsync() > 0;
+                }, false
+            );
         }
 
         public async Task<bool> DeleteTimeSliceByTask(int taskid)
         {
-            mDbContext.TimeSlices.RemoveRange(mDbContext.TimeSlices.Where(r => r.TaskId == taskid));
-            return await mDbContext.SaveChangesAsync() > 0;
+            return await IoC.Task.Run(
+                async () =>
+                {
+                    mDbContext.TimeSlices.RemoveRange(mDbContext.TimeSlices.Where(r => r.TaskId == taskid));
+                    return await mDbContext.SaveChangesAsync() > 0;
+                }, false);
         }
 
         #endregion

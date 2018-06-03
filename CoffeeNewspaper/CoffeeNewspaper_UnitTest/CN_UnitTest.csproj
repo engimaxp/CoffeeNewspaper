@@ -161,7 +161,15 @@
     <Compile Include="DomainTest\DomainTestHelper.cs" />
     <Compile Include="DomainTest\TaskTest.cs" />
     <Compile Include="DomainTest\TimeSliceTest.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\RelationTest\MemoTagRelationTest.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\RelationTest\TaskConnectorRelationTest.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\RelationTest\ParentTaskChildTaskRelationTest.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\RelationTest\TaskTimeSliceRelationTest.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\RelationTest\TaskTagRelationTest.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\RelationTest\TaskMemoRelationTest.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\TimeSliceDataStoreTest.cs" />
     <Compile Include="IntegrationTest\RepositoryTest\RepositarySetupAndTearDown.cs" />
+    <Compile Include="IntegrationTest\RepositoryTest\MemoDataStoreTest.cs" />
     <Compile Include="IntegrationTest\RepositoryTest\TaskDataStoreTest.cs" />
     <Compile Include="UtilitiesTest\TimeSlicesStatisticsTest.cs" />
   </ItemGroup>

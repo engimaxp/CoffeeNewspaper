@@ -40,12 +40,12 @@ namespace CN_Core
         /// <summary>
         ///     Tasks appended by this memo
         /// </summary>
-        public virtual ICollection<CNTaskMemo> TaskMemos { get; set; } = new List<CNTaskMemo>();
+        public virtual ICollection<CNTaskMemo> TaskMemos { get; set; } = new HashSet<CNTaskMemo>();
 
         /// <summary>
         ///     Tags of this Memo
         /// </summary>
-        public virtual ICollection<CNMemoTagger> MemoTaggers { get; set; } = new List<CNMemoTagger>();
+        public virtual ICollection<CNMemoTagger> MemoTaggers { get; set; } = new HashSet<CNMemoTagger>();
 
         #endregion
     }

@@ -62,11 +62,14 @@ namespace CN_Core
         private static void BindViewModels()
         {
             // Add our file logger factory
+            if(Kernel.TryGet<ILogFactory>()==null)
             Kernel.Bind<ILogFactory>().ToConstant(new BaseLogFactory());
             // Add our task manager
-            Kernel.Bind<ITaskManager>().ToConstant(new TaskManager());
+            if (Kernel.TryGet<ITaskManager>() == null)
+                Kernel.Bind<ITaskManager>().ToConstant(new TaskManager());
 
-            Kernel.Bind<IFileManager>().ToConstant(new FileManager());
+            if (Kernel.TryGet<IFileManager>() == null)
+                Kernel.Bind<IFileManager>().ToConstant(new FileManager());
         }
 
         #endregion

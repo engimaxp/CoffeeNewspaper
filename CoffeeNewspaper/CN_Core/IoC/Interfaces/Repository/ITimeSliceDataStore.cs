@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CN_Core.Interfaces.Repository
 {
@@ -24,6 +25,12 @@ namespace CN_Core.Interfaces.Repository
         /// <returns></returns>
         Task<CNTimeSlice> GetTimeSliceById(string timeSliceTimeSliceId);
 
+        /// <summary>
+        /// Get a task's timeslice list
+        /// </summary>
+        /// <param name="taskid"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTimeSlice>> GetTimeSliceByTaskID(int taskid);
         #endregion
 
         #region Update Methods

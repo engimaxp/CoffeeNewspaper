@@ -56,7 +56,7 @@ namespace CN_Core
         public static int GetWorkDays(this IEnumerable<CNTimeSlice> timeSlices)
         {
             //store the maximum day periods
-            var days = new HashSet<CNTimeSlice>();
+            var days = new HashSet<CNTimeSlice>(CNTimeSlice.StartDateTimeEndDateTimeComparer);
             foreach (var timeSlice in timeSlices)
             {
                 //Get encounted maximum day period

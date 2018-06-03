@@ -36,7 +36,7 @@ namespace CN_Repository
                     mDbContext.Tasks.Add(targetTask);
                     await mDbContext.SaveChangesAsync();
                     return targetTask;
-                });
+                },(CNTask)null);
         }
 
         #endregion
@@ -50,7 +50,7 @@ namespace CN_Repository
                 {
                     mDbContext.Tasks.Update(targetTask);
                     return await mDbContext.SaveChangesAsync() > 0;
-                });
+                }, exceptionDefaultResult: false);
         }
 
         #endregion

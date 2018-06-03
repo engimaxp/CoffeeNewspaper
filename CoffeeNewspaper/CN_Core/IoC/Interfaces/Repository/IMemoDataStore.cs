@@ -34,7 +34,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="memoid"></param>
         /// <returns></returns>
-        Task<CNMemo> SelectMemoById(string memoid);
+        Task<CNMemo> GetMemoById(string memoid);
 
         /// <summary>
         ///     Get all memos with no task append to them
@@ -62,10 +62,11 @@ namespace CN_Core.Interfaces.Repository
 
         /// <summary>
         ///     Deep copy of this memo
+        ///     the origin Memo Must Exist in db
         /// </summary>
-        /// <param name="originMemo">origin Memo being cloned</param>
+        /// <param name="memoid">origin Memo's id</param>
         /// <returns>cloned Memo</returns>
-        Task<CNMemo> CloneAMemo(CNMemo originMemo);
+        Task<CNMemo> CloneAMemo(string memoid);
 
         #endregion
     }

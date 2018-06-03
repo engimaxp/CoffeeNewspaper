@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using CN_Core;
 using CN_Repository;
 using CoffeeNewspaper_UnitTest.DomainTest;
 using NUnit.Framework;
@@ -17,7 +16,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task AddTask_QueryAllTask_QuerySpecifiedTask_AllPass()
         {
-            await  UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async dbcontext =>
             {
                 //Arrange argument to be tested
                 var assesTask = DomainTestHelper.GetARandomTask();
@@ -35,20 +34,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var firstTask = await taskDataStore.GetTask(tasks.First().TaskId);
 
                 Assert.AreEqual(tasks.First(), firstTask);
-                //assert it
                 Assert.AreEqual(tasks.FirstOrDefault(), assesTask);
-            });
-        }
-
-        [Test]
-        public async Task QuerySpecifiedTaskDoesntExist_ReturnNull()
-        {
-            await UseMemoryContextRun(async dbcontext =>
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var firstTask = await taskDataStore.GetTask(1);
-
-                Assert.IsNull(firstTask);
             });
         }
 
@@ -71,7 +57,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         }
 
         [Test]
-        public async Task DeleteATask_Fail()
+        public async Task DeleteATask_TaskIdNotExist_Fail()
         {
             await UseMemoryContextRun(async dbcontext =>
             {
@@ -84,24 +70,55 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         }
 
         [Test]
+        public async Task QuerySpecifiedTaskDoesntExist_ReturnNull()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var firstTask = await taskDataStore.GetTask(1);
+
+                Assert.IsNull(firstTask);
+            });
+        }
+
+        [Test]
         public async Task UpdateTask()
         {
             await UseMemoryContextRun(async dbcontext =>
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
-                CNTask assesTask = DomainTestHelper.GetARandomTask();
-                CNTask addedTask = await taskDataStore.AddTask(assesTask);
+                var assesTask = DomainTestHelper.GetARandomTask();
+                var addedTask = await taskDataStore.AddTask(assesTask);
 
                 //update the added task content,make sure its not equal to original task
                 addedTask.Content = "testing update";
 
                 //update to database ,make sure what ef return is equal to modified task
-                bool updatedResult = await taskDataStore.UpdateTask(addedTask);
+                var updatedResult = await taskDataStore.UpdateTask(addedTask);
 
                 Assert.IsTrue(updatedResult);
                 //select from db again ,make sure the task is updated
                 var selectedTask = await taskDataStore.GetTask(addedTask.TaskId);
                 Assert.AreEqual(selectedTask, addedTask);
+            });
+        }
+
+        [Test]
+        public async Task UpdateTask_TaskIdNotExist_Fail()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var assesTask = DomainTestHelper.GetARandomTask();
+                assesTask.TaskId = 1;
+
+                //update the added task content,make sure its not equal to original task
+                assesTask.Content = "testing update";
+
+                //update to database ,make sure what ef return is equal to modified task
+                var updatedResult = await taskDataStore.UpdateTask(assesTask);
+
+                Assert.False(updatedResult);
             });
         }
     }

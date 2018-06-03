@@ -55,14 +55,14 @@ namespace CN_Service
 
         public async Task<bool> DeleteAMemo(string memoId)
         {
-            var memo = await memoDataStore.SelectMemoById(memoId);
+            var memo = await memoDataStore.GetMemoById(memoId);
             if (memo == null) return false;
             return await memoDataStore.DeleteMemo(memo);
         }
 
         public async Task<bool> RemoveAMemoFromTask(string memoId, int taskId)
         {
-            var memo = await memoDataStore.SelectMemoById(memoId);
+            var memo = await memoDataStore.GetMemoById(memoId);
             var tobeRemovedRelations = memo.TaskMemos.Where(x => x.TaskId == taskId);
             tobeRemovedRelations.ToList().ForEach(x => memo.TaskMemos.Remove(x));
             return await memoDataStore.UpdateMemo(memo);
@@ -80,7 +80,7 @@ namespace CN_Service
 
         public async Task<CNMemo> GetMemoById(string memoId)
         {
-            return await memoDataStore.SelectMemoById(memoId);
+            return await memoDataStore.GetMemoById(memoId);
         }
     }
 }

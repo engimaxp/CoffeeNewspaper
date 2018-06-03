@@ -31,7 +31,13 @@ namespace CN_Core
                 throw new ArgumentException("A TimeSlice's EndTime Must Greater Than StartTime");
             EndDateTime = endDateTime;
         }
-
+        /// <summary>
+        /// EF requires a parameterless constructor be declared
+        /// </summary>
+        public CNTimeSlice()
+        {
+            
+        }
         #endregion
 
         #region Interface Implementation
@@ -75,6 +81,7 @@ namespace CN_Core
         #endregion
 
         #region Equality Implement
+        
 
         private sealed class StartDateTimeEndDateTimeEqualityComparer : IEqualityComparer<CNTimeSlice>
         {

@@ -13,6 +13,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [OneTimeSetUp]
         public void IntegretestSetup()
         {
+            //Bind the Basic Ioc Container once per run
             IoC.Setup();
         }
 

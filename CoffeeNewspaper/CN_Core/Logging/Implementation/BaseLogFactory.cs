@@ -60,7 +60,7 @@ namespace CN_Core.Logging
         {
             // Add console logger
             //            AddLogger(new FileLogger("log.txt"));
-            AddLogger(new ConsoleLogger());
+            AddLogger(new DebugLogger());
             // Add any others passed in
             if (loggers != null)
                 foreach (var logger in loggers)

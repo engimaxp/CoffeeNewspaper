@@ -1,4 +1,6 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+
 namespace CN_Core
 {
     /// <summary>
@@ -6,6 +8,8 @@ namespace CN_Core
     /// </summary>
     public class CNTaskConnector
     {
+        #region Public Properties
+
         /// <summary>
         ///     Id of this relation
         /// </summary>
@@ -16,5 +20,39 @@ namespace CN_Core
 
         public int SufTaskId { get; set; }
         public CNTask SufTask { get; set; }
+
+        #endregion
+
+        private sealed class PreTaskIdSufTaskIdEqualityComparer : IEqualityComparer<CNTaskConnector>
+        {
+            public bool Equals(CNTaskConnector x, CNTaskConnector y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return x.PreTaskId == y.PreTaskId && x.SufTaskId == y.SufTaskId;
+            }
+
+            public int GetHashCode(CNTaskConnector obj)
+            {
+                unchecked
+                {
+                    return (obj.PreTaskId * 397) ^ obj.SufTaskId;
+                }
+            }
+        }
+
+        public static IEqualityComparer<CNTaskConnector> PreTaskIdSufTaskIdComparer { get; } = new PreTaskIdSufTaskIdEqualityComparer();
+
+        #region Formatting Implement
+
+        public override string ToString()
+        {
+            return
+                $"{nameof(TaskConnectorId)}: {TaskConnectorId}, {nameof(PreTaskId)}: {PreTaskId}, {nameof(SufTaskId)}: {SufTaskId}";
+        }
+
+        #endregion
     }
 }

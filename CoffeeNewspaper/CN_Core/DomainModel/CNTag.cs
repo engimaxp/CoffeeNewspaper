@@ -20,12 +20,12 @@ namespace CN_Core
         /// <summary>
         ///     Task relations this tag has appended to
         /// </summary>
-        public virtual ICollection<CNTaskTagger> TaskTaggers { get; set; } = new List<CNTaskTagger>();
+        public virtual ICollection<CNTaskTagger> TaskTaggers { get; set; } = new HashSet<CNTaskTagger>();
 
         /// <summary>
         ///     Memo relations this tag has appended to
         /// </summary>
-        public virtual ICollection<CNMemoTagger> MemoTaggers { get; set; } = new List<CNMemoTagger>();
+        public virtual ICollection<CNMemoTagger> MemoTaggers { get; set; } = new HashSet<CNMemoTagger>();
 
         #endregion
 

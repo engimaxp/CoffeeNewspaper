@@ -1,4 +1,6 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+
 namespace CN_Core
 {
     /// <summary>
@@ -6,6 +8,17 @@ namespace CN_Core
     /// </summary>
     public class CNTaskMemo
     {
+        #region Formatting Implement
+
+        public override string ToString()
+        {
+            return $"{nameof(MemoId)}: {MemoId}, {nameof(TaskId)}: {TaskId}";
+        }
+
+        #endregion
+        
+        #region Public Properties
+
         /// <summary>
         ///     Id of this relation
         /// </summary>
@@ -15,5 +28,7 @@ namespace CN_Core
         public CNMemo Memo { get; set; }
         public int TaskId { get; set; }
         public CNTask Task { get; set; }
+
+        #endregion
     }
 }

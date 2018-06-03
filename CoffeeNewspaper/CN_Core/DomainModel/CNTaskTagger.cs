@@ -1,4 +1,6 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+
 namespace CN_Core
 {
     /// <summary>
@@ -6,6 +8,18 @@ namespace CN_Core
     /// </summary>
     public class CNTaskTagger
     {
+        #region Formatting Implement
+
+        public override string ToString()
+        {
+            return $"{nameof(TagId)}: {TagId}, {nameof(TaskId)}: {TaskId}";
+        }
+
+        #endregion
+        
+
+        #region Public Properties
+
         /// <summary>
         ///     Id of this relation
         /// </summary>
@@ -15,5 +29,8 @@ namespace CN_Core
         public CNTag Tag { get; set; }
         public int TaskId { get; set; }
         public CNTask Task { get; set; }
+
+        #endregion
+        
     }
 }

@@ -5,10 +5,14 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
 {
     public static class DomainTestHelper
     {
+        /// <summary>
+        ///     Get a random task
+        /// </summary>
+        /// <returns></returns>
         public static CNTask GetARandomTask()
         {
-            string timestamp = DateTime.Now.ToString("s");
-            return new CNTask()
+            var timestamp = DateTime.Now.ToString("s");
+            return new CNTask
             {
                 Content = "Write A Program" + timestamp + Guid.NewGuid().ToString("N"),
                 CreateTime = DateTime.Now,
@@ -17,28 +21,46 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Priority = CNPriority.High,
                 Urgency = CNUrgency.High,
                 Status = CNTaskStatus.TODO,
-                EstimatedDuration = 3600,
+                EstimatedDuration = 3600
             };
         }
 
-        public static CNMemo GetARandomMemo(string memoid)
+        /// <summary>
+        ///     Get a random memo
+        /// </summary>
+        /// <returns></returns>
+        public static CNMemo GetARandomMemo()
         {
-            string timestamp = DateTime.Now.ToString("s");
-            return new CNMemo()
+            var timestamp = DateTime.Now.ToString("s");
+            return new CNMemo
             {
-                MemoId = memoid,
+                MemoId = Guid.NewGuid().ToString("D"),
                 Title = "NewMemo",
-                Content = "Start with writing tests!" + timestamp + Guid.NewGuid().ToString("N"),
+                Content = "Start with writing tests!" + timestamp + Guid.NewGuid().ToString("N")
             };
         }
 
+        /// <summary>
+        ///     Get a random tag
+        /// </summary>
+        /// <returns></returns>
         public static CNTag GetARandomTag()
         {
-            string timestamp = DateTime.Now.ToString("s");
-            return new CNTag()
+            var timestamp = DateTime.Now.ToString("s");
+            return new CNTag
             {
-                Title = $"randomtag{timestamp}"
+                Title = $"randomtag{timestamp}{Guid.NewGuid():D}"
             };
+        }
+
+        /// <summary>
+        ///     Get a random timeslice
+        /// </summary>
+        /// <param name="EndTime"></param>
+        /// <returns></returns>
+        public static CNTimeSlice GetARandomTimeSlice(DateTime? EndTime = null)
+        {
+            return new CNTimeSlice(DateTime.Now, null);
         }
     }
 }
