@@ -135,6 +135,22 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         }
 
         [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineNotIntercept3()
+        {
+            var now = DateTime.Now;
+            var a = new CNTimeSlice(now.AddHours(1), now.AddHours(2));
+            var b = new CNTimeSlice(now.AddHours(3));
+            var c = new CNTimeSlice(now.AddHours(2), now.AddHours(3));
+
+            Assert.IsFalse(a.InterceptWith(b));
+            Assert.IsFalse(b.InterceptWith(a));
+            Assert.IsFalse(a.InterceptWith(c));
+            Assert.IsFalse(c.InterceptWith(a));
+            Assert.IsTrue(c.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(c));
+        }
+
+        [Test]
         public void GetDayDuration_SingleDay()
         {
             var currentTime = DateTime.Now;

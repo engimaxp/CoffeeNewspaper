@@ -23,6 +23,13 @@ namespace CN_Service
             if (memo == null) return string.Empty;
             var task = await taskDataStore.GetTask(taskid);
             if (task == null) return string.Empty;
+            //Add memo To Task
+            memo.TaskMemos.Add(new CNTaskMemo
+            {
+                Task = task,
+                Memo = memo
+            });
+            //if MemoId is Null add the Memo
             if (string.IsNullOrEmpty(memo.MemoId))
             {
                 var memo1 = memo;
@@ -31,20 +38,20 @@ namespace CN_Service
                     .ForEach(y => memo1.MemoTaggers.Add(new CNMemoTagger {Memo = memo1, Tag = y}));
                 memo = await memoDataStore.AddMemo(memo);
             }
+            //else Update it
             else
             {
                 if (!await memoDataStore.UpdateMemo(memo)) return string.Empty;
             }
-
-            await taskDataStore.UpdateTask(task);
-            return memo.MemoId;
+            
+            return memo?.MemoId;
         }
 
         public async Task<string> AddAMemoToGlobal(CNMemo memo)
         {
             if (memo == null) return string.Empty;
             memo = await memoDataStore.AddMemo(memo);
-            return memo.MemoId;
+            return memo?.MemoId;
         }
 
         public async Task<bool> UpdateAMemo(CNMemo memo)
@@ -62,8 +69,13 @@ namespace CN_Service
 
         public async Task<bool> RemoveAMemoFromTask(string memoId, int taskId)
         {
+            //Assert memo exist
             var memo = await memoDataStore.GetMemoById(memoId);
-            var tobeRemovedRelations = memo.TaskMemos.Where(x => x.TaskId == taskId);
+            if (memo == null) return false;
+            //Assert memo-task relation exist
+            var tobeRemovedRelations = memo.TaskMemos.Where(x => x.TaskId == taskId).ToList();
+            if(!tobeRemovedRelations.Any())return false;
+            //remove and update
             tobeRemovedRelations.ToList().ForEach(x => memo.TaskMemos.Remove(x));
             return await memoDataStore.UpdateMemo(memo);
         }

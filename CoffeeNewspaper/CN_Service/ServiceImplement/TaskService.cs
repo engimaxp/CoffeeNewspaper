@@ -10,14 +10,22 @@ namespace CN_Service
 {
     public class TaskService : ITaskService
     {
-        private readonly ITaskDataStore taskDataStore;
-        private readonly ITimeSliceDataStore timeSliceDataStore;
+        #region Construct
 
         public TaskService(ITimeSliceDataStore TimeSliceDataStore, ITaskDataStore TaskDataStore)
         {
             timeSliceDataStore = TimeSliceDataStore;
             taskDataStore = TaskDataStore;
         }
+
+        #endregion
+
+        #region Private Properties
+
+        private readonly ITaskDataStore taskDataStore;
+        private readonly ITimeSliceDataStore timeSliceDataStore;
+
+        #endregion
 
         #region Task relevent
 
@@ -45,7 +53,7 @@ namespace CN_Service
         public async Task<bool> DeleteTask(int taskId, bool force = false)
         {
             var targetTask = await taskDataStore.GetTask(taskId);
-            if (targetTask == null) throw new ArgumentException("TaskID does not exist!");
+            if (targetTask == null) return false;
             if (targetTask.IsDeleted) return true;
             if (targetTask.ChildTasks.Count > 0 && !force) throw new TaskHasChildTasksException();
             if (targetTask.SufTaskConnectors.Count > 0 && !force) throw new TaskHasSufTasksException();
@@ -62,7 +70,7 @@ namespace CN_Service
         public async Task<bool> RecoverATask(int taskId)
         {
             var targetTask = await taskDataStore.GetTask(taskId);
-            if (targetTask == null) throw new ArgumentException("TaskID does not exist!");
+            if (targetTask == null) return false; 
             if (!targetTask.IsDeleted) return true;
 
             //Recover the task itself
@@ -78,8 +86,8 @@ namespace CN_Service
         public async Task<bool> StartATask(int taskId)
         {
             var targetTask = await taskDataStore.GetTask(taskId);
-            if (targetTask == null) throw new ArgumentException("TaskID does not exist!");
-            if (targetTask.IsDeleted) throw new ArgumentException("Task is deleted");
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return false; 
             if (targetTask.Status != CNTaskStatus.TODO && targetTask.Status != CNTaskStatus.DONE)
                 throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.TODO, CNTaskStatus.DONE},
                     targetTask.Status);
@@ -95,8 +103,8 @@ namespace CN_Service
         public async Task<bool> PauseATask(int taskId)
         {
             var targetTask = await taskDataStore.GetTask(taskId);
-            if (targetTask == null) throw new ArgumentException("TaskID does not exist!");
-            if (targetTask.IsDeleted) throw new ArgumentException("Task is deleted");
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return false;
             if (targetTask.Status != CNTaskStatus.DOING)
                 throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.DOING}, targetTask.Status);
             targetTask.Status = CNTaskStatus.TODO;
@@ -109,10 +117,16 @@ namespace CN_Service
         public async Task<bool> RemoveATask(int taskId, bool force = false)
         {
             var targetTask = await taskDataStore.GetTask(taskId);
-            if (targetTask == null) throw new ArgumentException("TaskID does not exist!");
-            if (!targetTask.IsDeleted) throw new ArgumentException("Task is not deleted");
+            if (targetTask == null) return false;
+            if (!targetTask.IsDeleted) return false;
             if (targetTask.ChildTasks.Count > 0 && !force) throw new TaskHasChildTasksException();
             if (targetTask.SufTaskConnectors.Count > 0 && !force) throw new TaskHasSufTasksException();
+
+            //Remove the tasks children and suffix task
+            targetTask.ChildTasks.ToList()
+                .ForEach(x => Task.Run(async () => await RemoveATask(x.TaskId, force)));
+            targetTask.SufTaskConnectors.Select(y => y.SufTask).ToList()
+                .ForEach(x => Task.Run(async () => await RemoveATask(x.TaskId, force)));
 
             return await taskDataStore.RemoveTask(targetTask);
         }
@@ -120,8 +134,8 @@ namespace CN_Service
         public async Task<bool> FinishATask(int taskId)
         {
             var targetTask = await taskDataStore.GetTask(taskId);
-            if (targetTask == null) throw new ArgumentException("TaskID does not exist!");
-            if (targetTask.IsDeleted) throw new ArgumentException("Task is deleted");
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return false;
             if (targetTask.Status == CNTaskStatus.DONE)
                 throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.DOING, CNTaskStatus.TODO},
                     targetTask.Status);
@@ -135,7 +149,7 @@ namespace CN_Service
         public async Task<bool> FailATask(int taskId, string reason)
         {
             var targetTask = await taskDataStore.GetTask(taskId);
-            if (targetTask == null) throw new ArgumentException("TaskID does not exist!");
+            if (targetTask == null) return false;
 
             if (targetTask.IsFail)
             {
@@ -154,10 +168,21 @@ namespace CN_Service
 
         public async Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask)
         {
+            if (parentTask == null || targetTask == null) return false;
             targetTask.ParentTask = parentTask;
             return await taskDataStore.UpdateTask(targetTask);
         }
 
+        public async Task<bool> SetPreTask(CNTask targetTask, CNTask preTask)
+        {
+            if (targetTask == null || preTask == null) return false;
+            if (targetTask.PreTaskConnectors.ToList().Any(r => r.PreTask.TaskId == preTask.TaskId))
+            {
+                return false;
+            }
+            targetTask.PreTaskConnectors.Add(new CNTaskConnector(){PreTask = preTask,SufTask = targetTask});
+            return await taskDataStore.UpdateTask(targetTask);
+        }
         #endregion
 
         #region TimeSlices relevent
@@ -165,7 +190,7 @@ namespace CN_Service
         public async Task<bool> DeleteAllTimeSlicesOfTask(int taskId)
         {
             var targetTask = await taskDataStore.GetTask(taskId);
-            if (targetTask == null) throw new ArgumentException("TaskID does not exist!");
+            if (targetTask == null) return false;
             targetTask.ChildTasks.ToList()
                 .ForEach(x => Task.Run(async () => await DeleteAllTimeSlicesOfTask(x.TaskId)));
             targetTask.SufTaskConnectors.Select(y => y.SufTask).ToList()
@@ -191,12 +216,12 @@ namespace CN_Service
 
             //detect conflict
             if (task.UsedTimeSlices.Any(r => r.InterceptWith(timeSlice)))
-                throw new ArgumentException("Time slice intervene with exist");
+                throw new TimeSliceInterveneException();
 
             //Update Task's StartTime or EndTime
             var source = new List<CNTimeSlice>(task.UsedTimeSlices) {timeSlice};
             source.Sort();
-            await ExpandTaskTime(task.TaskId, source.First().StartDateTime, source.Last().EndDateTime);
+            await taskDataStore.ExpandTaskTime(task, source.First().StartDateTime, source.Last().EndDateTime);
 
             //Save TimeSlice
             timeSlice.Task = task;
@@ -208,16 +233,33 @@ namespace CN_Service
         {
             //Get original slice by id
             var originSlice = await timeSliceDataStore.GetTimeSliceById(timeSlice.TimeSliceId);
-
+            if (originSlice == null) return false;
             //Update Task's StartTime or EndTime
             var originDatas = originSlice.Task.UsedTimeSlices.ToList();
-            if (Equals(originDatas.First(), timeSlice))
-                await UpdateStartTaskTime(originSlice.Task.TaskId, originDatas.First().StartDateTime);
-            else if (Equals(originDatas.Last(), timeSlice))
-                await UpdateEndTaskTime(originSlice.Task.TaskId, originDatas.Last().EndDateTime);
+
+            //if only contain one slice
+            if (originDatas.Count == 1)
+            {
+                await taskDataStore.UpdateStartTaskTime(originSlice.Task, null);
+                await taskDataStore.UpdateEndTaskTime(originSlice.Task, null);
+            }
             else
-                await ExpandTaskTime(originSlice.Task.TaskId, originDatas.First().StartDateTime,
-                    originDatas.Last().EndDateTime);
+            {
+                //if have mutiple timeslices
+                originDatas.Sort();
+                if (Equals(originDatas.First(), timeSlice))
+                {
+                    originDatas.Remove(timeSlice);
+                    await taskDataStore.UpdateStartTaskTime(originSlice.Task, originDatas.First().StartDateTime);
+                }
+                else if (Equals(originDatas.Last(), timeSlice))
+                {
+                    originDatas.Remove(timeSlice);
+                    await taskDataStore.UpdateEndTaskTime(originSlice.Task, originDatas.Last().EndDateTime);
+                }
+            }
+            
+
             //delete the timeslice
             return await timeSliceDataStore.DeleteTimeSlice(originSlice);
         }
@@ -225,10 +267,11 @@ namespace CN_Service
         public async Task<bool> EndTimeSlice(int taskId, DateTime endTime)
         {
             var originDataTask = await taskDataStore.GetTask(taskId);
-
+            if (originDataTask == null) return false;
             var originDatas = originDataTask.UsedTimeSlices.ToList();
             originDatas.Sort();
             if (!(originDatas.Last().Clone() is CNTimeSlice lastSlice) || lastSlice.EndDateTime != null) return true;
+            if (lastSlice.StartDateTime > endTime) return false;
             lastSlice.EndDateTime = endTime;
 
             //EndTimeSlices of this task's children and suffix task
@@ -237,61 +280,8 @@ namespace CN_Service
             originDataTask.SufTaskConnectors.Select(y => y.SufTask).ToList()
                 .ForEach(x => Task.Run(async () => await EndTimeSlice(x.TaskId, endTime)));
 
-            await UpdateEndTaskTime(originDataTask.TaskId, endTime);
+            await taskDataStore.UpdateEndTaskTime(originDataTask, endTime);
             return await timeSliceDataStore.UpdateTimeSlice(lastSlice);
-        }
-        //
-        //        public void DeleteAllTimeSlices(int taskId)
-        //        {
-        //            var originRoot = rootDataProvider.GetRootData();
-        //            var tasks = originRoot.GetTaskAndChildSufTasksById(taskId);
-        //            foreach (var task in tasks)
-        //            {
-        //                var originDatas = GetTaskTimeSlices(task).ToList();
-        //                var dates = originDatas.Select(x => x.StartDate).Distinct();
-        //                foreach (var date in dates)
-        //                {
-        //                    var source = timeSliceProvider.GetOriginalDataByDate(date);
-        //                    source.Remove(task.TaskId);
-        //                    timeSliceProvider.OverWriteToDataSourceByDate(date, source);
-        //                }
-        //            }
-        //        }
-
-        private async Task ExpandTaskTime(int taskid, DateTime? targetStartTime, DateTime? targetEndTime)
-        {
-            var originDataTask = await taskDataStore.GetTask(taskid);
-            if (originDataTask == null) return;
-            if (originDataTask.StartTime == null || originDataTask.EndTime == null ||
-                originDataTask.StartTime > targetStartTime || originDataTask.EndTime < targetEndTime ||
-                targetEndTime == null)
-            {
-                if (originDataTask.StartTime == null || originDataTask.StartTime > targetStartTime)
-                    originDataTask.StartTime = targetStartTime;
-                if (originDataTask.EndTime == null && targetEndTime != null || //Pause A Task
-                    originDataTask.EndTime != null && targetEndTime == null || //Start A Task
-                    originDataTask.EndTime != null && targetEndTime != null && originDataTask.EndTime < targetEndTime
-                ) //Update A Task timeslice
-                    originDataTask.EndTime = targetEndTime;
-
-                await taskDataStore.UpdateTask(originDataTask);
-            }
-        }
-
-        private async Task UpdateStartTaskTime(int taskid, DateTime? targetStartTime)
-        {
-            var originDataTask = await taskDataStore.GetTask(taskid);
-            if (originDataTask == null) return;
-            originDataTask.StartTime = targetStartTime;
-            await taskDataStore.UpdateTask(originDataTask);
-        }
-
-        private async Task UpdateEndTaskTime(int taskid, DateTime? targetEndTime)
-        {
-            var originDataTask = await taskDataStore.GetTask(taskid);
-            if (originDataTask == null) return;
-            originDataTask.EndTime = targetEndTime;
-            await taskDataStore.UpdateTask(originDataTask);
         }
 
         #endregion

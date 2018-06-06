@@ -9,11 +9,12 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         ///     Get a random task
         /// </summary>
         /// <returns></returns>
-        public static CNTask GetARandomTask()
+        public static CNTask GetARandomTask(int id = 0)
         {
             var timestamp = DateTime.Now.ToString("s");
             return new CNTask
             {
+                TaskId = id,
                 Content = "Write A Program" + timestamp + Guid.NewGuid().ToString("N"),
                 CreateTime = DateTime.Now,
                 StartTime = null,
@@ -29,12 +30,12 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         ///     Get a random memo
         /// </summary>
         /// <returns></returns>
-        public static CNMemo GetARandomMemo()
+        public static CNMemo GetARandomMemo(bool generateId = false)
         {
             var timestamp = DateTime.Now.ToString("s");
             return new CNMemo
             {
-                MemoId = Guid.NewGuid().ToString("D"),
+                MemoId = generateId? Guid.NewGuid().ToString("D") :null,
                 Title = "NewMemo",
                 Content = "Start with writing tests!" + timestamp + Guid.NewGuid().ToString("N")
             };

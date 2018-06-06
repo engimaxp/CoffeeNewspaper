@@ -99,6 +99,13 @@ namespace CN_Core.Interfaces.Service
         /// <returns></returns>
         Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask);
 
+        /// <summary>
+        ///     Set pre task of this task
+        /// </summary>
+        /// <param name="targetTask"></param>
+        /// <param name="preTask"></param>
+        /// <returns></returns>
+        Task<bool> SetPreTask(CNTask targetTask, CNTask preTask);
         #region TimeSlices relevent
 
         /// <summary>

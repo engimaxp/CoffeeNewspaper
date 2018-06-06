@@ -1,26 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CN_Core.Interfaces.Repository
 {
     public interface ITaskDataStore
     {
-        #region Select Methods
-
-        /// <summary>
-        ///     Get all tasks from db
-        /// </summary>
-        /// <returns></returns>
-        Task<ICollection<CNTask>> GetAllTask();
-
-        /// <summary>
-        /// Get Task by id
-        /// </summary>
-        /// <param name="taskid"></param>
-        /// <returns></returns>
-        Task<CNTask> GetTask(int taskid);
-        #endregion
-
         #region Delete Methods
 
         /// <summary>
@@ -40,6 +25,24 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="targetTask"></param>
         /// <returns></returns>
         Task<CNTask> AddTask(CNTask targetTask);
+
+        #endregion
+
+        #region Select Methods
+
+        /// <summary>
+        ///     Get all tasks from db
+        /// </summary>
+        /// <returns></returns>
+        Task<ICollection<CNTask>> GetAllTask();
+
+        /// <summary>
+        ///     Get Task by id
+        /// </summary>
+        /// <param name="taskid"></param>
+        /// <returns></returns>
+        Task<CNTask> GetTask(int taskid);
+
         #endregion
 
         #region Update Methods
@@ -51,7 +54,33 @@ namespace CN_Core.Interfaces.Repository
         /// <returns></returns>
         Task<bool> UpdateTask(CNTask targetTask);
 
-        
+        /// <summary>
+        ///     Update EndTaskTime
+        /// </summary>
+        /// <param name="originDataTask">taskToBeUpdated</param>
+        /// <param name="targetEndTime">EndTime</param>
+        /// <returns></returns>
+        Task UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime);
+
+        /// <summary>
+        ///     Update StartTaskTime
+        /// </summary>
+        /// <param name="originDataTask">taskToBeUpdated</param>
+        /// <param name="targetStartTime">StartTime</param>
+        /// <returns></returns>
+        Task UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime);
+
+        /// <summary>
+        ///     ExpandTaskTime,Both StartTime and EndTime
+        ///     if origin start-end interval is small or intersect new start-end interval
+        ///     than update it
+        /// </summary>
+        /// <param name="originDataTask"></param>
+        /// <param name="targetStartTime"></param>
+        /// <param name="targetEndTime"></param>
+        /// <returns></returns>
+        Task ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime);
+
         #endregion
     }
 }

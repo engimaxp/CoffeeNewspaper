@@ -65,8 +65,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             await UseMemoryContextRun(async dbcontext =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
-                var assesMemo = DomainTestHelper.GetARandomMemo();
-                assesMemo.MemoId = Guid.NewGuid().ToString("D");
+                var assesMemo = DomainTestHelper.GetARandomMemo(true);
                 var beforeDeleteResult = await MemoDataStore.DeleteMemo(assesMemo);
                 Assert.IsFalse(beforeDeleteResult);
             });
@@ -112,8 +111,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             await UseMemoryContextRun(async dbcontext =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
-                var assesMemo = DomainTestHelper.GetARandomMemo();
-                assesMemo.MemoId = Guid.NewGuid().ToString("D");
+                var assesMemo = DomainTestHelper.GetARandomMemo(true);
 
                 //update the added Memo content,make sure its not equal to original Memo
                 assesMemo.Content = "testing update";

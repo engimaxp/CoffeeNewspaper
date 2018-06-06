@@ -14,7 +14,6 @@ namespace CN_Service
             Kernel.Bind<IMemoService>().To<MemoService>();
 
             Kernel.Bind<ITaskService>().To<TaskService>();
-            
         }
     }
 }
