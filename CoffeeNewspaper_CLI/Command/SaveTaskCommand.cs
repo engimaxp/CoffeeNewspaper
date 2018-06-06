@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Drawing;
-using CN_BLL;
-using CN_Model;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Service;
 using Console = Colorful.Console;
 
 namespace CoffeeNewspaper_CLI
@@ -13,7 +14,7 @@ namespace CoffeeNewspaper_CLI
             Name = "save";
         }
 
-        public override BaseState Excute(ArgumentParser input)
+        public override async Task<BaseState> Excute(ArgumentParser input)
         {
             if (State != null && State.StateObj is CNTask task)
             {
@@ -26,7 +27,7 @@ namespace CoffeeNewspaper_CLI
                 if (task.TaskId == 0)
                 {
                     task.CreateTime = DateTime.Now;
-                    if (new TaskService().CreateATask(task) > 0)
+                    if (await IoC.Get<ITaskService>().CreateATask(task) !=null)
                     {
                         Console.WriteLine("task create success!", Color.Green);
                     }
@@ -37,7 +38,7 @@ namespace CoffeeNewspaper_CLI
                 }
                 else
                 {
-                    if (new TaskService().EditATask(task))
+                    if (await IoC.Get<ITaskService>().EditATask(task))
                     {
                         Console.WriteLine("task edit success!", Color.Green);
                     }

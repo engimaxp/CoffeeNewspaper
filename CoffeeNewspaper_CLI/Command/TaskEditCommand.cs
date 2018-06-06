@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
-using CN_Model;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Service;
 using Console = Colorful.Console;
 
 namespace CoffeeNewspaper_CLI
@@ -12,7 +14,7 @@ namespace CoffeeNewspaper_CLI
             Name = "edit";
         }
 
-        public override BaseState Excute(ArgumentParser input)
+        public override async Task<BaseState> Excute(ArgumentParser input)
         {
             if (State != null && State.StateObj is CNTask task)
             {
@@ -83,10 +85,11 @@ namespace CoffeeNewspaper_CLI
                     }
                 }
 
-                int parentTask = input.GetSingle<int>("parent");
-                if (parentTask > 0)
+                int parentTaskId = input.GetSingle<int>("parent");
+                if (parentTaskId > 0)
                 {
-                    task.ParentTaskId = parentTask;
+                    var parentTask = await IoC.Get<ITaskService>().GetTaskById(parentTaskId);
+                    await IoC.Get<ITaskService>().SetParentTask(task, parentTask);
                 }
                 State.Refresh();
             }

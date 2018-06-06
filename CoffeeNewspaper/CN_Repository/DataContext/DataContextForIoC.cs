@@ -22,7 +22,8 @@ namespace CN_Repository
 
             // create a default dbContext object
             var dbContext = InMemoryMode ? CNDbContext.GetMemorySqlDatabase() : CNDbContext.GetFileSqlDatabase();
-
+            if(!InMemoryMode)
+                dbContext.Database.EnsureCreated();
             // bind a default DBContext to IoC
             Kernel.Bind<CNDbContext>().ToConstant(dbContext);
         }

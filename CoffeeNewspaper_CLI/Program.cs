@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Net;
-using System.Text;
-using CoffeeNewspaper_CLI.ConsoleTables;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Repository;
+using CN_Service;
 
 namespace CoffeeNewspaper_CLI
 {
@@ -16,6 +14,12 @@ namespace CoffeeNewspaper_CLI
         /// <param name="args">Command line arguments</param>
         private static void Main(string[] args)
         {
+            //Ioc Setup
+            IoC.Setup();
+            IoC.Kernel.BindCNDBContext();
+            IoC.Kernel.BindSqliteDataStore();
+            IoC.Kernel.BindServices();
+
             // enable ctrl+c
             Console.CancelKeyPress += (o, e) =>
             {
@@ -33,7 +37,10 @@ namespace CoffeeNewspaper_CLI
                     break;
                 }
                 ArgumentParser parser = new ArgumentParser(input);
-                var nextState = currentStatue.DoCommand(parser);
+                var statue = currentStatue;
+                var task = Task.Run(async () => await statue.DoCommand(parser));
+                task.Wait();
+                var nextState =task.Result;
                 if (nextState != currentStatue)
                 {
                     nextState.Display(currentStatue);
@@ -41,6 +48,5 @@ namespace CoffeeNewspaper_CLI
                 }
             }
         }
-        
     }
 }

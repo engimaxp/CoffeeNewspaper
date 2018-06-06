@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Linq;
-using CN_Model;
-using Console = Colorful.Console;
+using System.Threading.Tasks;
+using CN_Core;
+using Colorful;
 
 namespace CoffeeNewspaper_CLI
 {
@@ -14,40 +13,59 @@ namespace CoffeeNewspaper_CLI
             Name = "tag";
         }
 
-        public override BaseState Excute(ArgumentParser input)
+        public override async Task<BaseState> Excute(ArgumentParser input)
         {
+            await Task.Delay(1);
             if (State != null && State.StateObj is CNTask task)
             {
-                if (task.Tags == null) task.Tags = new List<string>();
-                var addTags = input.Get<string>("add");
-                if (addTags != null && addTags.Length > 0)
+                var addTags = input.Get<string>("add").Select(x => new CNTag {Title = x}).ToList();
+                if (addTags.Any())
                 {
-                    var totalTags = addTags.Union(task.Tags);
-                    task.Tags = totalTags.ToList();
+                    //TODO:Extract to Service Implement
+                    //union to get a non-repeat TagList
+                    var totalTags = addTags.Union(task.TaskTaggers.Select(x => x.Tag).ToList(), CNTag.TitleComparer);
+                    //select the new tags to be added
+                    var toBeAddedTag = totalTags.Where(x => string.IsNullOrEmpty(x.TagId));
+                    //add them to task
+                    toBeAddedTag.ToList().ForEach(y =>
+                        task.TaskTaggers.Add(new CNTaskTagger {Tag = y, TaskId = task.TaskId}));
                 }
-                var removeTags = input.Get<string>("remove");
-                if (removeTags != null && removeTags.Length > 0)
+
+                var removeTags = input.Get<string>("remove").Select(x => new CNTag {Title = x}).ToList();
+                if (removeTags.Any())
                 {
-                    var totalTags = task.Tags.Except(removeTags).ToList();
-                    task.Tags = totalTags.Any()? totalTags:null;
+                    var toBeRemovedTag = task.TaskTaggers.Select(x => x.Tag).ToList()
+                        .Intersect(removeTags, CNTag.TitleComparer).ToList();
+                    toBeRemovedTag.ForEach(x =>
+                        task.TaskTaggers.Remove(task.TaskTaggers.FirstOrDefault(y => y.TagId == x.TagId)));
                 }
+
                 State.Refresh();
             }
             else if (State != null && State.StateObj is CNMemo memo)
             {
-                if (memo.Tags == null) memo.Tags = new List<string>();
-                var addTags = input.Get<string>("add");
-                if (addTags != null && addTags.Length > 0)
+                var addTags = input.Get<string>("add").Select(x => new CNTag {Title = x}).ToList();
+                if (addTags.Any())
                 {
-                    var totalTags = addTags.Union(memo.Tags);
-                    memo.Tags = totalTags.ToList();
+                    //TODO:Extract to Service Implement
+                    //union to get a non-repeat TagList
+                    var totalTags = addTags.Union(memo.MemoTaggers.Select(x => x.Tag).ToList(), CNTag.TitleComparer);
+                    //select the new tags to be added
+                    var toBeAddedTag = totalTags.Where(x => string.IsNullOrEmpty(x.TagId));
+                    //add them to memo
+                    toBeAddedTag.ToList().ForEach(y =>
+                        memo.MemoTaggers.Add(new CNMemoTagger {Tag = y, MemoId = memo.MemoId}));
                 }
-                var removeTags = input.Get<string>("remove");
-                if (removeTags != null && removeTags.Length > 0)
+
+                var removeTags = input.Get<string>("remove").Select(x => new CNTag {Title = x}).ToList();
+                if (removeTags.Any())
                 {
-                    var totalTags = memo.Tags.Except(removeTags).ToList();
-                    memo.Tags = totalTags.Any() ? totalTags : null;
+                    var toBeRemovedTag = memo.MemoTaggers.Select(x => x.Tag).ToList()
+                        .Intersect(removeTags, CNTag.TitleComparer).ToList();
+                    toBeRemovedTag.ForEach(x =>
+                        memo.MemoTaggers.Remove(memo.MemoTaggers.FirstOrDefault(y => y.TagId == x.TagId)));
                 }
+
                 State.Refresh();
             }
             else
@@ -58,6 +76,5 @@ namespace CoffeeNewspaper_CLI
             Console.WriteLine();
             return State;
         }
-        
     }
 }

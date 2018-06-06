@@ -31,9 +31,7 @@ namespace CN_Core
 
         #region Interface Implementation
 
-        #region Equatable implementation
-
-        private sealed class TagidTitleEqualityComparer : IEqualityComparer<CNTag>
+        private sealed class TitleEqualityComparer : IEqualityComparer<CNTag>
         {
             public bool Equals(CNTag x, CNTag y)
             {
@@ -41,21 +39,19 @@ namespace CN_Core
                 if (ReferenceEquals(x, null)) return false;
                 if (ReferenceEquals(y, null)) return false;
                 if (x.GetType() != y.GetType()) return false;
-                return string.Equals(x.TagId, y.TagId) && string.Equals(x.Title, y.Title);
+                return string.Equals(x.Title, y.Title);
             }
 
             public int GetHashCode(CNTag obj)
             {
-                unchecked
-                {
-                    return ((obj.TagId != null ? obj.TagId.GetHashCode() : 0) * 397) ^
-                           (obj.Title != null ? obj.Title.GetHashCode() : 0);
-                }
+                return (obj.Title != null ? obj.Title.GetHashCode() : 0);
             }
         }
 
-        public static IEqualityComparer<CNTag> TagidTitleComparer { get; } = new TagidTitleEqualityComparer();
+        public static IEqualityComparer<CNTag> TitleComparer { get; } = new TitleEqualityComparer();
 
+        #region Equatable implementation
+        
         public bool Equals(CNTag other)
         {
             return string.Equals(TagId, other?.TagId) && string.Equals(Title, other?.Title);

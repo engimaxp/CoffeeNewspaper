@@ -1,6 +1,9 @@
 ﻿using System.Drawing;
 using System.Linq;
-using CN_BLL;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Service;
+using CN_Service;
 using CoffeeNewspaper_CLI.ConsoleTables;
 using Colorful;
 
@@ -13,7 +16,7 @@ namespace CoffeeNewspaper_CLI
             Name = "task";
         }
 
-        public override BaseState Excute(ArgumentParser input)
+        public override async Task<BaseState> Excute(ArgumentParser input)
         {
             if (input.Defined("add"))
             {
@@ -21,7 +24,7 @@ namespace CoffeeNewspaper_CLI
             }
             if (input.Defined("l"))
             {
-                var lst = new TaskService().GetAllTasks();
+                var lst = await IoC.Get<ITaskService>().GetAllTasks();
                 ConsoleTable tables = ConsoleTable.From(lst.Select(x => new {TaskID = x.TaskId, Content = x.Content}));
                 tables.WriteAlternateColorTable(Color.LightGoldenrodYellow, Color.White);
                 Console.WriteLine();
@@ -30,7 +33,7 @@ namespace CoffeeNewspaper_CLI
             if (input.Defined("more"))
             {
                 var taskid = input.GetSingle<int>("more");
-                var state = new TaskEditState {StateObj = new TaskService().GetTaskById(taskid)};
+                var state = new TaskEditState {StateObj = await IoC.Get<ITaskService>().GetTaskById(taskid)};
                 return state;
             }
 
