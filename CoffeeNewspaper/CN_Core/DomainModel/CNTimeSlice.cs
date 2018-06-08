@@ -8,6 +8,18 @@ namespace CN_Core
     /// </summary>
     public class CNTimeSlice : IEquatable<CNTimeSlice>, ICloneable, IComparable<CNTimeSlice>
     {
+        #region LazyLoading
+
+        private CNTask _task; 
+
+        private CNTimeSlice(Action<object, string> lazyLoader)
+        {
+            LazyLoader = lazyLoader;
+        }
+
+        private Action<object, string> LazyLoader { get; set; }
+
+        #endregion
         #region Private Properties
 
         /// <summary>
@@ -155,7 +167,11 @@ namespace CN_Core
         /// <summary>
         ///     Which task this slice belongs to
         /// </summary>
-        public virtual CNTask Task { get; set; }
+        public CNTask Task
+        {
+            get => LazyLoader == null ? _task : LazyLoader?.Load(this, ref _task);
+            set => _task = value;
+        }
 
         #endregion
 

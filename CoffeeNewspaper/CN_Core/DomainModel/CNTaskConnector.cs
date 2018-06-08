@@ -8,6 +8,29 @@ namespace CN_Core
     /// </summary>
     public class CNTaskConnector
     {
+        #region LazyLoading
+
+        private CNTask _preTask;
+
+        private CNTask _sufTask;
+
+        private CNTaskConnector(Action<object, string> lazyLoader)
+        {
+            LazyLoader = lazyLoader;
+        }
+
+        private Action<object, string> LazyLoader { get; set; }
+
+        #endregion
+
+        #region Constructor
+
+        public CNTaskConnector()
+        {
+            
+        }
+        #endregion
+
         #region Public Properties
 
         /// <summary>
@@ -16,10 +39,18 @@ namespace CN_Core
         public string TaskConnectorId { get; set; }
 
         public int PreTaskId { get; set; }
-        public virtual CNTask PreTask { get; set; }
+        public CNTask PreTask
+        {
+            get => LazyLoader == null ? _preTask : LazyLoader?.Load(this, ref _preTask);
+            set => _preTask = value;
+        }
 
         public int SufTaskId { get; set; }
-        public virtual CNTask SufTask { get; set; }
+        public CNTask SufTask
+        {
+            get => LazyLoader == null ? _sufTask : LazyLoader?.Load(this, ref _sufTask);
+            set => _sufTask = value;
+        }
 
         #endregion
 

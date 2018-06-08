@@ -5,6 +5,29 @@ namespace CN_Core
 {
     public class CNTag : IEquatable<CNTag>
     {
+        #region LazyLoading
+
+        private ICollection<CNTaskTagger> _taskTaggers = new HashSet<CNTaskTagger>();
+
+        private ICollection<CNMemoTagger> _memoTaggers = new HashSet<CNMemoTagger>();
+
+        private CNTag(Action<object, string> lazyLoader)
+        {
+            LazyLoader = lazyLoader;
+        }
+
+        private Action<object, string> LazyLoader { get; set; }
+
+        #endregion
+
+        #region Constructor
+
+        public CNTag()
+        {
+            
+        }
+        #endregion
+
         #region Public Properties
 
         /// <summary>
@@ -20,12 +43,20 @@ namespace CN_Core
         /// <summary>
         ///     Task relations this tag has appended to
         /// </summary>
-        public virtual ICollection<CNTaskTagger> TaskTaggers { get; set; } = new HashSet<CNTaskTagger>();
+        public ICollection<CNTaskTagger> TaskTaggers
+        {
+            get => LazyLoader == null ? _taskTaggers : LazyLoader?.Load(this, ref _taskTaggers);
+            set => _taskTaggers = value;
+        }
 
         /// <summary>
         ///     Memo relations this tag has appended to
         /// </summary>
-        public virtual ICollection<CNMemoTagger> MemoTaggers { get; set; } = new HashSet<CNMemoTagger>();
+        public ICollection<CNMemoTagger> MemoTaggers
+        {
+            get => LazyLoader == null ? _memoTaggers : LazyLoader?.Load(this, ref _memoTaggers);
+            set => _memoTaggers = value;
+        }
 
         #endregion
 

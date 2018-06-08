@@ -1,6 +1,7 @@
 ﻿using CN_Core;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 
@@ -73,8 +74,8 @@ namespace CN_Repository
         {
             //Add ConsoleLogging
             optionsBuilder
-                .UseLoggerFactory(MyLoggerFactory)
-                .UseLazyLoadingProxies();
+                    .ConfigureWarnings(warnnings=>warnnings.Log(CoreEventId.DetachedLazyLoadingWarning))
+                .UseLoggerFactory(MyLoggerFactory);
         }
         #endregion
 
@@ -115,10 +116,11 @@ namespace CN_Repository
             modelBuilder.Entity<CNTask>().Property(x => x.IsDeleted).HasColumnType("BOOLEAN").HasDefaultValue(false);
             modelBuilder.Entity<CNTask>().Property(x => x.IsFail).HasColumnType("BOOLEAN").HasDefaultValue(false);
             modelBuilder.Entity<CNTask>().Property(x => x.ParentTaskID).HasColumnType("INTEGER");
-            modelBuilder.Entity<CNTask>().Property(x => x.Priority).HasColumnType("INTEGER");
-            modelBuilder.Entity<CNTask>().Property(x => x.Urgency).HasColumnType("INTEGER");
-            modelBuilder.Entity<CNTask>().Property(x => x.Status).HasColumnType("INTEGER");
+//            modelBuilder.Entity<CNTask>().Property(x => x.Priority).HasColumnType("INTEGER");
+//            modelBuilder.Entity<CNTask>().Property(x => x.Urgency).HasColumnType("INTEGER");
+//            modelBuilder.Entity<CNTask>().Property(x => x.Status).HasColumnType("INTEGER");
             modelBuilder.Entity<CNTask>().Property(x => x.StartTime).HasColumnType("DATETIME");
+
             // Set Tasks parentTask foreign key
             // a parent task may have many child tasks
             // so this is a one-too-many relation

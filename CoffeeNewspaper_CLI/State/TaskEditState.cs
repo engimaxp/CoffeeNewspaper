@@ -43,11 +43,11 @@ namespace CoffeeNewspaper_CLI
                 Console.WriteLine($"{"EstimatedDuration:",-20}{DisplayDuration(task.EstimatedDuration)}");
                 Console.WriteLine($"{"Priority",-20}{Enum.GetName(typeof(CNPriority), task.Priority)}");
                 Console.WriteLine($"{"Urgency:",-20}{Enum.GetName(typeof(CNUrgency), task.Urgency)}");
-                Console.WriteLine($"{"Tags:",-20}{string.Join(",",task.TaskTaggers.ToList().Select(x=>x.Tag).Select(y=>y.Title))}");
+                Console.WriteLine($"{"Tags:",-20}{string.Join(",",(task.TaskTaggers??new List<CNTaskTagger>()).ToList().Select(x=>x.Tag).Select(y=>y.Title))}");
                 Console.WriteLine($"{"CreateTime:",-20}{(task.CreateTime > DateTime.MinValue?task.CreateTime:DateTime.Now)}");
                 Console.WriteLine($"{"StartTime:",-20}{task.StartTime}");
                 Console.WriteLine($"{"EndTime:",-20}{task.EndTime}");
-                Console.WriteLine($"{"Memos:",-20}{task.TaskMemos.Select(x=>x.Memo).ToList().Count + "memos"}");
+                Console.WriteLine($"{"Memos:",-20}{(task.TaskMemos??new List<CNTaskMemo>()).Select(x=>x.Memo).ToList().Count + "memos"}");
 
                 if (!string.IsNullOrEmpty(task.ParentTask?.Content))
                 {
