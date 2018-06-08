@@ -50,7 +50,7 @@ namespace CN_Repository
             return await IoC.Task.Run(
                 async () =>
                 {
-                    return await mDbContext.TimeSlices.FirstOrDefaultAsync(r =>
+                    return await mDbContext.TimeSlices.Include(x=>x.Task).FirstOrDefaultAsync(r =>
                         string.Equals(r.TimeSliceId, timeSliceTimeSliceId, StringComparison.Ordinal));
                 });
         }

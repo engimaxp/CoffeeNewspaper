@@ -16,10 +16,10 @@ namespace CN_Core
         public string TaskConnectorId { get; set; }
 
         public int PreTaskId { get; set; }
-        public CNTask PreTask { get; set; }
+        public virtual CNTask PreTask { get; set; }
 
         public int SufTaskId { get; set; }
-        public CNTask SufTask { get; set; }
+        public virtual CNTask SufTask { get; set; }
 
         #endregion
 

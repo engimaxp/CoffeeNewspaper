@@ -26,9 +26,9 @@ namespace CN_Core
         public string TaskTaggerId { get; set; }
 
         public string TagId { get; set; }
-        public CNTag Tag { get; set; }
+        public virtual CNTag Tag { get; set; }
         public int TaskId { get; set; }
-        public CNTask Task { get; set; }
+        public virtual CNTask Task { get; set; }
 
         #endregion
         

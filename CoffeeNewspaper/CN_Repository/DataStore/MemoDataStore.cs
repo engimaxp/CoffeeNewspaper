@@ -49,7 +49,10 @@ namespace CN_Repository
             return await IoC.Task.Run(
                 async () =>
                 {
-                    return await mDbContext.Memos.FirstOrDefaultAsync(r => string.Equals(r.MemoId, memoid));
+                    return await mDbContext.Memos
+                        .Include(x=>x.MemoTaggers)
+                        .Include(x=>x.TaskMemos)
+                        .FirstOrDefaultAsync(r => string.Equals(r.MemoId, memoid));
                 });
         }
 

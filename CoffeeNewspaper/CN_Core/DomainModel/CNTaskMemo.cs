@@ -25,9 +25,9 @@ namespace CN_Core
         public string TaskMemoId { get; set; }
 
         public string MemoId { get; set; }
-        public CNMemo Memo { get; set; }
+        public virtual CNMemo Memo { get; set; }
         public int TaskId { get; set; }
-        public CNTask Task { get; set; }
+        public virtual CNTask Task { get; set; }
 
         #endregion
     }

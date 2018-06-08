@@ -13,9 +13,9 @@
         public string MemoTaggerId { get; set; }
 
         public string TagId { get; set; }
-        public CNTag Tag { get; set; }
+        public virtual CNTag Tag { get; set; }
         public string MemoId { get; set; }
-        public CNMemo Memo { get; set; }
+        public virtual CNMemo Memo { get; set; }
 
         #endregion
         #region Formatting implement

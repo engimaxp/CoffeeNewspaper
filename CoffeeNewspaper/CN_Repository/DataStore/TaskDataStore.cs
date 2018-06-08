@@ -134,7 +134,8 @@ namespace CN_Repository
         {
             return await IoC.Task.Run(
                 async () =>
-                    await mDbContext.Tasks.FirstOrDefaultAsync(r => r.TaskId == taskid)
+                    await mDbContext.Tasks
+                        .FirstOrDefaultAsync(r => r.TaskId == taskid)
             );
         }
 

@@ -180,7 +180,7 @@ namespace CoffeeNewspaper_CLI
 		public T[] Get<T>(string Name = null)
 		{
 			string[] SrcArr = Get(Name);
-			if (SrcArr == null) return null;
+			if (SrcArr == null) return new T[0];
 			T[] Val = new T[SrcArr.Length];
 
 			for (int i = 0; i < SrcArr.Length; i++)

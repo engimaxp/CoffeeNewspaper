@@ -1,6 +1,8 @@
 ﻿using CN_Core;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Debug;
 
 namespace CN_Repository
 {
@@ -29,7 +31,8 @@ namespace CN_Repository
         #endregion
 
         #region Constructor
-
+        public static readonly LoggerFactory MyLoggerFactory
+            = new LoggerFactory(new[] { new DebugLoggerProvider((_, __) => true) });
         /// <summary>
         /// Get a File Sqlite Database context
         /// </summary>
@@ -68,6 +71,10 @@ namespace CN_Repository
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            //Add ConsoleLogging
+            optionsBuilder
+                .UseLoggerFactory(MyLoggerFactory)
+                .UseLazyLoadingProxies();
         }
         #endregion
 

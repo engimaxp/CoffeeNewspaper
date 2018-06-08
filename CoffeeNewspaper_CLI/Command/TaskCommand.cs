@@ -33,7 +33,8 @@ namespace CoffeeNewspaper_CLI
             if (input.Defined("more"))
             {
                 var taskid = input.GetSingle<int>("more");
-                var state = new TaskEditState {StateObj = await IoC.Get<ITaskService>().GetTaskById(taskid)};
+                var atsk = await IoC.Get<ITaskService>().GetTaskById(taskid);
+                var state = new TaskEditState {StateObj =atsk};
                 return state;
             }
 
