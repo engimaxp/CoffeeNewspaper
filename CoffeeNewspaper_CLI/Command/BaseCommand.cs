@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace CoffeeNewspaper_CLI
 {
@@ -31,8 +32,9 @@ namespace CoffeeNewspaper_CLI
 
         public string Name { get;protected set; }
 
-        public virtual BaseState Excute(ArgumentParser input)
+        public virtual async Task<BaseState> Excute(ArgumentParser input)
         {
+            await Task.Delay(1);
             throw new NotImplementedException();
         }
 

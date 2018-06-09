@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading.Tasks;
 using Console = Colorful.Console;
 namespace CoffeeNewspaper_CLI
 {
@@ -19,7 +20,7 @@ namespace CoffeeNewspaper_CLI
             CommandList.Add(new BackCommand(this));
         }
 
-        public BaseState DoCommand(ArgumentParser input)
+        public async Task<BaseState> DoCommand(ArgumentParser input)
         {
             if (string.IsNullOrEmpty(input.CommandLine)) return this;
             Console.WriteLine();
@@ -27,7 +28,7 @@ namespace CoffeeNewspaper_CLI
             {
                 if (command.Name.Equals(input.CommandLine, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    return command.Excute(input);
+                    return await command.Excute(input);
                 }
             }
             Console.WriteLineFormatted("{0} is Not a valid command", input.CommandLine, Color.LightGoldenrodYellow, Color.Gray);

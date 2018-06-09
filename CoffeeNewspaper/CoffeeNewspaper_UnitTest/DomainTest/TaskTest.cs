@@ -2,9 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CN_Model;
+using CN_Core;
 
 namespace CoffeeNewspaper_UnitTest.DomainTest
 {
@@ -12,95 +10,11 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
     public class TaskTest
     {
         [Test]
-        public void TaskAreEqual()
-        {
-            var time = DateTime.Now;
-            var task1 = new CNTask()
-            {
-                TaskId = 1,
-                Content = "Write A Program",
-                CreateTime = time,
-                StartTime = null,
-                EndTime = null,
-                Priority = CNPriority.High,
-                Urgency = CNUrgency.High,
-                EstimatedDuration = 3600,
-                Tags = new List<string>() {"Work"},
-            }.AddOrUpdateMemo(new CNMemo()
-            {
-                MemoId = "1",
-                Content = "Start with writing tests!",
-                Tags = new List<string>() {""}
-            }).AddOrUpdateMemo(new CNMemo()
-            {
-                MemoId = "1",
-                Content = "Start with writing tests!",
-                Tags = new List<string>() {""}
-            });
-            var task2 = new CNTask()
-            {
-                TaskId = 1,
-                Content = "Write A Program",
-                CreateTime = time,
-                StartTime = null,
-                EndTime = null,
-                Priority = CNPriority.High,
-                Urgency = CNUrgency.High,
-                EstimatedDuration = 3600,
-                Tags = new List<string>() {"Work"},
-            }.AddOrUpdateMemo(new CNMemo()
-            {
-                MemoId = "1",
-                Content = "Start with writing tests!",
-                Tags = new List<string>() {""}
-            });
-            Assert.AreEqual(1, new List<CNTask>() { task1 }.Intersect(new List<CNTask>() { task2 }, CNTask.CnTaskComparer).Count());
-            Assert.AreEqual(task1,task2);
-        }
-        [Test]
-        public void TaskAreNotEqual()
-        {
-            Assert.AreNotEqual(new CNTask()
-            {
-                TaskId = 1,
-                Content = "Write A Program",
-                CreateTime = DateTime.Now,
-                StartTime = null,
-                EndTime = null,
-                Priority = CNPriority.High,
-                Urgency = CNUrgency.High,
-                EstimatedDuration = 3600,
-                Tags = new List<string>() { "Work" },
-            }.AddOrUpdateMemo(new CNMemo()
-            {
-                MemoId = "1",
-                Content = "Start with writing tests!",
-                Tags = new List<string>() { "" }
-            }), new CNTask()
-            {
-                TaskId = 1,
-                Content = "Write A Program",
-                CreateTime = DateTime.Now,
-                StartTime = null,
-                EndTime = null,
-                Priority = CNPriority.High,
-                Urgency = CNUrgency.High,
-                EstimatedDuration = 3600,
-                Tags = new List<string>() { "Work2" },
-            }.AddOrUpdateMemo(new CNMemo()
-            {
-                MemoId = "1",
-                Content = "Start with writing tests!",
-                Tags = new List<string>() { "" }
-            }));
-        }
-
-        [Test]
         public void TaskCompare_SameUrgent_SameImportance_OrderByDeadLine()
         {
-            var task1 = DomainTestHelper.GetARandomTask(1);
-            var task2 = DomainTestHelper.GetARandomTask(2);
-            var task3 = DomainTestHelper.GetARandomTask(3);
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
             task1.Urgency = CNUrgency.Normal;
             task2.Urgency = CNUrgency.Normal;
             task3.Urgency = CNUrgency.Normal;
@@ -121,9 +35,9 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         [Test]
         public void TaskCompare_SameUrgent_OrderByImportance()
         {
-            var task1 = DomainTestHelper.GetARandomTask(1);
-            var task2 = DomainTestHelper.GetARandomTask(2);
-            var task3 = DomainTestHelper.GetARandomTask(3);
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
             task1.Urgency = CNUrgency.Normal;
             task2.Urgency = CNUrgency.Normal;
             task3.Urgency = CNUrgency.Normal;
@@ -143,9 +57,9 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         [Test]
         public void TaskCompare_OrderByUrgent()
         {
-            var task1 = DomainTestHelper.GetARandomTask(1);
-            var task2 = DomainTestHelper.GetARandomTask(2);
-            var task3 = DomainTestHelper.GetARandomTask(3);
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
             task1.Urgency = CNUrgency.Normal;
             task2.Urgency = CNUrgency.High;
             task3.Urgency = CNUrgency.Low;
@@ -166,9 +80,9 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         [Test]
         public void TaskCompare_OrderByMixed()
         {
-            var task1 = DomainTestHelper.GetARandomTask(1);
-            var task2 = DomainTestHelper.GetARandomTask(2);
-            var task3 = DomainTestHelper.GetARandomTask(3);
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
             task1.Urgency = CNUrgency.Normal;
             task2.Urgency = CNUrgency.Normal;
             task3.Urgency = CNUrgency.Low;

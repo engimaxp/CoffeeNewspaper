@@ -1,4 +1,5 @@
-﻿using Colorful;
+﻿using System.Threading.Tasks;
+using Colorful;
 
 namespace CoffeeNewspaper_CLI
 {
@@ -9,8 +10,9 @@ namespace CoffeeNewspaper_CLI
             Name = "back";
         }
 
-        public override BaseState Excute(ArgumentParser input)
+        public override async Task<BaseState> Excute(ArgumentParser input)
         {
+            await Task.Delay(1);
             if (State.LastState == null)
             {
                 Console.WriteLine("you have already back to the begining !");

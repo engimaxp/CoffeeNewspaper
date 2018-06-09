@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Threading.Tasks;
 using CoffeeNewspaper_CLI.ConsoleTables;
 using Colorful;
 
@@ -11,8 +12,9 @@ namespace CoffeeNewspaper_CLI
             Name = "help";
         }
 
-        public override BaseState Excute(ArgumentParser input)
+        public override async Task<BaseState> Excute(ArgumentParser input)
         {
+            await Task.Delay(1);
             var table = new ConsoleTable("Command", "Param", "Description");
 
             if (State is TaskEditState)

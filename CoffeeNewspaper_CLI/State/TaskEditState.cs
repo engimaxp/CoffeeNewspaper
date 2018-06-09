@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using CN_BLL;
-using CN_Model;
+using CN_Core;
+using CN_Core.Interfaces.Service;
+using CN_Service;
 using CoffeeNewspaper_CLI.ConsoleTables;
 using Console = Colorful.Console;
 namespace CoffeeNewspaper_CLI
@@ -42,25 +43,21 @@ namespace CoffeeNewspaper_CLI
                 Console.WriteLine($"{"EstimatedDuration:",-20}{DisplayDuration(task.EstimatedDuration)}");
                 Console.WriteLine($"{"Priority",-20}{Enum.GetName(typeof(CNPriority), task.Priority)}");
                 Console.WriteLine($"{"Urgency:",-20}{Enum.GetName(typeof(CNUrgency), task.Urgency)}");
-                Console.WriteLine($"{"Tags:",-20}{string.Join(",",task.Tags??new List<string>())}");
+                Console.WriteLine($"{"Tags:",-20}{string.Join(",",(task.TaskTaggers??new List<CNTaskTagger>()).ToList().Select(x=>x.Tag).Select(y=>y.Title))}");
                 Console.WriteLine($"{"CreateTime:",-20}{(task.CreateTime > DateTime.MinValue?task.CreateTime:DateTime.Now)}");
                 Console.WriteLine($"{"StartTime:",-20}{task.StartTime}");
                 Console.WriteLine($"{"EndTime:",-20}{task.EndTime}");
-                Console.WriteLine($"{"Memos:",-20}{(task.Memos ?? new List<CNMemo>()).Count + "memos"}");
+                Console.WriteLine($"{"Memos:",-20}{(task.TaskMemos??new List<CNTaskMemo>()).Select(x=>x.Memo).ToList().Count + "memos"}");
 
-                if (task.ParentTaskId > 0)
+                if (!string.IsNullOrEmpty(task.ParentTask?.Content))
                 {
-                    var parentTask = new TaskService().GetTaskById(task.ParentTaskId);
-                    if (!string.IsNullOrEmpty(parentTask?.Content))
-                    {
-                        Console.WriteLine($"{"Parent:",-20}({parentTask.TaskId}){parentTask.Content}");
-                    }
+                        Console.WriteLine($"{"Parent:",-20}({task.ParentTask.TaskId}){task.ParentTask.Content}");
                 }
 
-                if (task.PreTaskIds != null && task.PreTaskIds.Count>0)
+                if (task.PreTaskConnectors.Any())
                 {
                     Console.WriteLine($"{"PreTaskIds:",-20}");
-                    var preTasks = new TaskService().GetAllTasks().Where(x=> task.PreTaskIds.Contains(x.TaskId));
+                    var preTasks = task.PreTaskConnectors.Select(x=>x.PreTask);
                     ConsoleTable tables = ConsoleTable.From(preTasks.Select(x => new { TaskID = x.TaskId, Content = x.Content }));
                     tables.WriteAlternateColorTable(Color.LightGoldenrodYellow, Color.White);
                 }

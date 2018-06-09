@@ -1,20 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CN_Model;
+using CN_Core;
 
 namespace CoffeeNewspaper_UnitTest.DomainTest
 {
     public static class DomainTestHelper
     {
-        public static CNTask GetARandomTask(int taskid)
+        /// <summary>
+        ///     Get a random task
+        /// </summary>
+        /// <returns></returns>
+        public static CNTask GetARandomTask(int id = 0)
         {
-            string timestamp = DateTime.Now.ToString("s");
-            return new CNTask()
+            var timestamp = DateTime.Now.ToString("s");
+            return new CNTask
             {
-                TaskId = taskid,
+                TaskId = id,
                 Content = "Write A Program" + timestamp + Guid.NewGuid().ToString("N"),
                 CreateTime = DateTime.Now,
                 StartTime = null,
@@ -22,31 +22,46 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
                 Priority = CNPriority.High,
                 Urgency = CNUrgency.High,
                 Status = CNTaskStatus.TODO,
-                EstimatedDuration = 3600,
-                Tags = new List<string>() {"Work"},
+                EstimatedDuration = 3600
             };
         }
 
-        public static CNMemo GetARandomMemo(string memoid)
-        {
-            string timestamp = DateTime.Now.ToString("s");
-            return new CNMemo()
-            {
-                MemoId = memoid,
-                Title = "NewMemo",
-                Content = "Start with writing tests!" + timestamp + Guid.NewGuid().ToString("N"),
-                Tags = new List<string>() { "" }
-            };
-        }
         /// <summary>
-        /// contain a task which id is 1
+        ///     Get a random memo
         /// </summary>
         /// <returns></returns>
-        public static CNRoot GetRandomRoot()
+        public static CNMemo GetARandomMemo(bool generateId = false)
         {
-            CNRoot root = new CNRoot();
-            root.AddOrUpdateTask(GetARandomTask(1));
-            return root;
+            var timestamp = DateTime.Now.ToString("s");
+            return new CNMemo
+            {
+                MemoId = generateId? Guid.NewGuid().ToString("D") :null,
+                Title = "NewMemo",
+                Content = "Start with writing tests!" + timestamp + Guid.NewGuid().ToString("N")
+            };
+        }
+
+        /// <summary>
+        ///     Get a random tag
+        /// </summary>
+        /// <returns></returns>
+        public static CNTag GetARandomTag()
+        {
+            var timestamp = DateTime.Now.ToString("s");
+            return new CNTag
+            {
+                Title = $"randomtag{timestamp}{Guid.NewGuid():D}"
+            };
+        }
+
+        /// <summary>
+        ///     Get a random timeslice
+        /// </summary>
+        /// <param name="EndTime"></param>
+        /// <returns></returns>
+        public static CNTimeSlice GetARandomTimeSlice(DateTime? EndTime = null)
+        {
+            return new CNTimeSlice(DateTime.Now, null);
         }
     }
 }
