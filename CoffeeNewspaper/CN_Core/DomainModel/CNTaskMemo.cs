@@ -8,21 +8,7 @@ namespace CN_Core
     /// </summary>
     public class CNTaskMemo
     {
-        #region LazyLoading
-
-        private CNMemo _memo;
-
-        private CNTask _task;
-
-        private CNTaskMemo(Action<object, string> lazyLoader)
-        {
-            LazyLoader = lazyLoader;
-        }
         
-        private Action<object, string> LazyLoader { get; set; }
-
-        #endregion
-
         #region Constuctor
 
         public CNTaskMemo()
@@ -48,17 +34,9 @@ namespace CN_Core
         public string TaskMemoId { get; set; }
 
         public string MemoId { get; set; }
-        public CNMemo Memo
-        {
-            get => LazyLoader == null ? _memo : LazyLoader?.Load(this, ref _memo);
-            set => _memo = value;
-        }
+        public virtual CNMemo Memo { get; set; }
         public int TaskId { get; set; }
-        public CNTask Task
-        {
-            get => LazyLoader == null ? _task : LazyLoader?.Load(this, ref _task);
-            set => _task = value;
-        }
+        public virtual CNTask Task { get; set; }
 
         #endregion
     }

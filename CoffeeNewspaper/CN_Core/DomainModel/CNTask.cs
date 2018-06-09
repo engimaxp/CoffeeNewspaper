@@ -6,31 +6,7 @@ namespace CN_Core
 {
     public class CNTask : IComparable<CNTask>
     {
-        #region LazyLoading
-
-        private ICollection<CNTaskMemo> _taskMemos = new HashSet<CNTaskMemo>();
-
-        private ICollection<CNTaskTagger> _taskTaggers = new HashSet<CNTaskTagger>();
-
-        private ICollection<CNTaskConnector> _preTaskConnectors = new HashSet<CNTaskConnector>();
-
-        private CNTask _parentTask;
-
-        private ICollection<CNTaskConnector> _sufTaskConnectors = new HashSet<CNTaskConnector>();
-
-        private ICollection<CNTask> _childTasks = new HashSet<CNTask>();
-
-
-        private ICollection<CNTimeSlice> _usedTimeSlices = new HashSet<CNTimeSlice>(CNTimeSlice.StartDateTimeEndDateTimeComparer);
-
-        private CNTask(Action<object, string> lazyLoader)
-        {
-            LazyLoader = lazyLoader;
-        }
-
-        private Action<object, string> LazyLoader { get; set; }
-
-        #endregion
+        
 
         #region Constructor
 
@@ -116,20 +92,12 @@ namespace CN_Core
         /// <summary>
         ///     the tasks memos relation entites
         /// </summary>
-        public ICollection<CNTaskMemo> TaskMemos
-        {
-            get => LazyLoader == null ? _taskMemos : LazyLoader?.Load(this, ref _taskMemos);
-            set => _taskMemos = value;
-        } 
+        public virtual ICollection<CNTaskMemo> TaskMemos { get; set; } = new HashSet<CNTaskMemo>();
 
         /// <summary>
         ///     Tags of this task
         /// </summary>
-        public ICollection<CNTaskTagger> TaskTaggers
-        {
-            get => LazyLoader == null ? _taskTaggers : LazyLoader?.Load(this, ref _taskTaggers);
-            set => _taskTaggers = value;
-        }
+        public virtual ICollection<CNTaskTagger> TaskTaggers { get; set; } = new HashSet<CNTaskTagger>();
 
         /// <summary>
         ///     ParentTaskId
@@ -140,55 +108,35 @@ namespace CN_Core
         ///     ParentTask of this task
         ///     one task only have one parent ,so its a tree structure
         /// </summary>
-        public CNTask ParentTask
-        {
-            get => LazyLoader == null ? _parentTask : LazyLoader?.Load(this, ref _parentTask);
-            set => _parentTask = value;
-        }
+        public virtual CNTask ParentTask { get; set; } 
 
         /// <summary>
         ///     PreTasks of this task
         ///     one task may have many pretasks , only when these tasks is done when this task can start
         /// </summary>
-        public ICollection<CNTaskConnector> PreTaskConnectors
-        {
-            get => LazyLoader == null ? _preTaskConnectors : LazyLoader?.Load(this, ref _preTaskConnectors);
-            set => _preTaskConnectors = value;
-        } 
-        
+        public virtual ICollection<CNTaskConnector> PreTaskConnectors { get; set; } = new HashSet<CNTaskConnector>();
+
 
         /// <summary>
         ///     SufTasks of this task
         ///     one task may have many Suftasks , only this task is done when these tasks can start
         /// </summary>
-        public ICollection<CNTaskConnector> SufTaskConnectors
-        {
-            get => LazyLoader == null ? _sufTaskConnectors : LazyLoader?.Load(this, ref _sufTaskConnectors);
-            set => _sufTaskConnectors = value;
-        } 
-        
+        public virtual ICollection<CNTaskConnector> SufTaskConnectors { get; set; } = new HashSet<CNTaskConnector>();
+
         /// <summary>
         ///     ChildTasks of this task
         /// </summary>
-        public ICollection<CNTask> ChildTasks
-        {
-            get => LazyLoader == null ? _childTasks : LazyLoader?.Load(this, ref _childTasks);
-            set => _childTasks = value;
-        }
+        public virtual ICollection<CNTask> ChildTasks { get; set; } = new HashSet<CNTask>();
 
         /// <summary>
         ///     The timeslices this task has used
         /// </summary>
-        public ICollection<CNTimeSlice> UsedTimeSlices
-        {
-            get => LazyLoader == null ? _usedTimeSlices : LazyLoader?.Load(this, ref _usedTimeSlices);
-            set => _usedTimeSlices = value;
-        } 
+        public virtual ICollection<CNTimeSlice> UsedTimeSlices { get; set; } = new HashSet<CNTimeSlice>();
 
         #endregion
 
         #region Interface Implementation
-        
+
 
         #region Formatting implement
 

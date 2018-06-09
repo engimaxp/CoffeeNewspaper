@@ -74,8 +74,9 @@ namespace CN_Repository
         {
             //Add ConsoleLogging
             optionsBuilder
-                    .ConfigureWarnings(warnnings=>warnnings.Log(CoreEventId.DetachedLazyLoadingWarning))
-                .UseLoggerFactory(MyLoggerFactory);
+                .ConfigureWarnings(warnnings=>warnnings.Log(CoreEventId.DetachedLazyLoadingWarning))
+                .UseLoggerFactory(MyLoggerFactory)
+                .UseLazyLoadingProxies();
         }
         #endregion
 

@@ -41,38 +41,16 @@ namespace CN_Core
         /// <summary>
         ///     Tasks appended by this memo
         /// </summary>
-        public ICollection<CNTaskMemo> TaskMemos
-        {
-            get => LazyLoader == null ? _taskMemos : LazyLoader?.Load(this, ref _taskMemos);
-            set => _taskMemos = value;
-        }
+        public virtual ICollection<CNTaskMemo> TaskMemos { get; set; } =  new List<CNTaskMemo>();
 
         /// <summary>
         ///     Tags of this Memo
         /// </summary>
-        public ICollection<CNMemoTagger> MemoTaggers
-        {
-            get => LazyLoader == null ? _memoTaggers : LazyLoader?.Load(this, ref _memoTaggers);
-            set => _memoTaggers = value;
-        }
+        public virtual ICollection<CNMemoTagger> MemoTaggers { get; set; } = new HashSet<CNMemoTagger>();
 
         #endregion
 
-        #region LazyLoading
-
-        private ICollection<CNTaskMemo> _taskMemos = new HashSet<CNTaskMemo>();
-
-        private ICollection<CNMemoTagger> _memoTaggers = new HashSet<CNMemoTagger>();
-
-        private CNMemo(Action<object, string> lazyLoader)
-        {
-            LazyLoader = lazyLoader;
-        }
-
-
-        private Action<object, string> LazyLoader { get; set; }
-
-        #endregion
+        
         #region Constructor
 
         public CNMemo()

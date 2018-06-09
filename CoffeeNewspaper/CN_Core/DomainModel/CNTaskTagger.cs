@@ -8,21 +8,7 @@ namespace CN_Core
     /// </summary>
     public class CNTaskTagger
     {
-        #region LazyLoading
-
-        private CNTag _tag;
-
-        private CNTask _task;
-
-        private CNTaskTagger(Action<object, string> lazyLoader)
-        {
-            LazyLoader = lazyLoader;
-        }
-
-        private Action<object, string> LazyLoader { get; set; }
-
-        #endregion
-
+        
         #region Constructor
 
         public CNTaskTagger()
@@ -49,17 +35,9 @@ namespace CN_Core
         public string TaskTaggerId { get; set; }
 
         public string TagId { get; set; }
-        public CNTag Tag
-        {
-            get => LazyLoader == null ? _tag : LazyLoader?.Load(this, ref _tag);
-            set => _tag = value;
-        }
+        public virtual CNTag Tag { get; set; }
         public int TaskId { get; set; }
-        public CNTask Task
-        {
-            get => LazyLoader == null ? _task : LazyLoader?.Load(this, ref _task);
-            set => _task = value;
-        }
+        public virtual CNTask Task { get; set; }
 
         #endregion
         

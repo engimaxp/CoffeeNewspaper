@@ -7,7 +7,6 @@ using NUnit.Framework;
 
 namespace CoffeeNewspaper_UnitTest.RepositoryTest
 {
-    [TestFixture]
     public class RepositarySetupAndTearDown
     {
         [OneTimeSetUp]
