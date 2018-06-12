@@ -5,8 +5,47 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CN_WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Coffee Newspapaer!" Height="660" Width="780">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <!--Navagation Bar-->
+            <RowDefinition Height="Auto" />
+            <!--Page Content-->
+            <RowDefinition Height="*" />
+            <!--Status Bar-->
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--Navagation Bar-->
+        <local:HeadMenuControl Grid.Row="0"></local:HeadMenuControl>
+
+        <!--Page Content-->
+        <local:PageHost Grid.Row="1" 
+                        CurrentPage="{Binding ApplicationViewModel.CurrentPage,
+                                        Source={x:Static local:ViewModelLocator.Instance}}"
+                        CurrentPageViewModel="{Binding ApplicationViewModel.CurrentPageViewModel,
+                                        Source={x:Static local:ViewModelLocator.Instance}}"                            
+        />
+
+        <!--Status Bar-->
+        <Border Grid.Row="2"
+                Background="{StaticResource BackgroundVeryLightBrush}"
+                Height="40"
+                BorderBrush="{StaticResource BackgroundLightBrush}"
+                BorderThickness="0 1">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <TextBlock FontFamily="{StaticResource FontAwesomeSolid}"
+                           Text="{StaticResource FontAwesomeCheckIcon}"
+                           Margin="0 0 10 0"
+                           Foreground="{StaticResource WordGreenBrush}" 
+                           FontSize="{StaticResource FontSizeXLarge}"/>
+                <TextBlock
+                    Text="This is a status bar"
+                    Foreground="{StaticResource ForegroundDarkBrush}"
+                    FontSize="{StaticResource FontSizeLarge}"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>
