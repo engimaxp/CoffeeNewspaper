@@ -25,28 +25,17 @@ namespace CN_Presentation.ViewModel.Controls
 
         #endregion
 
-        #region Public Properties
-
-        /// <summary>
-        ///     this page is selected
-        /// </summary>
-        public ApplicationPage PageSelected { get; set; } = ApplicationPage.WorkSpace;
-        
-        #endregion
-
         #region Commands
 
         public ICommand ChangePageCommand { get; set; }
 
         #endregion
 
-        #region Public Methods
+        #region Public Properties
 
-        public void PageChanged(ApplicationPage targetPage)
-        {
-            PageSelected = targetPage;
-        }
+        public bool IsWorkSpaceSelected { get; set; }
 
         #endregion
+
     }
 }

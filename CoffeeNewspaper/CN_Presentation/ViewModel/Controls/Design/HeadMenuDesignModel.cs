@@ -18,7 +18,7 @@
         /// </summary>
         public HeadMenuDesignModel()
         {
-            PageSelected = ApplicationPage.WorkSpace;
+            
         }
 
         #endregion

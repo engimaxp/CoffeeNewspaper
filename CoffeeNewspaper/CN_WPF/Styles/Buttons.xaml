@@ -121,7 +121,7 @@
     <!-- Icon button -->
     <Style x:Key="IconButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}">
 
-        <Setter Property="Background" Value="{StaticResource ForegroundVeryDarkBrush}" />
+        <Setter Property="Background" Value="{StaticResource ForegroundDarkBrush}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundLightBrush}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeXXLarge}" />
@@ -129,6 +129,8 @@
         <Setter Property="Margin" Value="0" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Width" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" />
+
+        <Setter Property="local:IsHighlightProperty.Value" Value="False" />
 
         <Setter Property="Template">
             <Setter.Value>
@@ -139,7 +141,8 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 Background="{TemplateBinding Background}" 
                                 SnapsToDevicePixels="True">
-                            <Grid>
+                            <Grid x:Name="container"
+                                  Background="Transparent">
                                 <Viewbox>
                                     <TextBlock Text="{TemplateBinding Content}" 
                                                Focusable="False" 
@@ -155,7 +158,8 @@
                         <!--Selected Identifier-->
                         <Border Height="4"
                                 Background="{StaticResource IconHoverBlueBrush}"
-                                VerticalAlignment="Bottom"></Border>
+                                VerticalAlignment="Bottom"
+                                Visibility="{TemplateBinding local:IsHighlightProperty.Value,Converter={local:BooleanToVisiblityConverter},ConverterParameter=True}"></Border>
                     </Grid>
 
                     <ControlTemplate.Triggers>
@@ -169,12 +173,15 @@
                         <EventTrigger RoutedEvent="MouseLeave">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <ColorAnimation To="{StaticResource WordTransparentBlue}" Duration="0:0:0.3" Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" />
+                                    <ColorAnimation To="{StaticResource ForegroundDark}" Duration="0:0:0.3" Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" />
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Background" TargetName="border" Value="{StaticResource ForegroundDarkBrush}"/>
+                        </Trigger>
+                        <Trigger Property="local:IsHighlightProperty.Value" Value="True">
+                            <Setter Property="Background" TargetName="container" Value="{StaticResource ForegroundVeryDarkBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

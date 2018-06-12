@@ -166,6 +166,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AttachedProperties\BaseAttachedProperty.cs" />
+    <Compile Include="AttachedProperties\IsHighlightProperty.cs" />
     <Compile Include="Controls\HeadMenuControl.xaml.cs">
       <DependentUpon>HeadMenuControl.xaml</DependentUpon>
     </Compile>
@@ -194,6 +195,9 @@
     <Compile Include="ValueConverters\ApplicationPageHelpers.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
+    <Compile Include="ValueConverters\IsNavIconSelectedConverter.cs" />
+    <Compile Include="ValueConverters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="ValueConverters\BooleanToVisiblityGoneConverter.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
     <Page Include="Controls\HeadMenuControl.xaml">
       <SubType>Designer</SubType>
