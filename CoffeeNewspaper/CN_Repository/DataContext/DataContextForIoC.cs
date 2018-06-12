@@ -1,4 +1,5 @@
-﻿using Ninject;
+﻿using System.Threading.Tasks;
+using Ninject;
 
 namespace CN_Repository
 {
@@ -13,17 +14,14 @@ namespace CN_Repository
         /// </summary>
         /// <param name="Kernel"></param>
         /// <param name="InMemoryMode">true if used in unittest</param>
-        public static void BindCNDBContext(this IKernel Kernel, bool InMemoryMode = false)
+        public static async Task BindCNDBContext(this IKernel Kernel, bool InMemoryMode = false)
         {
             if (Kernel == null) return;
-            var origindbContext = Kernel.TryGet<CNDbContext>();
-            // if the originDBContext exists then jump to exit
-            if (origindbContext != null) return;
 
             // create a default dbContext object
             var dbContext = InMemoryMode ? CNDbContext.GetMemorySqlDatabase() : CNDbContext.GetFileSqlDatabase();
             if(!InMemoryMode)
-                dbContext.Database.EnsureCreated();
+                await dbContext.Database.EnsureCreatedAsync();
             // bind a default DBContext to IoC
             Kernel.Bind<CNDbContext>().ToConstant(dbContext);
         }
@@ -36,9 +34,6 @@ namespace CN_Repository
         public static void UnBindCNDBContext(this IKernel Kernel)
         {
             if (Kernel == null) return;
-            var origindbContext = Kernel.TryGet<CNDbContext>();
-            // if the originDBContext exists then jump to exit
-            if (origindbContext != null) return;
             Kernel.Unbind<CNDbContext>();
         }
     }
