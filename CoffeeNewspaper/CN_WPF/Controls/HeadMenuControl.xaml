@@ -35,6 +35,7 @@
                     />
             <Button Content="{StaticResource FontAwesomeGraduationCapIcon}"
                     Style="{StaticResource SolidIconButton}" 
+                    Command="{Binding ChangePageCommand}"
                     CommandParameter="{x:Static cnPresentation:ApplicationPage.TagReview}"
                     />
         </StackPanel>

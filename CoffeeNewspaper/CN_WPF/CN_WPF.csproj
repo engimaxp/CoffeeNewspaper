@@ -192,6 +192,7 @@
       <DependentUpon>WorkSpacePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="ValueConverters\ApplicationPageHelpers.cs" />
+    <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
     <Page Include="Controls\HeadMenuControl.xaml">

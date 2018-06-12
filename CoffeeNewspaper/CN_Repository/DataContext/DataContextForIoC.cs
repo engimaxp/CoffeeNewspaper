@@ -17,9 +17,6 @@ namespace CN_Repository
         public static async Task BindCNDBContext(this IKernel Kernel, bool InMemoryMode = false)
         {
             if (Kernel == null) return;
-            var origindbContext = Kernel.TryGet<CNDbContext>();
-            // if the originDBContext exists then jump to exit
-            if (origindbContext != null) return;
 
             // create a default dbContext object
             var dbContext = InMemoryMode ? CNDbContext.GetMemorySqlDatabase() : CNDbContext.GetFileSqlDatabase();
@@ -37,9 +34,6 @@ namespace CN_Repository
         public static void UnBindCNDBContext(this IKernel Kernel)
         {
             if (Kernel == null) return;
-            var origindbContext = Kernel.TryGet<CNDbContext>();
-            // if the originDBContext exists then jump to exit
-            if (origindbContext != null) return;
             Kernel.Unbind<CNDbContext>();
         }
     }

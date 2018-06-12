@@ -53,23 +53,22 @@ namespace CN_Core
         public static void Setup()
         {
             // Bind all required view models
-            BindViewModels();
+            if (!IsSetuped)
+            {
+                BindInfrastructure();
+            }
         }
 
+        private static bool IsSetuped { get; set; }
         /// <summary>
         ///     Binds all singleton view models
         /// </summary>
-        private static void BindViewModels()
+        private static void BindInfrastructure()
         {
-            // Add our file logger factory
-            if(Kernel.TryGet<ILogFactory>()==null)
             Kernel.Bind<ILogFactory>().ToConstant(new BaseLogFactory());
-            // Add our task manager
-            if (Kernel.TryGet<ITaskManager>() == null)
-                Kernel.Bind<ITaskManager>().ToConstant(new TaskManager());
-
-            if (Kernel.TryGet<IFileManager>() == null)
-                Kernel.Bind<IFileManager>().ToConstant(new FileManager());
+            Kernel.Bind<ITaskManager>().ToConstant(new TaskManager());
+            Kernel.Bind<IFileManager>().ToConstant(new FileManager());
+            IsSetuped = true;
         }
 
         #endregion

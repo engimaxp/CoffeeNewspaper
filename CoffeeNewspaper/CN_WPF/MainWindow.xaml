@@ -19,6 +19,8 @@
         <!--Navagation Bar-->
         <local:HeadMenuControl Grid.Row="0"></local:HeadMenuControl>
 
+
+<!--        <Frame Grid.Row="1" x:Name="MainFrame" Content="{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:ApplicationPageValueConverter}}"></Frame>-->
         <!--Page Content-->
         <local:PageHost Grid.Row="1" 
                         CurrentPage="{Binding ApplicationViewModel.CurrentPage,

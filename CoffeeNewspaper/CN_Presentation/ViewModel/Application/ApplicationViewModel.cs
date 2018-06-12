@@ -10,7 +10,7 @@ namespace CN_Presentation.ViewModel.Application
         /// <summary>
         /// The current page of the application
         /// </summary>
-        public ApplicationPage CurrentPage { get; private set; } = ApplicationPage.WorkSpace;
+        public ApplicationPage CurrentPage { get; private set; } = ApplicationPage.MemoList;
 
         /// <summary>
         /// The view model to use for the current page when the CurrentPage changes
@@ -18,7 +18,7 @@ namespace CN_Presentation.ViewModel.Application
         ///       it is simply used to set the view model of the current page 
         ///       at the time it changes
         /// </summary>
-        public BaseViewModel CurrentPageViewModel { get; set; } = new WorkSpaceViewModel();
+        public BaseViewModel CurrentPageViewModel { get; set; } = new MemoListViewModel();
 
         /// <summary>
         /// Navigates to the specified page

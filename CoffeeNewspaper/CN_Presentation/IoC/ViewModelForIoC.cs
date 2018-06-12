@@ -14,13 +14,8 @@ namespace CN_Presentation
         /// <param name="model"></param>
         private static void BindViewModel<TViewModel>(this IKernel Kernel, TViewModel model) where TViewModel : BaseViewModel
         {
-            if (Kernel == null) return;
-            var origindbContext = Kernel.TryGet<TViewModel>();
-            // if the originDBContext exists then jump to exit
-            if (origindbContext != null) return;
-
             // create a default dbContext object
-            Kernel.Bind<TViewModel>().ToConstant(model);
+            Kernel?.Bind<TViewModel>().ToConstant(model);
         }
 
         /// <summary>
