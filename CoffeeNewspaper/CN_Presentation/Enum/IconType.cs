@@ -30,6 +30,17 @@
 
         GraduationCap = 7,
 
-        Cog = 8
+        Cog = 8,
+
+        Play = 9,
+
+        Check = 10,
+
+        /// <summary>
+        /// Error
+        /// </summary>
+        Times = 11,
+
+        Pause = 12
     }
 }

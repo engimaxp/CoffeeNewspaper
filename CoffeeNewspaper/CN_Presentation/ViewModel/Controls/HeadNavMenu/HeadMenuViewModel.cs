@@ -13,7 +13,7 @@ namespace CN_Presentation.ViewModel.Controls
 
         public void InformPageChange()
         {
-            NavButtonItems.ForEach(x => x.InformPageChange());
+            this.NavButtonItems.ForEach(x => x.InformPageChange());
         }
     }
 }

@@ -35,7 +35,8 @@
     <system:String x:Key="FontAwesomeChartAreaIcon">&#xf1fe;</system:String>
     <system:String x:Key="FontAwesomeGraduationCapIcon">&#xf19d;</system:String>
     <system:String x:Key="FontAwesomeCheckIcon">&#xf00c;</system:String>
-
+    <system:String x:Key="FontAwesomeAngleDownIcon">&#xf107;</system:String>
+    
 
     <Style TargetType="{x:Type Control}" x:Key="BaseStyle">
         <Setter Property="FontFamily" Value="Microsoft YaHei" />

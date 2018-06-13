@@ -14,14 +14,7 @@ namespace CN_WPF
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (parameter != null)
-            {
                 return ((IconType) value).ToFontAwesomeText();
-            }
-            else
-            {
-                return ((IconType)value).ToFontAwesomeButton(); 
-            }
         }
 
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

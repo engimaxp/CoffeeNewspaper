@@ -9,6 +9,12 @@
       d:DesignHeight="450" d:DesignWidth="800">
 
     <Grid>
-        <TextBlock Text="WorkSpace"></TextBlock>
+        <Grid.ColumnDefinitions>
+            <!--Task List-->
+            <ColumnDefinition Width="300"></ColumnDefinition>
+            <!--Memo List-->
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <local:TaskListControl Grid.Column="0"></local:TaskListControl>
     </Grid>
 </local:BasePage>
