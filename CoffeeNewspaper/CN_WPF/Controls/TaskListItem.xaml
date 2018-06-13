@@ -45,7 +45,7 @@
                                 <Border Grid.Column="0" 
                                         Padding="8 15">
                                     <!-- TaskStatus Indicator -->
-                                        <TextBlock Text="{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}"
+                                    <TextBlock Text="{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}"
                                                Padding="0 4 0 0"
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Center"
@@ -80,8 +80,18 @@
                                         FontSize="{StaticResource FontSizeXLarge}"
                                         Text="{StaticResource FontAwesomeAngleDownIcon}"
                                         FontFamily="{StaticResource FontAwesomeSolid}"
-                                        Foreground="{StaticResource WordLightBlueBrush}"
-                                    />
+                                        Foreground="{StaticResource WordLightBlueBrush}" RenderTransformOrigin="0.5,0.5"
+                                        local:AnimateCWProperty.Value="{Binding IsExpanded}"
+                                        >
+                                        <TextBlock.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform/>
+                                                <SkewTransform/>
+                                                <RotateTransform x:Name="rtAngle" Angle="0"/>
+                                                <TranslateTransform/>
+                                            </TransformGroup>
+                                        </TextBlock.RenderTransform>
+                                    </TextBlock>
                                 </Border>
                             </Grid>
                         </Border>

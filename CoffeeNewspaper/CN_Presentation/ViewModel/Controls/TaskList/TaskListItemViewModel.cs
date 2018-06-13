@@ -52,7 +52,7 @@ namespace CN_Presentation.ViewModel.Controls
 
         public void ExpandTask()
         {
-            IsExpanded ^= IsExpanded;
+            IsExpanded ^= true;
         }
         #endregion
     }

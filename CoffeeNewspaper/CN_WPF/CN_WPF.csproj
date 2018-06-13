@@ -166,6 +166,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AttachedProperties\BaseAttachedProperty.cs" />
+    <Compile Include="AttachedProperties\FrameworkElementAnimationAttachedProperties.cs" />
     <Compile Include="AttachedProperties\IsHighlightProperty.cs" />
     <Compile Include="Controls\HeadMenuControl.xaml.cs">
       <DependentUpon>HeadMenuControl.xaml</DependentUpon>

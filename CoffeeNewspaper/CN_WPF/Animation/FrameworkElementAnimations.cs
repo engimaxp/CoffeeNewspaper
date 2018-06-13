@@ -175,6 +175,58 @@ namespace CN_WPF
 
         #endregion
 
+        #region Rotate CW / CCW
+
+        /// <summary>
+        /// Rotate an element CW
+        /// </summary>
+        /// <param name="element">The element to animate</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <param name="firstLoad">Indicates if this is the first load</param>
+        /// <returns></returns>
+        public static async Task RotateCWAsync(this FrameworkElement element, bool firstLoad, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddRotateCW(seconds);
+
+            // Start animating
+            sb.Begin(element);
+            
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        /// <summary>
+        /// Rotate an element CCW
+        /// </summary>
+        /// <param name="element">The element to animate</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <returns></returns>
+        public static async Task RotateCCWAsync(this FrameworkElement element, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddRotateCCW(seconds);
+
+            // Start animating
+            sb.Begin(element);
+            
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+
+            // Fully hide the element
+//            element.Visibility = Visibility.Collapsed;
+        }
+
+        #endregion
+
         #region Marquee
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace CN_WPF
@@ -284,6 +285,59 @@ namespace CN_WPF
 
         #endregion
 
+        #region Rotate CW/CCW
+
+        /// <summary>
+        /// Adds a rotate cw animation to the storyboard
+        /// </summary>
+        /// <param name="storyboard">The storyboard to add the animation to</param>
+        /// <param name="seconds">The time the animation will take</param>
+        public static void AddRotateCW(this Storyboard storyboard, float seconds)
+        {
+            // Create the margin animate from right 
+            var animation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
+                From = 360,
+                To = 180,
+            };
+
+            // Set the target property name
+            // Notice if this targetName is not set ,the animation will fail 
+            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
+            Storyboard.SetTargetName(animation, "rtAngle");
+            PropertyPath PropP = new PropertyPath(RotateTransform.AngleProperty);
+            Storyboard.SetTargetProperty(animation, PropP);
+
+            // Add this to the storyboard
+            storyboard.Children.Add(animation);
+        }
+
+        /// <summary>
+        /// Adds a rotate ccw animation to the storyboard
+        /// </summary>
+        /// <param name="storyboard">The storyboard to add the animation to</param>
+        /// <param name="seconds">The time the animation will take</param>
+        public static void AddRotateCCW(this Storyboard storyboard, float seconds)
+        {
+            // Create the margin animate from right 
+            var animation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
+                From=180,
+                To = 360,
+            };
+            // Set the target property name
+            // Notice if this targetName is not set ,the animation will fail
+            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
+            Storyboard.SetTargetName(animation, "rtAngle");
+            PropertyPath PropP = new PropertyPath(RotateTransform.AngleProperty);
+            Storyboard.SetTargetProperty(animation, PropP);
+            // Add this to the storyboard
+            storyboard.Children.Add(animation);
+        }
+
+        #endregion
 
         /// <summary>
         /// Adds a marquee scrolling right to left animation to the storyboard
