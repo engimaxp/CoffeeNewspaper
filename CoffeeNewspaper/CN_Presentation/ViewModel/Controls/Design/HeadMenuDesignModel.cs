@@ -1,4 +1,6 @@
-﻿namespace CN_Presentation.ViewModel.Controls.Design
+﻿using System.Collections.Generic;
+
+namespace CN_Presentation.ViewModel.Controls.Design
 {
     public class HeadMenuDesignModel:HeadMenuViewModel
     {
@@ -18,7 +20,39 @@
         /// </summary>
         public HeadMenuDesignModel()
         {
-            
+            NavButtonItems = new List<HeadMenuButtonViewModel>()
+            {
+                new HeadMenuButtonViewModel()
+                {
+                    FontCode = IconType.BreifCase,
+                    TargetPage = ApplicationPage.WorkSpace,
+                },
+                new HeadMenuButtonViewModel()
+                {
+                    FontCode = IconType.Tasks,
+                    TargetPage = ApplicationPage.TasksList
+                },
+                new HeadMenuButtonViewModel()
+                {
+                    FontCode = IconType.Notes,
+                    TargetPage = ApplicationPage.MemoList
+                },
+                new HeadMenuButtonViewModel()
+                {
+                    FontCode = IconType.ChartArea,
+                    TargetPage = ApplicationPage.Statistic
+                },
+                new HeadMenuButtonViewModel()
+                {
+                    FontCode = IconType.GraduationCap,
+                    TargetPage = ApplicationPage.TagReview
+                },
+                new HeadMenuButtonViewModel()
+                {
+                    FontCode = IconType.Cog,
+                    TargetPage = ApplicationPage.Settings
+                },
+            };
         }
 
         #endregion

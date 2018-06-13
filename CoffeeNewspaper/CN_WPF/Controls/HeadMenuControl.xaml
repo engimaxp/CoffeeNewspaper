@@ -1,11 +1,12 @@
 ﻿<UserControl x:Class="CN_WPF.HeadMenuControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:cnPresentation="clr-namespace:CN_Presentation;assembly=CN_Presentation"
-             mc:Ignorable="d" 
+             xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
+             mc:Ignorable="d"
              d:DesignHeight="64" d:DesignWidth="800">
     <Grid Height="64"
           Background="{StaticResource ForegroundDarkBrush}">
@@ -15,45 +16,29 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <!--Main Function Bar-->
+        <!--ShorCut Bar-->
         <StackPanel Grid.Column="0"
-                    Orientation="Horizontal">
-        </StackPanel>
+                    Orientation="Horizontal" />
 
-        <!--Settings and UserInfo Bar-->
-        <StackPanel Grid.Column="2"
-                    Orientation="Horizontal"
-                    >
-            <Button Content="{StaticResource FontAwesomeBreifCaseIcon}" Style="{StaticResource SolidIconButton}" 
-                    Command="{Binding ChangePageCommand}"
-                    CommandParameter="{x:Static cnPresentation:ApplicationPage.WorkSpace}"
-                    local:IsHighlightProperty.Value="{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:IsNavIconSelectedConverter},ConverterParameter={x:Static cnPresentation:ApplicationPage.WorkSpace}}"
-                    />
-            <Button Content="{StaticResource FontAwesomeTasksIcon}" Style="{StaticResource SolidIconButton}" 
-                    Command="{Binding ChangePageCommand}"
-                    CommandParameter="{x:Static cnPresentation:ApplicationPage.TasksList}"
-                    local:IsHighlightProperty.Value="{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:IsNavIconSelectedConverter},ConverterParameter={x:Static cnPresentation:ApplicationPage.TasksList}}"
-                    />
-            <Button Content="{StaticResource FontAwesomeNotesIcon}" Style="{StaticResource SolidIconButton}" 
-                    Command="{Binding ChangePageCommand}"
-                    CommandParameter="{x:Static cnPresentation:ApplicationPage.MemoList}"
-                    local:IsHighlightProperty.Value="{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:IsNavIconSelectedConverter},ConverterParameter={x:Static cnPresentation:ApplicationPage.MemoList}}"
-                    />
-            <Button Content="{StaticResource FontAwesomeChartAreaIcon}" Style="{StaticResource SolidIconButton}" 
-                    Command="{Binding ChangePageCommand}"
-                    CommandParameter="{x:Static cnPresentation:ApplicationPage.Statistic}"
-                    local:IsHighlightProperty.Value="{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:IsNavIconSelectedConverter},ConverterParameter={x:Static cnPresentation:ApplicationPage.Statistic}}"
-                    />
-            <Button Content="{StaticResource FontAwesomeGraduationCapIcon}" Style="{StaticResource SolidIconButton}" 
-                    Command="{Binding ChangePageCommand}"
-                    CommandParameter="{x:Static cnPresentation:ApplicationPage.TagReview}"
-                    local:IsHighlightProperty.Value="{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:IsNavIconSelectedConverter},ConverterParameter={x:Static cnPresentation:ApplicationPage.TagReview}}"
-                    />
-            <Button Content="{StaticResource FontAwesomeCogIcon}" Style="{StaticResource SolidIconButton}" 
-                    Command="{Binding ChangePageCommand}"
-                    CommandParameter="{x:Static cnPresentation:ApplicationPage.Settings}"
-                    local:IsHighlightProperty.Value="{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:IsNavIconSelectedConverter},ConverterParameter={x:Static cnPresentation:ApplicationPage.Settings}}"
-                    />
-        </StackPanel>
+        <!--Main Function and Settings UserInfo Bar-->
+        <ItemsControl Grid.Column="2"
+                      d:DataContext="{x:Static design:HeadMenuDesignModel.Instance}"
+                      ItemsSource="{Binding NavButtonItems}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Height="64"
+                            Content="{Binding FontCode,Converter={local:IconTypeToFontAwesomeConverter},ConverterParameter=False}"
+                            Style="{StaticResource SolidIconButton}"
+                            Command="{Binding JumpCommand}"
+                            CommandParameter="{Binding TargetPage}"
+                            local:IsHighlightProperty.Value="{Binding IsHighLighted}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </UserControl>

@@ -1,4 +1,6 @@
-﻿using CN_Presentation.ViewModel.Base;
+﻿using CN_Core;
+using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Controls;
 
 namespace CN_Presentation.ViewModel.Application
 {
@@ -41,6 +43,7 @@ namespace CN_Presentation.ViewModel.Application
             if (!different)
                 OnPropertyChanged(nameof(CurrentPage));
 
+            IoC.Get<HeadMenuViewModel>().InformPageChange();
         }
         
     }

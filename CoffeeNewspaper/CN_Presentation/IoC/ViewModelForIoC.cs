@@ -1,4 +1,5 @@
-﻿using CN_Presentation.ViewModel.Application;
+﻿using System.Collections.Generic;
+using CN_Presentation.ViewModel.Application;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Controls;
 using Ninject;
@@ -8,11 +9,12 @@ namespace CN_Presentation
     public static class ViewModelForIoC
     {
         /// <summary>
-        /// Helper Method: if a ViewModel is already binded then return directly else bind it
+        ///     Helper Method: if a ViewModel is already binded then return directly else bind it
         /// </summary>
         /// <param name="Kernel"></param>
         /// <param name="model"></param>
-        private static void BindViewModel<TViewModel>(this IKernel Kernel, TViewModel model) where TViewModel : BaseViewModel
+        private static void BindViewModel<TViewModel>(this IKernel Kernel, TViewModel model)
+            where TViewModel : BaseViewModel
         {
             // create a default dbContext object
             Kernel?.Bind<TViewModel>().ToConstant(model);
@@ -24,7 +26,42 @@ namespace CN_Presentation
         /// </summary>
         public static void BindInitialViewModel(this IKernel Kernel)
         {
-            Kernel.BindViewModel(new HeadMenuViewModel());
+            Kernel.BindViewModel(new HeadMenuViewModel
+            {
+                NavButtonItems = new List<HeadMenuButtonViewModel>
+                {
+                    new HeadMenuButtonViewModel()
+                    {
+                        FontCode = IconType.BreifCase,
+                        TargetPage = ApplicationPage.WorkSpace,
+                    },
+                    new HeadMenuButtonViewModel()
+                    {
+                        FontCode = IconType.Tasks,
+                        TargetPage = ApplicationPage.TasksList
+                    },
+                    new HeadMenuButtonViewModel()
+                    {
+                        FontCode = IconType.Notes,
+                        TargetPage = ApplicationPage.MemoList
+                    },
+                    new HeadMenuButtonViewModel()
+                    {
+                        FontCode = IconType.ChartArea,
+                        TargetPage = ApplicationPage.Statistic
+                    },
+                    new HeadMenuButtonViewModel()
+                    {
+                        FontCode = IconType.GraduationCap,
+                        TargetPage = ApplicationPage.TagReview
+                    },
+                    new HeadMenuButtonViewModel()
+                    {
+                        FontCode = IconType.Cog,
+                        TargetPage = ApplicationPage.Settings
+                    },
+                }
+            });
             Kernel.BindViewModel(new TasksListViewModel());
             Kernel.BindViewModel(new WorkSpaceViewModel());
             Kernel.BindViewModel(new MemoListViewModel());
