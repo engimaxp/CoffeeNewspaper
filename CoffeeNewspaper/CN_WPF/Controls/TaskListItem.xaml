@@ -1,12 +1,12 @@
 ﻿<UserControl x:Class="CN_WPF.TaskListItem"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignWidth="300">
 
     <UserControl.Resources>
@@ -17,20 +17,39 @@
 
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"></RowDefinition>
-                                <RowDefinition Height="Auto"></RowDefinition>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <!-- Content -->
                             <Border Grid.Row="0"
-                                x:Name="background"
-                            BorderThickness="1"
-                            BorderBrush="{StaticResource WordVeryVeryLightBlueBrush}"
-                            Background="{StaticResource ForegroundLightBrush}" Cursor="Hand">
+                                    x:Name="background"
+                                    BorderThickness="1"
+                                    BorderBrush="{StaticResource WordVeryVeryLightBlueBrush}"
+                                    Background="{StaticResource ForegroundLightBrush}" Cursor="Hand">
                                 <!-- Click to Expand TaskDetail -->
                                 <Border.InputBindings>
                                     <MouseBinding MouseAction="LeftClick" Command="{Binding ExpandTaskCommand}" />
                                 </Border.InputBindings>
-
+                                <Border.Triggers>
+                                    <EventTrigger RoutedEvent="MouseEnter">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation To="{StaticResource WordVeryVeryLightBlue}"
+                                                                Duration="0:0:0.3" Storyboard.TargetName="container"
+                                                                Storyboard.TargetProperty="Background.Color" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                    <EventTrigger RoutedEvent="MouseLeave">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation To="Transparent" Duration="0:0:0.3"
+                                                                Storyboard.TargetName="container"
+                                                                Storyboard.TargetProperty="Background.Color" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Border.Triggers>
                                 <Grid x:Name="container" Background="Transparent">
                                     <Grid.ColumnDefinitions>
                                         <!-- Task Urgency Indicator Bar -->
@@ -43,27 +62,26 @@
                                     </Grid.ColumnDefinitions>
                                     <!-- Task Urgency Indicator Bar -->
                                     <Border Grid.Column="0"
-                                        Width="4"
-                                        Margin="0 10"
-                                        HorizontalAlignment="Left"
-                                        Background="{Binding Urgency, Converter={local:TaskUrgencyToBackGroundColorConverter}}"
-                                />
+                                            Width="4"
+                                            Margin="0 10"
+                                            HorizontalAlignment="Left"
+                                            Background="{Binding Urgency, Converter={local:TaskUrgencyToBackGroundColorConverter}}" />
 
                                     <!-- TaskStatus Indicator padding -->
-                                    <Border Grid.Column="0" 
-                                        Padding="8 15">
+                                    <Border Grid.Column="0"
+                                            Padding="8 15">
                                         <!-- TaskStatus Indicator -->
-                                        <TextBlock Text="{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}"
-                                               Padding="0 4 0 0"
-                                               VerticalAlignment="Center"
-                                               HorizontalAlignment="Center"
-                                               Height="40"
-                                               TextAlignment="Center"
-                                               Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                               Foreground="{Binding Status,Converter={local:TaskStatusToForeGroundConverter}}"
-                                               FontSize="{StaticResource FontSizeXXLarge}"
-                                               FontFamily="{StaticResource FontAwesomeSolid}"
-                                    />
+                                        <TextBlock
+                                            Text="{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}"
+                                            Padding="0 4 0 0"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center"
+                                            Height="40"
+                                            TextAlignment="Center"
+                                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                            Foreground="{Binding Status,Converter={local:TaskStatusToForeGroundConverter}}"
+                                            FontSize="{StaticResource FontSizeXXLarge}"
+                                            FontFamily="{StaticResource FontAwesomeSolid}" />
                                     </Border>
 
                                     <!-- Task Title -->
@@ -71,32 +89,31 @@
                                         <StackPanel VerticalAlignment="Center">
                                             <!-- Name-->
                                             <TextBlock Text="{Binding TaskTitle}"
-                                                   MaxHeight="50"
-                                                   Padding="0 0 0 2"
-                                                   Foreground="{StaticResource ForegroundVeryDarkBrush}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   TextWrapping="Wrap"
-                                        />
+                                                       MaxHeight="50"
+                                                       Padding="0 0 0 2"
+                                                       Foreground="{StaticResource ForegroundVeryDarkBrush}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Border>
 
                                     <!-- Expand Indicator Padding -->
                                     <Border Grid.Column="2" Padding="0 0 15 0">
-                                        <TextBlock 
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Center"
-                                        FontSize="{StaticResource FontSizeXLarge}"
-                                        Text="{StaticResource FontAwesomeAngleDownIcon}"
-                                        FontFamily="{StaticResource FontAwesomeSolid}"
-                                        Foreground="{StaticResource WordLightBlueBrush}" RenderTransformOrigin="0.5,0.5"
-                                        local:AnimateCWProperty.Value="{Binding IsExpanded}"
-                                        >
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center"
+                                            FontSize="{StaticResource FontSizeXLarge}"
+                                            Text="{StaticResource FontAwesomeAngleDownIcon}"
+                                            FontFamily="{StaticResource FontAwesomeSolid}"
+                                            Foreground="{StaticResource WordLightBlueBrush}"
+                                            RenderTransformOrigin="0.5,0.5"
+                                            local:AnimateCWProperty.Value="{Binding IsExpanded}">
                                             <TextBlock.RenderTransform>
                                                 <TransformGroup>
-                                                    <ScaleTransform/>
-                                                    <SkewTransform/>
-                                                    <RotateTransform x:Name="rtAngle" Angle="0"/>
-                                                    <TranslateTransform/>
+                                                    <ScaleTransform />
+                                                    <SkewTransform />
+                                                    <RotateTransform x:Name="rtAngle" Angle="0" />
+                                                    <TranslateTransform />
                                                 </TransformGroup>
                                             </TextBlock.RenderTransform>
                                         </TextBlock>
@@ -105,67 +122,68 @@
                             </Border>
 
                             <!-- Expandable Content -->
-                            <ScrollViewer 
+                            <!-- ScrollView Animation Wrapper -->
+                            <ScrollViewer
                                 x:Name="ExpandScrollView"
-                                Grid.Row="1"  
+                                Grid.Row="1"
                                 HorizontalScrollBarVisibility="Hidden"
                                 VerticalScrollBarVisibility="Hidden"
                                 HorizontalContentAlignment="Stretch"
                                 VerticalContentAlignment="Bottom"
-                                local:AnimateScrollViewExpandProperty.Value="{Binding IsExpanded}"
-                                >
+                                local:AnimateScrollViewExpandProperty.Value="{Binding IsExpanded}">
                                 <ScrollViewer.Tag>
                                     <system:Double>1.0</system:Double>
                                 </ScrollViewer.Tag>
                                 <ScrollViewer.Height>
                                     <MultiBinding Converter="{local:MultiplyConverter}">
-                                        <Binding Path="ActualHeight" ElementName="ExpanderContent"/>
+                                        <Binding Path="ActualHeight" ElementName="ExpanderContent" />
                                         <Binding Path="Tag" RelativeSource="{RelativeSource Self}" />
                                     </MultiBinding>
                                 </ScrollViewer.Height>
+
+                                <!-- Shadow Border-->
                                 <Border x:Name="ExpanderContent"
-                                        Background="{StaticResource BackgroundVeryLightBrush}"
+                                        Background="{StaticResource ForegroundLightBrush}"
+                                        BorderBrush="{StaticResource ForegroundLightBrush}"
+                                        BorderThickness="1" 
+                                        ClipToBounds="True"
                                         Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType=ScrollViewer}}">
-                                    <StackPanel>
-                                        <TextBlock 
-                                            TextWrapping="Wrap"
-                                            Text="asdasdaasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdsdasd" RenderTransformOrigin="0,0">
-
-                                        </TextBlock>
-                                        <TextBlock 
-                                            TextWrapping="Wrap"
-                                            Text="asdasdaasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdsdasd" RenderTransformOrigin="0,0">
-
-                                        </TextBlock>
-                                        <TextBlock 
-                                            TextWrapping="Wrap"
-                                            Text="asdasdaasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdsdasd" RenderTransformOrigin="0,0">
-
-                                        </TextBlock>
-
-                                    </StackPanel>
+                                    <Grid>
+                                        <Border Background="Transparent"
+                                                BorderBrush="{StaticResource WordVeryLightBlueBrush}"
+                                                BorderThickness="0,10,0,0" Margin="0,-11,0,0">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="{StaticResource WordVeryLightBlue}" ShadowDepth="0" BlurRadius="10" />
+                                            </Border.Effect>
+                                        </Border>
+                                        <Border Padding="10 10 14 10" Background="Transparent">
+                                            <!-- Real Expanded Content -->
+                                            <StackPanel >
+                                                <TextBlock
+                                                    TextWrapping="Wrap"
+                                                    Text="asdasdaasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdsdasd"
+                                                />
+                                                <TextBlock
+                                                    TextWrapping="Wrap"
+                                                    Text="asdasdaasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdsdasd"
+                                                />
+                                                <TextBlock
+                                                    TextWrapping="Wrap"
+                                                    Text="asdasdaasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdsdasd"
+                                                />
+                                            </StackPanel>
+                                        </Border>
+                                        
+                                    </Grid>
                                 </Border>
                             </ScrollViewer>
                         </Grid>
 
                         <!-- Hover effect -->
                         <ControlTemplate.Triggers>
-                            <EventTrigger RoutedEvent="MouseEnter">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <ColorAnimation To="{StaticResource WordVeryVeryLightBlue}" Duration="0:0:0.3" Storyboard.TargetName="container" Storyboard.TargetProperty="Background.Color" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                            <EventTrigger RoutedEvent="MouseLeave">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <ColorAnimation To="Transparent" Duration="0:0:0.3" Storyboard.TargetName="container" Storyboard.TargetProperty="Background.Color" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" TargetName="container" Value="{StaticResource ForegroundDarkBrush}"/>
+                                <Setter Property="Background" TargetName="container"
+                                        Value="{StaticResource ForegroundDarkBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
