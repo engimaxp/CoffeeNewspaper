@@ -202,6 +202,7 @@
     <Compile Include="ValueConverters\ApplicationPageHelpers.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
+    <Compile Include="ValueConverters\MutiValueConverter\MultiplyConverter.cs" />
     <Compile Include="ValueConverters\TaskStatusToFontCodeConverter.cs" />
     <Compile Include="ValueConverters\TaskStatusToForeGroundConverter.cs" />
     <Compile Include="ValueConverters\TaskUrgencyToBackGroundColorConverter.cs" />

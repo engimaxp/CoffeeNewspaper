@@ -237,16 +237,47 @@ namespace CN_WPF
         {
             if (value)
                 // Animate in
-                await element.FadeInAsync(firstLoad, firstLoad ? 0 : 1f);
+                await element.FadeInAsync(firstLoad, firstLoad ? 0 : 0.3f);
             else
                 // Animate out
-                await element.FadeOutAsync(firstLoad ? 0 : 1f);
+                await element.FadeOutAsync(firstLoad ? 0 : 0.3f);
         }
     }
 
     /// <summary>
-    /// Animates a framework element fading in on show
-    /// and fading out on hide
+    /// Animates a scroll view expand from 0 to 1
+    /// its a work around to display smooth expand animation like expander control
+    /// ref https://www.codeproject.com/Articles/248112/Templating-WPF-Expander-Control#animation
+    /// </summary>
+    public class AnimateScrollViewExpandProperty : AnimateBaseProperty<AnimateScrollViewExpandProperty>
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.ScrollViewExpand(firstLoad, firstLoad ? 0 : 0.3f);
+            else
+                // Animate out
+                await element.ScrollViewShrink(firstLoad ? 0 : 0.3f);
+        }
+    }
+    /// <summary>
+    /// Animates a framework element expand from 0 to 1
+    /// </summary>
+    public class AnimateScaleYExpandProperty : AnimateBaseProperty<AnimateScaleYExpandProperty>
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.ScaleYExpand(firstLoad, firstLoad ? 0 : 0.3f);
+            else
+                // Animate out
+                await element.ScaleYShrink(firstLoad ? 0 : 0.3f);
+        }
+    }
+    /// <summary>
+    /// Animates a framework element Rotate 180 cw or -180 ccw
     /// </summary>
     public class AnimateCWProperty : AnimateBaseProperty<AnimateCWProperty>
     {
