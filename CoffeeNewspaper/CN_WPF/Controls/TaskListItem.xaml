@@ -25,11 +25,8 @@
                                     x:Name="background"
                                     BorderThickness="1"
                                     BorderBrush="{StaticResource WordVeryVeryLightBlueBrush}"
-                                    Background="{StaticResource ForegroundLightBrush}" Cursor="Hand">
-                                <!-- Click to Expand TaskDetail -->
-                                <Border.InputBindings>
-                                    <MouseBinding MouseAction="LeftClick" Command="{Binding ExpandTaskCommand}" />
-                                </Border.InputBindings>
+                                    Background="{StaticResource ForegroundLightBrush}" >
+                                
                                 <Border.Triggers>
                                     <EventTrigger RoutedEvent="MouseEnter">
                                         <BeginStoryboard>
@@ -98,7 +95,13 @@
                                     </Border>
 
                                     <!-- Expand Indicator Padding -->
-                                    <Border Grid.Column="2" Padding="0 0 15 0">
+                                    <Border Grid.Column="2"
+                                            Padding="0 0 15 0"
+                                            Cursor="Hand">
+                                        <!-- Click to Expand TaskDetail -->
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding ExpandTaskCommand}" />
+                                        </Border.InputBindings>
                                         <TextBlock
                                             VerticalAlignment="Center"
                                             HorizontalAlignment="Center"
@@ -171,6 +174,7 @@
                                                     TextWrapping="Wrap"
                                                     Text="asdasdaasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdsdasd"
                                                 />
+                                                <local:TagPanelControl></local:TagPanelControl>
                                             </StackPanel>
                                         </Border>
                                         

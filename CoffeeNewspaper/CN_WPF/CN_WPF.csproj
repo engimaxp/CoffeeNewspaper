@@ -174,6 +174,9 @@
     <Compile Include="Controls\PageHost.xaml.cs">
       <DependentUpon>PageHost.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TagPanelControl.xaml.cs">
+      <DependentUpon>TagPanelControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TaskListControl.xaml.cs">
       <DependentUpon>TaskListControl.xaml</DependentUpon>
     </Compile>
@@ -203,6 +206,7 @@
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
     <Compile Include="ValueConverters\MutiValueConverter\MultiplyConverter.cs" />
+    <Compile Include="ValueConverters\BorderBrushToColorConverter.cs" />
     <Compile Include="ValueConverters\TaskStatusToFontCodeConverter.cs" />
     <Compile Include="ValueConverters\TaskStatusToForeGroundConverter.cs" />
     <Compile Include="ValueConverters\TaskUrgencyToBackGroundColorConverter.cs" />
@@ -216,6 +220,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\PageHost.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TagPanelControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
