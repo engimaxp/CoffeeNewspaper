@@ -41,6 +41,12 @@
         /// </summary>
         Times = 11,
 
-        Pause = 12
+        Pause = 12,
+
+        Star = 13,
+
+        SolidFire = 14,
+
+        RegularFire = 15
     }
 }

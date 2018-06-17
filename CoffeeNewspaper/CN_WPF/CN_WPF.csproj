@@ -168,11 +168,15 @@
     <Compile Include="AttachedProperties\BaseAttachedProperty.cs" />
     <Compile Include="AttachedProperties\FrameworkElementAnimationAttachedProperties.cs" />
     <Compile Include="AttachedProperties\IsHighlightProperty.cs" />
+    <Compile Include="AttachedProperties\MonitorHoverProperty.cs" />
     <Compile Include="Controls\HeadMenuControl.xaml.cs">
       <DependentUpon>HeadMenuControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\PageHost.xaml.cs">
       <DependentUpon>PageHost.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RatingControl.xaml.cs">
+      <DependentUpon>RatingControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TagPanelControl.xaml.cs">
       <DependentUpon>TagPanelControl.xaml</DependentUpon>
@@ -205,6 +209,8 @@
     <Compile Include="ValueConverters\ApplicationPageHelpers.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
+    <Compile Include="ValueConverters\FontFamilyTypeToFontFamilyConverter.cs" />
+    <Compile Include="ValueConverters\ColorTypeToColorConverter.cs" />
     <Compile Include="ValueConverters\MutiValueConverter\MultiplyConverter.cs" />
     <Compile Include="ValueConverters\BorderBrushToColorConverter.cs" />
     <Compile Include="ValueConverters\TaskStatusToFontCodeConverter.cs" />
@@ -220,6 +226,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\PageHost.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RatingControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -324,6 +334,7 @@
     <Resource Include="Fonts\fa-regular-400.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Fonts\CN_Font.ttf" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

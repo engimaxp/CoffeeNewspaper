@@ -5,11 +5,11 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:CN_WPF"
       xmlns:application="clr-namespace:CN_Presentation.ViewModel.Application;assembly=CN_Presentation"
+      xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800">
 
     <Grid>
-
-        <TextBlock Text="TaskList"></TextBlock>
+        <local:RatingControl DataContext="{Binding StarRatingViewModel}"></local:RatingControl>
     </Grid>
 </local:BasePage>

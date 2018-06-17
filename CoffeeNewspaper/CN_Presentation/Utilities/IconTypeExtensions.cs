@@ -41,7 +41,12 @@
                     return "\uf00d";
                 case IconType.Pause:
                     return "\uf04c";
-
+                case IconType.Star:
+                    return "\uf005";
+                case IconType.RegularFire:
+                    return "\ue616";
+                case IconType.SolidFire:
+                    return "\ue617";
                 // If none found, return null
                 default:
                     return null;
