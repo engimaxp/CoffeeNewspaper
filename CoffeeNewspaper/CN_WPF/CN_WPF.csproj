@@ -169,6 +169,7 @@
     <Compile Include="AttachedProperties\FrameworkElementAnimationAttachedProperties.cs" />
     <Compile Include="AttachedProperties\IsHighlightProperty.cs" />
     <Compile Include="AttachedProperties\MonitorHoverProperty.cs" />
+    <Compile Include="AttachedProperties\MouseWheelEventBubbleUpAttachedProperty.cs" />
     <Compile Include="Controls\HeadMenuControl.xaml.cs">
       <DependentUpon>HeadMenuControl.xaml</DependentUpon>
     </Compile>
@@ -206,6 +207,7 @@
     <Compile Include="Pages\WorkSpacePage.xaml.cs">
       <DependentUpon>WorkSpacePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\VisualTreeExtensionClass.cs" />
     <Compile Include="ValueConverters\ApplicationPageHelpers.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />

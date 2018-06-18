@@ -37,8 +37,13 @@
     <system:String x:Key="FontAwesomeGraduationCapIcon">&#xf19d;</system:String>
     <system:String x:Key="FontAwesomeCheckIcon">&#xf00c;</system:String>
     <system:String x:Key="FontAwesomeAngleDownIcon">&#xf107;</system:String>
-    
+    <system:String x:Key="FontAwesomeClockIcon">&#xf017;</system:String>
+    <system:String x:Key="FontAwesomeHalfHourGlassIcon">&#xf252;</system:String>
+    <system:String x:Key="FontAwesomeStopWatchIcon">&#xf2f2;</system:String>
 
+    <!--Regular-->
+    <system:String x:Key="FontAwesomeTimesCircleIcon">&#xf057;</system:String>
+    
     <Style TargetType="{x:Type Control}" x:Key="BaseStyle">
 <!--        <Setter Property="FontFamily" Value="Microsoft YaHei" />-->
         <Setter Property="FontSize" Value="{StaticResource FontSizeRegular}" />

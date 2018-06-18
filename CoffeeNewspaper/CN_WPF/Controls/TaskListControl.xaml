@@ -6,12 +6,13 @@
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="300">
     <Border Padding="5 0 0 0" Background="{StaticResource WordVeryLightBlueBrush}">
         <Grid
             DataContext="{x:Static design:TaskListDesignModel.Instance}"
             >
             <ScrollViewer 
+                local:MouseWheelEventBubbleUpAttachedProperty.Value="True"
                 VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Items}">
                     <ItemsControl.ItemTemplate>

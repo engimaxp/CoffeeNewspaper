@@ -87,6 +87,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ButtonBase}">
                     <Border x:Name="border"
+                            Margin="0 0 -2 0"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 Background="{TemplateBinding Background}"
@@ -148,7 +149,9 @@
                                 Margin="{TemplateBinding Padding}"
                                 SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                TextAlignment="Center" />
+                                TextAlignment="Center" 
+                                MaxWidth="100"
+                                TextTrimming="CharacterEllipsis"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>

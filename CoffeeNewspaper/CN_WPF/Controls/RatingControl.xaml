@@ -22,8 +22,9 @@
                             Foreground="{Binding ColorType,Converter={local:ColorTypeToColorConverter}}"
                             Content="{Binding CurrentIconType,Converter={local:IconTypeToFontAwesomeConverter}}"
                             FontFamily="{Binding CurrentFontFamilyType,Converter={local:FontFamilyTypeToFontFamilyConverter}}"
-                            FontSize="{StaticResource FontSizeXLarge}"
+                            FontSize="{StaticResource FontSizeLarge}"
                         Command="{Binding RateClickCommand}"
+                        HorizontalAlignment="Left"
                         />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

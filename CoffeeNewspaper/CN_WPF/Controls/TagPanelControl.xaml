@@ -18,7 +18,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Button
+                    <Button ToolTip="{Binding TagTitle}"
                         Style="{StaticResource TagButton}"
                             Content="{Binding TagTitle}"/>
                 </DataTemplate>
