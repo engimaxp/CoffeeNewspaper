@@ -6,11 +6,5 @@ namespace CN_Presentation.ViewModel.Application
 {
     public class TasksListViewModel : BaseViewModel
     {
-        public RatingViewModel StarRatingViewModel { get; set; }
-
-        public TasksListViewModel()
-        {
-            StarRatingViewModel = RatingDesignModel.Instance;
-        }
     }
 }

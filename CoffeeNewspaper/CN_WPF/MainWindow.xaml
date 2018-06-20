@@ -5,7 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CN_WPF"
         mc:Ignorable="d"
-        Title="Coffee Newspapaer!" Height="660" Width="780">
+        Title="Coffee Newspapaer!" 
+        Height="660" 
+        Width="780"
+        MinWidth="780"
+        MinHeight="660">
     <Grid>
         <Grid.RowDefinitions>
             <!--Navagation Bar-->

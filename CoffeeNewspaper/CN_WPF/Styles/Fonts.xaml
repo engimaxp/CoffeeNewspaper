@@ -40,10 +40,21 @@
     <system:String x:Key="FontAwesomeClockIcon">&#xf017;</system:String>
     <system:String x:Key="FontAwesomeHalfHourGlassIcon">&#xf252;</system:String>
     <system:String x:Key="FontAwesomeStopWatchIcon">&#xf2f2;</system:String>
+    <system:String x:Key="FontAwesomeTagIcon">&#xf02b;</system:String>
+    <system:String x:Key="FontAwesomeAddIcon">&#xf067;</system:String>
+    <system:String x:Key="FontAwesomeTrashAltIcon">&#xf2ed;</system:String>
+
+    <system:String x:Key="FontAwesomeChevronCircleDownIcon">&#xf13a;</system:String>
+    <system:String x:Key="FontAwesomeChevronCircleLeftIcon">&#xf137;</system:String>
+    <system:String x:Key="FontAwesomeChevronCircleRightIcon">&#xf138;</system:String>
+    <system:String x:Key="FontAwesomeChevronCircleUpIcon">&#xf139;</system:String>
 
     <!--Regular-->
     <system:String x:Key="FontAwesomeTimesCircleIcon">&#xf057;</system:String>
-    
+
+    <!-- Custom -->
+    <system:String x:Key="FontAwesomeAddChildNodeIcon">&#xe70e;</system:String>
+
     <Style TargetType="{x:Type Control}" x:Key="BaseStyle">
 <!--        <Setter Property="FontFamily" Value="Microsoft YaHei" />-->
         <Setter Property="FontSize" Value="{StaticResource FontSizeRegular}" />
