@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="CN_WPF.RatingControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CN_WPF"
+             xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
+             mc:Ignorable="d">
+    <Grid >
+        <ItemsControl local:MonitorHoverProperty.Value="True"
+            d:DataContext="{x:Static design:RatingDesignModel.Instance}"
+            ItemsSource="{Binding IconButtons}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button
+                            Style="{StaticResource RatingButton}"
+                            Foreground="{Binding ColorType,Converter={local:ColorTypeToColorConverter}}"
+                            Content="{Binding CurrentIconType,Converter={local:IconTypeToFontAwesomeConverter}}"
+                            FontFamily="{Binding CurrentFontFamilyType,Converter={local:FontFamilyTypeToFontFamilyConverter}}"
+                            FontSize="{StaticResource FontSizeLarge}"
+                        Command="{Binding RateClickCommand}"
+                        HorizontalAlignment="Left"
+                        />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>

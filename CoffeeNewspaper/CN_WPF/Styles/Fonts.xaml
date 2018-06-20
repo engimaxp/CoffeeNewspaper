@@ -6,6 +6,7 @@
     <FontFamily x:Key="FontAwesomeRegular">pack://application;,,,/Fonts/#Font Awesome 5 Free</FontFamily>
     <FontFamily x:Key="FontAwesomeSolid">pack://application;,,,/Fonts/#Font Awesome 5 Free Solid</FontFamily>
     <FontFamily x:Key="FontAwesomeBrand">pack://application;,,,/Fonts/#Font Awesome 5 Brands</FontFamily>
+    <FontFamily x:Key="CNCustomerFont">pack://application;,,,/Fonts/#CN_Font</FontFamily>
 
     <system:Double x:Key="FontSizeSmaller">10</system:Double>
     <system:Double x:Key="FontSizeSmall">12</system:Double>
@@ -35,10 +36,27 @@
     <system:String x:Key="FontAwesomeChartAreaIcon">&#xf1fe;</system:String>
     <system:String x:Key="FontAwesomeGraduationCapIcon">&#xf19d;</system:String>
     <system:String x:Key="FontAwesomeCheckIcon">&#xf00c;</system:String>
+    <system:String x:Key="FontAwesomeAngleDownIcon">&#xf107;</system:String>
+    <system:String x:Key="FontAwesomeClockIcon">&#xf017;</system:String>
+    <system:String x:Key="FontAwesomeHalfHourGlassIcon">&#xf252;</system:String>
+    <system:String x:Key="FontAwesomeStopWatchIcon">&#xf2f2;</system:String>
+    <system:String x:Key="FontAwesomeTagIcon">&#xf02b;</system:String>
+    <system:String x:Key="FontAwesomeAddIcon">&#xf067;</system:String>
+    <system:String x:Key="FontAwesomeTrashAltIcon">&#xf2ed;</system:String>
 
+    <system:String x:Key="FontAwesomeChevronCircleDownIcon">&#xf13a;</system:String>
+    <system:String x:Key="FontAwesomeChevronCircleLeftIcon">&#xf137;</system:String>
+    <system:String x:Key="FontAwesomeChevronCircleRightIcon">&#xf138;</system:String>
+    <system:String x:Key="FontAwesomeChevronCircleUpIcon">&#xf139;</system:String>
+
+    <!--Regular-->
+    <system:String x:Key="FontAwesomeTimesCircleIcon">&#xf057;</system:String>
+
+    <!-- Custom -->
+    <system:String x:Key="FontAwesomeAddChildNodeIcon">&#xe70e;</system:String>
 
     <Style TargetType="{x:Type Control}" x:Key="BaseStyle">
-        <Setter Property="FontFamily" Value="Microsoft YaHei" />
+<!--        <Setter Property="FontFamily" Value="Microsoft YaHei" />-->
         <Setter Property="FontSize" Value="{StaticResource FontSizeRegular}" />
     </Style>
     

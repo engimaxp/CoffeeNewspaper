@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:CN_WPF">
 
-    <Color x:Key="BackgroundLight">#efefef</Color>
+    <Color x:Key="BackgroundLight">#cdcdcd</Color>
     <SolidColorBrush x:Key="BackgroundLightBrush" Color="{StaticResource BackgroundLight}" />
 
     <Color x:Key="BackgroundVeryLight">#fafafa</Color>

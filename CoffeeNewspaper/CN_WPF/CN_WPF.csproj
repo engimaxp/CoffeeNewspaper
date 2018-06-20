@@ -166,12 +166,32 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AttachedProperties\BaseAttachedProperty.cs" />
+    <Compile Include="AttachedProperties\FrameworkElementAnimationAttachedProperties.cs" />
     <Compile Include="AttachedProperties\IsHighlightProperty.cs" />
+    <Compile Include="AttachedProperties\MonitorGridHoverProperty.cs" />
+    <Compile Include="AttachedProperties\MonitorHoverProperty.cs" />
+    <Compile Include="AttachedProperties\MouseWheelEventBubbleUpAttachedProperty.cs" />
+    <Compile Include="AttachedProperties\TreeViewDisableDoubleClickAttackedProperties.cs" />
     <Compile Include="Controls\HeadMenuControl.xaml.cs">
       <DependentUpon>HeadMenuControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\PageHost.xaml.cs">
       <DependentUpon>PageHost.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RatingControl.xaml.cs">
+      <DependentUpon>RatingControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TagPanelControl.xaml.cs">
+      <DependentUpon>TagPanelControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TaskTreeViewControl.xaml.cs">
+      <DependentUpon>TaskTreeViewControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TaskListControl.xaml.cs">
+      <DependentUpon>TaskListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TaskListItem.xaml.cs">
+      <DependentUpon>TaskListItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\BasePage.cs" />
     <Compile Include="Pages\MemoListPage.xaml.cs">
@@ -192,18 +212,54 @@
     <Compile Include="Pages\WorkSpacePage.xaml.cs">
       <DependentUpon>WorkSpacePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\MyTreeViewHelper.cs" />
+    <Compile Include="Utilities\TreeViewItemExtensions.cs" />
+    <Compile Include="Utilities\VisualTreeExtensionClass.cs" />
     <Compile Include="ValueConverters\ApplicationPageHelpers.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
+    <Compile Include="ValueConverters\FontFamilyTypeToFontFamilyConverter.cs" />
+    <Compile Include="ValueConverters\ColorTypeToColorConverter.cs" />
+    <Compile Include="ValueConverters\LeftMarginMultiplierConverter.cs" />
+    <Compile Include="ValueConverters\MutiValueConverter\BaseMutiValueConverter.cs" />
+    <Compile Include="ValueConverters\MutiValueConverter\MultiplyConverter.cs" />
+    <Compile Include="ValueConverters\BorderBrushToColorConverter.cs" />
+    <Compile Include="ValueConverters\MutiValueConverter\WidthCalculateConverter.cs" />
+    <Compile Include="ValueConverters\TaskStatusToFontCodeConverter.cs" />
+    <Compile Include="ValueConverters\TaskStatusToForeGroundConverter.cs" />
+    <Compile Include="ValueConverters\TaskUrgencyToBackGroundColorConverter.cs" />
+    <Compile Include="ValueConverters\IconTypeToFontAwesomeConverter.cs" />
     <Compile Include="ValueConverters\IsNavIconSelectedConverter.cs" />
     <Compile Include="ValueConverters\BooleanToVisibilityConverter.cs" />
     <Compile Include="ValueConverters\BooleanToVisiblityGoneConverter.cs" />
+    <Compile Include="ValueConverters\ThicknessMaxConverter.cs" />
+    <Compile Include="ValueConverters\TreeViewLineConverter.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
     <Page Include="Controls\HeadMenuControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\PageHost.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RatingControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TagPanelControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TaskTreeViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TaskListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TaskListItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -268,6 +324,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Styles\TreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -296,6 +356,7 @@
     <Resource Include="Fonts\fa-regular-400.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Fonts\CN_Font.ttf" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

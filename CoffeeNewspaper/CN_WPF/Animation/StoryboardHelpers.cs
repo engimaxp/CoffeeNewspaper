@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace CN_WPF
@@ -284,7 +286,172 @@ namespace CN_WPF
 
         #endregion
 
+        #region Rotate CW/CCW
 
+        /// <summary>
+        /// Adds a rotate cw animation to the storyboard
+        /// </summary>
+        /// <param name="storyboard">The storyboard to add the animation to</param>
+        /// <param name="seconds">The time the animation will take</param>
+        public static void AddRotateCW(this Storyboard storyboard, float seconds)
+        {
+            // Create the margin animate from right 
+            var animation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
+                From = 360,
+                To = 180,
+            };
+
+            // Set the target property name
+            // Notice if this targetName is not set ,the animation will fail 
+            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
+            Storyboard.SetTargetName(animation, "rtAngle");
+            PropertyPath PropP = new PropertyPath(RotateTransform.AngleProperty);
+            Storyboard.SetTargetProperty(animation, PropP);
+
+            // Add this to the storyboard
+            storyboard.Children.Add(animation);
+        }
+
+        /// <summary>
+        /// Adds a rotate ccw animation to the storyboard
+        /// </summary>
+        /// <param name="storyboard">The storyboard to add the animation to</param>
+        /// <param name="seconds">The time the animation will take</param>
+        public static void AddRotateCCW(this Storyboard storyboard, float seconds)
+        {
+            // Create the margin animate from right 
+            var animation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
+                From=180,
+                To = 360,
+            };
+            // Set the target property name
+            // Notice if this targetName is not set ,the animation will fail
+            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
+            Storyboard.SetTargetName(animation, "rtAngle");
+            PropertyPath PropP = new PropertyPath(RotateTransform.AngleProperty);
+            Storyboard.SetTargetProperty(animation, PropP);
+            // Add this to the storyboard
+            storyboard.Children.Add(animation);
+        }
+
+        #endregion
+
+        #region ScaleY Expand/Shrink
+
+        /// <summary>
+        /// Adds a Scale y expand animation to the storyboard
+        /// </summary>
+        /// <param name="storyboard">The storyboard to add the animation to</param>
+        /// <param name="seconds">The time the animation will take</param>
+        public static void AddScaleYExpand(this Storyboard storyboard, float seconds)
+        { 
+            var animation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
+                From = 0,
+                To = 1,
+            };
+
+            // Set the target property name
+            // Notice if this targetName is not set ,the animation will fail 
+            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
+            Storyboard.SetTargetName(animation, "stScaleY");
+            PropertyPath PropP = new PropertyPath(ScaleTransform.ScaleYProperty);
+            Storyboard.SetTargetProperty(animation, PropP);
+
+            // Add this to the storyboard
+            storyboard.Children.Add(animation);
+        }
+
+        /// <summary>
+        /// Adds a Scale y shrink animation to the storyboard
+        /// </summary>
+        /// <param name="storyboard">The storyboard to add the animation to</param>
+        /// <param name="seconds">The time the animation will take</param>
+        public static void AddScaleYShrink(this Storyboard storyboard, float seconds)
+        {
+            var animation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
+                From = 1,
+                To = 0,
+            };
+            // Set the target property name
+            // Notice if this targetName is not set ,the animation will fail
+            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
+            Storyboard.SetTargetName(animation, "stScaleY");
+            PropertyPath PropP = new PropertyPath(ScaleTransform.ScaleYProperty);
+            Storyboard.SetTargetProperty(animation, PropP);
+            // Add this to the storyboard
+            storyboard.Children.Add(animation);
+        }
+
+        #endregion
+        #region ScaleY Expand/Shrink
+
+        /// <summary>
+        /// Adds a Scale y expand animation to the storyboard
+        /// </summary>
+        /// <param name="storyboard">The storyboard to add the animation to</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <param name="element"></param>
+        public static void AddScrollViewExpand(this Storyboard storyboard, float seconds,  FrameworkElement element)
+        {
+            //Designtime ignore animation ,because it cause error
+            if (DesignerProperties.GetIsInDesignMode(element))
+            {
+                element.SetValue(FrameworkElement.TagProperty, 1);
+                return;
+            }
+            //Runtime animation
+            var animation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
+                From = 0,
+                To = 1,
+            };
+
+            // Set the target property name
+            PropertyPath PropP = new PropertyPath("Tag");
+            Storyboard.SetTargetProperty(animation, PropP);
+
+            // Add this to the storyboard
+            storyboard.Children.Add(animation);
+        }
+
+        /// <summary>
+        /// Adds a ScrollView Container's Height shrink animation to the storyboard
+        /// </summary>
+        /// <param name="storyboard">The storyboard to add the animation to</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <param name="element"></param>
+        public static void AddScrollViewShrink(this Storyboard storyboard, float seconds,FrameworkElement element)
+        {
+            //Designtime ignore animation ,because it cause error
+            if (DesignerProperties.GetIsInDesignMode(element))
+            {
+                element.SetValue(FrameworkElement.TagProperty, 0);
+                return;
+            }
+            //Runtime animation
+            var animation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
+                From = 1,
+                To = 0,
+            };
+            // Set the target property name
+            PropertyPath PropP = new PropertyPath("Tag");
+            Storyboard.SetTargetProperty(animation, PropP);
+            // Add this to the storyboard
+            storyboard.Children.Add(animation);
+        }
+
+        #endregion
         /// <summary>
         /// Adds a marquee scrolling right to left animation to the storyboard
         /// </summary>

@@ -175,6 +175,162 @@ namespace CN_WPF
 
         #endregion
 
+        #region Rotate CW / CCW
+
+        /// <summary>
+        /// Rotate an element CW
+        /// </summary>
+        /// <param name="element">The element to animate</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <param name="firstLoad">Indicates if this is the first load</param>
+        /// <returns></returns>
+        public static async Task RotateCWAsync(this FrameworkElement element, bool firstLoad, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddRotateCW(seconds);
+
+            // Start animating
+            sb.Begin(element);
+            
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        /// <summary>
+        /// Rotate an element CCW
+        /// </summary>
+        /// <param name="element">The element to animate</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <returns></returns>
+        public static async Task RotateCCWAsync(this FrameworkElement element, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddRotateCCW(seconds);
+
+            // Start animating
+            sb.Begin(element);
+            
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+
+            // Fully hide the element
+//            element.Visibility = Visibility.Collapsed;
+        }
+
+        #endregion
+
+        #region ScaleY Expand / Shrink
+
+        /// <summary>
+        /// Scale an element y direction expand from 0 to 1
+        /// </summary>
+        /// <param name="element">The element to animate</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <param name="firstLoad">Indicates if this is the first load</param>
+        /// <returns></returns>
+        public static async Task ScaleYExpand(this FrameworkElement element, bool firstLoad, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Collapsed;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddScaleYExpand(seconds);
+
+            // Start animating
+            sb.Begin(element);
+
+            if (Math.Abs(seconds) > 1e-5 || firstLoad)
+                element.Visibility = Visibility.Visible;
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        /// <summary>
+        /// Scale an element y direction shrink from 0 to 1
+        /// </summary>
+        /// <param name="element">The element to animate</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <returns></returns>
+        public static async Task ScaleYShrink(this FrameworkElement element, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddScaleYShrink(seconds);
+
+            // Start animating
+            sb.Begin(element);
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+
+            // Fully hide the element
+                        element.Visibility = Visibility.Collapsed;
+        }
+
+        #endregion
+        #region ScrollView Container Expand / Shrink
+
+        /// <summary>
+        /// Change a ScrollView Container's Height from 0 to 1
+        /// Height is determined by its children's actual height
+        /// </summary>
+        /// <param name="element">The element to animate</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <param name="firstLoad">Indicates if this is the first load</param>
+        /// <returns></returns>
+        public static async Task ScrollViewExpand(this FrameworkElement element, bool firstLoad, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddScrollViewExpand(seconds, element);
+
+            // Start animating
+            sb.Begin(element);
+            
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        /// <summary>
+        /// Change a ScrollView Container's Height from 1 to 0
+        /// Height is determined by its children's actual height
+        /// </summary>
+        /// <param name="element">The element to animate</param>
+        /// <param name="seconds">The time the animation will take</param>
+        /// <returns></returns>
+        public static async Task ScrollViewShrink(this FrameworkElement element, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddScrollViewShrink(seconds, element);
+
+            // Start animating
+            sb.Begin(element);
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        #endregion
         #region Marquee
 
         /// <summary>
