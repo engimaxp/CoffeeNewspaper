@@ -44,7 +44,8 @@
                 <!-- Child Tasks Tree View -->
                 <StackPanel ZIndex="2" Grid.Column="2" Orientation="Horizontal">
                     <Button Style="{StaticResource IconGrowButton}"
-                            Content="{StaticResource FontAwesomeTrashAltIcon}" />
+                            Content="{StaticResource FontAwesomeTrashAltIcon}" 
+                            FontFamily="{StaticResource FontAwesomeRegular}"/>
                 </StackPanel>
             </Grid>
             <!-- Child Tasks Tree View -->
