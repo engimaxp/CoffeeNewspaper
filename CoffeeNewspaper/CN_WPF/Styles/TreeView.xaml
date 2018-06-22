@@ -20,7 +20,7 @@
                 <ControlTemplate TargetType="TreeView">
                     <Border Name="Border">
                         <Border.Background>
-                            <SolidColorBrush Color="{StaticResource ForegroundLight}" />
+                            <SolidColorBrush Color="{StaticResource ForegroundVeryLight}" />
                         </Border.Background>
                         <ScrollViewer Focusable="False"
                                       CanContentScroll="False"

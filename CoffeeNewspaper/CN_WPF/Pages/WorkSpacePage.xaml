@@ -12,9 +12,25 @@
         <Grid.ColumnDefinitions>
             <!--Task List-->
             <ColumnDefinition Width="300"></ColumnDefinition>
+            <!--Seperate line-->
+            <ColumnDefinition Width="5"></ColumnDefinition>
             <!--Memo List-->
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
+
+        <!--Task List-->
         <local:TaskListControl Grid.Column="0"></local:TaskListControl>
+
+        <!--Seperate line-->
+        <Border Grid.Column="1" Width="5" Background="{StaticResource WordVeryLightBlueBrush}"></Border>
+
+        <!--Memo List-->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+    <local:MemoListControl Grid.Row="1"></local:MemoListControl>
+        </Grid>
     </Grid>
 </local:BasePage>

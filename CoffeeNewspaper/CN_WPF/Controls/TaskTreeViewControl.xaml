@@ -35,7 +35,7 @@
                 <TextBlock Grid.Column="0"
                            Grid.ColumnSpan="3"
                            FontWeight="Bold"
-                           Foreground="{StaticResource ForegroundLightBrush}"
+                           Foreground="{StaticResource ForegroundVeryLightBrush}"
                            FontSize="{StaticResource FontSizeRegular}"
                            Text="MileStones"
                            VerticalAlignment="Center"

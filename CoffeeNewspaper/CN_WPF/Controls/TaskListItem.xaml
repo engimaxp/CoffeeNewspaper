@@ -25,7 +25,7 @@
                                     x:Name="background"
                                     BorderThickness="1"
                                     BorderBrush="{StaticResource WordVeryVeryLightBlueBrush}"
-                                    Background="{StaticResource ForegroundLightBrush}">
+                                    Background="{StaticResource ForegroundVeryLightBrush}">
 
                                 <Border.Triggers>
                                     <EventTrigger RoutedEvent="MouseEnter">
@@ -146,8 +146,8 @@
 
                                 <!-- Shadow Border-->
                                 <Border x:Name="ExpanderContent"
-                                        Background="{StaticResource ForegroundLightBrush}"
-                                        BorderBrush="{StaticResource ForegroundLightBrush}"
+                                        Background="{StaticResource ForegroundVeryLightBrush}"
+                                        BorderBrush="{StaticResource ForegroundVeryLightBrush}"
                                         BorderThickness="1"
                                         ClipToBounds="True"
                                         Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType=ScrollViewer}}">

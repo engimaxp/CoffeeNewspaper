@@ -167,13 +167,22 @@
     </ApplicationDefinition>
     <Compile Include="AttachedProperties\BaseAttachedProperty.cs" />
     <Compile Include="AttachedProperties\FrameworkElementAnimationAttachedProperties.cs" />
+    <Compile Include="AttachedProperties\IsBusyProperty.cs" />
     <Compile Include="AttachedProperties\IsHighlightProperty.cs" />
     <Compile Include="AttachedProperties\MonitorGridHoverProperty.cs" />
     <Compile Include="AttachedProperties\MonitorHoverProperty.cs" />
     <Compile Include="AttachedProperties\MouseWheelEventBubbleUpAttachedProperty.cs" />
+    <Compile Include="AttachedProperties\TextAttachedProperties.cs" />
+    <Compile Include="AttachedProperties\TextEntryWidthMatcherProperty.cs" />
     <Compile Include="AttachedProperties\TreeViewDisableDoubleClickAttackedProperties.cs" />
     <Compile Include="Controls\HeadMenuControl.xaml.cs">
       <DependentUpon>HeadMenuControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MemoListControl.xaml.cs">
+      <DependentUpon>MemoListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MemoListItemControl.xaml.cs">
+      <DependentUpon>MemoListItemControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\PageHost.xaml.cs">
       <DependentUpon>PageHost.xaml</DependentUpon>
@@ -192,6 +201,12 @@
     </Compile>
     <Compile Include="Controls\TaskListItem.xaml.cs">
       <DependentUpon>TaskListItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Input\PasswordEntryControl.xaml.cs">
+      <DependentUpon>PasswordEntryControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Input\TextEntryControl.xaml.cs">
+      <DependentUpon>TextEntryControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\BasePage.cs" />
     <Compile Include="Pages\MemoListPage.xaml.cs">
@@ -218,6 +233,7 @@
     <Compile Include="ValueConverters\ApplicationPageHelpers.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
+    <Compile Include="ValueConverters\BooleanInvertConverter.cs" />
     <Compile Include="ValueConverters\FontFamilyTypeToFontFamilyConverter.cs" />
     <Compile Include="ValueConverters\ColorTypeToColorConverter.cs" />
     <Compile Include="ValueConverters\LeftMarginMultiplierConverter.cs" />
@@ -236,6 +252,14 @@
     <Compile Include="ValueConverters\TreeViewLineConverter.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
     <Page Include="Controls\HeadMenuControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\MemoListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\MemoListItemControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -262,6 +286,14 @@
     <Page Include="Controls\TaskListItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Input\PasswordEntryControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Input\TextEntryControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
