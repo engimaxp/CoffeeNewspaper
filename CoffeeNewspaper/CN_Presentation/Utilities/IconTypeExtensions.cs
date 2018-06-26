@@ -47,6 +47,8 @@
                     return "\ue616";
                 case IconType.SolidFire:
                     return "\ue617";
+                case IconType.Add:
+                    return "\uf067";
                 // If none found, return null
                 default:
                     return null;

@@ -43,6 +43,8 @@
     <system:String x:Key="FontAwesomeTagIcon">&#xf02b;</system:String>
     <system:String x:Key="FontAwesomeAddIcon">&#xf067;</system:String>
     <system:String x:Key="FontAwesomeTrashAltIcon">&#xf2ed;</system:String>
+    <system:String x:Key="FontAwesomeFilterIcon">&#xf0b0;</system:String>
+    <system:String x:Key="FontAwesomeSortAmountDownIcon">&#xf160;</system:String>
 
     <system:String x:Key="FontAwesomeChevronCircleDownIcon">&#xf13a;</system:String>
     <system:String x:Key="FontAwesomeChevronCircleLeftIcon">&#xf137;</system:String>

@@ -22,15 +22,11 @@
         <local:TaskListControl Grid.Column="0"></local:TaskListControl>
 
         <!--Seperate line-->
-        <Border Grid.Column="1" Width="5" Background="{StaticResource WordVeryLightBlueBrush}"></Border>
+        <Border Grid.Column="1" Width="5" Background="{StaticResource WordDarkBlueBrush}"></Border>
 
         <!--Memo List-->
-        <Grid Grid.Column="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
-            </Grid.RowDefinitions>
-    <local:MemoListControl Grid.Row="1"></local:MemoListControl>
-        </Grid>
+
+        <local:MemoListControl Grid.Column="2"></local:MemoListControl>
+        
     </Grid>
 </local:BasePage>

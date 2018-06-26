@@ -57,4 +57,35 @@ namespace CN_Presentation.ViewModel.Controls.Design
 
         #endregion
     }
+
+
+    public class HeadMenuDesignModel2 : HeadMenuViewModel
+    {
+        #region Singleton
+
+        /// <summary>
+        /// A single instance of the design model
+        /// </summary>
+        public static HeadMenuDesignModel2 Instance => new HeadMenuDesignModel2();
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public HeadMenuDesignModel2()
+        {
+            NavButtonItems = new List<HeadMenuButtonViewModel>()
+            {
+                new HeadMenuButtonViewModel()
+                {
+                    FontCode = IconType.Add,
+                },
+            };
+        }
+
+        #endregion
+    }
 }
