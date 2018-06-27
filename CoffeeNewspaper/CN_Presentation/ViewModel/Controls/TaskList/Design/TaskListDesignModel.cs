@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace CN_Presentation.ViewModel.Controls.Design
 {
@@ -11,7 +12,7 @@ namespace CN_Presentation.ViewModel.Controls.Design
         /// </summary>
         public TaskListDesignModel()
         {
-            Items = new List<TaskListItemViewModel>
+            Items = new ObservableCollection<TaskListItemViewModel>
             {
                 new TaskListItemViewModel
                 {
@@ -100,6 +101,11 @@ namespace CN_Presentation.ViewModel.Controls.Design
                     TaskTitle =
                         "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree."
                 },
+            };
+
+            ActivatedSearchTxts = new ObservableCollection<string>()
+            {
+                "Hello","My","您好","Boun"
             };
         }
 

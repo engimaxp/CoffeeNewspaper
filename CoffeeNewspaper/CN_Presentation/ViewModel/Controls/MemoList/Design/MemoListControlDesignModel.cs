@@ -19,12 +19,17 @@ namespace CN_Presentation.ViewModel.Controls.Design
         /// Default constructor
         /// </summary>
         public MemoListControlDesignModel()
-        {Items = new ObservableCollection<MemoListItemViewModel>()
+        {
+            Items = new ObservableCollection<MemoListItemViewModel>()
             {
                 new MemoListItemViewModel(),
                 new MemoListItemViewModel(),
                 new MemoListItemViewModel(),
                 new MemoListItemViewModel(),
+            };
+            ActivatedSearchTxts = new ObservableCollection<string>()
+            {
+                "Hello","My","您好","Boun"
             };
         }
         #endregion
