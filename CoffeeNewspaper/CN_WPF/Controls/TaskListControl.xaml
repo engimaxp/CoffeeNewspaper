@@ -6,8 +6,9 @@
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="300">
-    <Border Padding="5 0 0 0" Background="{StaticResource WordVeryLightBlueBrush}">
+             d:DesignHeight="450" 
+             Width="300">
+    <Border Padding="0 5 0 0" Background="{StaticResource IconHoverBlueBrush}">
         <Grid DataContext="{x:Static design:TaskListDesignModel.Instance}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -15,12 +16,6 @@
             </Grid.RowDefinitions>
             <!-- search bar\filter bar\sort bar -->
             <Grid Grid.Row="0">
-                <Grid.Background>
-                    <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
-                        <GradientStop Color="{StaticResource WordVeryLightBlue}" Offset="0.0" />
-                        <GradientStop Color="{StaticResource WordDarkBlue}" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Grid.Background>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40" />
                     <RowDefinition Height="Auto" />
@@ -42,7 +37,7 @@
                                  VerticalAlignment="Center"></TextBox>
                     </Border>
                     <TextBlock
-                        Foreground="{StaticResource WordDarkBlueBrush}"
+                        Foreground="{StaticResource IconHoverBlueBrush}"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Left"
                         Grid.Column="0"
@@ -68,7 +63,7 @@
                 <!-- Search Activated Tags -->
 
                 <ItemsControl 
-                    Margin="0 -5 0 10"
+                    Margin="5 -5 5 10"
                     Grid.Row="1"
                     ItemsSource="{Binding ActivatedSearchTxts}">
                     <ItemsControl.ItemsPanel>

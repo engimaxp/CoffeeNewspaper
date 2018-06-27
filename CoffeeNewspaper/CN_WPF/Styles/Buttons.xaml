@@ -205,7 +205,7 @@
     <!-- Search Cancel button -->
     <Style x:Key="SearchCancelButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}">
 
-        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Background" Value="{StaticResource ForegroundVeryLightBrush}" />
         <Setter Property="BorderThickness" Value="2" />
         <Setter Property="Padding" Value="5 0" />
         <Setter Property="Margin" Value="0 10 10 0" />
@@ -271,7 +271,7 @@
                         <EventTrigger RoutedEvent="MouseLeave">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <ColorAnimation To="Transparent" Duration="0:0:0.02" Storyboard.TargetName="border"
+                                    <ColorAnimation To="{StaticResource ForegroundVeryLight}" Duration="0:0:0.02" Storyboard.TargetName="border"
                                                     Storyboard.TargetProperty="Background.Color" />
                                     <ColorAnimation To="{StaticResource ForegroundVeryDark}" Duration="0:0:0.02"
                                                     Storyboard.TargetName="textblock"
@@ -581,6 +581,7 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="0 0 10 0"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
@@ -591,7 +592,7 @@
                         </Grid.ColumnDefinitions>
                         <Border x:Name="checkBoxBorder"
                                 Background="{TemplateBinding Background}" 
-                                Margin="0 0 10 0" 
+                                Margin="{TemplateBinding Padding}" 
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
                             <Grid x:Name="markGrid">
@@ -692,6 +693,86 @@
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <!-- SidePanelExpander button -->
+    <Style  x:Key="SidePanelExpander" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}">
+
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource ForegroundLightBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeXXLarge}" />
+        <Setter Property="Cursor" Value="Hand"></Setter>
+        <Setter Property="local:IsHighlightProperty.Value" Value="False"></Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ButtonBase}">
+                    <Border x:Name="border"
+                            CornerRadius="10"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}" 
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Path 
+                                x:Name="backpath"  
+                                SnapsToDevicePixels="True" 
+                                Stroke="{StaticResource IconHoverBlueBrush}" 
+                                StrokeThickness="1" 
+                                Fill="{StaticResource IconHoverBlueBrush}">
+                                <Path.Data>
+                                    <PathGeometry Figures="m 0,0 l 10,5 0,50 -10,5 Z" />
+                                </Path.Data>
+                            </Path>
+                            <Path
+                                x:Name="closeIcon"  
+                                SnapsToDevicePixels="True" 
+                                Stroke="{StaticResource ForegroundMainBrush}" 
+                                StrokeThickness="1" 
+                                Visibility="{TemplateBinding local:IsHighlightProperty.Value,Converter={local:BooleanToVisiblityGoneConverter}}"
+                                Fill="{StaticResource ForegroundMainBrush}">
+
+                                <Path.Data>
+                                    <PathGeometry Figures="m 3,30 l 4,-3 0,6 -4,-3 Z" />
+                                </Path.Data>
+                            </Path>
+                            <Path
+                                x:Name="expandIcon" 
+                                Visibility="{TemplateBinding local:IsHighlightProperty.Value,Converter={local:BooleanToVisiblityGoneConverter},ConverterParameter=True}"
+                                SnapsToDevicePixels="True" 
+                                Stroke="{StaticResource ForegroundMainBrush}"
+                                StrokeThickness="1"
+                                Fill="{StaticResource ForegroundMainBrush}">
+                                <Path.Data>
+                                    <PathGeometry Figures="m 3,27 l 4,3 -4,3 0,-6 Z" />
+                                </Path.Data>
+                            </Path>
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <EventTrigger RoutedEvent="MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation To="{StaticResource WordOrange}" Duration="0:0:0.3" Storyboard.TargetName="backpath" Storyboard.TargetProperty="Fill.Color" />
+                                    <ColorAnimation To="{StaticResource WordOrange}" Duration="0:0:0.3" Storyboard.TargetName="backpath" Storyboard.TargetProperty="Stroke.Color" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation To="{StaticResource IconHoverBlue}" Duration="0:0:0.3" Storyboard.TargetName="backpath" Storyboard.TargetProperty="Fill.Color" />
+                                    <ColorAnimation To="{StaticResource IconHoverBlue}" Duration="0:0:0.3" Storyboard.TargetName="backpath" Storyboard.TargetProperty="Stroke.Color" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+
             </Setter.Value>
         </Setter>
     </Style>
