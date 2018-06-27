@@ -20,7 +20,7 @@
     <system:String x:Key="FontAwesomePictureIcon">&#xf1c5;</system:String>
     <system:String x:Key="FontAwesomeCogIcon">&#xf013;</system:String>
     <system:String x:Key="FontAwesomeSearchIcon">&#xf002;</system:String>
-    <system:String x:Key="FontAwesomeEllipsisIcon">&#xf141;</system:String>
+    <system:String x:Key="FontAwesomeEllipsisHIcon">&#xf141;</system:String>
     <system:String x:Key="FontAwesomeEllipsisVerticalIcon">&#xf142;</system:String>
     <system:String x:Key="FontAwesomePaperclipIcon">&#xf0c6;</system:String>
     <system:String x:Key="FontAwesomeEmojiIcon">&#xf118;</system:String>
@@ -43,20 +43,29 @@
     <system:String x:Key="FontAwesomeTagIcon">&#xf02b;</system:String>
     <system:String x:Key="FontAwesomeAddIcon">&#xf067;</system:String>
     <system:String x:Key="FontAwesomeTrashAltIcon">&#xf2ed;</system:String>
+    <system:String x:Key="FontAwesomeFilterIcon">&#xf0b0;</system:String>
+    <system:String x:Key="FontAwesomeSortAmountDownIcon">&#xf160;</system:String>
 
     <system:String x:Key="FontAwesomeChevronCircleDownIcon">&#xf13a;</system:String>
     <system:String x:Key="FontAwesomeChevronCircleLeftIcon">&#xf137;</system:String>
     <system:String x:Key="FontAwesomeChevronCircleRightIcon">&#xf138;</system:String>
     <system:String x:Key="FontAwesomeChevronCircleUpIcon">&#xf139;</system:String>
 
+
+    
     <!--Regular-->
     <system:String x:Key="FontAwesomeTimesCircleIcon">&#xf057;</system:String>
+    <system:String x:Key="FontAwesomeSquareIcon">&#xf0c8;</system:String>
+    <system:String x:Key="FontAwesomeCheckSquareIcon">&#xf14a;</system:String>
+    <system:String x:Key="FontAwesomeCaretSquareUpIcon">&#xf151;</system:String>
+    <system:String x:Key="FontAwesomeCaretSquareDownIcon">&#xf150;</system:String>
+    <system:String x:Key="FontAwesomeCopyIcon">&#xf0c5;</system:String>
 
     <!-- Custom -->
     <system:String x:Key="FontAwesomeAddChildNodeIcon">&#xe70e;</system:String>
 
     <Style TargetType="{x:Type Control}" x:Key="BaseStyle">
-<!--        <Setter Property="FontFamily" Value="Microsoft YaHei" />-->
+        <Setter Property="FontFamily" Value="Microsoft YaHei" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeRegular}" />
     </Style>
     

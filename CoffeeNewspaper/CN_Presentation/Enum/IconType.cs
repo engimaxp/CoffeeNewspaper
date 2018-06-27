@@ -47,6 +47,8 @@
 
         SolidFire = 14,
 
-        RegularFire = 15
+        RegularFire = 15,
+
+        Add = 16
     }
 }
