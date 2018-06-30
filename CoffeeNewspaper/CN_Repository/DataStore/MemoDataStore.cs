@@ -102,25 +102,22 @@ namespace CN_Repository
                         .Include(r => r.MemoTaggers)
                         .Include(x => x.TaskMemos)
                         .FirstOrDefault(e => string.Equals(e.MemoId, memoid, StringComparison.Ordinal));
-                    if (originalEntity != null)
+                    if (originalEntity == null) return null;
+                    originalEntity.MemoId = null;
+                    foreach (var originalEntityMemoTagger in originalEntity.MemoTaggers)
                     {
-                        originalEntity.MemoId = null;
-                        foreach (var originalEntityMemoTagger in originalEntity.MemoTaggers)
-                        {
-                            originalEntityMemoTagger.MemoId = null;
-                            originalEntityMemoTagger.MemoTaggerId = null;
-                        }
-                        foreach (var originalEntityTaskMemo in originalEntity.TaskMemos)
-                        {
-                            originalEntityTaskMemo.MemoId = null;
-                            originalEntityTaskMemo.TaskMemoId = null;
-                        }
-                        mDbContext.Memos.Add(originalEntity);
-                        await mDbContext.SaveChangesAsync();
-                        return originalEntity;
+                        originalEntityMemoTagger.MemoId = null;
+                        originalEntityMemoTagger.MemoTaggerId = null;
                     }
+                    foreach (var originalEntityTaskMemo in originalEntity.TaskMemos)
+                    {
+                        originalEntityTaskMemo.MemoId = null;
+                        originalEntityTaskMemo.TaskMemoId = null;
+                    }
+                    mDbContext.Memos.Add(originalEntity);
+                    await mDbContext.SaveChangesAsync();
+                    return originalEntity;
 
-                    return null;
                 }, (CNMemo)null);
         }
 

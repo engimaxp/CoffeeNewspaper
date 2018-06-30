@@ -25,16 +25,6 @@ namespace CN_Repository
             // bind a default DBContext to IoC
             Kernel.Bind<CNDbContext>().ToConstant(dbContext);
         }
-
-        /// <summary>
-        ///     Unbind the DbContext
-        ///     this can be used while app tear down
-        /// </summary>
-        /// <param name="Kernel"></param>
-        public static void UnBindCNDBContext(this IKernel Kernel)
-        {
-            if (Kernel == null) return;
-            Kernel.Unbind<CNDbContext>();
-        }
+        
     }
 }

@@ -15,6 +15,12 @@ namespace CN_Core.Interfaces.Repository
         /// <returns></returns>
         Task<bool> RemoveTask(CNTask targetTask);
 
+        /// <summary>
+        ///  Remove a PreSufTaskConnector from datasource
+        /// </summary>
+        /// <param name="connector"></param>
+        /// <returns></returns>
+        Task<bool> RemoveTaskConnector(CNTaskConnector connector);
         #endregion
 
         #region Add Methods
@@ -82,5 +88,6 @@ namespace CN_Core.Interfaces.Repository
         Task ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime);
 
         #endregion
+
     }
 }

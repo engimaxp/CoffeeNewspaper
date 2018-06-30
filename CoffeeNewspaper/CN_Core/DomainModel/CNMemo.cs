@@ -29,6 +29,11 @@ namespace CN_Core
         public string MemoId { get; set; }
 
         /// <summary>
+        ///     The sortIndex of this Memo
+        /// </summary>
+        public int Sort { get; set; }
+
+        /// <summary>
         ///     Content of this Memo May be any format string like html or json
         /// </summary>
         public string Content { get; set; }

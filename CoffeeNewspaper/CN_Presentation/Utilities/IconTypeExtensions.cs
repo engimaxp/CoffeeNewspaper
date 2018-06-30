@@ -49,6 +49,8 @@
                     return "\ue617";
                 case IconType.Add:
                     return "\uf067";
+                case IconType.HourGlass:
+                    return "\uf252";
                 // If none found, return null
                 default:
                     return null;

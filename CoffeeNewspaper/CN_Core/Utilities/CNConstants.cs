@@ -15,6 +15,9 @@
         /// value -2 / means user didn't fill the estimated duration property
         /// </summary>
         public const int ESTIMATED_DURATION_NOTWRITE = -2;
-
+        /// <summary>
+        /// Pengding reason for task
+        /// </summary>
+        public const string PENDINGREASON_PreTaskNotComplete = "preTask not finished";
     }
 }

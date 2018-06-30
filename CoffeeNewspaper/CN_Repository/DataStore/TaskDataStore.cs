@@ -25,6 +25,16 @@ namespace CN_Repository
                 }, false);
         }
 
+        public async Task<bool> RemoveTaskConnector(CNTaskConnector connector)
+        {
+            return await IoC.Task.Run(
+                async () =>
+                {
+                    mDbContext.TaskConnectors.Remove(connector);
+                    return await mDbContext.SaveChangesAsync() > 0;
+                }, false);
+        }
+
         #endregion
 
         #region Add Methods
@@ -74,8 +84,8 @@ namespace CN_Repository
                 async () =>
                 {
                     if (originDataTask == null) return;
-                    if (originDataTask.EndTime == null && targetStartTime == null) return;
-                    if (originDataTask.EndTime != null && originDataTask.EndTime.Equals(targetStartTime)) return;
+                    if (originDataTask.StartTime == null && targetStartTime == null) return;
+                    if (originDataTask.StartTime != null && originDataTask.StartTime.Equals(targetStartTime)) return;
                     originDataTask.StartTime = targetStartTime;
                     mDbContext.Tasks.Update(originDataTask);
                     await mDbContext.SaveChangesAsync();

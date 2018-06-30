@@ -178,5 +178,29 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 Assert.IsFalse(updatedResult);
             });
         }
+
+        [Test] 
+        public async Task DeleteTimeSliceByTask_Success()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
+                //Arrange argument to be tested
+                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
+                var task = DomainTestHelper.GetARandomTask();
+                //add this timeslice to task
+                task.UsedTimeSlices.Add(assesTimeSlice);
+                var TaskDataStore = new TaskDataStore(dbcontext);
+                await TaskDataStore.AddTask(task);
+
+                //action
+                var result = await TimeSliceDataStore.DeleteTimeSliceByTask(task.TaskId);
+                
+                Assert.IsTrue(result);
+
+                var finalTask = await TaskDataStore.GetTask(task.TaskId);
+                Assert.IsTrue(finalTask.UsedTimeSlices== null|| finalTask.UsedTimeSlices.Count == 0);
+            });
+        }
     }
 }

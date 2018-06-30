@@ -49,6 +49,8 @@
 
         RegularFire = 15,
 
-        Add = 16
+        Add = 16,
+
+        HourGlass = 17
     }
 }

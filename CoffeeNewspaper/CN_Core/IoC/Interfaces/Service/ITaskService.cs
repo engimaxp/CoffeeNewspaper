@@ -100,12 +100,21 @@ namespace CN_Core.Interfaces.Service
         Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask);
 
         /// <summary>
-        ///     Set pre task of this task
+        ///     Add pre task of this task
         /// </summary>
         /// <param name="targetTask"></param>
         /// <param name="preTask"></param>
         /// <returns></returns>
-        Task<bool> SetPreTask(CNTask targetTask, CNTask preTask);
+        Task<bool> AddPreTask(CNTask targetTask, CNTask preTask);
+
+
+        /// <summary>
+        ///     Remove pre task of this task
+        /// </summary>
+        /// <param name="targetTask"></param>
+        /// <param name="preTask"></param>
+        /// <returns></returns>
+        Task<bool> DelPreTask(CNTask targetTask, CNTask preTask);
         #region TimeSlices relevent
 
         /// <summary>
@@ -145,5 +154,14 @@ namespace CN_Core.Interfaces.Service
         Task<bool> DeleteTimeSlices(CNTimeSlice timeSlice);
 
         #endregion
+
+        /// <summary>
+        ///     Pending a task with reason
+        ///     this task and its suf children tasks cannot start
+        /// </summary>
+        /// <param name="TaskId"></param>
+        /// <param name="reason"></param>
+        /// <returns></returns>
+        Task<bool> PendingATask(int TaskId, string reason);
     }
 }

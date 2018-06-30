@@ -60,7 +60,7 @@ namespace CN_Core
             foreach (var timeSlice in timeSlices)
             {
                 //Get encounted maximum day period
-                var dayDuration = timeSlice.GetDayDuration();
+                var dayDuration = timeSlice?.GetDayDuration();
                 if (dayDuration == null) continue;
                 //if current day period is smaller than one of the existing day period then jump to next
                 if (days.Any(x => x.IsContaining(dayDuration))) continue;

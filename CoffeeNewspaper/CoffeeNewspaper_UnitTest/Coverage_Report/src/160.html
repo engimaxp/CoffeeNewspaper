@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\servicetest\memoservicetest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Repository;
+using CN_Core.Interfaces.Service;
+using CoffeeNewspaper_UnitTest.DomainTest;
+using Ninject;
+using NSubstitute;
+using NUnit.Framework;
+
+namespace CoffeeNewspaper_UnitTest.ServiceTest
+{
+    [TestFixture]
+    public class MemoServiceTest : ServiceSetupTearDown
+    {
+        [Test]
+        public async Task AddAMemoToTask_MemoNull_Fail()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            mockTaskDataStore.GetTask(1).Returns(Task.FromResult(DomainTestHelper.GetARandomTask()));
+            mockMemoDataStore.AddMemo(Arg.Any&lt;CNMemo&gt;())
+                .Returns(Task.FromResult(DomainTestHelper.GetARandomMemo(true)));
+
+            //Act
+            var result = await targetService.AddAMemoToTask(null, 1);
+
+            //Assert
+            Assert.True(string.IsNullOrEmpty(result));
+            await mockMemoDataStore.DidNotReceiveWithAnyArgs().AddMemo(Arg.Any&lt;CNMemo&gt;());
+        }
+        [Test]
+        public async Task AddAMemoToTask_TaskExist_Success()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask();
+            var mockTag = DomainTestHelper.GetARandomTag();
+            mockTask.TaskTaggers = new List&lt;CNTaskTagger&gt;(){new CNTaskTagger(){Tag = mockTag,Task = mockTask}};
+            //Assess
+            mockTaskDataStore.GetTask(1).Returns(Task.FromResult(mockTask));
+            mockMemoDataStore.AddMemo(Arg.Any&lt;CNMemo&gt;())
+                .Returns(Task.FromResult(DomainTestHelper.GetARandomMemo(true)));
+
+            //Act
+            var result = await targetService.AddAMemoToTask(DomainTestHelper.GetARandomMemo(), 1);
+
+            //Assert
+            Assert.IsFalse(string.IsNullOrEmpty(result));
+            await mockMemoDataStore.Received().AddMemo(Arg.Is&lt;CNMemo&gt;(x =&gt; x.TaskMemos.Count &gt; 0 &amp;&amp; x.MemoTaggers.Count&gt;0));
+        }
+
+        [Test]
+        public async Task AddAMemoToTask_TaskExistMemoExist_Success()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            mockTaskDataStore.GetTask(1).Returns(Task.FromResult(DomainTestHelper.GetARandomTask()));
+            mockMemoDataStore.UpdateMemo(Arg.Any&lt;CNMemo&gt;())
+                .Returns(Task.FromResult(true));
+
+            //Act
+            var result = await targetService.AddAMemoToTask(DomainTestHelper.GetARandomMemo(true), 1);
+
+            //Assert
+            Assert.IsFalse(string.IsNullOrEmpty(result));
+            await mockMemoDataStore.Received().UpdateMemo(Arg.Is&lt;CNMemo&gt;(x =&gt; x.TaskMemos.Count &gt; 0));
+        }
+
+        [Test]
+        public async Task AddAMemoToTask_DBFail_False()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            mockTaskDataStore.GetTask(1).Returns(Task.FromResult(DomainTestHelper.GetARandomTask()));
+            mockMemoDataStore.UpdateMemo(Arg.Any&lt;CNMemo&gt;())
+                .Returns(Task.FromResult(false));
+
+            //Act
+            var result = await targetService.AddAMemoToTask(DomainTestHelper.GetARandomMemo(true), 1);
+
+            //Assert
+            Assert.IsTrue(string.IsNullOrEmpty(result));
+            await mockMemoDataStore.Received().UpdateMemo(Arg.Is&lt;CNMemo&gt;(x =&gt; x.TaskMemos.Count &gt; 0));
+        }
+        [Test]
+        public async Task AddAMemoToTask_TaskNotExist_Fail()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            mockTaskDataStore.GetTask(1).Returns(Task.FromResult((CNTask) null));
+
+            //Act
+            var result = await targetService.AddAMemoToTask(DomainTestHelper.GetARandomMemo(), 1);
+
+            //Assert
+            Assert.IsTrue(string.IsNullOrEmpty(result));
+            await mockMemoDataStore.DidNotReceiveWithAnyArgs().AddMemo(Arg.Any&lt;CNMemo&gt;());
+        }
+
+        [Test]
+        public async Task DeleteAMemo_MemoExist_Success()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            var testMemo = DomainTestHelper.GetARandomMemo(true);
+            mockMemoDataStore.GetMemoById(testMemo.MemoId).Returns(Task.FromResult(testMemo));
+
+            //Act
+            var result = await targetService.DeleteAMemo(testMemo.MemoId);
+
+            //Assert
+            Assert.IsFalse(result);
+            await mockMemoDataStore.Received().DeleteMemo(Arg.Is&lt;CNMemo&gt;(x =&gt; x.MemoId == testMemo.MemoId));
+        }
+
+        [Test]
+        public async Task DeleteAMemo_MemoNotExist_Fail()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            var testMemo = DomainTestHelper.GetARandomMemo(true);
+            mockMemoDataStore.GetMemoById(testMemo.MemoId).Returns(Task.FromResult((CNMemo) null));
+
+            //Act
+            var result = await targetService.DeleteAMemo(testMemo.MemoId);
+
+            //Assert
+            Assert.IsFalse(result);
+            await mockMemoDataStore.DidNotReceiveWithAnyArgs().DeleteMemo(Arg.Any&lt;CNMemo&gt;());
+        }
+
+
+        [Test]
+        public async Task RemoveAMemoFromTask_MemoNotExist_Fail()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            var assesMemo = DomainTestHelper.GetARandomMemo(true);
+            mockMemoDataStore.GetMemoById(assesMemo.MemoId).Returns(Task.FromResult((CNMemo) null));
+
+            //Act
+            var result = await targetService.RemoveAMemoFromTask(assesMemo.MemoId, 1);
+
+            //Assert
+            Assert.False(result);
+            await mockMemoDataStore.DidNotReceiveWithAnyArgs().UpdateMemo(Arg.Any&lt;CNMemo&gt;());
+        }
+
+        [Test]
+        public async Task RemoveAMemoFromTask_Success()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            var assesMemo = DomainTestHelper.GetARandomMemo(true);
+            var assesTask = DomainTestHelper.GetARandomTask();
+            assesMemo.TaskMemos.Add(new CNTaskMemo
+            {
+                Memo = assesMemo,
+                MemoId = assesMemo.MemoId,
+                Task = assesTask,
+                TaskId = assesTask.TaskId
+            });
+            mockMemoDataStore.GetMemoById(assesMemo.MemoId).Returns(Task.FromResult(assesMemo));
+            mockMemoDataStore.UpdateMemo(Arg.Any&lt;CNMemo&gt;()).Returns(Task.FromResult(true));
+            //Act
+            var result = await targetService.RemoveAMemoFromTask(assesMemo.MemoId, assesTask.TaskId);
+
+            //Assert
+            Assert.True(result);
+            await mockMemoDataStore.Received().UpdateMemo(Arg.Is&lt;CNMemo&gt;(x =&gt; x.TaskMemos.Count == 0));
+        }
+
+        [Test]
+        public async Task RemoveAMemoFromTask_TaskMemoRelationNotExist_Fail()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            var assesMemo = DomainTestHelper.GetARandomMemo(true);
+            mockMemoDataStore.GetMemoById(assesMemo.MemoId).Returns(Task.FromResult(assesMemo));
+
+            //Act
+            var result = await targetService.RemoveAMemoFromTask(assesMemo.MemoId, 1);
+
+            //Assert
+            Assert.False(result);
+            await mockMemoDataStore.DidNotReceiveWithAnyArgs().UpdateMemo(Arg.Any&lt;CNMemo&gt;());
+        }
+        [Test]
+        public async Task AddAMemoToGlobal_Success()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            var assesMemo = DomainTestHelper.GetARandomMemo(true);
+            mockMemoDataStore.AddMemo(assesMemo).Returns(Task.FromResult(assesMemo));
+
+            //Act
+            var result = await targetService.AddAMemoToGlobal(assesMemo);
+
+            //Assert
+            Assert.AreEqual(assesMemo.MemoId,result);
+            await mockMemoDataStore.Received().AddMemo(Arg.Is&lt;CNMemo&gt;(x=&gt;x.MemoId == assesMemo.MemoId));
+        }
+        [Test]
+        public async Task AddAMemoToGlobal_Null_Fail()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            var assesMemo = DomainTestHelper.GetARandomMemo(true);
+            //Act
+            var result = await targetService.AddAMemoToGlobal(null);
+
+            //Assert
+            Assert.IsTrue(string.IsNullOrEmpty(result));
+            await mockMemoDataStore.DidNotReceiveWithAnyArgs().AddMemo(assesMemo);
+        }
+
+        [Test]
+        public async Task UpdateAMemo_Success()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            var assesMemo = DomainTestHelper.GetARandomMemo(true);
+            mockMemoDataStore.UpdateMemo(assesMemo).Returns(Task.FromResult(true));
+
+            //Act
+            var result = await targetService.UpdateAMemo(assesMemo);
+
+            //Assert
+            Assert.IsTrue(result);
+            await mockMemoDataStore.Received().UpdateMemo(Arg.Is&lt;CNMemo&gt;(x =&gt; x.MemoId == assesMemo.MemoId));
+        }
+        [Test]
+        public async Task UpdateAMemo_Null_Fail()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Assess
+            var assesMemo = DomainTestHelper.GetARandomMemo(true);
+            //Act
+            var result = await targetService.UpdateAMemo(null);
+
+            //Assert
+            Assert.IsFalse(result);
+            await mockMemoDataStore.DidNotReceiveWithAnyArgs().UpdateMemo(assesMemo);
+        }
+        [Test]
+        public async Task GetAllGlobalMemos_Traverse()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Act
+            await targetService.GetAllGlobalMemos();
+
+            //Assert
+            await mockMemoDataStore.Received().GetAllGlobalMemos();
+        }
+        [Test]
+        public async Task GetAllTaskMemos_Traverse()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Act
+            await targetService.GetAllTaskMemos(1);
+
+            //Assert
+            await mockMemoDataStore.Received().GetAllTaskMemos(1);
+        }
+        [Test]
+        public async Task GetMemoById_Traverse()
+        {
+            var mockMemoDataStore = _kernel.Get&lt;IMemoDataStore&gt;();
+            var targetService = _kernel.Get&lt;IMemoService&gt;();
+
+            //Act
+            await targetService.GetMemoById(&quot;1&quot;);
+
+            //Assert
+            await mockMemoDataStore.Received().GetMemoById(&quot;1&quot;);
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,9,18,10,1],[19,13,19,67,1],[20,13,20,67,1],[21,13,21,61,1],[24,13,24,102,1],[25,13,26,82,1],[29,13,29,70,1],[32,13,32,55,1],[33,13,33,91,1],[34,9,34,10,1],[37,9,37,10,1],[38,13,38,67,1],[39,13,39,67,1],[40,13,40,61,1],[41,13,41,62,1],[42,13,42,60,1],[43,13,43,112,1],[45,13,45,77,1],[46,13,47,82,1],[50,13,50,99,1],[53,13,53,58,1],[54,13,54,125,1],[55,9,55,10,1],[59,9,59,10,1],[60,13,60,67,1],[61,13,61,67,1],[62,13,62,61,1],[65,13,65,102,1],[66,13,67,49,1],[70,13,70,103,1],[73,13,73,58,1],[74,13,74,103,1],[75,9,75,10,1],[79,9,79,10,1],[80,13,80,67,1],[81,13,81,67,1],[82,13,82,61,1],[85,13,85,102,1],[86,13,87,50,1],[90,13,90,103,1],[93,13,93,57,1],[94,13,94,103,1],[95,9,95,10,1],[98,9,98,10,1],[99,13,99,67,1],[100,13,100,67,1],[101,13,101,61,1],[104,13,104,82,1],[107,13,107,99,1],[110,13,110,57,1],[111,13,111,91,1],[112,9,112,10,1],[116,9,116,10,1],[117,13,117,67,1],[118,13,118,61,1],[121,13,121,66,1],[122,13,122,95,1],[125,13,125,75,1],[128,13,128,36,1],[129,13,129,109,1],[130,9,130,10,1],[134,9,134,10,1],[135,13,135,67,1],[136,13,136,61,1],[139,13,139,66,1],[140,13,140,100,1],[143,13,143,75,1],[146,13,146,36,1],[147,13,147,94,1],[148,9,148,10,1],[153,9,153,10,1],[154,13,154,67,1],[155,13,155,61,1],[158,13,158,67,1],[159,13,159,101,1],[162,13,162,87,1],[165,13,165,34,1],[166,13,166,94,1],[167,9,167,10,1],[171,9,171,10,1],[172,13,172,67,1],[173,13,173,61,1],[176,13,176,67,1],[177,13,177,63,1],[178,13,184,16,1],[185,13,185,97,1],[186,13,186,92,1],[188,13,188,102,1],[191,13,191,33,1],[192,13,192,104,1],[193,9,193,10,1],[197,9,197,10,1],[198,13,198,67,1],[199,13,199,61,1],[202,13,202,67,1],[203,13,203,97,1],[206,13,206,87,1],[209,13,209,34,1],[210,13,210,94,1],[211,9,211,10,1],[214,9,214,10,1],[215,13,215,67,1],[216,13,216,61,1],[219,13,219,67,1],[220,13,220,86,1],[223,13,223,74,1],[226,13,226,54,1],[227,13,227,105,1],[228,9,228,10,1],[231,9,231,10,1],[232,13,232,67,1],[233,13,233,61,1],[236,13,236,67,1],[238,13,238,69,1],[241,13,241,57,1],[242,13,242,83,1],[243,9,243,10,1],[247,9,247,10,1],[248,13,248,67,1],[249,13,249,61,1],[252,13,252,67,1],[253,13,253,84,1],[256,13,256,69,1],[259,13,259,35,1],[260,13,260,110,1],[261,9,261,10,1],[264,9,264,10,1],[265,13,265,67,1],[266,13,266,61,1],[269,13,269,67,1],[271,13,271,64,1],[274,13,274,36,1],[275,13,275,86,1],[276,9,276,10,1],[279,9,279,10,1],[280,13,280,67,1],[281,13,281,61,1],[284,13,284,53,1],[287,13,287,68,1],[288,9,288,10,1],[291,9,291,10,1],[292,13,292,67,1],[293,13,293,61,1],[296,13,296,52,1],[299,13,299,67,1],[300,9,300,10,1],[303,9,303,10,1],[304,13,304,67,1],[305,13,305,61,1],[308,13,308,50,1],[311,13,311,65,1],[312,9,312,10,1]]);
+    </script>
+  </body>
+</html>

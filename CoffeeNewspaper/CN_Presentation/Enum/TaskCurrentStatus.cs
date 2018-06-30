@@ -8,6 +8,7 @@
         STOP = 0,
         UNDERGOING = 1,
         DELETE = 2,
-        COMPLETE = 3
+        COMPLETE = 3,
+        PENDING = 4,
     }
 }

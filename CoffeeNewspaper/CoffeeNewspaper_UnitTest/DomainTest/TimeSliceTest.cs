@@ -20,9 +20,8 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         [Test]
         public void CreateATimeSlice_EndTimeGreaterThanStartTime()
         {
-            Assert.Catch<ArgumentException>(() => {
-                CNTimeSlice a = new CNTimeSlice(DateTime.Now, DateTime.Now.AddMinutes(-1));
-            });
+            Assert.Throws<ArgumentException>(() => {
+                CNTimeSlice a = new CNTimeSlice(DateTime.Now, DateTime.Now.AddMinutes(-1));});
         }
         [Test]
         public void CloneATimeSlice()
@@ -74,6 +73,12 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
         }
 
 
+        [Test]
+        public void InterceptWithAnother_nullCondition_false()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3), DateTime.Now);
+            Assert.IsFalse(a.InterceptWith(null));
+        }
         [Test]
         public void InterceptWithAnother_BothEndTime_TimeLineIntercept1()
         {
@@ -166,7 +171,22 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.AddDays(1).ToShortDateString()).AddMilliseconds(-1));
             Assert.AreEqual(b, a.GetDayDuration());
         }
+        [Test]
+        public void GetDayDuration_StartTimeBiggerThanDateTimeNow()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(1).AddMinutes(-1), currentTime.AddDays(1).AddMinutes(4));
+            Assert.IsNull(a.GetDayDuration());
+        }
 
+        [Test]
+        public void IsContaining_NoBoundary()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.ToShortDateString()));
+            Assert.IsFalse(b.IsContaining(a));
+        }
         [Test]
         public void IsContaining_BWrapA()
         {
@@ -220,6 +240,14 @@ namespace CoffeeNewspaper_UnitTest.DomainTest
             a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), DateTime.Now.Date);
             b = a.GetDayDuration();
             Assert.AreEqual(2, b.GetWorkDays());
+        }
+        [Test]
+        public void GetWorkDays_EndTimeZero()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1));
+            ;
+            Assert.AreEqual(0, a.GetWorkDays());
         }
 
         [Test]

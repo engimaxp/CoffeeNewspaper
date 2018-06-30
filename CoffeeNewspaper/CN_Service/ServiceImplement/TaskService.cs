@@ -31,7 +31,7 @@ namespace CN_Service
 
         public async Task<bool> EditATask(CNTask task)
         {
-            if (task.TaskId <= 0) return false;
+            if (task == null || task.TaskId <= 0) return false;
             return await taskDataStore.UpdateTask(task);
         }
 
@@ -88,8 +88,8 @@ namespace CN_Service
             var targetTask = await taskDataStore.GetTask(taskId);
             if (targetTask == null) return false;
             if (targetTask.IsDeleted) return false; 
-            if (targetTask.Status != CNTaskStatus.TODO && targetTask.Status != CNTaskStatus.DONE)
-                throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.TODO, CNTaskStatus.DONE},
+            if (targetTask.Status != CNTaskStatus.TODO && targetTask.Status != CNTaskStatus.PENDING)
+                throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.TODO, CNTaskStatus.PENDING},
                     targetTask.Status);
             //set status to doing
             targetTask.Status = CNTaskStatus.DOING;
@@ -111,7 +111,27 @@ namespace CN_Service
             await taskDataStore.UpdateTask(targetTask);
 
             //EndTimeSlices of this task's children and suffix task
-            return await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            return true;
+        }
+
+        public async Task<bool> PendingATask(int taskId,string reason)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return false;
+            if (targetTask.Status != CNTaskStatus.DOING
+                && targetTask.Status != CNTaskStatus.TODO
+                && targetTask.Status != CNTaskStatus.PENDING)
+                throw new TaskStatusException(new List<CNTaskStatus> { CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING }, targetTask.Status);
+            //EndTimeSlices of this task's children and suffix task
+            if (targetTask.Status == CNTaskStatus.DOING)
+            {
+                await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            }
+            targetTask.Status = CNTaskStatus.PENDING;
+            targetTask.PendingReason = reason;
+            return await taskDataStore.UpdateTask(targetTask);
         }
 
         public async Task<bool> RemoveATask(int taskId, bool force = false)
@@ -137,7 +157,7 @@ namespace CN_Service
             if (targetTask == null) return false;
             if (targetTask.IsDeleted) return false;
             if (targetTask.Status == CNTaskStatus.DONE)
-                throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.DOING, CNTaskStatus.TODO},
+                throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING },
                     targetTask.Status);
             targetTask.Status = CNTaskStatus.DONE;
             await taskDataStore.UpdateTask(targetTask);
@@ -163,25 +183,61 @@ namespace CN_Service
             await taskDataStore.UpdateTask(targetTask);
 
             //EndTimeSlices of this task's children and suffix task
-            return await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            return true;
         }
 
         public async Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask)
         {
-            if (parentTask == null || targetTask == null) return false;
+            if (targetTask == null) return false;
             targetTask.ParentTask = parentTask;
             return await taskDataStore.UpdateTask(targetTask);
         }
 
-        public async Task<bool> SetPreTask(CNTask targetTask, CNTask preTask)
+        public async Task<bool> AddPreTask(CNTask targetTask, CNTask preTask)
         {
-            if (targetTask == null || preTask == null) return false;
+            if (targetTask == null || preTask == null)
+            {
+                return false;
+            }
             if (targetTask.PreTaskConnectors.ToList().Any(r => r.PreTask.TaskId == preTask.TaskId))
             {
                 return false;
             }
             targetTask.PreTaskConnectors.Add(new CNTaskConnector(){PreTask = preTask,SufTask = targetTask});
+
+            //if pretask not complete update current task status to pending
+            if (preTask.Status != CNTaskStatus.DONE)
+            {
+                await PendingATask(targetTask.TaskId, CNConstants.PENDINGREASON_PreTaskNotComplete);
+            }
             return await taskDataStore.UpdateTask(targetTask);
+        }
+
+        public async Task<bool> DelPreTask(CNTask targetTask, CNTask preTask)
+        {
+            if (targetTask == null || preTask == null)
+            {
+                return false;
+            }
+
+            var preTasks = targetTask.PreTaskConnectors.ToList();
+            var  connector = preTasks.FirstOrDefault(r => r.PreTask.TaskId == preTask.TaskId);
+            if (connector == null) return false;
+
+            if (await taskDataStore.RemoveTaskConnector(connector))
+            {
+                var otherPreTasks = preTasks.Where(r => r.PreTask.TaskId != preTask.TaskId);
+                if (otherPreTasks.Select(y=>y.PreTask).All(x=>x.Status == CNTaskStatus.DONE)
+                    && targetTask.Status == CNTaskStatus.PENDING)
+                {
+                    targetTask.Status = CNTaskStatus.TODO;
+                    targetTask.PendingReason = null;
+                }
+                return await taskDataStore.UpdateTask(targetTask);
+            }
+
+            return false;
         }
         #endregion
 
@@ -191,7 +247,7 @@ namespace CN_Service
         {
             var targetTask = await taskDataStore.GetTask(taskId);
             if (targetTask == null) return false;
-            targetTask.ChildTasks.ToList()
+            targetTask.ChildTasks?.ToList()
                 .ForEach(x => Task.Run(async () => await DeleteAllTimeSlicesOfTask(x.TaskId)));
             targetTask.SufTaskConnectors.Select(y => y.SufTask).ToList()
                 .ForEach(x => Task.Run(async () => await DeleteAllTimeSlicesOfTask(x.TaskId)));
@@ -205,7 +261,7 @@ namespace CN_Service
         {
             var task = await taskDataStore.GetTask(taskid);
             if (task == null) return new List<CNTimeSlice>();
-            return task.UsedTimeSlices.ToList();
+            return await timeSliceDataStore.GetTimeSliceByTaskID(taskid);
         }
 
         public async Task<CNTimeSlice> AddATimeSlice(int taskid, CNTimeSlice timeSlice)
@@ -267,10 +323,12 @@ namespace CN_Service
         public async Task<bool> EndTimeSlice(int taskId, DateTime endTime)
         {
             var originDataTask = await taskDataStore.GetTask(taskId);
-            if (originDataTask == null) return false;
+            if (originDataTask?.UsedTimeSlices == null || originDataTask.UsedTimeSlices.Count == 0) return false;
             var originDatas = originDataTask.UsedTimeSlices.ToList();
             originDatas.Sort();
+            // if the last timeslice is ended then return true
             if (!(originDatas.Last().Clone() is CNTimeSlice lastSlice) || lastSlice.EndDateTime != null) return true;
+            // if the last timeslice's starttime is bigger than endtime return false
             if (lastSlice.StartDateTime > endTime) return false;
             lastSlice.EndDateTime = endTime;
 

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CN_Core;
 using CN_Repository;
 using CoffeeNewspaper_UnitTest.DomainTest;
 using NUnit.Framework;
@@ -137,6 +139,59 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 Assert.AreEqual(finalTask.EndTime, nowtime);
             });
         }
+        [Test]
+        public async Task UpdateEndTaskTime_OriginalTaskNull_ReturnFalse()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var assesTask = DomainTestHelper.GetARandomTask();
+                var addedTask = await taskDataStore.AddTask(assesTask);
+
+                //update to database ,make sure what ef return is equal to modified task
+                var nowtime = DateTime.Now;
+                await taskDataStore.UpdateEndTaskTime(null, nowtime);
+
+                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
+                Assert.IsNull(finalTask.EndTime);
+            });
+        }
+        [Test]
+        public async Task UpdateEndTaskTime_OriginalTaskEndTimeNull_TargetTimeNull_ReturnFalse()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var assesTask = DomainTestHelper.GetARandomTask();
+                var addedTask = await taskDataStore.AddTask(assesTask);
+
+                //update to database ,make sure what ef return is equal to modified task
+                var nowtime = DateTime.Now;
+                await taskDataStore.UpdateEndTaskTime(assesTask, null);
+
+                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
+                Assert.IsNull(finalTask.EndTime);
+            });
+        }
+        [Test]
+        public async Task UpdateEndTaskTime_OriginalTaskEndTimeEqualsTargetTime_ReturnFalse()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var assesTask = DomainTestHelper.GetARandomTask();
+                var nowtime = DateTime.Now;
+                assesTask.EndTime = nowtime;
+                var addedTask = await taskDataStore.AddTask(assesTask);
+
+                //update to database ,make sure what ef return is equal to modified task
+                await taskDataStore.UpdateEndTaskTime(assesTask, nowtime);
+
+                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
+                Assert.IsNotNull(finalTask.EndTime);
+                Assert.AreEqual(finalTask.EndTime, nowtime);
+            });
+        }
 
         [Test]
         public async Task UpdateStartTaskTime_Success()
@@ -149,6 +204,60 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
 
                 //update to database ,make sure what ef return is equal to modified task
                 var nowtime = DateTime.Now;
+                await taskDataStore.UpdateStartTaskTime(assesTask, nowtime);
+
+                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
+                Assert.IsNotNull(finalTask.StartTime);
+                Assert.AreEqual(finalTask.StartTime, nowtime);
+            });
+        }
+        [Test]
+        public async Task UpdateStartTaskTime_OriginalTaskNull_ReturnFalse()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var assesTask = DomainTestHelper.GetARandomTask();
+                var addedTask = await taskDataStore.AddTask(assesTask);
+
+                //update to database ,make sure what ef return is equal to modified task
+                var nowtime = DateTime.Now;
+                await taskDataStore.UpdateStartTaskTime(null, nowtime);
+
+                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
+                Assert.IsNull(finalTask.StartTime);
+            });
+        }
+        [Test]
+        public async Task UpdateStartTaskTime_OriginalTaskStartTimeNull_TargetTimeNull_ReturnFalse()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var assesTask = DomainTestHelper.GetARandomTask();
+                var addedTask = await taskDataStore.AddTask(assesTask);
+
+                //update to database ,make sure what ef return is equal to modified task
+                var nowtime = DateTime.Now;
+                await taskDataStore.UpdateStartTaskTime(assesTask, null);
+
+                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
+                Assert.IsNull(finalTask.StartTime);
+            });
+        }
+
+        [Test]
+        public async Task UpdateStartTaskTime_OriginalTaskStartTimeEqualsTargetTime_ReturnFalse()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var assesTask = DomainTestHelper.GetARandomTask();
+                var nowtime = DateTime.Now;
+                assesTask.StartTime = nowtime;
+                var addedTask = await taskDataStore.AddTask(assesTask);
+
+                //update to database ,make sure what ef return is equal to modified task
                 await taskDataStore.UpdateStartTaskTime(assesTask, nowtime);
 
                 var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
@@ -298,6 +407,29 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
                 Assert.AreEqual(addedTask.StartTime, finalTask.StartTime);
                 Assert.AreEqual(null, finalTask.EndTime);
+            });
+        }
+        [Test]
+        public async Task RemoveTaskConnector_Success()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var assesTask1 = DomainTestHelper.GetARandomTask();
+                var assesTask2 = DomainTestHelper.GetARandomTask();
+                var connector = new CNTaskConnector() {PreTask = assesTask2, SufTask = assesTask1};
+                assesTask1.PreTaskConnectors = new List<CNTaskConnector>(){ connector };
+                var addedTask = await taskDataStore.AddTask(assesTask1);
+                //update to database ,make sure what ef return is equal to modified task
+                
+                await taskDataStore.RemoveTaskConnector(connector);
+
+                var finalTask1 = await taskDataStore.GetTask(assesTask1.TaskId);
+                Assert.IsNotNull(finalTask1);
+                Assert.IsTrue(assesTask1.PreTaskConnectors == null || assesTask1.PreTaskConnectors.Count == 0);
+                var finalTask2 = await taskDataStore.GetTask(assesTask2.TaskId);
+                Assert.IsNotNull(finalTask2);
+                Assert.IsTrue(assesTask2.SufTaskConnectors == null || assesTask2.SufTaskConnectors.Count == 0);
             });
         }
     }

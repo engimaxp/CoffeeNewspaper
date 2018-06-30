@@ -24,6 +24,11 @@ namespace CN_Core
         public int TaskId { get; set; }
 
         /// <summary>
+        ///     The sortIndex of this task
+        /// </summary>
+        public int Sort { get; set; }
+
+        /// <summary>
         ///     The detail of this task most likely plain text
         /// </summary>
         public string Content { get; set; }
@@ -88,6 +93,12 @@ namespace CN_Core
         ///     if this task's <see cref="IsFail" /> is true ,this properties shall store the fail reason
         /// </summary>
         public string FailReason { get; set; }
+
+        /// <summary>
+        ///     The pending reason of this task
+        ///     if this task's <see cref="CNTaskStatus.PENDING" /> ,this properties shall store the pending reason
+        /// </summary>
+        public string PendingReason { get; set; }
 
         /// <summary>
         ///     the tasks memos relation entites

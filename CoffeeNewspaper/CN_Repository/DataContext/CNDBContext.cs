@@ -109,6 +109,8 @@ namespace CN_Repository
             
             modelBuilder.Entity<CNTask>().Property(x => x.TaskId).HasColumnType("INTEGER");
             modelBuilder.Entity<CNTask>().Property(x => x.Content).HasColumnType("VARCHAR");
+            modelBuilder.Entity<CNTask>().Property(x => x.Sort).HasColumnType("INTEGER");
+            modelBuilder.Entity<CNTask>().Property(x => x.PendingReason).HasColumnType("VARCHAR");
             modelBuilder.Entity<CNTask>().Property(x => x.CreateTime).HasColumnType("DATETIME");
             modelBuilder.Entity<CNTask>().Property(x => x.DeadLine).HasColumnType("DATETIME");
             modelBuilder.Entity<CNTask>().Property(x => x.EndTime).HasColumnType("DATETIME");
@@ -139,6 +141,7 @@ namespace CN_Repository
             modelBuilder.Entity<CNMemo>().ToTable(nameof(CNMemo));
             modelBuilder.Entity<CNMemo>().HasKey(a => a.MemoId);
             modelBuilder.Entity<CNMemo>().Property(x => x.MemoId).HasColumnType("VARCHAR");
+            modelBuilder.Entity<CNTask>().Property(x => x.Sort).HasColumnType("INTEGER");
             modelBuilder.Entity<CNMemo>().Property(x => x.Content).HasColumnType("VARCHAR");
             modelBuilder.Entity<CNMemo>().Property(x => x.Title).HasColumnType("VARCHAR");
             modelBuilder.Entity<CNMemo>().Property(x => x.MemoId).ValueGeneratedOnAdd(); 

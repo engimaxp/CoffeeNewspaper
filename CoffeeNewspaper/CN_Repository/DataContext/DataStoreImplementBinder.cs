@@ -1,8 +1,7 @@
 ﻿using CN_Core.Interfaces.Repository;
-using CN_Repository;
 using Ninject;
 
-namespace CN_Service
+namespace CN_Repository
 {
     public static class DataStoreImplementBinder
     {

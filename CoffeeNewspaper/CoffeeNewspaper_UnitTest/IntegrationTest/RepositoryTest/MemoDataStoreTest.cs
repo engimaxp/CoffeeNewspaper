@@ -141,6 +141,42 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             });
         }
 
+        [Test]
+        public async Task Clone_OriginalMemoNull_ReturnFalse()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var MemoDataStore = new MemoDataStore(dbcontext);
+                var assesMemo = DomainTestHelper.GetARandomMemo();
+                var addedMemo = await MemoDataStore.AddMemo(assesMemo);
+                var cloneMemo = await MemoDataStore.CloneAMemo(Guid.NewGuid().ToString("N"));
+
+                var allMemos = await MemoDataStore.GetAllGlobalMemos();
+                Assert.AreEqual(1, allMemos.Count);
+
+                Assert.IsNull(cloneMemo);
+            });
+        }
+
+        [Test]
+        public async Task GetAllTaskMemos_Success()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                var MemoDataStore = new MemoDataStore(dbcontext);
+
+                var taskDataStore = new TaskDataStore(dbcontext);
+                var assesMemo = DomainTestHelper.GetARandomMemo();
+                var assesTask = DomainTestHelper.GetARandomTask();
+                assesTask.TaskMemos = new List<CNTaskMemo>(){new CNTaskMemo(){Memo = assesMemo,Task = assesTask}};
+                var addedTask = await taskDataStore.AddTask(assesTask);
+
+                var allMemos = await MemoDataStore.GetAllTaskMemos(addedTask.TaskId);
+                Assert.AreEqual(1, allMemos.Count);
+                Assert.AreEqual(assesMemo.Content, allMemos.First().Content);
+            });
+        }
+
         /// <summary>
         /// Some Memo Contain Relations
         /// this test will assert those relations are cloned properly

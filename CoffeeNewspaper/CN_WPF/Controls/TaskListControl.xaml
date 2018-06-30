@@ -8,7 +8,13 @@
              mc:Ignorable="d"
              d:DesignHeight="450" 
              Width="300">
-    <Border Padding="0 5 0 0" Background="{StaticResource IconHoverBlueBrush}">
+    <Border Padding="1 5 0 0">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0 0.5" EndPoint="1 0.5">
+                    <GradientStop Color="{StaticResource WordLightBlue}" Offset="0.0" />
+                    <GradientStop Color="{StaticResource IconHoverBlue}" Offset="1" />
+                </LinearGradientBrush>
+        </Border.Background>
         <Grid DataContext="{x:Static design:TaskListDesignModel.Instance}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
