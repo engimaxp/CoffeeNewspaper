@@ -12,14 +12,14 @@ namespace CN_WPF
         public HeadMenuControl()
         {
             InitializeComponent();
-//            if (!DesignerProperties.GetIsInDesignMode(this))
-//            {
-//                DataContext = ViewModelLocator.HeadMenuViewModel;
-//            }
-//            else
-//            {
-//                DataContext = HeadMenuDesignModel.Instance;
-//            }
+            if (!DesignerProperties.GetIsInDesignMode(this))
+            {
+                DataContext = ViewModelLocator.HeadMenuViewModel;
+            }
+            else
+            {
+                DataContext = HeadMenuDesignModel.Instance;
+            }
         }
     }
 }

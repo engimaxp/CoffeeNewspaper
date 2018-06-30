@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:CN_WPF"
         mc:Ignorable="d"
         Title="Coffee Newspapaer!" 
+        AllowsTransparency="False"
         Height="660" 
         Width="780"
         MinWidth="780"

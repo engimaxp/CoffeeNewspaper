@@ -14,19 +14,19 @@ namespace CN_WPF
             if (!(sender is ScrollViewer scrollViewer)) return;
             if ((bool) e.NewValue)
             {
-                RoutedEventHandler onLoaded = null;
-                onLoaded = (s, ee) =>
+                void OnLoaded(object s, RoutedEventArgs ee)
                 {
-                    scrollViewer.Loaded -= onLoaded;
+                    scrollViewer.Loaded -= OnLoaded;
 
                     //Hook the event
                     scrollViewer.FindAndActToAllChild<ScrollViewer>((scrollchildview) =>
                     {
-                        scrollchildview.PreviewMouseWheel += (sss,eee) => PreviewMouseWheel(sss,eee, scrollViewer);
+                        scrollchildview.PreviewMouseWheel += (sss, eee) => PreviewMouseWheel(sss, eee, scrollViewer);
                     });
 
-                };
-                scrollViewer.Loaded += onLoaded;
+                }
+
+                scrollViewer.Loaded += OnLoaded;
             }
         }
 

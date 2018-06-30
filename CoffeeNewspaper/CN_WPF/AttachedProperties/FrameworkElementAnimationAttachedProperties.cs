@@ -60,8 +60,7 @@ namespace CN_WPF
 
                 // Create a single self-unhookable event 
                 // for the elements Loaded event
-                RoutedEventHandler onLoaded = null;
-                onLoaded = async (ss, ee) =>
+                async void onLoaded(object ss, RoutedEventArgs ee)
                 {
                     // Unhook ourselves
                     element.Loaded -= onLoaded;
@@ -79,7 +78,7 @@ namespace CN_WPF
 
                     // Flag that we have finished first load
                     mAlreadyLoaded[weakReference] = true;
-                };
+                }
 
                 // Hook into the Loaded event of the element
                 element.Loaded += onLoaded;
