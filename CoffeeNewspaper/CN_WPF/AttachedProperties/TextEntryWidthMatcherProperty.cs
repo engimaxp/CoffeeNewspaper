@@ -17,11 +17,10 @@ namespace CN_WPF
             SetWidths(panel);
 
             // Wait for panel to load
-            RoutedEventHandler onLoaded = null;
-            onLoaded = (s, ee) =>
+            void OnLoaded(object s, RoutedEventArgs ee)
             {
                 // Unhook
-                panel.Loaded -= onLoaded;
+                panel.Loaded -= OnLoaded;
 
                 // Set widths
                 SetWidths(panel);
@@ -32,11 +31,10 @@ namespace CN_WPF
                     // Set it's margin to the given value
 
                     // Ignore any non-text entry controls
-                    if (!(child is TextEntryControl) && !(child is PasswordEntryControl))
-                        continue;
+                    if (!(child is TextEntryControl)) continue;
 
                     // Get the label from the text entry or password entry
-                    var label = child is TextEntryControl ? (child as TextEntryControl).Label : (child as PasswordEntryControl).Label;
+                    var label = (child as TextEntryControl).Label;
 
                     label.SizeChanged += (ss, eee) =>
                     {
@@ -44,10 +42,10 @@ namespace CN_WPF
                         SetWidths(panel);
                     };
                 }
-            };
+            }
 
             // Hook into the Loaded event
-            panel.Loaded += onLoaded;
+            panel.Loaded += OnLoaded;
         }
 
         /// <summary>
@@ -63,11 +61,11 @@ namespace CN_WPF
             foreach (var child in panel.Children)
             {
                 // Ignore any non-text entry controls
-                if (!(child is TextEntryControl) && !(child is PasswordEntryControl))
+                if (!(child is TextEntryControl))
                     continue;
 
                 // Get the label from the text entry or password entry
-                var label = child is TextEntryControl ? (child as TextEntryControl).Label : (child as PasswordEntryControl).Label;
+                var label = (child as TextEntryControl).Label;
 
                 // Find if this value is larger than the other controls
                 maxSize = Math.Max(maxSize, label.RenderSize.Width + label.Margin.Left + label.Margin.Right);
@@ -82,9 +80,6 @@ namespace CN_WPF
                 if (child is TextEntryControl text)
                     // Set each controls LabelWidth value to the max size
                     text.LabelWidth = gridLength;
-                else if (child is PasswordEntryControl pass)
-                    // Set each controls LabelWidth value to the max size
-                    pass.LabelWidth = gridLength;
             }
 
         }

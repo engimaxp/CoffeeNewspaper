@@ -89,9 +89,17 @@
             </Grid>
             <!-- task list container -->
             <ScrollViewer Grid.Row="1"
+                          CanContentScroll="False"
                           local:MouseWheelEventBubbleUpAttachedProperty.Value="True"
                           VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl 
+                    ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel IsItemsHost="True" VirtualizingStackPanel.IsVirtualizing="True"
+                                                    VirtualizingStackPanel.VirtualizationMode="Recycling" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <local:TaskListItem />

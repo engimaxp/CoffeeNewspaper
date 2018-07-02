@@ -84,7 +84,7 @@ namespace CN_WPF
                 element.Loaded += onLoaded;
             }
             // If we have started a first load but not fired the animation yet, update the property
-            else if (alreadyLoadedReference.Value == false)
+            else if (!alreadyLoadedReference.Value)
                 mFirstLoadValue[new WeakReference(sender)] = (bool)value;
             else
                 // Do desired animation
