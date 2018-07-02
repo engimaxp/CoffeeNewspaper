@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\base\basedatastore.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace CN_Repository
+{
+    public class BaseDataStore
+    {
+        #region Protected Members
+
+        /// &lt;summary&gt;
+        ///     The database context for the client data store
+        /// &lt;/summary&gt;
+        protected CNDbContext mDbContext;
+
+        #endregion
+
+        #region Constructor
+
+        /// &lt;summary&gt;
+        ///     Default constructor
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;dbContext&quot;&gt;The database to use&lt;/param&gt;
+        public BaseDataStore(CNDbContext dbContext)
+        {
+            // Set local member
+            mDbContext = dbContext;
+        }
+
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,9,20,52,1],[21,9,21,10,1],[23,13,23,36,1],[24,9,24,10,1]]);
+    </script>
+  </body>
+</html>

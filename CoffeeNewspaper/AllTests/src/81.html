@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\relationtest\tasktagrelationtest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Repository;
+using CoffeeNewspaper_UnitTest.DomainTest;
+using NUnit.Framework;
+
+namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
+{
+
+    /// &lt;summary&gt;
+    ///     In-Memory integration data persistent test
+    /// &lt;/summary&gt;
+    [TestFixture]
+    public class TaskTagRelationTest : RepositarySetupAndTearDown
+    {
+        /// &lt;summary&gt;
+        /// Get a tag-already-bind task
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;bindTagCount&quot;&gt;how many tag is bind to this task&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private CNTask GetTagBindTestTask(int bindTagCount)
+        {
+            var assesTask = DomainTestHelper.GetARandomTask();
+            Enumerable.Range(0, bindTagCount).ToList().ForEach(x =&gt;
+            {
+                var assesTag = DomainTestHelper.GetARandomTag();
+                assesTask.TaskTaggers.Add(new CNTaskTagger() { Tag = assesTag, Task = assesTask }); 
+            });
+            return assesTask;
+        }
+        [Test]
+        public async Task DeleteATaskTagRelation_BothTaskAndTagStillExist()
+        {
+            await UseMemoryContextRun(async dbcontext =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetTagBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                await taskDataStore.AddTask(assesTask);
+
+                assesTask.TaskTaggers.Remove(assesTask.TaskTaggers.First());
+                await taskDataStore.UpdateTask(assesTask);
+
+                Assert.AreEqual(1,dbcontext.Tags.Count());
+                Assert.AreEqual(1, dbcontext.Tasks.Count());
+                Assert.AreEqual(0,dbcontext.TaskTaggers.Count());
+            });
+        }
+        [Test]
+        public async Task AddDupplicateTaskTagRelation_ReturnFalse()
+        {
+            await UseMemoryContextRun(async dbcontext =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetTagBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                await taskDataStore.AddTask(assesTask);
+
+                assesTask.TaskTaggers.Add(new CNTaskTagger(){TagId = assesTask.TaskTaggers.First().TagId,TaskId = assesTask.TaskId});
+                var result = await taskDataStore.UpdateTask(assesTask);
+
+                Assert.IsFalse(result);
+                Assert.AreEqual(1, dbcontext.Tags.Count());
+                Assert.AreEqual(1, dbcontext.Tasks.Count());
+                Assert.AreEqual(1, dbcontext.TaskTaggers.Count());
+            });
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[23,9,23,10,1],[24,13,24,63,1],[25,13,26,13,1],[26,13,26,14,1],[26,14,27,17,1],[27,17,27,65,1],[27,65,28,17,1],[28,17,28,100,1],[28,100,29,13,1],[29,13,29,14,1],[29,14,29,16,1],[25,13,29,16,1],[30,13,30,30,1],[31,9,31,10,1],[34,9,34,10,1],[35,13,36,13,1],[36,13,36,14,1],[36,14,38,17,1],[38,17,38,55,1],[38,55,39,17,1],[39,17,39,66,1],[39,66,40,17,1],[40,17,40,56,1],[40,56,42,17,1],[42,17,42,77,1],[42,77,43,17,1],[43,17,43,59,1],[43,59,45,17,1],[45,17,45,59,1],[45,59,46,17,1],[46,17,46,61,1],[46,61,47,17,1],[47,17,47,66,1],[47,66,48,13,1],[48,13,48,14,1],[48,14,48,16,1],[35,13,48,16,1],[49,9,49,10,1],[52,9,52,10,1],[53,13,54,13,1],[54,13,54,14,1],[54,14,56,17,1],[56,17,56,55,1],[56,55,57,17,1],[57,17,57,66,1],[57,66,58,17,1],[58,17,58,56,1],[58,56,60,17,1],[60,17,60,134,1],[60,134,61,17,1],[61,17,61,72,1],[61,72,63,17,1],[63,17,63,40,1],[63,40,64,17,1],[64,17,64,60,1],[64,60,65,17,1],[65,17,65,61,1],[65,61,66,17,1],[66,17,66,67,1],[66,67,67,13,1],[67,13,67,14,1],[67,14,67,16,1],[53,13,67,16,1],[68,9,68,10,1]]);
+    </script>
+  </body>
+</html>

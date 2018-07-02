@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\memodatastore.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Repository;
+using Microsoft.EntityFrameworkCore;
+
+namespace CN_Repository
+{
+    public class MemoDataStore : BaseDataStore, IMemoDataStore
+    {
+        public MemoDataStore(CNDbContext dbContext) : base(dbContext)
+        {
+        }
+
+        #region Delete Methods
+
+        public async Task&lt;bool&gt; DeleteMemo(CNMemo memo)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    mDbContext.Memos.Remove(memo);
+                    return await mDbContext.SaveChangesAsync() &gt; 0;
+                }, false);
+        }
+
+        #endregion
+
+        #region Update Methods
+
+        public async Task&lt;bool&gt; UpdateMemo(CNMemo memo)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    mDbContext.Memos.Update(memo);
+                    return await mDbContext.SaveChangesAsync() &gt; 0;
+                }, false);
+        }
+
+        #endregion
+
+        #region Select Methods
+
+        public async Task&lt;CNMemo&gt; GetMemoById(string memoid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    return await mDbContext.Memos
+                        .Include(x=&gt;x.MemoTaggers)
+                        .Include(x=&gt;x.TaskMemos)
+                        .FirstOrDefaultAsync(r =&gt; string.Equals(r.MemoId, memoid));
+                });
+        }
+
+        public async Task&lt;ICollection&lt;CNMemo&gt;&gt; GetAllGlobalMemos()
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    return await mDbContext.Memos
+                        .Where(r =&gt; r.TaskMemos.Count == 0)
+                        .ToListAsync();
+                });
+        }
+
+        public async Task&lt;ICollection&lt;CNMemo&gt;&gt; GetAllTaskMemos(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    return await mDbContext.Memos
+                        .Where(r =&gt; r.TaskMemos.Any(y =&gt; y.TaskId == taskid))
+                        .ToListAsync();
+                });
+        }
+
+        #endregion
+
+        #region Add Methods
+
+        public async Task&lt;CNMemo&gt; AddMemo(CNMemo memo)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    mDbContext.Memos.Add(memo);
+                    await mDbContext.SaveChangesAsync();
+                    return memo;
+                },(CNMemo)null);
+        }
+
+        public async Task&lt;CNMemo&gt; CloneAMemo(string memoid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    var originalEntity = mDbContext.Memos.AsNoTracking()
+                        .Include(r =&gt; r.MemoTaggers)
+                        .Include(x =&gt; x.TaskMemos)
+                        .FirstOrDefault(e =&gt; string.Equals(e.MemoId, memoid, StringComparison.Ordinal));
+                    if (originalEntity == null) return null;
+                    originalEntity.MemoId = null;
+                    foreach (var originalEntityMemoTagger in originalEntity.MemoTaggers)
+                    {
+                        originalEntityMemoTagger.MemoId = null;
+                        originalEntityMemoTagger.MemoTaggerId = null;
+                    }
+                    foreach (var originalEntityTaskMemo in originalEntity.TaskMemos)
+                    {
+                        originalEntityTaskMemo.MemoId = null;
+                        originalEntityTaskMemo.TaskMemoId = null;
+                    }
+                    mDbContext.Memos.Add(originalEntity);
+                    await mDbContext.SaveChangesAsync();
+                    return originalEntity;
+
+                }, (CNMemo)null);
+        }
+
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,55,13,70,1],[14,9,14,10,1],[15,9,15,10,1],[20,9,20,10,1],[21,13,23,17,1],[23,17,23,18,1],[23,18,24,21,1],[24,21,24,51,1],[24,51,25,21,1],[25,21,25,68,1],[25,68,26,17,1],[26,17,26,18,1],[26,18,26,27,1],[21,13,26,27,1],[27,9,27,10,1],[34,9,34,10,1],[35,13,37,17,1],[37,17,37,18,1],[37,18,38,21,1],[38,21,38,51,1],[38,51,39,21,1],[39,21,39,68,1],[39,68,40,17,1],[40,17,40,18,1],[40,18,40,27,1],[35,13,40,27,1],[41,9,41,10,1],[48,9,48,10,1],[49,13,51,17,1],[51,17,51,18,1],[51,18,52,21,1],[52,21,55,84,1],[55,84,56,17,1],[56,17,56,18,1],[56,18,56,20,1],[49,13,56,20,1],[57,9,57,10,1],[60,9,60,10,1],[61,13,63,17,1],[63,17,63,18,1],[63,18,64,21,1],[64,21,66,40,1],[66,40,67,17,1],[67,17,67,18,1],[67,18,67,20,1],[61,13,67,20,1],[68,9,68,10,1],[71,9,71,10,1],[72,13,74,17,1],[74,17,74,18,1],[74,18,75,21,1],[75,21,77,40,1],[77,40,78,17,1],[78,17,78,18,1],[78,18,78,20,1],[72,13,78,20,1],[79,9,79,10,1],[86,9,86,10,1],[87,13,89,17,1],[89,17,89,18,1],[89,18,90,21,1],[90,21,90,48,1],[90,48,91,21,1],[91,21,91,57,1],[91,57,92,21,1],[92,21,92,33,1],[92,33,93,17,1],[93,17,93,18,1],[93,18,93,33,1],[87,13,93,33,1],[94,9,94,10,1],[97,9,97,10,1],[98,13,100,17,1],[100,17,100,18,1],[100,18,101,21,1],[101,21,104,105,1],[104,105,105,21,1],[105,21,105,48,1],[105,48,105,49,1],[105,49,105,61,1],[105,61,106,21,1],[106,21,106,50,1],[106,50,107,21,1],[107,21,107,28,1],[107,28,107,30,1],[107,30,107,58,1],[107,58,107,59,1],[107,59,107,61,1],[107,61,107,62,1],[107,62,107,88,1],[107,88,108,21,1],[108,21,108,22,1],[108,22,109,25,1],[109,25,109,64,1],[109,64,110,25,1],[110,25,110,70,1],[110,70,111,21,1],[111,21,111,22,1],[111,22,112,21,1],[112,21,112,28,1],[112,28,112,30,1],[112,30,112,56,1],[112,56,112,57,1],[112,57,112,59,1],[112,59,112,60,1],[112,60,112,84,1],[112,84,113,21,1],[113,21,113,22,1],[113,22,114,25,1],[114,25,114,62,1],[114,62,115,25,1],[115,25,115,66,1],[115,66,116,21,1],[116,21,116,22,1],[116,22,117,21,1],[117,21,117,58,1],[117,58,118,21,1],[118,21,118,57,1],[118,57,119,21,1],[119,21,119,43,1],[119,43,121,17,1],[121,17,121,18,1],[121,18,121,34,1],[98,13,121,34,1],[122,9,122,10,1]]);
+    </script>
+  </body>
+</html>

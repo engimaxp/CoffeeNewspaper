@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_service\serviceimplement\taskservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Repository;
+using CN_Core.Interfaces.Service;
+
+namespace CN_Service
+{
+    public class TaskService : ITaskService
+    {
+        #region Construct
+
+        public TaskService(ITimeSliceDataStore TimeSliceDataStore, ITaskDataStore TaskDataStore)
+        {
+            timeSliceDataStore = TimeSliceDataStore;
+            taskDataStore = TaskDataStore;
+        }
+
+        #endregion
+
+        #region Private Properties
+
+        private readonly ITaskDataStore taskDataStore;
+        private readonly ITimeSliceDataStore timeSliceDataStore;
+
+        #endregion
+
+        #region Task relevent
+
+        public async Task&lt;bool&gt; EditATask(CNTask task)
+        {
+            if (task == null || task.TaskId &lt;= 0) return false;
+            return await taskDataStore.UpdateTask(task);
+        }
+
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetAllTasks()
+        {
+            return await taskDataStore.GetAllTask();
+        }
+
+        public async Task&lt;CNTask&gt; GetTaskById(int taskId)
+        {
+            return await taskDataStore.GetTask(taskId);
+        }
+
+        public async Task&lt;CNTask&gt; CreateATask(CNTask task)
+        {
+            return await taskDataStore.AddTask(task);
+        }
+
+        public async Task&lt;bool&gt; DeleteTask(int taskId, bool force = false)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return true;
+            if (targetTask.ChildTasks.Count &gt; 0 &amp;&amp; !force) throw new TaskHasChildTasksException();
+            if (targetTask.SufTaskConnectors.Count &gt; 0 &amp;&amp; !force) throw new TaskHasSufTasksException();
+            //Delete the task itself
+            targetTask.IsDeleted = true;
+            //Delete the tasks children and suffix task
+            targetTask.ChildTasks.ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await DeleteTask(x.TaskId, force)));
+            targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask).ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await DeleteTask(x.TaskId, force)));
+            return await taskDataStore.UpdateTask(targetTask);
+        }
+
+        public async Task&lt;bool&gt; RecoverATask(int taskId)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false; 
+            if (!targetTask.IsDeleted) return true;
+
+            //Recover the task itself
+            targetTask.IsDeleted = false;
+            //Recover the tasks children and suffix task
+            targetTask.ChildTasks.ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await RecoverATask(x.TaskId)));
+            targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask).ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await RecoverATask(x.TaskId)));
+            return await taskDataStore.UpdateTask(targetTask);
+        }
+
+        public async Task&lt;bool&gt; StartATask(int taskId)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return false; 
+            if (targetTask.Status != CNTaskStatus.TODO &amp;&amp; targetTask.Status != CNTaskStatus.PENDING)
+                throw new TaskStatusException(new List&lt;CNTaskStatus&gt; {CNTaskStatus.TODO, CNTaskStatus.PENDING},
+                    targetTask.Status);
+            //set status to doing
+            targetTask.Status = CNTaskStatus.DOING;
+            await taskDataStore.UpdateTask(targetTask);
+            //if this is the first start then update targetTask&#39;s startTime
+            //add a timeslice to this task
+            await AddATimeSlice(targetTask.TaskId, new CNTimeSlice(DateTime.Now));
+            return true;
+        }
+
+        public async Task&lt;bool&gt; PauseATask(int taskId)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return false;
+            if (targetTask.Status != CNTaskStatus.DOING)
+                throw new TaskStatusException(new List&lt;CNTaskStatus&gt; {CNTaskStatus.DOING}, targetTask.Status);
+            targetTask.Status = CNTaskStatus.TODO;
+            await taskDataStore.UpdateTask(targetTask);
+
+            //EndTimeSlices of this task&#39;s children and suffix task
+            await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            return true;
+        }
+
+        public async Task&lt;bool&gt; PendingATask(int TaskId,string reason)
+        {
+            var targetTask = await taskDataStore.GetTask(TaskId);
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return false;
+            if (targetTask.Status != CNTaskStatus.DOING
+                &amp;&amp; targetTask.Status != CNTaskStatus.TODO
+                &amp;&amp; targetTask.Status != CNTaskStatus.PENDING)
+                throw new TaskStatusException(new List&lt;CNTaskStatus&gt; { CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING }, targetTask.Status);
+            //EndTimeSlices of this task&#39;s children and suffix task
+            if (targetTask.Status == CNTaskStatus.DOING)
+            {
+                await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            }
+            targetTask.Status = CNTaskStatus.PENDING;
+            targetTask.PendingReason = reason;
+            return await taskDataStore.UpdateTask(targetTask);
+        }
+
+        public async Task&lt;bool&gt; RemoveATask(int taskId, bool force = false)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            if (!targetTask.IsDeleted) return false;
+            if (targetTask.ChildTasks.Count &gt; 0 &amp;&amp; !force) throw new TaskHasChildTasksException();
+            if (targetTask.SufTaskConnectors.Count &gt; 0 &amp;&amp; !force) throw new TaskHasSufTasksException();
+
+            //Remove the tasks children and suffix task
+            targetTask.ChildTasks.ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await RemoveATask(x.TaskId, force)));
+            targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask).ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await RemoveATask(x.TaskId, force)));
+
+            return await taskDataStore.RemoveTask(targetTask);
+        }
+
+        public async Task&lt;bool&gt; FinishATask(int taskId)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return false;
+            if (targetTask.Status == CNTaskStatus.DONE)
+                throw new TaskStatusException(new List&lt;CNTaskStatus&gt; {CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING },
+                    targetTask.Status);
+            targetTask.Status = CNTaskStatus.DONE;
+            await taskDataStore.UpdateTask(targetTask);
+
+            //EndTimeSlices of this task&#39;s children and suffix task
+            return await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+        }
+
+        public async Task&lt;bool&gt; FailATask(int taskId, string reason)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+
+            if (targetTask.IsFail)
+            {
+                targetTask.FailReason = reason;
+                return await taskDataStore.UpdateTask(targetTask);
+            }
+
+            //tag this as filed
+            targetTask.IsFail = true;
+            targetTask.FailReason = reason;
+            await taskDataStore.UpdateTask(targetTask);
+
+            //EndTimeSlices of this task&#39;s children and suffix task
+            await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            return true;
+        }
+
+        public async Task&lt;bool&gt; SetParentTask(CNTask targetTask, CNTask parentTask)
+        {
+            if (targetTask == null) return false;
+            targetTask.ParentTask = parentTask;
+            return await taskDataStore.UpdateTask(targetTask);
+        }
+
+        public async Task&lt;bool&gt; AddPreTask(CNTask targetTask, CNTask preTask)
+        {
+            if (targetTask == null || preTask == null)
+            {
+                return false;
+            }
+            if (targetTask.PreTaskConnectors.Any(r =&gt; r.PreTask.TaskId == preTask.TaskId))
+            {
+                return false;
+            }
+            targetTask.PreTaskConnectors.Add(new CNTaskConnector(){PreTask = preTask,SufTask = targetTask});
+
+            //if pretask not complete update current task status to pending
+            if (preTask.Status != CNTaskStatus.DONE)
+            {
+                await PendingATask(targetTask.TaskId, CNConstants.PENDINGREASON_PreTaskNotComplete);
+            }
+            return await taskDataStore.UpdateTask(targetTask);
+        }
+
+        public async Task&lt;bool&gt; DelPreTask(CNTask targetTask, CNTask preTask)
+        {
+            if (targetTask == null || preTask == null)
+            {
+                return false;
+            }
+
+            var preTasks = targetTask.PreTaskConnectors.ToList();
+            var  connector = preTasks.FirstOrDefault(r =&gt; r.PreTask.TaskId == preTask.TaskId);
+            if (connector == null) return false;
+
+            if (await taskDataStore.RemoveTaskConnector(connector))
+            {
+                var otherPreTasks = preTasks.Where(r =&gt; r.PreTask.TaskId != preTask.TaskId);
+                if (otherPreTasks.Select(y=&gt;y.PreTask).All(x=&gt;x.Status == CNTaskStatus.DONE)
+                    &amp;&amp; targetTask.Status == CNTaskStatus.PENDING)
+                {
+                    targetTask.Status = CNTaskStatus.TODO;
+                    targetTask.PendingReason = null;
+                }
+                return await taskDataStore.UpdateTask(targetTask);
+            }
+
+            return false;
+        }
+        #endregion
+
+        #region TimeSlices relevent
+
+        public async Task&lt;bool&gt; DeleteAllTimeSlicesOfTask(int taskId)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            targetTask.ChildTasks?.ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await DeleteAllTimeSlicesOfTask(x.TaskId)));
+            targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask).ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await DeleteAllTimeSlicesOfTask(x.TaskId)));
+            targetTask.StartTime = null;
+            targetTask.EndTime = null;
+            await taskDataStore.UpdateTask(targetTask);
+            return await timeSliceDataStore.DeleteTimeSliceByTask(targetTask.TaskId);
+        }
+
+        public async Task&lt;ICollection&lt;CNTimeSlice&gt;&gt; GetTaskTimeSlices(int taskid)
+        {
+            var task = await taskDataStore.GetTask(taskid);
+            if (task == null) return new List&lt;CNTimeSlice&gt;();
+            return await timeSliceDataStore.GetTimeSliceByTaskID(taskid);
+        }
+
+        public async Task&lt;CNTimeSlice&gt; AddATimeSlice(int taskid, CNTimeSlice timeSlice)
+        {
+            //get original task
+            var task = await taskDataStore.GetTask(taskid);
+            if (task == null) return null;
+
+            //detect conflict
+            if (task.UsedTimeSlices.Any(r =&gt; r.InterceptWith(timeSlice)))
+                throw new TimeSliceInterveneException();
+
+            //Update Task&#39;s StartTime or EndTime
+            var source = new List&lt;CNTimeSlice&gt;(task.UsedTimeSlices) {timeSlice};
+            source.Sort();
+            await taskDataStore.ExpandTaskTime(task, source.First().StartDateTime, source.Last().EndDateTime);
+
+            //Save TimeSlice
+            timeSlice.Task = task;
+            return await timeSliceDataStore.AddTimeSlice(timeSlice);
+        }
+
+
+        public async Task&lt;bool&gt; DeleteTimeSlices(CNTimeSlice timeSlice)
+        {
+            //Get original slice by id
+            var originSlice = await timeSliceDataStore.GetTimeSliceById(timeSlice.TimeSliceId);
+            if (originSlice == null) return false;
+            //Update Task&#39;s StartTime or EndTime
+            var originDatas = originSlice.Task.UsedTimeSlices.ToList();
+
+            //if only contain one slice
+            if (originDatas.Count == 1)
+            {
+                await taskDataStore.UpdateStartTaskTime(originSlice.Task, null);
+                await taskDataStore.UpdateEndTaskTime(originSlice.Task, null);
+            }
+            else
+            {
+                //if have mutiple timeslices
+                originDatas.Sort();
+                if (Equals(originDatas.First(), timeSlice))
+                {
+                    originDatas.Remove(timeSlice);
+                    await taskDataStore.UpdateStartTaskTime(originSlice.Task, originDatas.First().StartDateTime);
+                }
+                else if (Equals(originDatas.Last(), timeSlice))
+                {
+                    originDatas.Remove(timeSlice);
+                    await taskDataStore.UpdateEndTaskTime(originSlice.Task, originDatas.Last().EndDateTime);
+                }
+            }
+            
+
+            //delete the timeslice
+            return await timeSliceDataStore.DeleteTimeSlice(originSlice);
+        }
+
+        public async Task&lt;bool&gt; EndTimeSlice(int taskId, DateTime endTime)
+        {
+            var originDataTask = await taskDataStore.GetTask(taskId);
+            if (originDataTask?.UsedTimeSlices == null || originDataTask.UsedTimeSlices.Count == 0) return false;
+            var originDatas = originDataTask.UsedTimeSlices.ToList();
+            originDatas.Sort();
+            // if the last timeslice is ended then return true
+            if (!(originDatas.Last().Clone() is CNTimeSlice lastSlice) || lastSlice.EndDateTime != null) return true;
+            // if the last timeslice&#39;s starttime is bigger than endtime return false
+            if (lastSlice.StartDateTime &gt; endTime) return false;
+            lastSlice.EndDateTime = endTime;
+
+            //EndTimeSlices of this task&#39;s children and suffix task
+            originDataTask.ChildTasks.ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await EndTimeSlice(x.TaskId, endTime)));
+            originDataTask.SufTaskConnectors.Select(y =&gt; y.SufTask).ToList()
+                .ForEach(x =&gt; Task.Run(async () =&gt; await EndTimeSlice(x.TaskId, endTime)));
+
+            await taskDataStore.UpdateEndTaskTime(originDataTask, endTime);
+            return await timeSliceDataStore.UpdateTimeSlice(lastSlice);
+        }
+
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,97,1],[16,9,16,10,1],[17,13,17,53,1],[18,13,18,43,1],[19,9,19,10,1],[33,9,33,10,1],[34,13,34,50,1],[34,51,34,64,1],[35,13,35,57,1],[36,9,36,10,1],[39,9,39,10,1],[40,13,40,53,1],[41,9,41,10,1],[44,9,44,10,1],[45,13,45,56,1],[46,9,46,10,1],[49,9,49,10,1],[50,13,50,54,1],[51,9,51,10,1],[54,9,54,10,1],[55,13,55,66,1],[56,13,56,36,1],[56,37,56,50,1],[57,13,57,38,1],[57,39,57,51,1],[58,13,58,59,1],[58,60,58,99,1],[59,13,59,66,1],[59,67,59,104,1],[61,13,61,41,1],[63,13,64,31,1],[64,31,64,52,1],[64,52,64,85,1],[64,85,64,86,1],[64,31,64,86,1],[64,86,64,88,1],[63,13,64,88,1],[65,13,65,54,1],[65,54,65,63,1],[65,63,66,31,1],[66,31,66,52,1],[66,52,66,85,1],[66,85,66,86,1],[66,31,66,86,1],[66,86,66,88,1],[65,13,66,88,1],[67,13,67,63,1],[68,9,68,10,1],[71,9,71,10,1],[72,13,72,66,1],[73,13,73,36,1],[73,37,73,50,1],[74,13,74,39,1],[74,40,74,52,1],[77,13,77,42,1],[79,13,80,31,1],[80,31,80,52,1],[80,52,80,80,1],[80,80,80,81,1],[80,31,80,81,1],[80,81,80,83,1],[79,13,80,83,1],[81,13,81,54,1],[81,54,81,63,1],[81,63,82,31,1],[82,31,82,52,1],[82,52,82,80,1],[82,80,82,81,1],[82,31,82,81,1],[82,81,82,83,1],[81,13,82,83,1],[83,13,83,63,1],[84,9,84,10,1],[87,9,87,10,1],[88,13,88,66,1],[89,13,89,36,1],[89,37,89,50,1],[90,13,90,38,1],[90,39,90,52,1],[91,13,91,101,1],[92,17,93,40,1],[95,13,95,52,1],[96,13,96,56,1],[99,13,99,83,1],[100,13,100,25,1],[101,9,101,10,1],[104,9,104,10,1],[105,13,105,66,1],[106,13,106,36,1],[106,37,106,50,1],[107,13,107,38,1],[107,39,107,52,1],[108,13,108,57,1],[109,17,109,111,1],[110,13,110,51,1],[111,13,111,56,1],[114,13,114,65,1],[115,13,115,25,1],[116,9,116,10,1],[119,9,119,10,1],[120,13,120,66,1],[121,13,121,36,1],[121,37,121,50,1],[122,13,122,38,1],[122,39,122,52,1],[123,13,125,62,1],[126,17,126,154,1],[128,13,128,57,1],[129,13,129,14,1],[130,17,130,69,1],[131,13,131,14,1],[132,13,132,54,1],[133,13,133,47,1],[134,13,134,63,1],[135,9,135,10,1],[138,9,138,10,1],[139,13,139,66,1],[140,13,140,36,1],[140,37,140,50,1],[141,13,141,39,1],[141,40,141,53,1],[142,13,142,59,1],[142,60,142,99,1],[143,13,143,66,1],[143,67,143,104,1],[146,13,147,31,1],[147,31,147,52,1],[147,52,147,86,1],[147,86,147,87,1],[147,31,147,87,1],[147,87,147,89,1],[146,13,147,89,1],[148,13,148,54,1],[148,54,148,63,1],[148,63,149,31,1],[149,31,149,52,1],[149,52,149,86,1],[149,86,149,87,1],[149,31,149,87,1],[149,87,149,89,1],[148,13,149,89,1],[151,13,151,63,1],[152,9,152,10,1],[155,9,155,10,1],[156,13,156,66,1],[157,13,157,36,1],[157,37,157,50,1],[158,13,158,38,1],[158,39,158,52,1],[159,13,159,56,1],[160,17,161,40,1],[162,13,162,51,1],[163,13,163,56,1],[166,13,166,72,1],[167,9,167,10,1],[170,9,170,10,1],[171,13,171,66,1],[172,13,172,36,1],[172,37,172,50,1],[174,13,174,35,1],[175,13,175,14,1],[176,17,176,48,1],[177,17,177,67,1],[181,13,181,38,1],[182,13,182,44,1],[183,13,183,56,1],[186,13,186,65,1],[187,13,187,25,1],[188,9,188,10,1],[191,9,191,10,1],[192,13,192,36,1],[192,37,192,50,1],[193,13,193,48,1],[194,13,194,63,1],[195,9,195,10,1],[198,9,198,10,1],[199,13,199,55,1],[200,13,200,14,1],[201,17,201,30,1],[203,13,203,55,1],[203,55,203,89,1],[203,89,203,91,1],[203,13,203,91,1],[204,13,204,14,1],[205,17,205,30,1],[207,13,207,109,1],[210,13,210,53,1],[211,13,211,14,1],[212,17,212,101,1],[213,13,213,14,1],[214,13,214,63,1],[215,9,215,10,1],[218,9,218,10,1],[219,13,219,55,1],[220,13,220,14,1],[221,17,221,30,1],[224,13,224,66,1],[225,13,225,59,1],[225,59,225,93,1],[225,93,225,95,1],[225,13,225,95,1],[226,13,226,35,1],[226,36,226,49,1],[228,13,228,68,1],[229,13,229,14,1],[230,17,230,57,1],[230,57,230,91,1],[230,91,230,93,1],[230,17,230,93,1],[231,17,231,45,1],[231,45,231,54,1],[231,54,231,63,1],[231,63,231,92,1],[231,92,232,66,1],[231,17,232,66,1],[233,17,233,18,1],[234,21,234,59,1],[235,21,235,53,1],[236,17,236,18,1],[237,17,237,67,1],[240,13,240,26,1],[241,9,241,10,1],[247,9,247,10,1],[248,13,248,66,1],[249,13,249,36,1],[249,37,249,50,1],[250,13,251,31,1],[251,31,251,52,1],[251,52,251,93,1],[251,93,251,94,1],[251,31,251,94,1],[251,94,251,96,1],[250,13,251,96,1],[252,13,252,54,1],[252,54,252,63,1],[252,63,253,31,1],[253,31,253,52,1],[253,52,253,93,1],[253,93,253,94,1],[253,31,253,94,1],[253,94,253,96,1],[252,13,253,96,1],[254,13,254,41,1],[255,13,255,39,1],[256,13,256,56,1],[257,13,257,86,1],[258,9,258,10,1],[261,9,261,10,1],[262,13,262,60,1],[263,13,263,30,1],[263,31,263,62,1],[264,13,264,74,1],[265,9,265,10,1],[268,9,268,10,1],[270,13,270,60,1],[271,13,271,30,1],[271,31,271,43,1],[274,13,274,46,1],[274,46,274,72,1],[274,72,274,74,1],[274,13,274,74,1],[275,17,275,57,1],[278,13,278,81,1],[279,13,279,27,1],[280,13,280,111,1],[283,13,283,35,1],[284,13,284,69,1],[285,9,285,10,1],[289,9,289,10,1],[291,13,291,96,1],[292,13,292,37,1],[292,38,292,51,1],[294,13,294,72,1],[297,13,297,40,1],[298,13,298,14,1],[299,17,299,81,1],[300,17,300,79,1],[301,13,301,14,1],[303,13,303,14,1],[305,17,305,36,1],[306,17,306,60,1],[307,17,307,18,1],[308,21,308,51,1],[309,21,309,114,1],[310,17,310,18,1],[311,22,311,64,1],[312,17,312,18,1],[313,21,313,51,1],[314,21,314,109,1],[315,17,315,18,1],[316,13,316,14,1],[320,13,320,74,1],[321,9,321,10,1],[324,9,324,10,1],[325,13,325,70,1],[326,13,326,100,1],[326,101,326,114,1],[327,13,327,70,1],[328,13,328,32,1],[330,13,330,105,1],[330,106,330,118,1],[332,13,332,51,1],[332,52,332,65,1],[333,13,333,45,1],[336,13,337,31,1],[337,31,337,52,1],[337,52,337,89,1],[337,89,337,90,1],[337,31,337,90,1],[337,90,337,92,1],[336,13,337,92,1],[338,13,338,58,1],[338,58,338,67,1],[338,67,339,31,1],[339,31,339,52,1],[339,52,339,89,1],[339,89,339,90,1],[339,31,339,90,1],[339,90,339,92,1],[338,13,339,92,1],[341,13,341,76,1],[342,13,342,72,1],[343,9,343,10,1]]);
+    </script>
+  </body>
+</html>
