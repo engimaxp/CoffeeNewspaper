@@ -119,9 +119,6 @@ namespace CN_Repository
             modelBuilder.Entity<CNTask>().Property(x => x.IsDeleted).HasColumnType("BOOLEAN").HasDefaultValue(false);
             modelBuilder.Entity<CNTask>().Property(x => x.IsFail).HasColumnType("BOOLEAN").HasDefaultValue(false);
             modelBuilder.Entity<CNTask>().Property(x => x.ParentTaskID).HasColumnType("INTEGER");
-//            modelBuilder.Entity<CNTask>().Property(x => x.Priority).HasColumnType("INTEGER");
-//            modelBuilder.Entity<CNTask>().Property(x => x.Urgency).HasColumnType("INTEGER");
-//            modelBuilder.Entity<CNTask>().Property(x => x.Status).HasColumnType("INTEGER");
             modelBuilder.Entity<CNTask>().Property(x => x.StartTime).HasColumnType("DATETIME");
 
             // Set Tasks parentTask foreign key
@@ -262,9 +259,7 @@ namespace CN_Repository
                 .HasIndex(p => new { p.TaskId, p.MemoId })
                 .IsUnique(); 
             #endregion
-
-            // TODO: Set up limits
-            //modelBuilder.Entity<LoginCredentialsDataModel>().Property(a => a.FirstName).HasMaxLength(50);
+            
         }
 
         #endregion

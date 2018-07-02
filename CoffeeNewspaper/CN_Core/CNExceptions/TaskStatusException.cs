@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace CN_Core
 {
     /// <summary>
     ///     Throw this exception when Task's <see cref="CNTaskStatus" /> is not Right
     /// </summary>
+    [Serializable]
     public class TaskStatusException : Exception
     {
         #region Construction
@@ -14,6 +16,11 @@ namespace CN_Core
         {
             GetShoudBeStatus = targetTaskStatus;
             currentStatus = originStatus;
+        }
+
+        protected TaskStatusException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
 
         #endregion

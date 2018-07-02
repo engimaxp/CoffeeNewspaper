@@ -13,7 +13,7 @@ namespace CN_Presentation.ViewModel.Base
         /// <summary>
         /// The action to run
         /// </summary>
-        private Action mAction;
+        private readonly Action mAction;
 
         #endregion
 

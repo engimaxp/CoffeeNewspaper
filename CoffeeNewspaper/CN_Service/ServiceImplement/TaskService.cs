@@ -115,9 +115,9 @@ namespace CN_Service
             return true;
         }
 
-        public async Task<bool> PendingATask(int taskId,string reason)
+        public async Task<bool> PendingATask(int TaskId,string reason)
         {
-            var targetTask = await taskDataStore.GetTask(taskId);
+            var targetTask = await taskDataStore.GetTask(TaskId);
             if (targetTask == null) return false;
             if (targetTask.IsDeleted) return false;
             if (targetTask.Status != CNTaskStatus.DOING
@@ -200,7 +200,7 @@ namespace CN_Service
             {
                 return false;
             }
-            if (targetTask.PreTaskConnectors.ToList().Any(r => r.PreTask.TaskId == preTask.TaskId))
+            if (targetTask.PreTaskConnectors.Any(r => r.PreTask.TaskId == preTask.TaskId))
             {
                 return false;
             }

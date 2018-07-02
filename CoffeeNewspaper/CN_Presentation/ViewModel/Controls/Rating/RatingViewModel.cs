@@ -10,7 +10,7 @@ namespace CN_Presentation.ViewModel.Controls
 
         public RatingViewModel GenerateChildViewModel(int MaximumIconNum)
         {
-            if(MaximumIconNum<this.SelectedValue) throw new Exception("Invalid parameter MaximumIconNum");
+            if(MaximumIconNum<this.SelectedValue) throw new ArgumentException("Invalid parameter MaximumIconNum");
             IconButtons = new List<RatingIconButtonViewModel>();
             for (var i = 0; i < MaximumIconNum; i++)
                 IconButtons.Add(new RatingIconButtonViewModel

@@ -78,7 +78,7 @@ namespace CN_Core
                 }
             }
 
-            return days.ToList().Sum(x => x.GetWorkDays());
+            return days.Sum(x => x.GetWorkDays());
         }
     }
 }

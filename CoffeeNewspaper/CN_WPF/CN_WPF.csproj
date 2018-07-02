@@ -225,7 +225,6 @@
     <Compile Include="Controls\TaskListItem.xaml.cs">
       <DependentUpon>TaskListItem.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Input\TextEntryControl.xaml.cs">
       <DependentUpon>TextEntryControl.xaml</DependentUpon>
     </Compile>

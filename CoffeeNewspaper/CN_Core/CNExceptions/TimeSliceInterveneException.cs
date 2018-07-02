@@ -6,6 +6,7 @@ namespace CN_Core
     /// <summary>
     ///     This <see cref="CNTimeSlice" /> Intervene with another 
     /// </summary>
+    [Serializable]
     public class TimeSliceInterveneException : Exception
     {
         #region Construction

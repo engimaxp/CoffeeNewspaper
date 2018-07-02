@@ -7,6 +7,7 @@ namespace CN_Core
     ///     This <see cref="CNTask" /> has child tasks
     ///     throw this exception while try to remove or delete a task
     /// </summary>
+    [Serializable]
     public class TaskHasChildTasksException : Exception
     {
         #region Construction

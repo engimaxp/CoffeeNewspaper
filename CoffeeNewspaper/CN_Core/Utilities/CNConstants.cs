@@ -3,7 +3,7 @@
     /// <summary>
     /// Store all project scope constants
     /// </summary>
-    public class CNConstants
+    public static class CNConstants
     {
         public const string DIRECTORY_DATEFORMAT = "yyyy-MM-dd";
 
