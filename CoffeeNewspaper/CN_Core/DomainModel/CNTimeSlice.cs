@@ -88,8 +88,8 @@ namespace CN_Core
             public bool Equals(CNTimeSlice x, CNTimeSlice y)
             {
                 if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(x, null)) return false;
-                if (ReferenceEquals(y, null)) return false;
+                if (x == null) return false;
+                if (y == null) return false;
                 if (x.GetType() != y.GetType()) return false;
                 return x.StartDateTime.Equals(y.StartDateTime) && x.EndDateTime.Equals(y.EndDateTime);
             }
@@ -105,14 +105,14 @@ namespace CN_Core
 
         public bool Equals(CNTimeSlice other)
         {
-            if (ReferenceEquals(null, other)) return false;
+            if (other == null) return false;
             if (ReferenceEquals(this, other)) return true;
             return StartDateTime.Equals(other.StartDateTime) && EndDateTime.Equals(other.EndDateTime);
         }
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj == null) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
             return Equals((CNTimeSlice) obj);
@@ -128,6 +128,38 @@ namespace CN_Core
 
         #endregion
 
+        #region Operator Overide
+        
+        public static bool operator ==(CNTimeSlice left, CNTimeSlice right)
+        {
+            if (left == null)
+            {
+                return right == null;
+            }
+            return left.Equals(right);
+        }
+        public static bool operator >(CNTimeSlice left, CNTimeSlice right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+        public static bool operator <(CNTimeSlice left, CNTimeSlice right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+        public static bool operator >=(CNTimeSlice left, CNTimeSlice right)
+        {
+            return left.CompareTo(right) >= 0;
+        }
+        public static bool operator <=(CNTimeSlice left, CNTimeSlice right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+        public static bool operator !=(CNTimeSlice left, CNTimeSlice right)
+        {
+            return !(left == right);
+        }
+
+        #endregion
         #endregion
 
         #region Public Properties

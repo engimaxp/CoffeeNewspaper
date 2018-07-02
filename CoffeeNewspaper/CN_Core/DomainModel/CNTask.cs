@@ -182,6 +182,49 @@ namespace CN_Core
             return 0;
         }
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as CNTask;
+            if (other == null)
+            {
+                return false;
+            }
+            return this.CompareTo(other) == 0;
+        }
+
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public static bool operator ==(CNTask left, CNTask right)
+        {
+            if (left == null)
+            {
+                return right == null;
+            }
+            return left.Equals(right);
+        }
+        public static bool operator >(CNTask left, CNTask right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+        public static bool operator <(CNTask left, CNTask right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+        public static bool operator >=(CNTask left, CNTask right)
+        {
+            return left.CompareTo(right) >= 0;
+        }
+        public static bool operator <=(CNTask left, CNTask right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+        public static bool operator !=(CNTask left, CNTask right)
+        {
+            return !(left == right);
+        }
+
         #endregion
 
         #endregion

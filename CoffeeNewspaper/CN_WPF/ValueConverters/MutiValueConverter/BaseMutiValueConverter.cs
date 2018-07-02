@@ -10,11 +10,11 @@ namespace CN_WPF
         /// <summary>
         /// A single static instance of this value converter
         /// </summary>
-        private static T Converter;
+        private static readonly T Converter = new T();
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return Converter ?? (Converter = new T());
+            return Converter ;
         }
 
         public abstract object Convert(object[] values, Type targetType, object parameter, CultureInfo culture);

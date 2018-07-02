@@ -45,27 +45,21 @@ namespace CN_WPF
         public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             // If we don't have a control, return
-            if (sender is TextBoxBase control)
+            if (sender is TextBoxBase control && (bool)e.NewValue)
             {
-                if ((bool)e.NewValue)
-                {
-                    // Focus this control
-                    control.Focus();
+                // Focus this control
+                control.Focus();
 
-                    // Select all text
-                    control.SelectAll();
-                }
+                // Select all text
+                control.SelectAll();
             }
-            if (sender is PasswordBox password)
+            if (sender is PasswordBox password && (bool)e.NewValue)
             {
-                if ((bool)e.NewValue)
-                {
-                    // Focus this control
-                    password.Focus();
+                // Focus this control
+                password.Focus();
 
-                    // Select all text
-                    password.SelectAll();
-                }
+                // Select all text
+                password.SelectAll();
             }
         }
     }

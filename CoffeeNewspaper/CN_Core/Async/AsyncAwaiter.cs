@@ -145,8 +145,6 @@ namespace CN_Core
             }
             catch (Exception ex)
             {
-                // Get error message
-                var error = ex.Message;
 
                 // Log message to debug level 
                 // (may not be an issue but we don't want to miss anything in debug)
