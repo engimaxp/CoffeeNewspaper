@@ -21,12 +21,12 @@ namespace CN_WPF
         /// True if this is the very first time the value has been updated
         /// Used to make sure we run the logic at least once during first load
         /// </summary>
-        protected Dictionary<WeakReference, bool> mAlreadyLoaded = new Dictionary<WeakReference, bool>();
+        private readonly Dictionary<WeakReference, bool> mAlreadyLoaded = new Dictionary<WeakReference, bool>();
 
         /// <summary>
         /// The most recent value used if we get a value changed before we do the first load
         /// </summary>
-        protected Dictionary<WeakReference, bool> mFirstLoadValue = new Dictionary<WeakReference, bool>();
+        private readonly Dictionary<WeakReference, bool> mFirstLoadValue = new Dictionary<WeakReference, bool>();
 
         #endregion
 
@@ -40,7 +40,6 @@ namespace CN_WPF
             var alreadyLoadedReference = mAlreadyLoaded.FirstOrDefault(f => Equals(f.Key.Target, sender));
 
             // Try and get the first load reference
-            KeyValuePair<WeakReference, bool> firstLoadReference;
 
             // Don't fire if the value doesn't change
             if ((bool)sender.GetValue(ValueProperty) == (bool)value && alreadyLoadedReference.Key != null)
@@ -71,7 +70,7 @@ namespace CN_WPF
 
                     // Refresh the first load value in case it changed
                     // since the 5ms delay
-                    firstLoadReference = mFirstLoadValue.FirstOrDefault(f => f.Key.Target == sender);
+                    var firstLoadReference = mFirstLoadValue.FirstOrDefault(f => Equals(f.Key.Target, sender));
 
                     // Do desired animation
                     DoAnimation(element, firstLoadReference.Key != null ? firstLoadReference.Value : (bool)value, true);
@@ -284,10 +283,10 @@ namespace CN_WPF
         {
             if (value)
                 // ccw out
-                await element.RotateCCWAsync(firstLoad ? 0 : 0.3f);
+                await element.RotateCCWAsync(0);
             else
             // cw in
-            await element.RotateCWAsync(firstLoad, firstLoad ? 0 : 0.3f);
+            await element.RotateCWAsync(firstLoad, 0);
         }
     }
     

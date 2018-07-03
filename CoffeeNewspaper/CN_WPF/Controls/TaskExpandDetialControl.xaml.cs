@@ -1,4 +1,6 @@
 ﻿using System.Windows.Controls;
+using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Controls;
 
 namespace CN_WPF
 {
@@ -10,6 +12,12 @@ namespace CN_WPF
         public TaskExpandDetialControl()
         {
             InitializeComponent();
+        }
+
+        public TaskExpandDetialControl(TaskExpandDetailViewModel viewModel)
+        {
+            InitializeComponent();
+            this.DataContext = viewModel;
         }
     }
 }

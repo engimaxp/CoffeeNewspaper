@@ -247,10 +247,11 @@
     <Compile Include="Pages\WorkSpacePage.xaml.cs">
       <DependentUpon>WorkSpacePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\ExpandDetailControlHelper.cs" />
     <Compile Include="Utilities\MyTreeViewHelper.cs" />
     <Compile Include="Utilities\TreeViewItemExtensions.cs" />
     <Compile Include="Utilities\VisualTreeExtensionClass.cs" />
-    <Compile Include="ValueConverters\ApplicationPageHelpers.cs" />
+    <Compile Include="Utilities\ApplicationPageHelpers.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
     <Compile Include="ValueConverters\BooleanInvertConverter.cs" />

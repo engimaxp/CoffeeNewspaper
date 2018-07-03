@@ -120,7 +120,11 @@
 
         <!-- Expandable Content -->
         <!-- ScrollView Animation Wrapper -->
-        <local:ScrollViewExpander Grid.Row="1"></local:ScrollViewExpander>
+        <local:ScrollViewExpander
+            Grid.Row="1"
+            ToggleExpand="{Binding IsExpanded}"
+            ContentViewModel="{x:Static design:TaskExpandDetailDesignModel.Instance}"
+            ></local:ScrollViewExpander>
     </Grid>
 
 </UserControl>

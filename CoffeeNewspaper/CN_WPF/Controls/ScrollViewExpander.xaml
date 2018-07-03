@@ -13,8 +13,7 @@
             HorizontalScrollBarVisibility="Hidden"
             VerticalScrollBarVisibility="Hidden"
             HorizontalContentAlignment="Stretch"
-            VerticalContentAlignment="Bottom"
-            local:AnimateScrollViewExpandProperty.Value="True">
+            VerticalContentAlignment="Bottom">
         <ScrollViewer.Tag>
             <system:Double>1.0</system:Double>
         </ScrollViewer.Tag>
