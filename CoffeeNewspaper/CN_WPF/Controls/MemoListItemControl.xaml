@@ -13,7 +13,7 @@
                     <ControlTemplate TargetType="{x:Type ContentControl}">
                         <Border Padding="10"
                                 Margin="10 0 20 10"
-                                Background="{StaticResource BackGroundMemoYelloBrush}"
+                                Background="{StaticResource WordVeryVeryLightBlueBrush}"
                                 CornerRadius="10">
                             <Grid
                                 MinHeight="300">

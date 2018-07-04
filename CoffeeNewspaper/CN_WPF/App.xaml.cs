@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Windows;
 using CN_Core;
+using CN_Core.Interfaces;
 using CN_Presentation;
 using CN_Repository;
 using CN_Service;
@@ -31,6 +32,9 @@ namespace CN_WPF
             IoC.Kernel.BindInitialViewModel();
             await IoC.Kernel.BindCNDBContext();
             IoC.Kernel.BindServices();
+
+            //Bind UI Manager So Could use be used in ViewModel
+            IoC.Kernel.Bind<IUIManager>().ToConstant(new UIManager());
             await Task.Delay(1);
         }
     }

@@ -6,10 +6,6 @@ using CN_Core.Interfaces;
 
 namespace CN_Core.Logging
 {
-    /// <summary>
-    /// The standard log factory for Fasetto Word
-    /// Logs details to the Debug by default
-    /// </summary>
     public class BaseLogFactory : ILogFactory
     {
         #region Protected Methods
