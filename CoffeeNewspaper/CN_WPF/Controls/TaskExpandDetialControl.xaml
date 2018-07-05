@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="300">
+             d:DesignWidth="300">
 
     <!-- Shadow Border-->
     <Border x:Name="ExpanderContent"
@@ -62,11 +62,13 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <local:RatingControl
+                            DisplayTxt="False"
                                     ToolTip="Urgency Settings"
                                     Grid.Column="0"
                                     Margin="-4 0 0 0"
                                     DataContext="{x:Static design:RatingDesignModel2.Instance}" />
                         <local:RatingControl
+                            DisplayTxt="False"
                                     ToolTip="Importance Settings"
                                     Grid.Column="2"
                                     DataContext="{x:Static design:RatingDesignModel.Instance}" />

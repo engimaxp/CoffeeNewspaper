@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CN_Core.Interfaces;
 using CN_Presentation.ViewModel.Dialog;
 
@@ -7,10 +6,9 @@ namespace CN_WPF
 {
     public class UIManager:IUIManager
     {
-        public async Task ShowForm(FormDialogViewModel viewModel)
+        public Task ShowForm(FormDialogViewModel form)
         {
-            throw new NotImplementedException();
-            //            return new FormWindowBox().ShowForm(viewModel);
+            return new FormDialogBox().ShowDialog(form);
         }
 
         public Task ShowMessage(MessageBoxDialogViewModel viewModel)

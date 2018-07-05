@@ -6,11 +6,16 @@ namespace CN_Presentation.ViewModel.Controls
 {
     public class RatingViewModel : BaseViewModel
     {
+        private int _selectedValue;
+        private string _selectedValueTxt;
+
         #region Public Methods
 
-        public RatingViewModel GenerateChildViewModel(int MaximumIconNum)
+        public RatingViewModel GenerateChildViewModel()
         {
-            if(MaximumIconNum<this.SelectedValue) throw new ArgumentException("Invalid parameter MaximumIconNum");
+            if (EnumType == null) throw new ArgumentException("Property EnumType Not Set");
+            int MaximumIconNum = Enum.GetNames(EnumType).Length;
+            if (MaximumIconNum<this.SelectedValue) throw new ArgumentException("Invalid parameter MaximumIconNum");
             IconButtons = new List<RatingIconButtonViewModel>();
             for (var i = 0; i < MaximumIconNum; i++)
                 IconButtons.Add(new RatingIconButtonViewModel
@@ -22,7 +27,7 @@ namespace CN_Presentation.ViewModel.Controls
                     RegularIcon = RegularIcon,
                     RegularFontFamilyType = RegularFontFamilyType,
                     IsSolidStatus = SelectedValue - 1 >= i,
-                    parentModel = this
+                    ParentModel = this
                 });
             return this;
         }
@@ -43,8 +48,29 @@ namespace CN_Presentation.ViewModel.Controls
 
         public UserColorType ColorType { get; set; }
 
-        public int SelectedValue { get; set; }
+        public int SelectedValue
+        {
+            get => _selectedValue;
+            set
+            {
+                _selectedValue = value;
+                OnPropertyChanged(nameof(SelectedValue));
+                OnPropertyChanged(nameof(SelectedValueTxt));
+            }
+        }
 
+        public string SelectedValueTxt
+        {
+            get
+            {
+                _selectedValueTxt = Enum.GetNames(EnumType)[_selectedValue - 1]; 
+                return _selectedValueTxt;
+            }
+            set => _selectedValueTxt = value;
+        }
+
+        public Type EnumType { get; set; }
+        
         #endregion
 
         public void SetChildrensSolidStatus(int currentHoveredCurrentPosition)

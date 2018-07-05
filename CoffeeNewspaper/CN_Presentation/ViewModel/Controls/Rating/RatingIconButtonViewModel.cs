@@ -22,7 +22,7 @@ namespace CN_Presentation.ViewModel.Controls
 
         public bool IsSolidStatus { get; set; }
 
-        public RatingViewModel parentModel { get; set; } 
+        public RatingViewModel ParentModel { get; set; } 
         
         public IconType CurrentIconType => IsSolidStatus ? SolidIcon : RegularIcon;
 
@@ -38,7 +38,7 @@ namespace CN_Presentation.ViewModel.Controls
 
         private void Rate()
         {
-            parentModel.SelectedValue = CurrentPosition + 1;
+            ParentModel.SelectedValue = CurrentPosition + 1;
         }
     }
 }

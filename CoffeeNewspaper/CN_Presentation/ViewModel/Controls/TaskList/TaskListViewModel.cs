@@ -4,6 +4,7 @@ using CN_Core;
 using CN_Core.Interfaces;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Dialog;
+using CN_Presentation.ViewModel.Form;
 
 namespace CN_Presentation.ViewModel.Controls
 {
@@ -15,9 +16,23 @@ namespace CN_Presentation.ViewModel.Controls
 
         public ICommand FilterCommand { get; set; }
 
+        public ICommand SortCommand { get; set; }
+
         public TaskListViewModel()
         {
             FilterCommand = new RelayCommand(Filter);
+            SortCommand = new RelayCommand(Sort);
+        }
+
+        private void Sort()
+        {
+            IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel()
+            {
+                Title = "Add a Task",
+                FormContentViewModel = new TaskDetailFormViewModel(),
+                OKButtonText = "queding",
+                CancelButtonText = "quxiao"
+            });
         }
 
         private void Filter()

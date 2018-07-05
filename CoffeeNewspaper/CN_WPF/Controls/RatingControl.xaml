@@ -5,9 +5,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
-             mc:Ignorable="d">
+             mc:Ignorable="d"
+             d:DesignWidth="200">
     <Grid >
-        <ItemsControl local:MonitorHoverProperty.Value="True"
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <ItemsControl
+            Grid.Column="0"
+            local:MonitorHoverProperty.Value="True"
             d:DataContext="{x:Static design:RatingDesignModel.Instance}"
             ItemsSource="{Binding IconButtons}">
             <ItemsControl.ItemsPanel>
@@ -29,5 +36,13 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+        <TextBlock
+            Grid.Column="1" 
+            x:Name="NameColumn"
+                   Text="{Binding SelectedValueTxt}"
+                   VerticalAlignment="Center"
+                   FontSize="{StaticResource FontSizeLarge}"
+                   HorizontalAlignment="Right"
+            Foreground="{StaticResource ForegroundDarkBrush}"></TextBlock>
     </Grid>
 </UserControl>

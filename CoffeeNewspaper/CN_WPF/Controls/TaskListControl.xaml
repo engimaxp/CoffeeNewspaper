@@ -59,7 +59,8 @@
                         <!-- Sort Icon -->
                         <Button Style="{StaticResource IconGrowButton}"
                                 Foreground="{StaticResource ForegroundMainBrush}"
-                                Content="{StaticResource FontAwesomeSortAmountDownIcon}" />
+                                Content="{StaticResource FontAwesomeSortAmountDownIcon}" 
+                                Command="{Binding SortCommand}"/>
                         <!-- Filter Icon -->
                         <Button Style="{StaticResource IconGrowButton}"
                                 Foreground="{StaticResource ForegroundMainBrush}"

@@ -1,4 +1,7 @@
-﻿namespace CN_Presentation.ViewModel.Controls.Design
+﻿using System;
+using CN_Core;
+
+namespace CN_Presentation.ViewModel.Controls.Design
 {
     public class RatingDesignModel:RatingViewModel
     {
@@ -25,8 +28,11 @@
             RegularFontFamilyType = FontFamilyType.FontAwesomeRegular;
             SolidFontFamilyType = FontFamilyType.FontAwesomeSolid;
             SelectedValue = 3;
-            GenerateChildViewModel(5);
+            EnumType = typeof(CNPriority);
+            GenerateChildViewModel();
         }
+
+
         #endregion
     }
 
@@ -56,7 +62,8 @@
             RegularFontFamilyType = FontFamilyType.CNFont;
             SolidFontFamilyType = FontFamilyType.CNFont;
             SelectedValue = 1;
-            GenerateChildViewModel(5);
+            EnumType = typeof(CNUrgency);
+            GenerateChildViewModel();
         }
         #endregion
     }

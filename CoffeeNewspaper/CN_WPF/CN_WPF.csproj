@@ -210,6 +210,9 @@
     <Compile Include="Controls\ScrollViewExpander.xaml.cs">
       <DependentUpon>ScrollViewExpander.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TagPanelControlWithCancel.xaml.cs">
+      <DependentUpon>TagPanelControlWithCancel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TagPanelControl.xaml.cs">
       <DependentUpon>TagPanelControl.xaml</DependentUpon>
     </Compile>
@@ -226,11 +229,17 @@
       <DependentUpon>TaskListItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\BaseDialogUserControl.cs" />
+    <Compile Include="Dialogs\FormDialogBox.xaml.cs">
+      <DependentUpon>FormDialogBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\DialogMessageBox.xaml.cs">
       <DependentUpon>DialogMessageBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="DialogWindow.xaml.cs">
       <DependentUpon>DialogWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TaskDetailFormControl.xaml.cs">
+      <DependentUpon>TaskDetailFormControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Input\TextEntryControl.xaml.cs">
       <DependentUpon>TextEntryControl.xaml</DependentUpon>
@@ -261,6 +270,7 @@
     <Compile Include="Utilities\VisualTreeExtensionClass.cs" />
     <Compile Include="Utilities\ApplicationPageHelpers.cs" />
     <Compile Include="Utilities\WindowResizer.cs" />
+    <Compile Include="ValueConverters\FormControlValueConverter.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
     <Compile Include="ValueConverters\BooleanInvertConverter.cs" />
@@ -271,6 +281,7 @@
     <Compile Include="ValueConverters\MutiValueConverter\MultiplyConverter.cs" />
     <Compile Include="ValueConverters\BorderBrushToColorConverter.cs" />
     <Compile Include="ValueConverters\MutiValueConverter\WidthCalculateConverter.cs" />
+    <Compile Include="ValueConverters\TaskStatusToTextConverter.cs" />
     <Compile Include="ValueConverters\TaskStatusToFontCodeConverter.cs" />
     <Compile Include="ValueConverters\TaskStatusToForeGroundConverter.cs" />
     <Compile Include="ValueConverters\TaskUrgencyToBackGroundColorConverter.cs" />
@@ -307,6 +318,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\TagPanelControlWithCancel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\TagPanelControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -327,11 +342,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Dialogs\FormDialogBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Dialogs\DialogMessageBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DialogWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Forms\TaskDetailFormControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

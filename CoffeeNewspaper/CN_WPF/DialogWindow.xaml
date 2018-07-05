@@ -33,7 +33,7 @@
 
                                 <!-- Window border and drop shadow -->
                                 <Border CornerRadius="{Binding WindowCornerRadius, FallbackValue=10}"
-                                        Background="{StaticResource ForegroundMainBrush}">
+                                        Background="{StaticResource ForegroundVeryLightBrush}">
                                     <Border.Effect>
                                         <DropShadowEffect ShadowDepth="0" Opacity="0.2" />
                                     </Border.Effect>
@@ -44,7 +44,7 @@
 
                                     <!-- Corner clipping -->
                                     <Grid.OpacityMask>
-                                        <VisualBrush Visual="{Binding ElementName=Container}" />
+                                        <VisualBrush x:Name="VisualBrush" Visual="{Binding ElementName='Container'}" />
                                     </Grid.OpacityMask>
 
                                     <Grid.RowDefinitions>
@@ -89,7 +89,7 @@
             GlassFrameThickness="0" />
     </WindowChrome.WindowChrome>
 
-    <Border Background="{StaticResource ForegroundMainBrush}"
+    <Border Background="{StaticResource ForegroundVeryLightBrush}"
             Padding="10">
 
         <ContentControl Content="{Binding Content}" />

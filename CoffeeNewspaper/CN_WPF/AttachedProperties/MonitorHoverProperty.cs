@@ -49,7 +49,7 @@ namespace CN_WPF
         private void MouseEnterButton(object sender, MouseEventArgs mouseEventArgs)
         {
             if (!(((ContentPresenter) sender).DataContext is RatingIconButtonViewModel currentHovered)) return;
-            currentHovered.parentModel.SetChildrensSolidStatus(currentHovered.CurrentPosition);
+            currentHovered.ParentModel.SetChildrensSolidStatus(currentHovered.CurrentPosition);
         }
 
         /// <summary>

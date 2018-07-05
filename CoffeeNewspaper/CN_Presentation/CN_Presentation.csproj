@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <Folder Include="ViewModel\Application\Design\" />
-    <Folder Include="ViewModel\Form\" />
   </ItemGroup>
 
 </Project>
