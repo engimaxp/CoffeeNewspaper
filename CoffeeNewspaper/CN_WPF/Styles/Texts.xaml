@@ -39,9 +39,10 @@
                                    x:Name="placeholder"
                                    FontFamily="Microsoft YaHei UI Light"
                                    Padding="{TemplateBinding Padding}"
-                                   VerticalAlignment="Center"
+                                   VerticalAlignment="Top"
+                                   TextWrapping="Wrap"
                                    HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
-                                   Foreground="{StaticResource ForegroundVeryDarkBrush}"
+                                   Foreground="{StaticResource BackgroundLightBrush}"
                                    TextTrimming="CharacterEllipsis"
                                    >
                             <TextBlock.Style>

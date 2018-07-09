@@ -5,6 +5,7 @@ using CN_Core.Interfaces;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Dialog;
 using CN_Presentation.ViewModel.Form;
+using CN_Presentation.ViewModel.Form.Design;
 
 namespace CN_Presentation.ViewModel.Controls
 {
@@ -29,9 +30,9 @@ namespace CN_Presentation.ViewModel.Controls
             IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel()
             {
                 Title = "Add a Task",
-                FormContentViewModel = new TaskDetailFormViewModel(),
-                OKButtonText = "queding",
-                CancelButtonText = "quxiao"
+                FormContentViewModel = TaskDetailFormDesignModel.Instance,
+                OKButtonText = "Confirm",
+                CancelButtonText = "Cancel"
             });
         }
 

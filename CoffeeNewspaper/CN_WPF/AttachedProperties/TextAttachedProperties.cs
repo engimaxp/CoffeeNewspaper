@@ -42,10 +42,10 @@ namespace CN_WPF
     /// </summary>
     public class FocusAndSelectProperty : BaseAttachedProperty<FocusAndSelectProperty, bool>
     {
-        public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        public override void OnValueUpdated(DependencyObject sender, object e)
         {
             // If we don't have a control, return
-            if (sender is TextBoxBase control && (bool)e.NewValue)
+            if (sender is TextBoxBase control && (bool)e)
             {
                 // Focus this control
                 control.Focus();
@@ -53,7 +53,7 @@ namespace CN_WPF
                 // Select all text
                 control.SelectAll();
             }
-            if (sender is PasswordBox password && (bool)e.NewValue)
+            if (sender is PasswordBox password && (bool)e)
             {
                 // Focus this control
                 password.Focus();

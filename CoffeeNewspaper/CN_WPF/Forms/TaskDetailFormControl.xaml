@@ -7,7 +7,7 @@
              xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
              xmlns:design1="clr-namespace:CN_Presentation.ViewModel.Form.Design;assembly=CN_Presentation"
              mc:Ignorable="d"
-             Height="395"
+             MinHeight="395"
              Width="485"
              d:DataContext="{x:Static design1:TaskDetailFormDesignModel.Instance}">
     <Grid Background="{StaticResource ForegroundVeryLightBrush}">
@@ -20,26 +20,82 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Border Grid.Row="0"
-                Grid.Column="0"
-                Margin="10 10 10 0"
-                CornerRadius="15"
-                BorderThickness="2"
-                BorderBrush="{StaticResource ForegroundLightBrush}"
-                Background="{StaticResource ForegroundVeryLightBrush}">
-            <TextBox Style="{StaticResource MemoContent}"
-                     TextWrapping="Wrap"
-                     AcceptsReturn="True"
-                     Margin="5"
-                     Text="1234"
-                     FontSize="{StaticResource FontSizeRegular}" />
-        </Border>
+        <Grid
+            Margin="10 10 10 0"
+            Grid.Row="0"
+            Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <!-- Task Title -->
+            <WrapPanel Grid.Row="0"
+                       Orientation="Horizontal"
+                       Margin="0 0 0 5">
+                <TextBlock
+                    Margin="0 1 5 0"
+                    FontWeight="Bold"
+                    FontFamily="{StaticResource FontAwesomeSolid}"
+                    FontSize="{StaticResource FontSizeRegular}"
+                    Foreground="{StaticResource WordDarkBlueBrush}"
+                    Text="{StaticResource FontAwesomeCoffeeIcon}" />
+                <TextBlock
+                    TextWrapping="Wrap"
+                    FontWeight="Bold"
+                    FontFamily="Microsoft YaHei UI"
+                    FontSize="{StaticResource FontSizeRegular}"
+                    Foreground="{StaticResource WordDarkBlueBrush}"
+                    Text="{Binding Title}" />
+            </WrapPanel>
 
-        <StackPanel Grid.Row="0"
-                    Grid.Column="1"
-                    Margin="10 10 10 0">
+            <!-- Task Content -->
+            <Border Grid.Row="1"
+                    CornerRadius="5"
+                    BorderThickness="1"
+                    BorderBrush="{StaticResource ForegroundLightBrush}"
+                    Background="{StaticResource ForegroundMainBrush}">
+                <TextBox Style="{StaticResource MemoContent}"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         Margin="5"
+                         Padding="0"
+                         Tag="Write your task detail here... first line will be the title"
+                         Text="{Binding Content,Mode=TwoWay}"
+                         FontSize="{StaticResource FontSizeRegular}" />
+            </Border>
+
+            <!-- Parent Task -->
+            <TextBlock Grid.Row="2"
+                       Margin="0 5">
+                Parent Task:Task PlaceHolder
+            </TextBlock>
+
+            <!-- Child Tasks -->
+            <TextBlock Grid.Row="3"
+                       Margin="0 0 0 5">
+                Child Tasks:Task PlaceHolder
+            </TextBlock>
+        </Grid>
+
+        <Grid Grid.Row="0"
+              Grid.Column="1"
+              Margin="10 10 10 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <!--Status-->
-            <DockPanel Margin="0 0 0 5">
+            <DockPanel Margin="0 0 0 5" Grid.Row="0">
                 <TextBlock DockPanel.Dock="Left"
                            Text="{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}"
                            VerticalAlignment="Center"
@@ -58,50 +114,83 @@
             </DockPanel>
 
             <!--Pending Reason-->
-            <Border
-                Visibility="{Binding IsPending,Converter={local:BooleanToVisiblityGoneConverter}}"
-                Background="{StaticResource BackGroundMemoYelloBrush}"
-                CornerRadius="4"
-                BorderBrush="{StaticResource BackGroundMemoYelloBrush}"
-                BorderThickness="1"
-                Padding="5"
-                Margin="0 0 0 5">
-                <TextBlock FontSize="{StaticResource FontSizeSmall}"
-                           TextWrapping="Wrap"
+            <Border Grid.Row="1"
+                    Visibility="{Binding IsPending,Converter={local:BooleanToVisiblityGoneConverter}}"
+                    Background="{StaticResource BackGroundMemoYelloBrush}"
+                    CornerRadius="4"
+                    BorderBrush="{StaticResource BackGroundMemoYelloBrush}"
+                    BorderThickness="1"
+                    Padding="5"
+                    Margin="0 0 0 5">
+                <TextBlock TextWrapping="Wrap"
                            Foreground="{StaticResource ForegroundVeryDarkBrush}"
-                           Text="{Binding PendingReason,FallbackValue=''}"></TextBlock>
+                           FontSize="{StaticResource FontSizeSmall}">
+                    <Run FontFamily="{StaticResource FontAwesomeSolid}"
+                         Text="{StaticResource FontAwesomeHalfHourGlassIcon}" />
+                    <Run Text="{Binding PendingReason,FallbackValue=''}" />
+                </TextBlock>
             </Border>
 
             <!--Fail Reason-->
-            <Border
-                Visibility="{Binding IsFail,Converter={local:BooleanToVisiblityGoneConverter}}"
-                Margin="0 0 0 5"
-                Background="{StaticResource WordRedBrush}"
-                CornerRadius="4"
-                BorderBrush="{StaticResource WordRedBrush}"
-                BorderThickness="1"
-                Padding="5">
+            <Border Grid.Row="2"
+                    Visibility="{Binding IsFail,Converter={local:BooleanToVisiblityGoneConverter}}"
+                    Margin="0 0 0 5"
+                    Background="{StaticResource WordRedBrush}"
+                    CornerRadius="4"
+                    BorderBrush="{StaticResource WordRedBrush}"
+                    BorderThickness="1"
+                    Padding="5">
                 <TextBlock FontSize="{StaticResource FontSizeSmall}"
                            TextWrapping="Wrap"
-                           Foreground="{StaticResource ForegroundVeryLightBrush}"
-                           Text="{Binding FailReason,FallbackValue=''}"></TextBlock>
+                           Foreground="{StaticResource ForegroundVeryLightBrush}">
+                    <Run FontFamily="{StaticResource FontAwesomeSolid}"
+                         Text="{StaticResource FontAwesomeTimesCircleIcon}" />
+                    <Run Text="{Binding FailReason,FallbackValue=''}" />
+                </TextBlock>
             </Border>
             <!--Urgency-->
-            <local:RatingControl
-                Margin="-3 0 0 5"
-                DisplayTxt="True"
-                DataContext="{x:Static design:RatingDesignModel2.Instance}" />
+            <local:RatingControl Grid.Row="3"
+                                 Margin="-3 0 0 5"
+                                 DisplayTxt="True"
+                                 DataContext="{x:Static design:RatingDesignModel2.Instance}" />
             <!--Priority-->
-            <local:RatingControl
-                Margin="-3 0 0 5"
-                DisplayTxt="True"
-                DataContext="{x:Static design:RatingDesignModel.Instance}" />
+            <local:RatingControl Grid.Row="4"
+                                 Margin="-3 0 0 5"
+                                 DisplayTxt="True"
+                                 DataContext="{x:Static design:RatingDesignModel.Instance}" />
 
-            <TextBlock>DeadLine:</TextBlock>
-            <TextBlock>Estimated Duration:</TextBlock>
-            <TextBlock>Estimated Duration:</TextBlock>
+            <!-- DeadLine -->
+            <DockPanel Grid.Row="6"
+                       Margin="0 0 0 5">
+                <TextBlock DockPanel.Dock="Left">DeadLine:</TextBlock>
+                <TextBlock DockPanel.Dock="Right"
+                           HorizontalAlignment="Right"
+                           Text="{Binding DeadLineLeft}" />
+            </DockPanel>
 
-        </StackPanel>
+            <local:DateTimeEntryControl
+                DataContext="{Binding DeadLineEntry}"
+                Grid.Row="7"
+                Margin="0 0 0 5" VerticalAlignment="Bottom" />
+            <!-- Estimated Duration -->
+            <DockPanel Grid.Row="8"
+                       Margin="0 0 0 5">
+                <TextBlock DockPanel.Dock="Left">Estimated Duration:</TextBlock>
+                <TextBlock DockPanel.Dock="Right"
+                           HorizontalAlignment="Right">
+                    2H
+                </TextBlock>
+            </DockPanel>
+            <Border Grid.Row="9"
+                    Margin="0 0 0 5"
+                    CornerRadius="5"
+                    BorderThickness="1"
+                    BorderBrush="{StaticResource ForegroundLightBrush}"
+                    Background="{StaticResource ForegroundMainBrush}">
+                <DatePicker />
+            </Border>
+
+        </Grid>
 
         <WrapPanel Grid.Row="1"
                    Grid.Column="0"

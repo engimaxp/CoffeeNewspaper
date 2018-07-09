@@ -1,4 +1,5 @@
 ﻿using CN_Presentation.ViewModel.Form;
+using CN_Presentation.ViewModel.Form.Design;
 
 namespace CN_Presentation.ViewModel.Dialog.Design
 {
@@ -24,9 +25,9 @@ namespace CN_Presentation.ViewModel.Dialog.Design
         public FormDialogDesignModel()
         {
             Title = "Add a Task";
-            FormContentViewModel = new TaskDetailFormViewModel();
-            OKButtonText = "queding";
-            CancelButtonText = "quxiao";
+            FormContentViewModel = TaskDetailFormDesignModel.Instance;
+            OKButtonText = "Confirm";
+            CancelButtonText = "Cancel";
         }
 
         #endregion
