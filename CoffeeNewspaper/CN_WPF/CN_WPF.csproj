@@ -263,6 +263,9 @@
     <Compile Include="Forms\TaskDetailFormControl.xaml.cs">
       <DependentUpon>TaskDetailFormControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Input\CalendarSelectControl.xaml.cs">
+      <DependentUpon>CalendarSelectControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Input\DateTimeEntryControl.xaml.cs">
       <DependentUpon>DateTimeEntryControl.xaml</DependentUpon>
     </Compile>
@@ -383,6 +386,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Input\CalendarSelectControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Input\DateTimeEntryControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -449,6 +456,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Styles\Texts.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Styles\DateTimePicker.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

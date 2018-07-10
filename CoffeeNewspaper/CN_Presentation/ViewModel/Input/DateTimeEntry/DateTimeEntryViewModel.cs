@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
 using CN_Presentation.Utilities;
@@ -34,7 +35,9 @@ namespace CN_Presentation.Input
         {
             RecognizeCommand = new RelayCommand(Recognize);
             ClearCommand = new RelayCommand(Clear);
+            PopUpCommand = new RelayCommand(PopUp);
         }
+
 
         #endregion
 
@@ -78,17 +81,24 @@ namespace CN_Presentation.Input
         public bool RecgonizeFail { get; set; }
 
         public string FailReason => RecgonizeFail ? "Can't recgonize" : string.Empty;
+
+        public bool IsCalendarPopup { get; set; }
         #endregion
 
         #region Commands
 
         public ICommand RecognizeCommand { get; set; }
         public ICommand ClearCommand { get; set; }
-
+        public ICommand PopUpCommand { get; set; }
         #endregion
 
         #region Private Methods
 
+        private void PopUp()
+        {
+            Debug.WriteLine(IsCalendarPopup);
+            IsCalendarPopup ^= true;
+        }
         private void Clear()
         {
             if (!string.IsNullOrEmpty(InputText))

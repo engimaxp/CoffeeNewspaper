@@ -1,0 +1,276 @@
+﻿<UserControl x:Class="CN_WPF.CalendarSelectControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CN_WPF"
+             xmlns:design="clr-namespace:CN_Presentation.Input.Design;assembly=CN_Presentation"
+             mc:Ignorable="d"
+             DataContext="{x:Static design:CalendarSelectControlDesignModel.Instance}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+
+        <!--Left Calendar-->
+        <Border Grid.Row="0"
+                Grid.Column="0"
+                Grid.RowSpan="2"
+                BorderBrush="{StaticResource WordBlueBrush}"
+                BorderThickness="1"
+                Background="{StaticResource ForegroundVeryLightBrush}">
+            <Calendar
+                DisplayDate="{Binding DisplayDate,Mode=TwoWay}"
+                x:Name="Calendar"
+                IsTodayHighlighted="True"
+                SelectionMode="SingleDate"
+                FirstDayOfWeek="Monday"
+                SelectedDate="{Binding SelectedDate}"
+                Style="{StaticResource CalendarStyle}"
+                CalendarItemStyle="{StaticResource CalendarItemStyle}"
+                CalendarDayButtonStyle="{StaticResource CalendarDayButtonStyle}"
+                CalendarButtonStyle="{StaticResource CalendarButtonStyle}" />
+        </Border>
+
+        <!--Time Quick Selector-->
+        <Border Grid.Row="0"
+                Grid.Column="1"
+                Width="{Binding Path=ActualWidth, ElementName=Calendar}"
+                Background="{StaticResource WordVeryVeryLightBlueBrush}">
+            <ItemsControl ItemsSource="{Binding TimeQSBtns}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button
+                            FontSize="{StaticResource FontSizeRegular}"
+                            BorderThickness="1"
+                            BorderBrush="{StaticResource WordBlueBrush}"
+                            Background="{StaticResource ForegroundVeryLightBrush}"
+                            Foreground="{StaticResource WordBlueBrush}"
+                            Content="{Binding Text}" 
+                            Template="{DynamicResource TimeQuickSelectBtn}">
+                            <Button.Resources>
+                                <ControlTemplate x:Key="TimeQuickSelectBtn" TargetType="{x:Type ButtonBase}">
+                                    <Border x:Name="border"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True">
+                                        <TextBlock x:Name="contentPresenter"
+                                   Text="{TemplateBinding Content}"
+                                   Focusable="False"
+                                   FontFamily="{TemplateBinding FontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                   Margin="{TemplateBinding Padding}"
+                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="Button.IsDefaulted" Value="True">
+                                            <Setter Property="BorderBrush" TargetName="border"
+                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
+                                            <Setter Property="Foreground" TargetName="contentPresenter"
+                                    Value="{StaticResource ForegroundVeryLightBrush}" />
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
+                                            <Setter Property="Foreground" TargetName="contentPresenter"
+                                    Value="{StaticResource ForegroundVeryLightBrush}" />
+                                        </Trigger>
+                                        <Trigger Property="ToggleButton.IsChecked" Value="True">
+                                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
+                                            <Setter Property="Foreground" TargetName="contentPresenter"
+                                    Value="{StaticResource ForegroundVeryLightBrush}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Resources>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style>
+                        <Setter Property="Grid.Column" Value="{Binding ColNum}" />
+                        <Setter Property="Grid.Row" Value="{Binding RowNum}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+            </ItemsControl>
+        </Border>
+
+        <!--Text Ediable Time Displayer-->
+        <Border Grid.Row="1"
+                Grid.Column="1"
+                BorderBrush="{StaticResource WordBlueBrush}"
+                BorderThickness="1"
+                Background="{StaticResource ForegroundVeryLightBrush}">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                <!--Date hint-->
+                <TextBlock Text="{Binding Date}"
+                           FontFamily="Microsoft Yahei"
+                           FontWeight="Bold"
+                           Margin="0 0 10 0"
+                           Foreground="{StaticResource ForegroundDarkBrush}"
+                           FontSize="{StaticResource FontSizeRegular}"
+                           VerticalAlignment="Center"></TextBlock>
+                <!--Time hint-->
+                <TextBox Text="15"
+                         FontSize="{StaticResource FontSizeRegular}"
+                         FontFamily="Microsoft Yahei"
+                         FontWeight="Bold"
+                         Padding="0"
+                         Margin="0 2 0 0"
+                         Foreground="{StaticResource ForegroundDarkBrush}"
+                         VerticalAlignment="Center"></TextBox>
+                <TextBlock Text=":"
+                           FontSize="{StaticResource FontSizeRegular}"
+                           FontFamily="Microsoft Yahei"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource ForegroundDarkBrush}"
+                           ></TextBlock>
+                <TextBox Text="00"
+                         FontSize="{StaticResource FontSizeRegular}"
+                         FontFamily="Microsoft Yahei"
+                         FontWeight="Bold"
+                         Foreground="{StaticResource ForegroundDarkBrush}"
+                         Padding="0"
+                         Margin="0 2 2 0"
+                         VerticalAlignment="Center"></TextBox>
+            </StackPanel>
+        </Border>
+
+        <!--Go to today btn-->
+        <Button
+            Grid.Row="2"
+            Grid.Column="0"
+            Content="Go to Today"
+            FontSize="{StaticResource FontSizeRegular}"
+            BorderBrush="{StaticResource WordBlueBrush}"
+            Background="{StaticResource ForegroundVeryLightBrush}"
+            Foreground="{StaticResource WordBlueBrush}"
+            Padding="10,2"
+            Margin="0"
+            Command="{Binding GoToTodayCommand}"
+            Template="{DynamicResource TodayButtonControl}">
+            <Button.Resources>
+                <ControlTemplate x:Key="TodayButtonControl" TargetType="{x:Type ButtonBase}">
+                    <Border x:Name="border"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True">
+                        <TextBlock x:Name="contentPresenter"
+                                   Text="{TemplateBinding Content}"
+                                   Focusable="False"
+                                   FontFamily="{TemplateBinding FontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                   Margin="{TemplateBinding Padding}"
+                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Button.IsDefaulted" Value="True">
+                            <Setter Property="BorderBrush" TargetName="border"
+                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
+                            <Setter Property="Foreground" TargetName="contentPresenter"
+                                    Value="{StaticResource ForegroundVeryLightBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
+                            <Setter Property="Foreground" TargetName="contentPresenter"
+                                    Value="{StaticResource ForegroundVeryLightBrush}" />
+                        </Trigger>
+                        <Trigger Property="ToggleButton.IsChecked" Value="True">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
+                            <Setter Property="Foreground" TargetName="contentPresenter"
+                                    Value="{StaticResource ForegroundVeryLightBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Resources>
+        </Button>
+
+        <!--Confirm btn-->
+        <Button Grid.Row="2"
+                Grid.Column="1"
+                Content="Cofirm"
+                FontSize="{StaticResource FontSizeRegular}"
+                BorderBrush="{StaticResource WordBlueBrush}"
+                Background="{StaticResource WordBlueBrush}"
+                Foreground="{StaticResource ForegroundVeryLightBrush}"
+                Padding="10,2"
+                Margin="0"
+                Template="{DynamicResource ConfirmButton}">
+            <Button.Resources>
+                <ControlTemplate x:Key="ConfirmButton" TargetType="{x:Type ButtonBase}">
+                    <Border x:Name="border"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True">
+                        <TextBlock x:Name="contentPresenter"
+                                   Text="{TemplateBinding Content}"
+                                   Focusable="False"
+                                   FontFamily="{TemplateBinding FontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                   Margin="{TemplateBinding Padding}"
+                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Button.IsDefaulted" Value="True">
+                            <Setter Property="BorderBrush" TargetName="border"
+                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
+
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
+                        </Trigger>
+
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Resources>
+        </Button>
+    </Grid>
+</UserControl>

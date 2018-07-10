@@ -20,14 +20,17 @@
         <!-- TextInput -->
         <Border Grid.Row="0"
                 Grid.Column="0"
+                Grid.ColumnSpan="2"
                 CornerRadius="5"
                 BorderThickness="1"
                 BorderBrush="{StaticResource ForegroundLightBrush}"
                 Background="{StaticResource ForegroundMainBrush}">
-            <TextBox Style="{StaticResource MemoContent}"
+            <TextBox 
+                x:Name="DateTimeTextBox"
+                Style="{StaticResource MemoContent}"
                      local:FocusAndSelectProperty.Value="{Binding Editing,UpdateSourceTrigger=PropertyChanged}"
                      Margin="0"
-                     Padding="4"
+                     Padding="4 4 20 4"
                      Tag="e.g.Next Morning or 1/29 8:00"
                      Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
                      FontSize="{StaticResource FontSizeRegular}" >
@@ -41,10 +44,11 @@
         <!-- Calendar Control -->
         <Button Grid.Row="0"
                 Grid.Column="1"
-                FontSize="{StaticResource FontSizeLarge}"
+                Padding="0 0 6 2"
+                FontSize="{StaticResource FontSizeRegular}"
                 Style="{StaticResource IconDarkerButton}"
                 Content="{StaticResource FontAwesomeCalendarAltIcon}"
-                ></Button>
+                Command="{Binding PopUpCommand}"></Button>
 
         <!-- Recognizer Suggest -->
         <ItemsControl 
@@ -75,5 +79,21 @@
                    Visibility="{Binding RecgonizeFail,Converter={local:BooleanToVisiblityGoneConverter}}"
                    Foreground="{StaticResource WordRedBrush}"
                    Text="{Binding FailReason}"></TextBlock>
-    </Grid>
+
+        <!-- CalendarPopup -->
+        <Popup 
+            x:Name="CalendarPopup"
+            Grid.Column="0"
+               Grid.Row="1"
+               Grid.ColumnSpan="2"
+               StaysOpen="False"
+               AllowsTransparency="True"
+               Placement="Bottom"
+               IsOpen="{Binding IsCalendarPopup}"
+               PlacementTarget="{Binding ElementName=DateTimeTextBox}">
+            <local:CalendarSelectControl>
+
+            </local:CalendarSelectControl>
+        </Popup>
+</Grid>
 </UserControl>
