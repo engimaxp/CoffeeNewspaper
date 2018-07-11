@@ -3,7 +3,7 @@
     public static class DateTimeV2ExplainerFactory
     {
 
-        public static IDateTimeV2Explainer CreateExplaner(this string typeName)
+        public static BaseDateTimeV2Explainer CreateExplaner(this string typeName)
         {
             switch (typeName)
             {

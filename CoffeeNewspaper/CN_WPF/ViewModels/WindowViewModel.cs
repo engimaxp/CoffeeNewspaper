@@ -14,12 +14,12 @@ namespace CN_WPF
         /// <summary>
         /// The window this view model controls
         /// </summary>
-        private Window mWindow;
+        private readonly Window mWindow;
 
         /// <summary>
         /// The window resizer helper that keeps the window size correct in various states
         /// </summary>
-        private WindowResizer mWindowResizer;
+        private readonly WindowResizer mWindowResizer;
 
         /// <summary>
         /// The margin around the window to allow for a drop shadow
@@ -64,7 +64,7 @@ namespace CN_WPF
         /// <summary>
         /// The size of the resize border around the window
         /// </summary>
-        public int ResizeBorder =>0;// mWindow.WindowState == WindowState.Maximized ? 0 : 4;
+        public int ResizeBorder =>0;
 
         /// <summary>
         /// The size of the resize border around the window, taking into account the outer margin
@@ -85,7 +85,13 @@ namespace CN_WPF
         public Thickness OuterMarginSize
         {
             // If it is maximized or docked, no border
-            get => mWindow.WindowState == WindowState.Maximized ? mWindowResizer.CurrentMonitorMargin : (Borderless ? new Thickness(0) : mOuterMarginSize);
+            get
+            {
+                var thickness = Borderless ? new Thickness(0) : mOuterMarginSize;
+                return mWindow.WindowState == WindowState.Maximized
+                    ? mWindowResizer.CurrentMonitorMargin
+                    : thickness;
+            }
             set => mOuterMarginSize = value;
         }
 
@@ -168,7 +174,7 @@ namespace CN_WPF
 
             // Create commands
             MinimizeCommand = new RelayCommand(() => mWindow.WindowState = WindowState.Minimized);
-            MaximizeCommand = new RelayCommand(() => mWindow.WindowState ^= WindowState.Maximized);
+            MaximizeCommand = new RelayCommand(() => mWindow.WindowState =(mWindow.WindowState == WindowState.Maximized)?WindowState.Normal:WindowState.Maximized);
             CloseCommand = new RelayCommand(() => mWindow.Close());
             MenuCommand = new RelayCommand(() => SystemCommands.ShowSystemMenu(mWindow, GetMousePosition()));
 
@@ -214,7 +220,7 @@ namespace CN_WPF
         /// Gets the current mouse position on the screen
         /// </summary>
         /// <returns></returns>
-        private Point GetMousePosition()
+        private System.Windows.Point GetMousePosition()
         {
             return mWindowResizer.GetCursorPosition();
         }
