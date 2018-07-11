@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
+using CN_Presentation.Input.Design;
 using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Input;
 using Microsoft.Recognizers.Text.DateTime;
 
 namespace CN_Presentation.Input
 {
-    public class DateTimeEntryViewModel : BaseViewModel
+    public class DateTimeEntryViewModel : BaseViewModel,IUpdateDateTime
     {
         #region Private Properties
 
@@ -27,6 +28,14 @@ namespace CN_Presentation.Input
         {
             ParentInterface = parentInterface;
         }
+        #region Interface implement
+
+        public void NotifyUpdateDateTime(DateTime? time)
+        {
+            SelectedDateTime = time ?? DateTime.Now;
+            IsCalendarPopup = false;
+        } 
+        #endregion
         #endregion
 
         #region Constructor
@@ -43,6 +52,9 @@ namespace CN_Presentation.Input
 
         #region Public Properties
 
+        /// <summary>
+        /// The Current Selected DateTime
+        /// </summary>
         public DateTime? SelectedDateTime
         {
             get => _selectedDateTime;
@@ -52,11 +64,14 @@ namespace CN_Presentation.Input
                     return;
 
                 _selectedDateTime = value;
-
+                InputText = (_selectedDateTime ?? DateTime.Now).ToString("f");
                 ParentInterface?.NotifyUpdateDateTime(_selectedDateTime);
             }
         }
 
+        /// <summary>
+        /// The Current Input TextBox
+        /// </summary>
         public string InputText
         {
             get => _inputText;
@@ -68,21 +83,51 @@ namespace CN_Presentation.Input
                 _inputText = value;
 
                 if (string.IsNullOrEmpty(_inputText))
-                    Recognize();
+                {
+                    RecgonizeFail = false;
+                    SuggestButtons = null;
+                }
             }
         }
 
+        /// <summary>
+        /// Datetime Suggest Buttons
+        /// if there is ambiguous recognitions
+        /// create these buttons and show to the user to let them choose
+        /// </summary>
         public ObservableCollection<DateTimeSuggestButtonViewModel> SuggestButtons { get; set; }
 
+        /// <summary>
+        /// display SuggestButtons or not 
+        /// </summary>
         public bool DisplaySuggestButtons => SuggestButtons != null && SuggestButtons.Count > 0;
 
+        /// <summary>
+        /// true if the textbox need to be in edit state
+        /// have focus and selectall
+        /// </summary>
         public bool Editing { get; set; }
 
+        /// <summary>
+        /// true if the RecgonizeText Fail
+        /// </summary>
         public bool RecgonizeFail { get; set; }
 
+        /// <summary>
+        /// Recgonize Fail Reason
+        /// </summary>
         public string FailReason => RecgonizeFail ? "Can't recgonize" : string.Empty;
 
+        /// <summary>
+        /// true if the calendar select control display
+        /// </summary>
         public bool IsCalendarPopup { get; set; }
+
+        /// <summary>
+        /// the calendar controls viewModel
+        /// </summary>
+        public CalendarSelectControlViewModel PopUpCalendarSelectViewModel { get; set; } = new CalendarSelectControlDesignModel();
+
         #endregion
 
         #region Commands
@@ -96,8 +141,17 @@ namespace CN_Presentation.Input
 
         private void PopUp()
         {
-            Debug.WriteLine(IsCalendarPopup);
             IsCalendarPopup ^= true;
+            if (IsCalendarPopup)
+            {
+                var cscvm = new CalendarSelectControlViewModel();
+                cscvm.SetUpdateTimeOfDayInterface(this);
+                if (_selectedDateTime.HasValue)
+                {
+                    cscvm.CurrentlyValue = _selectedDateTime.Value;
+                }
+                PopUpCalendarSelectViewModel = cscvm;
+            }
         }
         private void Clear()
         {
@@ -139,5 +193,6 @@ namespace CN_Presentation.Input
         }
 
         #endregion
+
     }
 }

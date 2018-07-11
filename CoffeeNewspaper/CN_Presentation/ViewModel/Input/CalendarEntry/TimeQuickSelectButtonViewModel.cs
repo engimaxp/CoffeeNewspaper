@@ -54,7 +54,7 @@ namespace CN_Presentation.ViewModel.Input
 
         private void Click()
         {
-            UpdateTimeOfDay.UpdateTimeOfDay(TimeOfDay);
+            UpdateTimeOfDay?.UpdateTimeOfDay(TimeOfDay);
         }
     }
 }

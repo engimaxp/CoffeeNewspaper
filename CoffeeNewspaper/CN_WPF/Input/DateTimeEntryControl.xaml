@@ -91,8 +91,8 @@
                Placement="Bottom"
                IsOpen="{Binding IsCalendarPopup}"
                PlacementTarget="{Binding ElementName=DateTimeTextBox}">
-            <local:CalendarSelectControl>
-
+            <local:CalendarSelectControl
+                DataContext="{Binding PopUpCalendarSelectViewModel}">
             </local:CalendarSelectControl>
         </Popup>
 </Grid>

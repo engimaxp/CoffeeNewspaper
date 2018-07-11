@@ -31,7 +31,7 @@
                 IsTodayHighlighted="True"
                 SelectionMode="SingleDate"
                 FirstDayOfWeek="Monday"
-                SelectedDate="{Binding SelectedDate}"
+                SelectedDate="{Binding SelectedDate,Mode=TwoWay}"
                 Style="{StaticResource CalendarStyle}"
                 CalendarItemStyle="{StaticResource CalendarItemStyle}"
                 CalendarDayButtonStyle="{StaticResource CalendarDayButtonStyle}"
@@ -73,7 +73,8 @@
                             Background="{StaticResource ForegroundVeryLightBrush}"
                             Foreground="{StaticResource WordBlueBrush}"
                             Content="{Binding Text}" 
-                            Template="{DynamicResource TimeQuickSelectBtn}">
+                            Template="{DynamicResource TimeQuickSelectBtn}"
+                            Command="{Binding ClickCommand}">
                             <Button.Resources>
                                 <ControlTemplate x:Key="TimeQuickSelectBtn" TargetType="{x:Type ButtonBase}">
                                     <Border x:Name="border"
@@ -144,14 +145,20 @@
                            FontSize="{StaticResource FontSizeRegular}"
                            VerticalAlignment="Center"></TextBlock>
                 <!--Time hint-->
-                <TextBox Text="15"
+                <TextBox Text="{Binding SelectedTimeHourTxt,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                          FontSize="{StaticResource FontSizeRegular}"
                          FontFamily="Microsoft Yahei"
                          FontWeight="Bold"
                          Padding="0"
                          Margin="0 2 0 0"
                          Foreground="{StaticResource ForegroundDarkBrush}"
-                         VerticalAlignment="Center"></TextBox>
+                         VerticalAlignment="Center"
+                         >
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Up" Command="{Binding HourCtlArrowUp}"></KeyBinding>
+                        <KeyBinding Key="Down" Command="{Binding HourCtlArrowDown}"></KeyBinding>
+                    </TextBox.InputBindings>
+                </TextBox>
                 <TextBlock Text=":"
                            FontSize="{StaticResource FontSizeRegular}"
                            FontFamily="Microsoft Yahei"
@@ -159,14 +166,19 @@
                            VerticalAlignment="Center"
                            Foreground="{StaticResource ForegroundDarkBrush}"
                            ></TextBlock>
-                <TextBox Text="00"
+                <TextBox Text="{Binding SelectedTimeMinuteTxt,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                          FontSize="{StaticResource FontSizeRegular}"
                          FontFamily="Microsoft Yahei"
                          FontWeight="Bold"
                          Foreground="{StaticResource ForegroundDarkBrush}"
                          Padding="0"
                          Margin="0 2 2 0"
-                         VerticalAlignment="Center"></TextBox>
+                         VerticalAlignment="Center">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Up" Command="{Binding MinuteCtlArrowUp}"></KeyBinding>
+                        <KeyBinding Key="Down" Command="{Binding MinuteCtlArrowDown}"></KeyBinding>
+                    </TextBox.InputBindings>
+                </TextBox>
             </StackPanel>
         </Border>
 
@@ -228,7 +240,8 @@
         <!--Confirm btn-->
         <Button Grid.Row="2"
                 Grid.Column="1"
-                Content="Cofirm"
+                Content="Confirm"
+                Command="{Binding ConfirmCommand}"
                 FontSize="{StaticResource FontSizeRegular}"
                 BorderBrush="{StaticResource WordBlueBrush}"
                 Background="{StaticResource WordBlueBrush}"
