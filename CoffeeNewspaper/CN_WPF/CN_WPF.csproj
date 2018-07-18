@@ -213,6 +213,7 @@
     <Compile Include="AttachedProperties\MouseWheelEventBubbleUpAttachedProperty.cs" />
     <Compile Include="AttachedProperties\TextAttachedProperties.cs" />
     <Compile Include="AttachedProperties\TextEntryWidthMatcherProperty.cs" />
+    <Compile Include="AttachedProperties\TextBoxNumericalAllowOnlyAttachedProperties.cs" />
     <Compile Include="AttachedProperties\TreeViewDisableDoubleClickAttackedProperties.cs" />
     <Compile Include="Controls\HeadMenuControl.xaml.cs">
       <DependentUpon>HeadMenuControl.xaml</DependentUpon>
@@ -271,6 +272,9 @@
     </Compile>
     <Compile Include="Input\TextEntryControl.xaml.cs">
       <DependentUpon>TextEntryControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Input\TimeRangeEntryControl.xaml.cs">
+      <DependentUpon>TimeRangeEntryControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ioc\UIManager.cs" />
     <Compile Include="Pages\BasePage.cs" />
@@ -397,6 +401,10 @@
     <Page Include="Input\TextEntryControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Input\TimeRangeEntryControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -3,29 +3,31 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using CN_Presentation.Input.Design;
+using CN_Core.Utilities;
+using CN_Presentation.Input;
 using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Base;
-using CN_Presentation.ViewModel.Input;
+using Microsoft.Recognizers.Text;
 using Microsoft.Recognizers.Text.DateTime;
 
-namespace CN_Presentation.Input
+namespace CN_Presentation.ViewModel.Input
 {
-    public class DateTimeEntryViewModel : HasChildSuggestButton<DateTimeSuggestButtonViewModel>,IUpdateDateTime
+    public class TimeRangeEntryViewModel:HasChildSuggestButton<TimeRangeSuggestButtonViewModel>, IUpdateTimeRange
     {
+
         #region Private Properties
 
         private string _inputText;
 
-        private IUpdateDateTime ParentInterface;
+        private IUpdateTimeRange ParentInterface;
 
-        private DateTime? _selectedDateTime;
+        private int _selectedTimeDuration;
 
         #endregion
 
         #region Public Methods
 
-        public void SetParentInterface(IUpdateDateTime parentInterface)
+        public void SetParentInterface(IUpdateTimeRange parentInterface)
         {
             ParentInterface = parentInterface;
         }
@@ -33,36 +35,37 @@ namespace CN_Presentation.Input
 
         protected override Type GetTypeForValue()
         {
-            return typeof(DateTime);
+            return _selectedTimeDuration.GetType();
         }
 
-        protected override IEnumerable<DateTimeSuggestButtonViewModel> CreateListUseModelLists(IEnumerable<SuggestDataDto> sdDtos)
+        protected override IEnumerable<TimeRangeSuggestButtonViewModel> CreateListUseModelLists(IEnumerable<SuggestDataDto> sdDtos)
         {
-            return sdDtos?.Select(x =>
+            return sdDtos?.Select(x=>
             {
-                var temp = new DateTimeSuggestButtonViewModel()
+                var temp = new TimeRangeSuggestButtonViewModel()
                 {
                     ParentModel = this,
                     Title = x.Title,
                 };
-                if (x.Value is DateTime time)
+                if (x.Value is int timerange)
                 {
-                    temp.ValueDateTime = time;
+                    temp.TimeRangeSecondsCount = timerange;
                 }
                 return temp;
             });
         }
-        public void NotifyUpdateDateTime(DateTime? time)
+
+        public void NotifyUpdateTimeRange(int timeRangeSeconds)
         {
-            SelectedDateTime = time ?? DateTime.Now;
+            SelectedTimeDuration = timeRangeSeconds;
             IsPanelPopup = false;
-        } 
+        }
         #endregion
         #endregion
 
         #region Constructor
 
-        public DateTimeEntryViewModel()
+        public TimeRangeEntryViewModel()
         {
             RecognizeCommand = new RelayCommand(Recognize);
             ClearCommand = new RelayCommand(Clear);
@@ -77,20 +80,19 @@ namespace CN_Presentation.Input
         /// <summary>
         /// The Current Selected DateTime
         /// </summary>
-        public DateTime? SelectedDateTime
+        public int SelectedTimeDuration
         {
-            get => _selectedDateTime;
+            get => _selectedTimeDuration;
             set
             {
-                if (_selectedDateTime == value)
+                if (_selectedTimeDuration == value)
                     return;
 
-                _selectedDateTime = value;
-                InputText = (_selectedDateTime ?? DateTime.Now).ToString("f");
-                ParentInterface?.NotifyUpdateDateTime(_selectedDateTime);
-
+                _selectedTimeDuration = value;
+                InputText = new TimeSpan(_selectedTimeDuration*1000).GetTimeSpanLeftInfo();
                 SuggestButtons = null;
                 Editing = true;
+                ParentInterface?.NotifyUpdateTimeRange(_selectedTimeDuration);
             }
         }
 
@@ -120,7 +122,7 @@ namespace CN_Presentation.Input
         /// if there is ambiguous recognitions
         /// create these buttons and show to the user to let them choose
         /// </summary>
-        public ObservableCollection<DateTimeSuggestButtonViewModel> SuggestButtons { get; set; }
+        public ObservableCollection<TimeRangeSuggestButtonViewModel> SuggestButtons { get; set; }
 
         /// <summary>
         /// display SuggestButtons or not 
@@ -148,11 +150,6 @@ namespace CN_Presentation.Input
         /// </summary>
         public bool IsPanelPopup { get; set; }
 
-        /// <summary>
-        /// the calendar controls viewModel
-        /// </summary>
-        public CalendarSelectControlViewModel PopUpCalendarSelectViewModel { get; set; } = new CalendarSelectControlDesignModel();
-
         #endregion
 
         #region Commands
@@ -167,23 +164,13 @@ namespace CN_Presentation.Input
         private void PopUp()
         {
             IsPanelPopup ^= true;
-            if (IsPanelPopup)
-            {
-                var cscvm = new CalendarSelectControlViewModel();
-                cscvm.SetUpdateTimeOfDayInterface(this);
-                if (_selectedDateTime.HasValue)
-                {
-                    cscvm.CurrentlyValue = _selectedDateTime.Value;
-                }
-                PopUpCalendarSelectViewModel = cscvm;
-            }
         }
         private void Clear()
         {
             if (!string.IsNullOrEmpty(InputText))
             {
                 InputText = string.Empty;
-                SuggestButtons = new ObservableCollection<DateTimeSuggestButtonViewModel>();
+                SuggestButtons = new ObservableCollection<TimeRangeSuggestButtonViewModel>();
             }
 
             Editing = false;
@@ -195,25 +182,25 @@ namespace CN_Presentation.Input
             {
                 return;
             }
-            var suggestResults = DateTimeRecognizer.RecognizeDateTime(_inputText, "zh-cn");
-            var btnlist = CollectDateTimeSuggestButtonViewModels(suggestResults, this) ??
-                          Enumerable.Empty<DateTimeSuggestButtonViewModel>();
+            List<ModelResult> suggestResults = DateTimeRecognizer.RecognizeDateTime(_inputText, "zh-cn");
+            IEnumerable<TimeRangeSuggestButtonViewModel> btnlist = CollectDateTimeSuggestButtonViewModels(suggestResults,this) ??
+                          Enumerable.Empty<TimeRangeSuggestButtonViewModel>();
             var list = btnlist.ToList();
             if (list.Count == 1)
             {
                 var btn = list.First();
-                SelectedDateTime = btn.ValueDateTime;
-                InputText = btn.ValueDateTime.ToString("f");
+                SelectedTimeDuration = btn.TimeRangeSecondsCount;
+                InputText = new TimeSpan(btn.TimeRangeSecondsCount * 1000).GetTimeSpanLeftInfo();
                 SuggestButtons = null;
             }
             else
             {
-                SuggestButtons = new ObservableCollection<DateTimeSuggestButtonViewModel>(list);
+                SuggestButtons = new ObservableCollection<TimeRangeSuggestButtonViewModel>(list);
             }
 
             RecgonizeFail = list.Count == 0;
 
-             Editing = true;
+            Editing = true;
             OnPropertyChanged(nameof(Editing));
         }
 

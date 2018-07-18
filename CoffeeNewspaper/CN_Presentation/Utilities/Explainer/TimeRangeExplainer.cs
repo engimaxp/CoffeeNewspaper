@@ -10,5 +10,10 @@ namespace CN_Presentation.Utilities
         {
             return Convert.ToDateTime($"{DateTime.Now.ToShortDateString()} {time}");
         }
+
+        protected override int StringToTimeRangeSecondsCount(string time)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -153,7 +153,7 @@
                          Margin="0 2 0 0"
                          Foreground="{StaticResource ForegroundDarkBrush}"
                          VerticalAlignment="Center"
-                         >
+                         local:TextBoxNumericalAllowOnlyAttachedProperties.Value="True">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Up" Command="{Binding HourCtlArrowUp}"></KeyBinding>
                         <KeyBinding Key="Down" Command="{Binding HourCtlArrowDown}"></KeyBinding>
@@ -173,7 +173,8 @@
                          Foreground="{StaticResource ForegroundDarkBrush}"
                          Padding="0"
                          Margin="0 2 2 0"
-                         VerticalAlignment="Center">
+                         VerticalAlignment="Center"
+                         local:TextBoxNumericalAllowOnlyAttachedProperties.Value="True">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Up" Command="{Binding MinuteCtlArrowUp}"></KeyBinding>
                         <KeyBinding Key="Down" Command="{Binding MinuteCtlArrowDown}"></KeyBinding>

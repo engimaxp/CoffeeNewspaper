@@ -1,12 +1,11 @@
-﻿<UserControl x:Class="CN_WPF.DateTimeEntryControl"
+﻿<UserControl x:Class="CN_WPF.TimeRangeEntryControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.Input.Design;assembly=CN_Presentation"
-             mc:Ignorable="d"
-             d:DesignWidth="232"
+             mc:Ignorable="d" d:DesignWidth="232"
              d:DataContext="{x:Static design:DateTimeEntryDesignModel.Instance}">
     <Grid>
         <Grid.RowDefinitions>
@@ -31,7 +30,7 @@
                      local:FocusAndSelectProperty.Value="{Binding Editing,UpdateSourceTrigger=PropertyChanged}"
                      Margin="0"
                      Padding="4 4 20 4"
-                     Tag="e.g.Next Morning or 1/29 8:00"
+                     Tag="e.g.3 hours or Four Days"
                      Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
                      FontSize="{StaticResource FontSizeRegular}" >
                 <TextBox.InputBindings>
@@ -44,10 +43,10 @@
         <!-- Calendar Control -->
         <Button Grid.Row="0"
                 Grid.Column="1"
-                Padding="0 0 6 2"
+                Padding="0 0 5 0"
                 FontSize="{StaticResource FontSizeRegular}"
                 Style="{StaticResource IconDarkerButton}"
-                Content="{StaticResource FontAwesomeCalendarAltIcon}"
+                Content="{StaticResource FontAwesomeStopWatchIcon}"
                 Command="{Binding PopUpCommand}"></Button>
 
         <!-- Recognizer Suggest -->
@@ -71,7 +70,7 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-        
+
         <!-- Error Message -->
         <TextBlock Grid.Column="0"
                    Grid.Row="1"
@@ -95,5 +94,5 @@
                 DataContext="{Binding PopUpCalendarSelectViewModel}">
             </local:CalendarSelectControl>
         </Popup>
-</Grid>
+    </Grid>
 </UserControl>

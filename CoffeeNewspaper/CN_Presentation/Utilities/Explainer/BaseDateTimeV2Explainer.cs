@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using CN_Presentation.Input;
 
 namespace CN_Presentation.Utilities
 {
@@ -11,26 +10,42 @@ namespace CN_Presentation.Utilities
 
         protected abstract DateTime StringToDateTime(string time);
 
-        public IEnumerable<DateTimeSuggestButtonViewModel> CreateDateTimeSuggestButtonViewModel(IEnumerable enumerable,
-            DateTimeEntryViewModel parentModel)
+        protected abstract int StringToTimeRangeSecondsCount(string time);
+
+        protected virtual string GetTitle(string time)
+        {
+            return time;
+        }
+
+        public IEnumerable<SuggestDataDto> CreateDTOModelDateTime(IEnumerable enumerable,Type valueType)
         {
 
-            var results = new List<DateTimeSuggestButtonViewModel>();
+            var results = new List<SuggestDataDto>();
             if (enumerable == null) return results;
             foreach (var element in enumerable)
             {
                 if (element is Dictionary<string, string> dict)
                 {
                     var time = dict[FieldName];
-                    results.Add(new DateTimeSuggestButtonViewModel
+                    results.Add(new SuggestDataDto
                     {
-                        ValueDateTime = StringToDateTime(time),
-                        Title = time,
-                        ParentModel = parentModel
+                        Value = ValueConverter(time,valueType),
+                        Title = GetTitle(time),
                     });
                 }
             }
             return results;
+        }
+        private object ValueConverter(string value,Type valueType)
+        {
+            if (valueType == typeof(DateTime))
+            {
+                return StringToDateTime(value);
+            }
+            else
+            {
+                return StringToTimeRangeSecondsCount(value);
+            }
         }
     }
 }

@@ -17,7 +17,7 @@ namespace CN_Presentation.ViewModel.Form.Design
             PendingReason = "Due To blablabla this task is pending";
             Content =
                 "Each control in WPF has a DataContext property. \r\nIt's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree.";
-            var pi = DateTimeEntryDesignModel.Instance;
+            var pi = TimeRangeEntryDesignModel.Instance;
             pi.SetParentInterface(this);
             DeadLineEntry = pi;
         }

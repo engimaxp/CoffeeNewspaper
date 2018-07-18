@@ -11,5 +11,9 @@ namespace CN_Presentation.Utilities
             return Convert.ToDateTime(time);
         }
 
+        protected override int StringToTimeRangeSecondsCount(string time)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

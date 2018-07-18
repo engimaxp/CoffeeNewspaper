@@ -22,7 +22,7 @@
                 Background="{StaticResource ForegroundVeryLightBrush}">
 
             <Border.Triggers>
-                <EventTrigger RoutedEvent="MouseEnter">
+                <EventTrigger RoutedEvent="Mouse.MouseEnter">
                     <BeginStoryboard>
                         <Storyboard>
                             <ColorAnimation To="{StaticResource WordVeryVeryLightBlue}"
@@ -31,7 +31,7 @@
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
-                <EventTrigger RoutedEvent="MouseLeave">
+                <EventTrigger RoutedEvent="Mouse.MouseLeave">
                     <BeginStoryboard>
                         <Storyboard>
                             <ColorAnimation To="Transparent" Duration="0:0:0.3"

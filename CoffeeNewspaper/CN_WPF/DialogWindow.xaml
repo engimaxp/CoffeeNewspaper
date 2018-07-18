@@ -61,6 +61,8 @@
                                     <!-- Title -->
                                     <TextBlock Grid.Column="0" Panel.ZIndex="1"
                                                Text="{Binding Title}"
+                                               FontFamily="Microsoft YaHei"
+                                               FontWeight="Bold"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
                                                FontSize="{StaticResource FontSizeLarge}"
