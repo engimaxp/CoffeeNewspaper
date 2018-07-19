@@ -178,8 +178,7 @@
                 <TextBlock DockPanel.Dock="Left">Estimated Duration:</TextBlock>
                 <TextBlock DockPanel.Dock="Right"
                            HorizontalAlignment="Right"
-                           Text="{Binding UsedTimePercent}">
-                </TextBlock>
+                           Text="{Binding UsedTimePercent}" />
             </DockPanel>
             <local:TimeRangeEntryControl
                 DataContext="{Binding EstimatedDurationEntry}"
@@ -193,11 +192,7 @@
                    Grid.ColumnSpan="2"
                    Margin="10 0 10 10">
             <local:TagPanelControlWithCancel />
-            <Button ToolTip="Add a tag"
-                    Padding="10 2"
-                    Style="{StaticResource TagButton}"
-                    FontFamily="{StaticResource FontAwesomeSolid}"
-                    Content="{StaticResource FontAwesomeAddIcon}" />
+            <local:TagAddingControl />
         </WrapPanel>
 
     </Grid>

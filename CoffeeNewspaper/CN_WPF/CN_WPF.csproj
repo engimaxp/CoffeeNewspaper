@@ -271,6 +271,9 @@
     <Compile Include="Input\DateTimeEntryControl.xaml.cs">
       <DependentUpon>DateTimeEntryControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Input\TagAddingControl.xaml.cs">
+      <DependentUpon>TagAddingControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Input\TextEntryControl.xaml.cs">
       <DependentUpon>TextEntryControl.xaml</DependentUpon>
     </Compile>
@@ -399,6 +402,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Input\DateTimeEntryControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Input\TagAddingControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
