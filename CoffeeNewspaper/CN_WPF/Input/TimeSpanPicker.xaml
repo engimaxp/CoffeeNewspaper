@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.Input.Design;assembly=CN_Presentation"
              mc:Ignorable="d"
-             d:DataContext="{x:Static design:TimeSpanPickerDesignModel.Instance}">
+             DataContext="{x:Static design:TimeSpanPickerDesignModel.Instance}">
     <Border
         Padding="10"
         Background="{StaticResource ForegroundVeryLightBrush}">
@@ -49,20 +49,20 @@
                      local:MonitorListBoxSelectProperty.Value="True"
                      Margin="0 0 10 0"
                      SelectedItem="{Binding SelectDay,Mode=TwoWay}"
-                     ItemContainerStyle="{StaticResource ListBoxItemStyle1}" />
+                     ItemContainerStyle="{StaticResource TimePickerListBoxItemStyle}" />
             <ListBox Grid.Row="1"
                      Grid.Column="1"
                      ItemsSource="{Binding Hours}"
                      local:MonitorListBoxSelectProperty.Value="True"
                      SelectedItem="{Binding SelectHour,Mode=TwoWay}"
                      Margin="0 0 10 0"
-                     ItemContainerStyle="{StaticResource ListBoxItemStyle1}" />
+                     ItemContainerStyle="{StaticResource TimePickerListBoxItemStyle}" />
             <ListBox Grid.Row="1"
                      Grid.Column="2"
                      ItemsSource="{Binding Minutes}"
                      local:MonitorListBoxSelectProperty.Value="True"
                      SelectedItem="{Binding SelectMinute,Mode=TwoWay}"
-                     ItemContainerStyle="{StaticResource ListBoxItemStyle1}" />
+                     ItemContainerStyle="{StaticResource TimePickerListBoxItemStyle}" />
 
             <StackPanel Grid.Row="2"
                         Grid.Column="0"

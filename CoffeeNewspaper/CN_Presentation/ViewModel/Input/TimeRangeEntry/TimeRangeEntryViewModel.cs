@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Input;
 using CN_Core.Utilities;
 using CN_Presentation.Input;
+using CN_Presentation.Input.Design;
 using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Base;
 using Microsoft.Recognizers.Text;
@@ -154,7 +155,7 @@ namespace CN_Presentation.ViewModel.Input
         /// <summary>
         /// the time range picker controls viewModel
         /// </summary>
-        public TimeSpanPickerViewModel PopUpTimeSpanSelectViewModel { get; set; } = new TimeSpanPickerViewModel();
+        public TimeSpanPickerViewModel PopUpTimeSpanSelectViewModel { get; set; } = new TimeSpanPickerDesignModel();
 
         #endregion
 

@@ -553,7 +553,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <Style x:Key="ListBoxItemStyle1" TargetType="{x:Type ListBoxItem}">
+    <Style x:Key="TimePickerListBoxItemStyle" TargetType="{x:Type ListBoxItem}">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Padding" Value="4,1"/>
         <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>

@@ -90,7 +90,9 @@
                Placement="Bottom"
                IsOpen="{Binding IsPanelPopup}"
                PlacementTarget="{Binding ElementName=DateTimeTextBox}">
-            <local:TimeSpanPicker DataContext="{Binding PopUpTimeSpanSelectViewModel}"></local:TimeSpanPicker>
+            <local:TimeSpanPicker 
+                DataContext="{Binding PopUpTimeSpanSelectViewModel}">
+            </local:TimeSpanPicker>
         </Popup>
     </Grid>
 </UserControl>
