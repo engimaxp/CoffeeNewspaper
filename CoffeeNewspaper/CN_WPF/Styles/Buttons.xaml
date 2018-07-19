@@ -949,4 +949,101 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style x:Key="InputConfirmButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}" >
+
+        <Setter Property="BorderBrush" Value="{StaticResource WordBlueBrush}"/>
+        <Setter Property="Background" Value="{StaticResource WordBlueBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundVeryLightBrush}"/>
+        <Setter Property="Padding" Value="10,2"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ButtonBase}">
+                    <Border x:Name="border"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True">
+                        <TextBlock x:Name="contentPresenter"
+                                   Text="{TemplateBinding Content}"
+                                   Focusable="False"
+                                   FontFamily="{TemplateBinding FontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                   Margin="{TemplateBinding Padding}"
+                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Button.IsDefaulted" Value="True">
+                            <Setter Property="BorderBrush" TargetName="border"
+                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
+
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
+                        </Trigger>
+
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <Style x:Key="InputClearButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}" >
+
+        <Setter Property="BorderBrush" Value="{StaticResource WordBlueBrush}"/>
+        <Setter Property="Background" Value="{StaticResource ForegroundVeryLightBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource WordBlueBrush}"/>
+        <Setter Property="Padding" Value="10,2"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate  TargetType="{x:Type ButtonBase}">
+                    <Border x:Name="border"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True">
+                        <TextBlock x:Name="contentPresenter"
+                                   Text="{TemplateBinding Content}"
+                                   Focusable="False"
+                                   FontFamily="{TemplateBinding FontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                   Margin="{TemplateBinding Padding}"
+                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Button.IsDefaulted" Value="True">
+                            <Setter Property="BorderBrush" TargetName="border"
+                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
+                            <Setter Property="Foreground" TargetName="contentPresenter"
+                                    Value="{StaticResource ForegroundVeryLightBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
+                            <Setter Property="Foreground" TargetName="contentPresenter"
+                                    Value="{StaticResource ForegroundVeryLightBrush}" />
+                        </Trigger>
+                        <Trigger Property="ToggleButton.IsChecked" Value="True">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
+                            <Setter Property="Foreground" TargetName="contentPresenter"
+                                    Value="{StaticResource ForegroundVeryLightBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

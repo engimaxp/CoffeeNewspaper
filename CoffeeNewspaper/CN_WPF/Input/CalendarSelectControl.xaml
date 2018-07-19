@@ -188,54 +188,8 @@
             Grid.Row="2"
             Grid.Column="0"
             Content="Go to Today"
-            FontSize="{StaticResource FontSizeRegular}"
-            BorderBrush="{StaticResource WordBlueBrush}"
-            Background="{StaticResource ForegroundVeryLightBrush}"
-            Foreground="{StaticResource WordBlueBrush}"
-            Padding="10,2"
-            Margin="0"
             Command="{Binding GoToTodayCommand}"
-            Template="{DynamicResource TodayButtonControl}">
-            <Button.Resources>
-                <ControlTemplate x:Key="TodayButtonControl" TargetType="{x:Type ButtonBase}">
-                    <Border x:Name="border"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Background="{TemplateBinding Background}"
-                            SnapsToDevicePixels="True">
-                        <TextBlock x:Name="contentPresenter"
-                                   Text="{TemplateBinding Content}"
-                                   Focusable="False"
-                                   FontFamily="{TemplateBinding FontFamily}"
-                                   FontSize="{TemplateBinding FontSize}"
-                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                   Margin="{TemplateBinding Padding}"
-                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="Button.IsDefaulted" Value="True">
-                            <Setter Property="BorderBrush" TargetName="border"
-                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
-                            <Setter Property="Foreground" TargetName="contentPresenter"
-                                    Value="{StaticResource ForegroundVeryLightBrush}" />
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
-                            <Setter Property="Foreground" TargetName="contentPresenter"
-                                    Value="{StaticResource ForegroundVeryLightBrush}" />
-                        </Trigger>
-                        <Trigger Property="ToggleButton.IsChecked" Value="True">
-                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordBlueBrush}" />
-                            <Setter Property="Foreground" TargetName="contentPresenter"
-                                    Value="{StaticResource ForegroundVeryLightBrush}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Button.Resources>
+            Style="{StaticResource InputClearButton}">
         </Button>
 
         <!--Confirm btn-->
@@ -243,48 +197,7 @@
                 Grid.Column="1"
                 Content="Confirm"
                 Command="{Binding ConfirmCommand}"
-                FontSize="{StaticResource FontSizeRegular}"
-                BorderBrush="{StaticResource WordBlueBrush}"
-                Background="{StaticResource WordBlueBrush}"
-                Foreground="{StaticResource ForegroundVeryLightBrush}"
-                Padding="10,2"
-                Margin="0"
-                Template="{DynamicResource ConfirmButton}">
-            <Button.Resources>
-                <ControlTemplate x:Key="ConfirmButton" TargetType="{x:Type ButtonBase}">
-                    <Border x:Name="border"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Background="{TemplateBinding Background}"
-                            SnapsToDevicePixels="True">
-                        <TextBlock x:Name="contentPresenter"
-                                   Text="{TemplateBinding Content}"
-                                   Focusable="False"
-                                   FontFamily="{TemplateBinding FontFamily}"
-                                   FontSize="{TemplateBinding FontSize}"
-                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                   Margin="{TemplateBinding Padding}"
-                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="Button.IsDefaulted" Value="True">
-                            <Setter Property="BorderBrush" TargetName="border"
-                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
-                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
-
-                            <Setter Property="Background" TargetName="border" Value="{StaticResource WordOrangeBrush}" />
-                        </Trigger>
-
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Button.Resources>
+                Style="{StaticResource InputConfirmButton}">
         </Button>
     </Grid>
 </UserControl>

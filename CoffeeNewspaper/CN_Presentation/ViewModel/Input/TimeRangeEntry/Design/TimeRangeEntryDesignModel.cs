@@ -3,16 +3,16 @@
 namespace CN_Presentation.Input.Design
 {
     /// <summary>
-    /// The design-time data for a <see cref="TimeSpanPickerViewModel"/>
+    /// The design-time data for a <see cref="TimeRangeEntryViewModel"/>
     /// </summary>
-    public class TimeSpanPickerDesignModel : TimeSpanPickerViewModel
+    public class TimeRangeEntryDesignModel : TimeRangeEntryViewModel
     {
         #region Singleton
 
         /// <summary>
         /// A single instance of the design model
         /// </summary>
-        public static TimeSpanPickerDesignModel Instance => new TimeSpanPickerDesignModel();
+        public static TimeRangeEntryDesignModel Instance => new TimeRangeEntryDesignModel();
 
         #endregion
 
@@ -21,7 +21,7 @@ namespace CN_Presentation.Input.Design
         /// <summary>
         /// Default Constructor
         /// </summary>
-        public TimeSpanPickerDesignModel()
+        public TimeRangeEntryDesignModel()
         {
         }
 

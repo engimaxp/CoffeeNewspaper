@@ -46,7 +46,7 @@
                 Padding="0 0 5 0"
                 FontSize="{StaticResource FontSizeRegular}"
                 Style="{StaticResource IconDarkerButton}"
-                Content="{StaticResource FontAwesomeStopWatchIcon}"
+                Content="{StaticResource FontAwesomeClockIcon}"
                 Command="{Binding PopUpCommand}"></Button>
 
         <!-- Recognizer Suggest -->
@@ -81,7 +81,7 @@
 
         <!-- CalendarPopup -->
         <Popup 
-            x:Name="CalendarPopup"
+            x:Name="TimeRangePickerPopup"
             Grid.Column="0"
                Grid.Row="1"
                Grid.ColumnSpan="2"
@@ -90,9 +90,7 @@
                Placement="Bottom"
                IsOpen="{Binding IsPanelPopup}"
                PlacementTarget="{Binding ElementName=DateTimeTextBox}">
-            <local:CalendarSelectControl
-                DataContext="{Binding PopUpCalendarSelectViewModel}">
-            </local:CalendarSelectControl>
+            <local:TimeSpanPicker DataContext="{Binding PopUpTimeSpanSelectViewModel}"></local:TimeSpanPicker>
         </Popup>
     </Grid>
 </UserControl>

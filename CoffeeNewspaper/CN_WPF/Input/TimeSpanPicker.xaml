@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="CN_WPF.TimeSpanPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CN_WPF"
+             xmlns:design="clr-namespace:CN_Presentation.Input.Design;assembly=CN_Presentation"
+             mc:Ignorable="d"
+             d:DataContext="{x:Static design:TimeSpanPickerDesignModel.Instance}">
+    <Border
+        Padding="10"
+        Background="{StaticResource ForegroundVeryLightBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="200" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="70" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="0 0 0 5"
+                       FontFamily="Microsoft Yahei"
+                       FontWeight="Bold">
+                Days
+            </TextBlock>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="1"
+                       Margin="0 0 0 5"
+                       FontFamily="Microsoft Yahei"
+                       FontWeight="Bold">
+                Hours
+            </TextBlock>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="2"
+                       Margin="0 0 0 5"
+                       FontFamily="Microsoft Yahei"
+                       FontWeight="Bold">
+                Minutes
+            </TextBlock>
+
+            <ListBox Grid.Row="1"
+                     Grid.Column="0"
+                     ItemsSource="{Binding Days}"
+                     local:MonitorListBoxSelectProperty.Value="True"
+                     Margin="0 0 10 0"
+                     SelectedItem="{Binding SelectDay,Mode=TwoWay}"
+                     ItemContainerStyle="{StaticResource ListBoxItemStyle1}" />
+            <ListBox Grid.Row="1"
+                     Grid.Column="1"
+                     ItemsSource="{Binding Hours}"
+                     local:MonitorListBoxSelectProperty.Value="True"
+                     SelectedItem="{Binding SelectHour,Mode=TwoWay}"
+                     Margin="0 0 10 0"
+                     ItemContainerStyle="{StaticResource ListBoxItemStyle1}" />
+            <ListBox Grid.Row="1"
+                     Grid.Column="2"
+                     ItemsSource="{Binding Minutes}"
+                     local:MonitorListBoxSelectProperty.Value="True"
+                     SelectedItem="{Binding SelectMinute,Mode=TwoWay}"
+                     ItemContainerStyle="{StaticResource ListBoxItemStyle1}" />
+
+            <StackPanel Grid.Row="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button
+                    Content="Clear"
+                    Margin="10 10 10 0"
+                    Command="{Binding ClearCommand}"
+                    Style="{StaticResource InputClearButton}" />
+                <!--Confirm btn-->
+                <Button
+                    Content="Confirm"
+                    Margin="10 10 0 0"
+                    Command="{Binding ConfirmCommand}"
+                    Style="{StaticResource InputConfirmButton}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+
+</UserControl>

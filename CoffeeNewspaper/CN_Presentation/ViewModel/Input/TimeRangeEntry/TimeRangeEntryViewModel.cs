@@ -151,6 +151,11 @@ namespace CN_Presentation.ViewModel.Input
         /// </summary>
         public bool IsPanelPopup { get; set; }
 
+        /// <summary>
+        /// the time range picker controls viewModel
+        /// </summary>
+        public TimeSpanPickerViewModel PopUpTimeSpanSelectViewModel { get; set; } = new TimeSpanPickerViewModel();
+
         #endregion
 
         #region Commands
@@ -165,6 +170,16 @@ namespace CN_Presentation.ViewModel.Input
         private void PopUp()
         {
             IsPanelPopup ^= true;
+            if (IsPanelPopup)
+            {
+                var tssvm = new TimeSpanPickerViewModel();
+                tssvm.SetUpdateTimeRangeInterface(this);
+                if (_selectedTimeDuration>0)
+                {
+                    tssvm.CurrentlyValue = _selectedTimeDuration;
+                }
+                PopUpTimeSpanSelectViewModel = tssvm;
+            }
         }
         private void Clear()
         {

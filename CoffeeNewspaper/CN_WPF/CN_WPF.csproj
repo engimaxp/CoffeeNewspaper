@@ -209,6 +209,7 @@
     <Compile Include="AttachedProperties\IsBusyProperty.cs" />
     <Compile Include="AttachedProperties\IsHighlightProperty.cs" />
     <Compile Include="AttachedProperties\MonitorGridHoverProperty.cs" />
+    <Compile Include="AttachedProperties\MonitorListBoxSelectProperty.cs" />
     <Compile Include="AttachedProperties\MonitorHoverProperty.cs" />
     <Compile Include="AttachedProperties\MouseWheelEventBubbleUpAttachedProperty.cs" />
     <Compile Include="AttachedProperties\TextAttachedProperties.cs" />
@@ -275,6 +276,9 @@
     </Compile>
     <Compile Include="Input\TimeRangeEntryControl.xaml.cs">
       <DependentUpon>TimeRangeEntryControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Input\TimeSpanPicker.xaml.cs">
+      <DependentUpon>TimeSpanPicker.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ioc\UIManager.cs" />
     <Compile Include="Pages\BasePage.cs" />
@@ -403,6 +407,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Input\TimeRangeEntryControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Input\TimeSpanPicker.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
