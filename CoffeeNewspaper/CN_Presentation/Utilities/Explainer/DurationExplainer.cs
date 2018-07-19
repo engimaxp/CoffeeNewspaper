@@ -12,14 +12,14 @@ namespace CN_Presentation.Utilities
             return Convert.ToDateTime(DateTime.Now.AddSeconds(Convert.ToDouble(time)));
         }
 
-        protected override int StringToTimeRangeSecondsCount(string time)
+        protected override long StringToTimeRangeSecondsCount(string time)
         {
-            throw new NotImplementedException();
+            return Convert.ToInt64(time);
         }
 
         protected override string GetTitle(string time)
         {
-            return new TimeSpan(Convert.ToInt64(time) * 1000).GetTimeSpanLeftInfo();
+            return new TimeSpan(Convert.ToInt64(time) * 10000000).GetTimeSpanLeftInfo(false);
         }
     }
 }

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using CN_Presentation.ViewModel.Input;
 
 namespace CN_Presentation.Input.Design
 {
     /// <summary>
-    /// The design-time data for a <see cref="DateTimeEntryViewModel"/>
+    /// The design-time data for a <see cref="TimeRangeEntryViewModel"/>
     /// </summary>
-    public class TimeRangeEntryDesignModel : DateTimeEntryViewModel
+    public class TimeRangeEntryDesignModel : TimeRangeEntryViewModel
     {
         #region Singleton
 

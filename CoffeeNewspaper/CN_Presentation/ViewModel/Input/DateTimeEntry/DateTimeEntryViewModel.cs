@@ -111,6 +111,7 @@ namespace CN_Presentation.Input
                 {
                     RecgonizeFail = false;
                     SuggestButtons = null;
+                    ParentInterface?.NotifyUpdateDateTime(null);
                 }
             }
         }

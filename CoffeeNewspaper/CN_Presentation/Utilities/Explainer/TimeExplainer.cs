@@ -11,9 +11,14 @@ namespace CN_Presentation.Utilities
             return Convert.ToDateTime($"{DateTime.Now.ToShortDateString()} {time}");
         }
 
-        protected override int StringToTimeRangeSecondsCount(string time)
+        protected override long StringToTimeRangeSecondsCount(string time)
         {
-            throw new NotImplementedException();
+            var newtime = Convert.ToDateTime($"{DateTime.Now.ToShortDateString()} {time}");
+            if (newtime <= DateTime.Now)
+            {
+                newtime = newtime.AddDays(1);
+            }
+            return Convert.ToInt64((newtime - DateTime.Now).TotalSeconds);
         }
     }
 }

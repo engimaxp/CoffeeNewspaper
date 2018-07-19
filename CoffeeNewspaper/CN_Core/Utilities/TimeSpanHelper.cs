@@ -5,7 +5,7 @@ namespace CN_Core.Utilities
 {
     public static class TimeSpanHelper
     {
-        public static string GetTimeSpanLeftInfo(this TimeSpan timeSpan)
+        public static string GetTimeSpanLeftInfo(this TimeSpan timeSpan,bool showLeft)
         {
             StringBuilder result = new StringBuilder();
 
@@ -42,7 +42,7 @@ namespace CN_Core.Utilities
             {
                 result.Append("Right Now");
             }
-            else
+            else if(showLeft)
             {
                 //add a left sign to the end of the timetip
                 result.Append(" Left");

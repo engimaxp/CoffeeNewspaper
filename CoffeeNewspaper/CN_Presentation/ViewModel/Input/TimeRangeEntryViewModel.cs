@@ -21,7 +21,7 @@ namespace CN_Presentation.ViewModel.Input
 
         private IUpdateTimeRange ParentInterface;
 
-        private int _selectedTimeDuration;
+        private long _selectedTimeDuration;
 
         #endregion
 
@@ -47,7 +47,7 @@ namespace CN_Presentation.ViewModel.Input
                     ParentModel = this,
                     Title = x.Title,
                 };
-                if (x.Value is int timerange)
+                if (x.Value is long timerange)
                 {
                     temp.TimeRangeSecondsCount = timerange;
                 }
@@ -55,7 +55,7 @@ namespace CN_Presentation.ViewModel.Input
             });
         }
 
-        public void NotifyUpdateTimeRange(int timeRangeSeconds)
+        public void NotifyUpdateTimeRange(long timeRangeSeconds)
         {
             SelectedTimeDuration = timeRangeSeconds;
             IsPanelPopup = false;
@@ -80,7 +80,7 @@ namespace CN_Presentation.ViewModel.Input
         /// <summary>
         /// The Current Selected DateTime
         /// </summary>
-        public int SelectedTimeDuration
+        public long SelectedTimeDuration
         {
             get => _selectedTimeDuration;
             set
@@ -89,7 +89,7 @@ namespace CN_Presentation.ViewModel.Input
                     return;
 
                 _selectedTimeDuration = value;
-                InputText = new TimeSpan(_selectedTimeDuration*1000).GetTimeSpanLeftInfo();
+                InputText = new TimeSpan(_selectedTimeDuration * 10000000).GetTimeSpanLeftInfo(false);
                 SuggestButtons = null;
                 Editing = true;
                 ParentInterface?.NotifyUpdateTimeRange(_selectedTimeDuration);
@@ -113,6 +113,7 @@ namespace CN_Presentation.ViewModel.Input
                 {
                     RecgonizeFail = false;
                     SuggestButtons = null;
+                    ParentInterface?.NotifyUpdateTimeRange(0);
                 }
             }
         }
@@ -190,7 +191,7 @@ namespace CN_Presentation.ViewModel.Input
             {
                 var btn = list.First();
                 SelectedTimeDuration = btn.TimeRangeSecondsCount;
-                InputText = new TimeSpan(btn.TimeRangeSecondsCount * 1000).GetTimeSpanLeftInfo();
+                InputText = new TimeSpan(btn.TimeRangeSecondsCount * 10000000).GetTimeSpanLeftInfo(false);
                 SuggestButtons = null;
             }
             else

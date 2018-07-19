@@ -3,10 +3,11 @@ using CN_Core;
 using CN_Core.Utilities;
 using CN_Presentation.Input;
 using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Input;
 
 namespace CN_Presentation.ViewModel.Form
 {
-    public class TaskDetailFormViewModel : BaseViewModel, IUpdateDateTime
+    public class TaskDetailFormViewModel : BaseViewModel, IUpdateDateTime, IUpdateTimeRange
     {
         #region Public Methods
 
@@ -19,7 +20,14 @@ namespace CN_Presentation.ViewModel.Form
             else
                 DeadLineLeft = time.Value < DateTime.Now
                     ? "Over Due"
-                    : (time.Value - DateTime.Now).GetTimeSpanLeftInfo();
+                    : (time.Value - DateTime.Now).GetTimeSpanLeftInfo(true);
+        }
+
+        public void NotifyUpdateTimeRange(long timeRangeSeconds)
+        {
+            if (timeRangeSeconds > 0)
+                UsedTimePercent = ((timeRangeSeconds - 300.0) / timeRangeSeconds).ToString("P2") + " Left";
+            else UsedTimePercent = string.Empty;
         }
 
         #endregion
@@ -70,10 +78,22 @@ namespace CN_Presentation.ViewModel.Form
         /// </summary>
         public DateTimeEntryViewModel DeadLineEntry { get; set; }
 
+
         /// <summary>
         ///     Mainly used to cooperate with <see cref="DeadLineEntry" />, to calculate the currently left time
         /// </summary>
         public string DeadLineLeft { get; set; }
+
+        /// <summary>
+        ///     Estimated Duration of this task
+        /// </summary>
+        public TimeRangeEntryViewModel EstimatedDurationEntry { get; set; }
+
+        /// <summary>
+        ///     Mainly used to cooperate with <see cref="EstimatedDurationEntry" />. to calculate the currently work complete
+        ///     percentage
+        /// </summary>
+        public string UsedTimePercent { get; set; }
 
         #endregion
     }

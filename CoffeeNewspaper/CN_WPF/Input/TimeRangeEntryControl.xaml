@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.Input.Design;assembly=CN_Presentation"
              mc:Ignorable="d" d:DesignWidth="232"
-             d:DataContext="{x:Static design:DateTimeEntryDesignModel.Instance}">
+             d:DataContext="{x:Static design:TimeRangeEntryDesignModel.Instance}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>

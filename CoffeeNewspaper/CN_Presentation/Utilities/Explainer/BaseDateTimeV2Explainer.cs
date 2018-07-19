@@ -10,7 +10,7 @@ namespace CN_Presentation.Utilities
 
         protected abstract DateTime StringToDateTime(string time);
 
-        protected abstract int StringToTimeRangeSecondsCount(string time);
+        protected abstract long StringToTimeRangeSecondsCount(string time);
 
         protected virtual string GetTitle(string time)
         {
@@ -27,11 +27,18 @@ namespace CN_Presentation.Utilities
                 if (element is Dictionary<string, string> dict)
                 {
                     var time = dict[FieldName];
-                    results.Add(new SuggestDataDto
+                    try
                     {
-                        Value = ValueConverter(time,valueType),
-                        Title = GetTitle(time),
-                    });
+                        results.Add(new SuggestDataDto
+                        {
+                            Value = ValueConverter(time,valueType),
+                            Title = GetTitle(time),
+                        });
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
                 }
             }
             return results;

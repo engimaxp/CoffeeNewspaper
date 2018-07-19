@@ -11,9 +11,11 @@ namespace CN_Presentation.Utilities
             return Convert.ToDateTime(time);
         }
 
-        protected override int StringToTimeRangeSecondsCount(string time)
+        protected override long StringToTimeRangeSecondsCount(string time)
         {
-            throw new NotImplementedException();
+            var timeForThis = Convert.ToDateTime(time);
+            if(timeForThis<=DateTime.Now) throw new ArgumentException("ignoreable,dump time which less than now");
+            return Convert.ToInt64((timeForThis - DateTime.Now).TotalSeconds);
         }
     }
 }

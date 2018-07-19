@@ -9,7 +9,7 @@ namespace CN_Presentation.Input
     {
         public string Title { get; set; }
 
-        public int TimeRangeSecondsCount { get; set; }
+        public long TimeRangeSecondsCount { get; set; }
 
         public ICommand ClickCommand { get; set; }
 
