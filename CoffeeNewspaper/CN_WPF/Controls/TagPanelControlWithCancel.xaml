@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
+             xmlns:controls="clr-namespace:CN_Presentation.ViewModel.Controls;assembly=CN_Presentation"
              mc:Ignorable="d"
              d:DesignWidth="300">
     <ItemsControl
@@ -18,7 +19,7 @@
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
-            <DataTemplate>
+            <DataTemplate DataType="{x:Type controls:TagItemViewModel}">
                 <Button ToolTip="{Binding TagTitle}"
                         Style="{StaticResource TagButtonCancel}"
                         Content="{Binding TagTitle}"

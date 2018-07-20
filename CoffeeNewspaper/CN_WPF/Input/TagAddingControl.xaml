@@ -59,10 +59,12 @@
                                          Text="{Binding TagInput,UpdateSourceTrigger=PropertyChanged}"
                                          Padding="0"
                                          Margin="0"
+                                         Tag="Input Tag"
                                          FontSize="{StaticResource FontSizeRegular}"
                                          BorderBrush="{StaticResource ForegroundDarkBrush}"
                                          BorderThickness="0 0 0 1"
-                                         Width="80"
+                                         Width="70"
+                                         HorizontalScrollBarVisibility="Hidden"
                                          Style="{StaticResource MemoContent}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding ConfirmAddCommand}"></KeyBinding>

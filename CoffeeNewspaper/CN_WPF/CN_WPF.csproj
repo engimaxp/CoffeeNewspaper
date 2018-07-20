@@ -303,6 +303,7 @@
     <Compile Include="Pages\WorkSpacePage.xaml.cs">
       <DependentUpon>WorkSpacePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\BindingProxy.cs" />
     <Compile Include="Utilities\ExpandDetailControlHelper.cs" />
     <Compile Include="Utilities\MyTreeViewHelper.cs" />
     <Compile Include="Utilities\TreeViewItemExtensions.cs" />
