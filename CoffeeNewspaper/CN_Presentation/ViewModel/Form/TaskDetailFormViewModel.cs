@@ -2,12 +2,14 @@
 using CN_Core;
 using CN_Core.Utilities;
 using CN_Presentation.Input;
+using CN_Presentation.Input.Design;
 using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Controls;
 using CN_Presentation.ViewModel.Input;
 
 namespace CN_Presentation.ViewModel.Form
 {
-    public class TaskDetailFormViewModel : BaseViewModel, IUpdateDateTime, IUpdateTimeRange
+    public class TaskDetailFormViewModel : BaseViewModel, IUpdateDateTime, IUpdateTimeRange 
     {
         #region Public Methods
 
@@ -29,6 +31,7 @@ namespace CN_Presentation.ViewModel.Form
                 UsedTimePercent = ((timeRangeSeconds - 300.0) / timeRangeSeconds).ToString("P2") + " Left";
             else UsedTimePercent = string.Empty;
         }
+        
 
         #endregion
 
@@ -90,11 +93,17 @@ namespace CN_Presentation.ViewModel.Form
         public TimeRangeEntryViewModel EstimatedDurationEntry { get; set; }
 
         /// <summary>
+        ///     Display Tag Panel ViewModels
+        /// </summary>
+        public TagPanelViewModel TagPanelViewModel { get; set; } = new TagPanelViewModel();
+
+        /// <summary>
         ///     Mainly used to cooperate with <see cref="EstimatedDurationEntry" />. to calculate the currently work complete
         ///     percentage
         /// </summary>
         public string UsedTimePercent { get; set; }
 
         #endregion
+
     }
 }

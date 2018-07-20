@@ -128,7 +128,7 @@
                     </Grid>
 
                     <!-- Tag Button -->
-                    <local:TagPanelControl />
+                    <local:TagPanelControl DataContext="{x:Static design:TagPanelDesignModel.Instance}" />
 
                     <!-- Fail Reason -->
                     <Grid Margin="0 10"

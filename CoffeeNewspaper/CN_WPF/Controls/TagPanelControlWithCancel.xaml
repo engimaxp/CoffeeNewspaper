@@ -8,19 +8,28 @@
              mc:Ignorable="d"
              d:DesignWidth="300">
     <ItemsControl
-        DataContext="{x:Static design:TagPanelDesignModel.Instance}"
-        ItemsSource="{Binding TagItems}">
+        d:DataContext="{x:Static design:TagPanelDesignModel.Instance}">
+        <ItemsControl.Resources>
+            <CollectionViewSource x:Key="TagCollection" Source="{Binding TagItems}" />
+        </ItemsControl.Resources>
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <WrapPanel Orientation="Horizontal" />
+                <WrapPanel Orientation="Horizontal" IsItemsHost="True" />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
             <DataTemplate>
                 <Button ToolTip="{Binding TagTitle}"
                         Style="{StaticResource TagButtonCancel}"
-                        Content="{Binding TagTitle}" />
+                        Content="{Binding TagTitle}"
+                        Command="{Binding DeleteCommand}" />
             </DataTemplate>
         </ItemsControl.ItemTemplate>
+        <ItemsControl.ItemsSource>
+            <CompositeCollection>
+                <CollectionContainer Collection="{Binding Source={StaticResource TagCollection}}" />
+                <local:TagAddingControl DataContext="{Binding AddTagEntry}" />
+            </CompositeCollection>
+        </ItemsControl.ItemsSource>
     </ItemsControl>
 </UserControl>

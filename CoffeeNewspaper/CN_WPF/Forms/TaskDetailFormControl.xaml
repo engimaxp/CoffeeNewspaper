@@ -191,8 +191,7 @@
                    Grid.Column="0"
                    Grid.ColumnSpan="2"
                    Margin="10 0 10 10">
-            <local:TagPanelControlWithCancel />
-            <local:TagAddingControl />
+            <local:TagPanelControlWithCancel DataContext="{Binding TagPanelViewModel}" />
         </WrapPanel>
 
     </Grid>

@@ -8,7 +8,7 @@
              mc:Ignorable="d"
              d:DesignWidth="300">
     <ItemsControl
-        DataContext="{x:Static design:TagPanelDesignModel.Instance}"
+        d:DataContext="{x:Static design:TagPanelDesignModel.Instance}"
         ItemsSource="{Binding TagItems}">
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
