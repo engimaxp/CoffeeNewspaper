@@ -19,7 +19,8 @@
                     Style="{StaticResource SimpleTxtButton}"
                     IsDefault="True"
                     FontSize="{StaticResource FontSizeRegular}"
-                    Command="{Binding CloseCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BaseDialogUserControl}}}"
+                    Command="{Binding ConfirmCommand}"
+                    local:IsBusyProperty.Value="{Binding FormContentViewModel.ConfirmIsRunning}"
                     HorizontalAlignment="Center"
                     Margin="10"
             />
@@ -27,6 +28,7 @@
             <Button Content="{Binding CancelButtonText}"
                     Style="{StaticResource SimpleTxtButton}"
                     BorderBrush="{StaticResource WordOrangeBrush}"
+                    Visibility="{Binding FormContentViewModel.ConfirmIsRunning,Converter={local:BooleanToVisiblityGoneConverter},ConverterParameter=True}"
                     BorderThickness="1"
                     Background="{StaticResource ForegroundVeryLightBrush}"
                     Foreground="{StaticResource WordOrangeBrush}"

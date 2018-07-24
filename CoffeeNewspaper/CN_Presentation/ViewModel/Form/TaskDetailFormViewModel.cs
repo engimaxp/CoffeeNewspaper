@@ -1,16 +1,67 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using CN_Core;
+using CN_Core.Interfaces.Service;
 using CN_Core.Utilities;
 using CN_Presentation.Input;
-using CN_Presentation.Input.Design;
-using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Controls;
 using CN_Presentation.ViewModel.Input;
 
 namespace CN_Presentation.ViewModel.Form
 {
-    public class TaskDetailFormViewModel : BaseViewModel, IUpdateDateTime, IUpdateTimeRange 
+    public class TaskDetailFormViewModel : FormBaseViewModel, IUpdateDateTime, IUpdateTimeRange
     {
+        #region Private Properties
+
+        private readonly CNTask originTask;
+
+        #endregion
+
+        #region Constructor
+
+        public TaskDetailFormViewModel(CNTask originTask = null)
+        {
+            this.originTask = originTask;
+        }
+
+        #endregion
+
+        #region Base Confirm Action Implement
+
+        public override async Task<bool> Confirm()
+        {
+            Debug.WriteLine("Confirm");
+            return await RunCommandAsync<bool>(() => ConfirmIsRunning, async () =>
+            {
+                var newTask = GenerateCNTask();
+                var result = true;
+                await Task.Delay(3000);
+//                if (originTask == null)
+//                {
+//                    result = (await IoC.Get<ITaskService>().CreateATask(newTask))?.TaskId > 0;
+//                }
+//                else
+//                {
+//                    newTask.TaskId = originTask.TaskId;
+//                    result = await IoC.Get<ITaskService>().EditATask(newTask);
+//                }
+
+                return result;
+            });
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private CNTask GenerateCNTask()
+        {
+            return new CNTask();
+        }
+
+        #endregion
+
         #region Public Methods
 
         #region Interface Implement
@@ -31,7 +82,6 @@ namespace CN_Presentation.ViewModel.Form
                 UsedTimePercent = ((timeRangeSeconds - 300.0) / timeRangeSeconds).ToString("P2") + " Left";
             else UsedTimePercent = string.Empty;
         }
-        
 
         #endregion
 
@@ -104,6 +154,5 @@ namespace CN_Presentation.ViewModel.Form
         public string UsedTimePercent { get; set; }
 
         #endregion
-
     }
 }

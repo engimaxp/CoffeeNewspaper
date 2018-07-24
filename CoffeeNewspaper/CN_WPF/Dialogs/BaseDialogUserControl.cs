@@ -103,6 +103,11 @@ namespace CN_WPF
                     // Set this control to the dialog window content
                     mDialogWindow.ViewModel.Content = this;
 
+                    // Set close command function
+                    viewModel.CloseWindowEvent += () => {
+                        CloseCommand.Execute(null); 
+                    };
+
                     // Setup this controls data context binding to the view model
                     DataContext = viewModel;
 
