@@ -5,14 +5,14 @@ namespace CN_Presentation.ViewModel.Controls
 {
     public static class RatingModelTemplate
     {
-        public static RatingViewModel GetNewModel(this RatingControlType controlType)
+        public static RatingViewModel GetNewModel(this RatingControlType controlType,int selectedValue)
         {
             switch (controlType)
             {
                 case RatingControlType.Priority:
-                    return new RatingDesignModel2();
+                    return new RatingDesignModel2(selectedValue);
                 case RatingControlType.Urgency:
-                    return new RatingDesignModel();
+                    return new RatingDesignModel(selectedValue);
                 default:
                     Debugger.Break();
                     return null;

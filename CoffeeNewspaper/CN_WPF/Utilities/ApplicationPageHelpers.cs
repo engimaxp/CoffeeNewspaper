@@ -36,7 +36,7 @@ namespace CN_WPF
                     return new TagReviewPage(viewModel as TagReviewViewModel);
 
                 case ApplicationPage.TasksList:
-                    return new TaskListPage(viewModel as TasksListViewModel);
+                    return new TaskListPage(viewModel as TasksListPageViewModel);
 
                 default:
                     Debugger.Break();

@@ -41,6 +41,9 @@
                     </BeginStoryboard>
                 </EventTrigger>
             </Border.Triggers>
+            <Border.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding OpenEditDialogCommand}"></MouseBinding>
+            </Border.InputBindings>
             <Grid x:Name="container" Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <!-- Task Urgency Indicator Bar -->

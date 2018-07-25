@@ -1,17 +1,23 @@
 ﻿using System.Windows.Input;
+using CN_Core;
 using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Controls;
 
 namespace CN_Presentation.ViewModel.Application
 {
-    public class WorkSpaceViewModel:BaseViewModel
+    public class WorkSpaceViewModel : BaseViewModel
     {
         #region Public Properties
+
         /// <summary>
         /// Side Task Menu Visible or Collapse
         /// </summary>
         public bool SideTaskMenuVisible { get; set; } = true;
 
-        #endregion
+        public TaskListViewModel TasksListViewModel { get; set; }= IoC.Get<TaskListViewModel>();
+   
+
+    #endregion
 
 
         #region Constructor

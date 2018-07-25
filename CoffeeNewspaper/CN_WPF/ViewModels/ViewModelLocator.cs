@@ -25,6 +25,12 @@ namespace CN_WPF
         /// The navigation bar view model
         /// </summary>
         public static HeadMenuViewModel HeadMenuViewModel => IoC.Get<HeadMenuViewModel>();
+
+        /// <summary>
+        /// The Task list bar view model
+        /// </summary>
+        public static TaskListViewModel TaskListViewModel => IoC.Get<TaskListViewModel>();
+        
         #endregion
     }
 }

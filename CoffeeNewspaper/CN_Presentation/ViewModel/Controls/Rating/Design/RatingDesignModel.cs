@@ -20,14 +20,14 @@ namespace CN_Presentation.ViewModel.Controls.Design
         /// <summary>
         /// Default constructor
         /// </summary>
-        public RatingDesignModel()
+        public RatingDesignModel(int selectedValue = 3)
         {
             ColorType = UserColorType.WordOrange;
             RegularIcon = IconType.Star;
             SolidIcon = IconType.Star;
             RegularFontFamilyType = FontFamilyType.FontAwesomeRegular;
             SolidFontFamilyType = FontFamilyType.FontAwesomeSolid;
-            SelectedValue = 3;
+            SelectedValue = selectedValue;
             EnumType = typeof(CNPriority);
             GenerateChildViewModel();
         }
@@ -54,14 +54,14 @@ namespace CN_Presentation.ViewModel.Controls.Design
         /// <summary>
         /// Default constructor
         /// </summary>
-        public RatingDesignModel2()
+        public RatingDesignModel2(int selectedValue = 3)
         {
             ColorType = UserColorType.WordRed;
             RegularIcon = IconType.RegularFire;
             SolidIcon = IconType.SolidFire;
             RegularFontFamilyType = FontFamilyType.CNFont;
             SolidFontFamilyType = FontFamilyType.CNFont;
-            SelectedValue = 3;
+            SelectedValue = selectedValue;
             EnumType = typeof(CNUrgency);
             GenerateChildViewModel();
         }

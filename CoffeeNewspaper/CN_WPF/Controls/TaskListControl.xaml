@@ -15,7 +15,7 @@
                     <GradientStop Color="{StaticResource IconHoverBlue}" Offset="1" />
                 </LinearGradientBrush>
         </Border.Background>
-        <Grid DataContext="{x:Static design:TaskListDesignModel.Instance}">
+        <Grid d:DataContext="{x:Static design:TaskListDesignModel.Instance}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />

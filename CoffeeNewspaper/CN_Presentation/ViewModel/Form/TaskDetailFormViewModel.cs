@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
 using CN_Core.Interfaces;
 using CN_Core.Interfaces.Service;
 using CN_Core.Utilities;
 using CN_Presentation.Input;
+using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Controls;
 using CN_Presentation.ViewModel.Dialog;
 using CN_Presentation.ViewModel.Input;
@@ -32,6 +35,32 @@ namespace CN_Presentation.ViewModel.Form
             var timeRangeViewModel = new TimeRangeEntryViewModel();
             timeRangeViewModel.SetParentInterface(this);
             EstimatedDurationEntry = timeRangeViewModel;
+
+            if (originTask != null)
+            {
+                Status = originTask.MapTaskCurrentStatus();
+                IsFail = originTask.IsFail;
+                FailReason = originTask.FailReason;
+                PendingReason = originTask.PendingReason;
+                Content = originTask.Content;
+                DeadLineEntry.SelectedDateTime = originTask.DeadLine;
+                EstimatedDurationEntry.SelectedTimeDuration = originTask.EstimatedDuration;
+                UrgencyRating = RatingControlType.Urgency.GetNewModel(
+                    Enum.GetNames(typeof(CNUrgency)).ToList().IndexOf(originTask.Urgency.ToString()) + 1);
+                PriorityRating = RatingControlType.Priority.GetNewModel(
+                    Enum.GetNames(typeof(CNPriority)).ToList().IndexOf(originTask.Priority.ToString()) + 1);
+                TagPanelViewModel.TagItems = new ObservableCollection<TagItemViewModel>(originTask.TaskTaggers.Select(x => x.Tag)
+                    .Select(y => new TagItemViewModel(TagPanelViewModel)
+                    {
+                        TagId = y.TagId,
+                        TagTitle = y.Title
+                    }));
+            }
+            else
+            {
+                UrgencyRating = RatingControlType.Urgency.GetNewModel(3);
+                PriorityRating = RatingControlType.Priority.GetNewModel(3);
+            }
         }
 
         #endregion
@@ -55,6 +84,8 @@ namespace CN_Presentation.ViewModel.Form
                         newTask.TaskId = originTask.TaskId;
                         result = await IoC.Get<ITaskService>().EditATask(newTask);
                     }
+                    //TODO: find a method to decouple
+                    await IoC.Get<TaskListViewModel>().RefreshTaskItems();
                 }
                 catch (Exception exception)
                 {
@@ -202,9 +233,9 @@ namespace CN_Presentation.ViewModel.Form
         /// </summary>
         public string UsedTimePercent { get; set; }
 
-        public RatingViewModel UrgencyRating { get; set; } = RatingControlType.Urgency.GetNewModel();
+        public RatingViewModel UrgencyRating { get; set; } 
 
-        public RatingViewModel PriorityRating { get; set; } = RatingControlType.Priority.GetNewModel();
+        public RatingViewModel PriorityRating { get; set; } 
 
         #endregion
     }

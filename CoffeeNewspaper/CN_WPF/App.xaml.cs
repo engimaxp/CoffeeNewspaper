@@ -3,6 +3,7 @@ using System.Windows;
 using CN_Core;
 using CN_Core.Interfaces;
 using CN_Presentation;
+using CN_Presentation.ViewModel.Controls;
 using CN_Repository;
 using CN_Service;
 
@@ -35,6 +36,7 @@ namespace CN_WPF
             IoC.Kernel.BindSqliteDataStore();
             IoC.Kernel.BindServices();
 
+            await IoC.Get<TaskListViewModel>().RefreshTaskItems();
 
             //Bind UI Manager So Could use be used in ViewModel
             IoC.Kernel.Bind<IUIManager>().ToConstant(new UIManager());
