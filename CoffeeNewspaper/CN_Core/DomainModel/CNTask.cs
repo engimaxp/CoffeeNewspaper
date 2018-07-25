@@ -60,7 +60,7 @@ namespace CN_Core
         ///     -2 means never will end
         ///     0 means user doest fill this property
         /// </summary>
-        public int EstimatedDuration { get; set; }
+        public long EstimatedDuration { get; set; }
 
         /// <summary>
         ///     The EndTime of this task

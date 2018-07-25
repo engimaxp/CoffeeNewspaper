@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using CN_Core;
+using CN_Core.Interfaces;
 using CN_Core.Interfaces.Service;
 using CN_Core.Utilities;
 using CN_Presentation.Input;
 using CN_Presentation.ViewModel.Controls;
+using CN_Presentation.ViewModel.Dialog;
 using CN_Presentation.ViewModel.Input;
 
 namespace CN_Presentation.ViewModel.Form
@@ -23,6 +24,14 @@ namespace CN_Presentation.ViewModel.Form
         public TaskDetailFormViewModel(CNTask originTask = null)
         {
             this.originTask = originTask;
+
+            var dateTimeViewModel = new DateTimeEntryViewModel();
+            dateTimeViewModel.SetParentInterface(this);
+            DeadLineEntry = dateTimeViewModel;
+
+            var timeRangeViewModel = new TimeRangeEntryViewModel();
+            timeRangeViewModel.SetParentInterface(this);
+            EstimatedDurationEntry = timeRangeViewModel;
         }
 
         #endregion
@@ -31,21 +40,31 @@ namespace CN_Presentation.ViewModel.Form
 
         public override async Task<bool> Confirm()
         {
-            Debug.WriteLine("Confirm");
-            return await RunCommandAsync<bool>(() => ConfirmIsRunning, async () =>
+            return await RunCommandAsyncGeneric(() => ConfirmIsRunning, async () =>
             {
-                var newTask = GenerateCNTask();
-                var result = true;
-                await Task.Delay(3000);
-//                if (originTask == null)
-//                {
-//                    result = (await IoC.Get<ITaskService>().CreateATask(newTask))?.TaskId > 0;
-//                }
-//                else
-//                {
-//                    newTask.TaskId = originTask.TaskId;
-//                    result = await IoC.Get<ITaskService>().EditATask(newTask);
-//                }
+                var result = false;
+                try
+                {
+                    var newTask = GenerateCNTask();
+                    if (originTask == null)
+                    {
+                        result = (await IoC.Get<ITaskService>().CreateATask(newTask))?.TaskId > 0;
+                    }
+                    else
+                    {
+                        newTask.TaskId = originTask.TaskId;
+                        result = await IoC.Get<ITaskService>().EditATask(newTask);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    await IoC.Get<IUIManager>()
+                        .ShowMessage(new MessageBoxDialogViewModel
+                        {
+                            Title = "Error！",
+                            Message = exception.Message
+                        });
+                }
 
                 return result;
             });
@@ -57,7 +76,37 @@ namespace CN_Presentation.ViewModel.Form
 
         private CNTask GenerateCNTask()
         {
-            return new CNTask();
+            var result = new CNTask
+            {
+                Content = Content,
+                CreateTime = DateTime.Now,
+                DeadLine = DeadLineEntry.SelectedDateTime,
+                EstimatedDuration = EstimatedDurationEntry.SelectedTimeDuration
+            };
+
+            Enum.TryParse(Enum.GetNames(typeof(CNUrgency))[UrgencyRating.SelectedValue - 1], out CNUrgency urgency);
+            result.Urgency = urgency;
+
+            Enum.TryParse(Enum.GetNames(typeof(CNPriority))[PriorityRating.SelectedValue - 1], out CNPriority priority);
+            result.Priority = priority;
+
+            foreach (var tagItemViewModel in TagPanelViewModel.TagItems)
+                result.TaskTaggers.Add(string.IsNullOrEmpty(tagItemViewModel.TagId)
+                    ? new CNTaskTagger
+                    {
+                        Task = result,
+                        Tag = new CNTag
+                        {
+                            Title = tagItemViewModel.TagTitle
+                        }
+                    }
+                    : new CNTaskTagger
+                    {
+                        Task = result,
+                        TagId = tagItemViewModel.TagId
+                    });
+
+            return result;
         }
 
         #endregion
@@ -152,6 +201,10 @@ namespace CN_Presentation.ViewModel.Form
         ///     percentage
         /// </summary>
         public string UsedTimePercent { get; set; }
+
+        public RatingViewModel UrgencyRating { get; set; } = RatingControlType.Urgency.GetNewModel();
+
+        public RatingViewModel PriorityRating { get; set; } = RatingControlType.Priority.GetNewModel();
 
         #endregion
     }

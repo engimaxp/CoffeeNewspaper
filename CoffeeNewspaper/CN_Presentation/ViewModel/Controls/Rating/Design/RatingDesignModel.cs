@@ -61,7 +61,7 @@ namespace CN_Presentation.ViewModel.Controls.Design
             SolidIcon = IconType.SolidFire;
             RegularFontFamilyType = FontFamilyType.CNFont;
             SolidFontFamilyType = FontFamilyType.CNFont;
-            SelectedValue = 1;
+            SelectedValue = 3;
             EnumType = typeof(CNUrgency);
             GenerateChildViewModel();
         }

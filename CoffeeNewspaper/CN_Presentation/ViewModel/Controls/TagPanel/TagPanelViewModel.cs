@@ -31,6 +31,8 @@ namespace CN_Presentation.ViewModel.Controls
     {
         public string TagTitle { get; set; }
 
+        public string TagId { get; set; }
+
         private TagPanelViewModel Parent { get; set; }
 
         public TagItemViewModel(TagPanelViewModel parent)

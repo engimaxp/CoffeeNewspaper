@@ -537,15 +537,27 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
-
-            //Assess
-//            mockTaskDataStore.GetTask(1).Returns(Task.FromResult((CNTask)null));
+            
 
             //Act
             var result = await targetService.EditATask(null);
 
             //Assert
             Assert.IsFalse(result);
+            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(null);
+        }
+        [Test]
+        public async Task EditATask_TaskContentEmpty_Fail()
+        {
+            var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
+            var targetService = _kernel.Get<ITaskService>();
+            var task = DomainTestHelper.GetARandomTask(1);
+            task.Content = String.Empty;
+
+            //Act
+            Assert.ThrowsAsync<ArgumentException>(async()=>await targetService.EditATask(task));
+
+            //Assert
             await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(null);
         }
         [Test]
@@ -605,6 +617,20 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await mockTaskDataStore.Received().AddTask(Arg.Is<CNTask>(x=>x.Content.Equals(mockTask.Content)));
         }
 
+        [Test]
+        public async Task CreateATask_TaskContentNotExists_ThrowException()
+        {
+            var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
+            var targetService = _kernel.Get<ITaskService>();
+            var mockTask = DomainTestHelper.GetARandomTask();
+            mockTask.Content = string.Empty;
+            //Assess
+            //Act
+
+            Assert.ThrowsAsync<ArgumentException>(async()=>await targetService.CreateATask(mockTask));
+
+            await mockTaskDataStore.DidNotReceiveWithAnyArgs().AddTask(mockTask);
+        }
 
         [Test]
         public async Task DeleteTask_TaskIsNull_ReturnFalse()

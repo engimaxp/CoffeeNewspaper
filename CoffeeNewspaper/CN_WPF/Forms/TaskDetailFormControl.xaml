@@ -62,7 +62,7 @@
                          Margin="5"
                          Padding="0"
                          Tag="Write your task detail here... first line will be the title"
-                         Text="{Binding Content,Mode=TwoWay}"
+                         Text="{Binding Content,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                          FontSize="{StaticResource FontSizeRegular}" />
             </Border>
 
@@ -152,12 +152,12 @@
             <local:RatingControl Grid.Row="3"
                                  Margin="-3 0 0 5"
                                  DisplayTxt="True"
-                                 DataContext="{x:Static design:RatingDesignModel2.Instance}" />
+                                 DataContext="{Binding UrgencyRating}" />
             <!--Priority-->
             <local:RatingControl Grid.Row="4"
                                  Margin="-3 0 0 5"
                                  DisplayTxt="True"
-                                 DataContext="{x:Static design:RatingDesignModel.Instance}" />
+                                 DataContext="{Binding PriorityRating}" />
 
             <!-- DeadLine -->
             <DockPanel Grid.Row="6"

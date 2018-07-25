@@ -31,7 +31,10 @@ namespace CN_WPF
             IoC.Setup();
             IoC.Kernel.BindInitialViewModel();
             await IoC.Kernel.BindCNDBContext();
+
+            IoC.Kernel.BindSqliteDataStore();
             IoC.Kernel.BindServices();
+
 
             //Bind UI Manager So Could use be used in ViewModel
             IoC.Kernel.Bind<IUIManager>().ToConstant(new UIManager());

@@ -29,9 +29,15 @@ namespace CN_Service
 
         #region Task relevent
 
-        public async Task<bool> EditATask(CNTask task)
+        public Task<bool> EditATask(CNTask task)
         {
-            if (task == null || task.TaskId <= 0) return false;
+            if (task == null || task.TaskId <= 0) return Task.FromResult(false);
+            if (string.IsNullOrEmpty(task.Content) || string.IsNullOrEmpty(task.Content.Trim())) throw new ArgumentException("The Content Field is needed");
+            return EditATaskAsync(task);
+        }
+
+        private async Task<bool> EditATaskAsync(CNTask task)
+        {
             return await taskDataStore.UpdateTask(task);
         }
 
@@ -45,7 +51,13 @@ namespace CN_Service
             return await taskDataStore.GetTask(taskId);
         }
 
-        public async Task<CNTask> CreateATask(CNTask task)
+        public Task<CNTask> CreateATask(CNTask task)
+        {
+            if (string.IsNullOrEmpty(task.Content) || string.IsNullOrEmpty(task.Content.Trim())) throw new ArgumentException("The Content Field is needed");
+            return CreateATaskAsync(task);
+        }
+
+        private async Task<CNTask> CreateATaskAsync(CNTask task)
         {
             return await taskDataStore.AddTask(task);
         }

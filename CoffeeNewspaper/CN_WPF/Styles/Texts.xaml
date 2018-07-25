@@ -223,10 +223,10 @@
                                    x:Name="placeholder"
                                    FontFamily="Microsoft YaHei UI Light"
                                    Padding="{TemplateBinding Padding}"
-                                   VerticalAlignment="Center"
+                                   VerticalAlignment="{TemplateBinding VerticalAlignment}"
                                    HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
                                    Foreground="{StaticResource ForegroundVeryDarkBrush}"
-                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="Wrap"
                                    >
                             <TextBlock.Style>
                                 <Style TargetType="{x:Type TextBlock}">

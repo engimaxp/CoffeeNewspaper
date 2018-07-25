@@ -5,32 +5,31 @@ using CN_Core.Interfaces;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Dialog;
 using CN_Presentation.ViewModel.Form;
-using CN_Presentation.ViewModel.Form.Design;
 
 namespace CN_Presentation.ViewModel.Controls
 {
-    public class TaskListViewModel:BaseViewModel
+    public class TaskListViewModel : BaseViewModel
     {
-        public ObservableCollection<TaskListItemViewModel> Items { get; set; }
-        
-        public ObservableCollection<string> ActivatedSearchTxts { get; set; }
-
-        public ICommand FilterCommand { get; set; }
-
-        public ICommand SortCommand { get; set; }
-
         public TaskListViewModel()
         {
             FilterCommand = new RelayCommand(Filter);
             SortCommand = new RelayCommand(Sort);
         }
 
+        public ObservableCollection<TaskListItemViewModel> Items { get; set; }
+
+        public ObservableCollection<string> ActivatedSearchTxts { get; set; }
+
+        public ICommand FilterCommand { get; set; }
+
+        public ICommand SortCommand { get; set; }
+
         private void Sort()
         {
-            IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel()
+            IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Add a Task",
-                FormContentViewModel = TaskDetailFormDesignModel.Instance,
+                FormContentViewModel = new TaskDetailFormViewModel(),
                 OKButtonText = "Confirm",
                 CancelButtonText = "Cancel"
             });

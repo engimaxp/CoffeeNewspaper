@@ -56,7 +56,7 @@ namespace CN_Presentation.ViewModel.Base
                 updatingFlag.SetPropertyValue(false);
             }
         }
-        protected async Task<T> RunCommandAsync<T>(Expression<Func<bool>> updatingFlag, Func<Task<T>> action)
+        protected async Task<T> RunCommandAsyncGeneric<T>(Expression<Func<bool>> updatingFlag, Func<Task<T>> action)
         {
             // Check if the flag property is true (meaning the function is already running)
             if (updatingFlag.GetPropertyValue())

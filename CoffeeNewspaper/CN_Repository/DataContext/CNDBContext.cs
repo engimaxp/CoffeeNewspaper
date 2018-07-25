@@ -114,7 +114,7 @@ namespace CN_Repository
             modelBuilder.Entity<CNTask>().Property(x => x.CreateTime).HasColumnType("DATETIME");
             modelBuilder.Entity<CNTask>().Property(x => x.DeadLine).HasColumnType("DATETIME");
             modelBuilder.Entity<CNTask>().Property(x => x.EndTime).HasColumnType("DATETIME");
-            modelBuilder.Entity<CNTask>().Property(x => x.EstimatedDuration).HasColumnType("INTEGER");
+            modelBuilder.Entity<CNTask>().Property(x => x.EstimatedDuration).HasColumnType("BIGINT");
             modelBuilder.Entity<CNTask>().Property(x => x.FailReason).HasColumnType("VARCHAR");
             modelBuilder.Entity<CNTask>().Property(x => x.IsDeleted).HasColumnType("BOOLEAN").HasDefaultValue(false);
             modelBuilder.Entity<CNTask>().Property(x => x.IsFail).HasColumnType("BOOLEAN").HasDefaultValue(false);
