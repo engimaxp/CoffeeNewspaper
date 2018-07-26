@@ -95,7 +95,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 addedTask.Content = "testing update";
 
                 //update to database ,make sure what ef return is equal to modified task
-                var updatedResult = await taskDataStore.UpdateTask(addedTask);
+                var updatedResult = await taskDataStore.UpdateTask(addedTask, addedTask);
 
                 Assert.IsTrue(updatedResult);
                 //select from db again ,make sure the task is updated

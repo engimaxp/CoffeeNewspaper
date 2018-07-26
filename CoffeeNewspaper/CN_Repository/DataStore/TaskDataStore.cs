@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
 using CN_Core.Interfaces.Repository;
@@ -59,7 +60,8 @@ namespace CN_Repository
             return await IoC.Task.Run(
                 async () =>
                 {
-                    mDbContext.Tasks.Update(targetTask);
+                    CNTask originTask =await mDbContext.Tasks.FirstOrDefaultAsync(x => x.TaskId == targetTask.TaskId);
+                    mDbContext.Entry(originTask).CurrentValues.SetValues(targetTask);
                     return await mDbContext.SaveChangesAsync() > 0;
                 }, false);
         }
@@ -136,7 +138,7 @@ namespace CN_Repository
         {
             return await IoC.Task.Run(
                 async () =>
-                    await mDbContext.Tasks.ToListAsync()
+                    await mDbContext.Tasks.AsNoTracking().ToListAsync()
             );
         }
 
@@ -144,7 +146,7 @@ namespace CN_Repository
         {
             return await IoC.Task.Run(
                 async () =>
-                    await mDbContext.Tasks
+                    await mDbContext.Tasks.AsNoTracking()
                         .FirstOrDefaultAsync(r => r.TaskId == taskid)
             );
         }

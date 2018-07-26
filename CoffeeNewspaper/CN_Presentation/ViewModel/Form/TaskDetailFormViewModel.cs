@@ -84,8 +84,8 @@ namespace CN_Presentation.ViewModel.Form
                         newTask.TaskId = originTask.TaskId;
                         result = await IoC.Get<ITaskService>().EditATask(newTask);
                     }
-                    //TODO: find a method to decouple
-                    await IoC.Get<TaskListViewModel>().RefreshTaskItems();
+
+                    await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(newTask.TaskId);
                 }
                 catch (Exception exception)
                 {

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using CN_Core;
 using CN_Core.Interfaces;
+using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Dialog;
 using CN_Presentation.ViewModel.Form;
@@ -13,6 +13,12 @@ namespace CN_Presentation.ViewModel.Controls
     /// </summary>
     public class TaskListItemViewModel : BaseViewModel
     {
+        #region Private Properties
+
+        private CNTask _taskInfo;
+
+        #endregion
+
         #region Constructor
 
         public TaskListItemViewModel(CNTask TaskInfo = null)
@@ -20,6 +26,12 @@ namespace CN_Presentation.ViewModel.Controls
             ExpandTaskCommand = new RelayCommand(ExpandTask);
             OpenEditDialogCommand = new RelayCommand(OpenEditDialog);
             this.TaskInfo = TaskInfo;
+            if (TaskInfo != null)
+            {
+                TaskTitle = TaskInfo.Content.GetFirstLineOrWords(50);
+                Urgency = TaskInfo.MapFourQuadrantTaskUrgency();
+                Status = TaskInfo.MapTaskCurrentStatus();
+            }
         }
 
         #endregion
@@ -46,15 +58,33 @@ namespace CN_Presentation.ViewModel.Controls
         /// </summary>
         public bool IsExpanded { get; set; }
 
-        #endregion
-        #region Private Properties
+        /// <summary>
+        ///     Store TaskInfo for future use
+        /// </summary>
+        public CNTask TaskInfo
+        {
+            get => _taskInfo;
+            set
+            {
+                Refreshed = true;
+                _taskInfo = value;
+                if (_taskInfo != null)
+                {
+                    TaskTitle = _taskInfo.Content.GetFirstLineOrWords(50);
+                    Urgency = _taskInfo.MapFourQuadrantTaskUrgency();
+                    Status = _taskInfo.MapTaskCurrentStatus();
+                }
+            }
+        }
 
         /// <summary>
-        /// Store TaskInfo for future use
+        /// Every time refresh list where refresh this boolean to true
+        /// after refresh every false items will be removed
         /// </summary>
-        private CNTask TaskInfo { get; set; }
+        public bool Refreshed { get; set; }
 
         #endregion
+
         #region Commands
 
         /// <summary>
@@ -78,7 +108,7 @@ namespace CN_Presentation.ViewModel.Controls
 
         private void OpenEditDialog()
         {
-            IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel()
+            IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Edit Task",
                 FormContentViewModel = new TaskDetailFormViewModel(TaskInfo),
