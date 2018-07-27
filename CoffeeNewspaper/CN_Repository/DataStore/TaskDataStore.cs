@@ -60,8 +60,7 @@ namespace CN_Repository
             return await IoC.Task.Run(
                 async () =>
                 {
-                    CNTask originTask =await mDbContext.Tasks.FirstOrDefaultAsync(x => x.TaskId == targetTask.TaskId);
-                    mDbContext.Entry(originTask).CurrentValues.SetValues(targetTask);
+                    mDbContext.Tasks.Update(targetTask);
                     return await mDbContext.SaveChangesAsync() > 0;
                 }, false);
         }
@@ -138,7 +137,7 @@ namespace CN_Repository
         {
             return await IoC.Task.Run(
                 async () =>
-                    await mDbContext.Tasks.AsNoTracking().ToListAsync()
+                    await mDbContext.Tasks.ToListAsync()
             );
         }
 
@@ -146,7 +145,7 @@ namespace CN_Repository
         {
             return await IoC.Task.Run(
                 async () =>
-                    await mDbContext.Tasks.AsNoTracking()
+                    await mDbContext.Tasks
                         .FirstOrDefaultAsync(r => r.TaskId == taskid)
             );
         }

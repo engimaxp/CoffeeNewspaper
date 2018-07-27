@@ -13,12 +13,6 @@ namespace CN_Presentation.ViewModel.Controls
     /// </summary>
     public class TaskListItemViewModel : BaseViewModel
     {
-        #region Private Properties
-
-        private CNTask _taskInfo;
-
-        #endregion
-
         #region Constructor
 
         public TaskListItemViewModel(CNTask TaskInfo = null)
@@ -61,21 +55,7 @@ namespace CN_Presentation.ViewModel.Controls
         /// <summary>
         ///     Store TaskInfo for future use
         /// </summary>
-        public CNTask TaskInfo
-        {
-            get => _taskInfo;
-            set
-            {
-                Refreshed = true;
-                _taskInfo = value;
-                if (_taskInfo != null)
-                {
-                    TaskTitle = _taskInfo.Content.GetFirstLineOrWords(50);
-                    Urgency = _taskInfo.MapFourQuadrantTaskUrgency();
-                    Status = _taskInfo.MapTaskCurrentStatus();
-                }
-            }
-        }
+        public CNTask TaskInfo { get; set; }
 
         /// <summary>
         /// Every time refresh list where refresh this boolean to true
@@ -118,5 +98,16 @@ namespace CN_Presentation.ViewModel.Controls
         }
 
         #endregion
+
+        public void Refresh()
+        {
+            Refreshed = true;
+            if (TaskInfo != null)
+            {
+                TaskTitle = TaskInfo.Content.GetFirstLineOrWords(50);
+                Urgency = TaskInfo.MapFourQuadrantTaskUrgency();
+                Status = TaskInfo.MapTaskCurrentStatus();
+            }
+        }
     }
 }

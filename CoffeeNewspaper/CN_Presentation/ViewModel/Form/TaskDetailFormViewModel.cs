@@ -49,7 +49,8 @@ namespace CN_Presentation.ViewModel.Form
                     Enum.GetNames(typeof(CNUrgency)).ToList().IndexOf(originTask.Urgency.ToString()) + 1);
                 PriorityRating = RatingControlType.Priority.GetNewModel(
                     Enum.GetNames(typeof(CNPriority)).ToList().IndexOf(originTask.Priority.ToString()) + 1);
-                TagPanelViewModel.TagItems = new ObservableCollection<TagItemViewModel>(originTask.TaskTaggers.Select(x => x.Tag)
+                TagPanelViewModel.TagItems = new ObservableCollection<TagItemViewModel>(originTask.TaskTaggers
+                    .Select(x => x.Tag)
                     .Select(y => new TagItemViewModel(TagPanelViewModel)
                     {
                         TagId = y.TagId,
@@ -76,14 +77,9 @@ namespace CN_Presentation.ViewModel.Form
                 {
                     var newTask = GenerateCNTask();
                     if (originTask == null)
-                    {
                         result = (await IoC.Get<ITaskService>().CreateATask(newTask))?.TaskId > 0;
-                    }
                     else
-                    {
-                        newTask.TaskId = originTask.TaskId;
                         result = await IoC.Get<ITaskService>().EditATask(newTask);
-                    }
 
                     await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(newTask.TaskId);
                 }
@@ -107,13 +103,12 @@ namespace CN_Presentation.ViewModel.Form
 
         private CNTask GenerateCNTask()
         {
-            var result = new CNTask
-            {
-                Content = Content,
-                CreateTime = DateTime.Now,
-                DeadLine = DeadLineEntry.SelectedDateTime,
-                EstimatedDuration = EstimatedDurationEntry.SelectedTimeDuration
-            };
+            var result = new CNTask {CreateTime = DateTime.Now};
+            if (originTask != null && originTask.TaskId > 0){ result = originTask;}
+
+            result.Content = Content;
+            result.DeadLine = DeadLineEntry.SelectedDateTime;
+            result.EstimatedDuration = EstimatedDurationEntry.SelectedTimeDuration;
 
             Enum.TryParse(Enum.GetNames(typeof(CNUrgency))[UrgencyRating.SelectedValue - 1], out CNUrgency urgency);
             result.Urgency = urgency;
@@ -121,8 +116,26 @@ namespace CN_Presentation.ViewModel.Form
             Enum.TryParse(Enum.GetNames(typeof(CNPriority))[PriorityRating.SelectedValue - 1], out CNPriority priority);
             result.Priority = priority;
 
+            //Delete Tags
+            if (result.TaskTaggers.Count>0)
+            {
+                var remainOldTags =  TagPanelViewModel.TagItems.Where(x => !string.IsNullOrEmpty(x.TagId)).Select(y => y.TagId);
+                foreach (var cnTaskTagger in result.TaskTaggers.Where(x => !remainOldTags.Contains(x.TagId)).ToList())
+                {
+                    result.TaskTaggers.Remove(cnTaskTagger);
+                }
+            }
+            //Add Tags
             foreach (var tagItemViewModel in TagPanelViewModel.TagItems)
-                result.TaskTaggers.Add(string.IsNullOrEmpty(tagItemViewModel.TagId)
+            {
+                //Jump over old tags
+                if (result.TaskTaggers.FirstOrDefault(x =>
+                        x.TagId == tagItemViewModel.TagId && !string.IsNullOrEmpty(tagItemViewModel.TagId)) != null)
+                {
+                    continue;
+                }
+
+                var curTaskTagger = string.IsNullOrEmpty(tagItemViewModel.TagId)
                     ? new CNTaskTagger
                     {
                         Task = result,
@@ -135,7 +148,9 @@ namespace CN_Presentation.ViewModel.Form
                     {
                         Task = result,
                         TagId = tagItemViewModel.TagId
-                    });
+                    };
+                result.TaskTaggers.Add(curTaskTagger);
+            }
 
             return result;
         }
@@ -233,9 +248,9 @@ namespace CN_Presentation.ViewModel.Form
         /// </summary>
         public string UsedTimePercent { get; set; }
 
-        public RatingViewModel UrgencyRating { get; set; } 
+        public RatingViewModel UrgencyRating { get; set; }
 
-        public RatingViewModel PriorityRating { get; set; } 
+        public RatingViewModel PriorityRating { get; set; }
 
         #endregion
     }

@@ -33,41 +33,53 @@ namespace CN_Presentation.ViewModel.Controls
             var tasks = await IoC.Get<ITaskService>().GetAllTasks();
 
             if (Items.Count == 0)
+            {
                 foreach (var cnTask in tasks)
                     Items.Add(new TaskListItemViewModel(cnTask));
+            }
             else
             {
                 foreach (var cnTask in tasks)
                 {
                     var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == cnTask.TaskId);
                     if (index >= 0)
+                    {
                         Items[index].TaskInfo = cnTask;
+                        Items[index].Refresh();
+                    }
                     else
+                    {
                         Items.Add(new TaskListItemViewModel(cnTask));
+                    }
                 }
-                foreach (var tobeDeletedItem in Items.Where(x=>!x.Refreshed))
-                {
-                    Items.Remove(tobeDeletedItem);
-                }
+
+                foreach (var tobeDeletedItem in Items.Where(x => !x.Refreshed)) Items.Remove(tobeDeletedItem);
             }
-                
         }
+
         public async Task RefreshSpecificTaskItem(int taskId)
         {
             var task = await IoC.Get<ITaskService>().GetTaskById(taskId);
-            
+
             if (Items.Count == 0)
+            {
                 Items.Add(new TaskListItemViewModel(task));
+            }
             else
             {
-                    var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == taskId);
-                    if (index >= 0)
-                        Items[index].TaskInfo = task;
-                    else
-                        Items.Add(new TaskListItemViewModel(task));
+                var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == taskId);
+                if (index >= 0)
+                {
+                    Items[index].TaskInfo = task;
+                    Items[index].Refresh();
+                }
+                else
+                {
+                    Items.Add(new TaskListItemViewModel(task));
+                }
             }
-
         }
+
         private void Sort()
         {
             IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel

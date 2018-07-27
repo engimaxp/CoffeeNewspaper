@@ -95,7 +95,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 addedTask.Content = "testing update";
 
                 //update to database ,make sure what ef return is equal to modified task
-                var updatedResult = await taskDataStore.UpdateTask(addedTask, addedTask);
+                var updatedResult = await taskDataStore.UpdateTask(addedTask);
 
                 Assert.IsTrue(updatedResult);
                 //select from db again ,make sure the task is updated
@@ -128,7 +128,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                await taskDataStore.AddTask(assesTask);
 
                 //update to database ,make sure what ef return is equal to modified task
                 var nowtime = DateTime.Now;
@@ -146,7 +146,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                await taskDataStore.AddTask(assesTask);
 
                 //update to database ,make sure what ef return is equal to modified task
                 var nowtime = DateTime.Now;
@@ -163,10 +163,9 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                await taskDataStore.AddTask(assesTask);
 
                 //update to database ,make sure what ef return is equal to modified task
-                var nowtime = DateTime.Now;
                 await taskDataStore.UpdateEndTaskTime(assesTask, null);
 
                 var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
@@ -182,7 +181,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var assesTask = DomainTestHelper.GetARandomTask();
                 var nowtime = DateTime.Now;
                 assesTask.EndTime = nowtime;
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                await taskDataStore.AddTask(assesTask);
 
                 //update to database ,make sure what ef return is equal to modified task
                 await taskDataStore.UpdateEndTaskTime(assesTask, nowtime);
@@ -200,7 +199,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                await taskDataStore.AddTask(assesTask);
 
                 //update to database ,make sure what ef return is equal to modified task
                 var nowtime = DateTime.Now;
@@ -218,7 +217,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                await taskDataStore.AddTask(assesTask);
 
                 //update to database ,make sure what ef return is equal to modified task
                 var nowtime = DateTime.Now;
@@ -235,10 +234,9 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                await taskDataStore.AddTask(assesTask);
 
                 //update to database ,make sure what ef return is equal to modified task
-                var nowtime = DateTime.Now;
                 await taskDataStore.UpdateStartTaskTime(assesTask, null);
 
                 var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
@@ -255,7 +253,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var assesTask = DomainTestHelper.GetARandomTask();
                 var nowtime = DateTime.Now;
                 assesTask.StartTime = nowtime;
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                await taskDataStore.AddTask(assesTask);
 
                 //update to database ,make sure what ef return is equal to modified task
                 await taskDataStore.UpdateStartTaskTime(assesTask, nowtime);
@@ -272,7 +270,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             {
                 var taskDataStore = new TaskDataStore(dbcontext);
                 var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                await taskDataStore.AddTask(assesTask);
 
                 //update to database ,make sure what ef return is equal to modified task
                 var nowtime = DateTime.Now;
@@ -419,7 +417,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var assesTask2 = DomainTestHelper.GetARandomTask();
                 var connector = new CNTaskConnector() {PreTask = assesTask2, SufTask = assesTask1};
                 assesTask1.PreTaskConnectors = new List<CNTaskConnector>(){ connector };
-                var addedTask = await taskDataStore.AddTask(assesTask1);
+                await taskDataStore.AddTask(assesTask1);
                 //update to database ,make sure what ef return is equal to modified task
                 
                 await taskDataStore.RemoveTaskConnector(connector);
