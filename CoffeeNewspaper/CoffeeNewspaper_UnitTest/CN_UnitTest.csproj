@@ -204,6 +204,7 @@
     <Compile Include="ServiceTest\MemoServiceTest.cs" />
     <Compile Include="ServiceTest\ServiceSetupTearDown.cs" />
     <Compile Include="ServiceTest\TaskServiceTest.cs" />
+    <Compile Include="UtilitiesTest\DateTimeHeplerTest.cs" />
     <Compile Include="UtilitiesTest\TimeSlicesStatisticsTest.cs" />
   </ItemGroup>
   <ItemGroup>

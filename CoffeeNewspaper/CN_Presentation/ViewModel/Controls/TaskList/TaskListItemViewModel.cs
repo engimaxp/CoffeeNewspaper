@@ -1,4 +1,7 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Windows.Input;
 using CN_Core;
 using CN_Core.Interfaces;
 using CN_Presentation.Utilities;
@@ -25,6 +28,30 @@ namespace CN_Presentation.ViewModel.Controls
                 TaskTitle = TaskInfo.Content.GetFirstLineOrWords(50);
                 Urgency = TaskInfo.MapFourQuadrantTaskUrgency();
                 Status = TaskInfo.MapTaskCurrentStatus();
+            }
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public void Refresh()
+        {
+            Refreshed = true;
+            if (TaskInfo != null)
+            {
+                TaskTitle = TaskInfo.Content.GetFirstLineOrWords(50);
+                Urgency = TaskInfo.MapFourQuadrantTaskUrgency();
+                Status = TaskInfo.MapTaskCurrentStatus();
+                RefreshExpanderView();
+            }
+        }
+
+        public void RefreshExpanderView()
+        {
+            if (IsExpanded)
+            {
+                LoadDataToDetailExpanderView();
             }
         }
 
@@ -58,10 +85,15 @@ namespace CN_Presentation.ViewModel.Controls
         public CNTask TaskInfo { get; set; }
 
         /// <summary>
-        /// Every time refresh list where refresh this boolean to true
-        /// after refresh every false items will be removed
+        ///     Every time refresh list where refresh this boolean to true
+        ///     after refresh every false items will be removed
         /// </summary>
         public bool Refreshed { get; set; }
+
+        /// <summary>
+        ///     Expand Detail View Model
+        /// </summary>
+        public TaskExpandDetailViewModel ExpandDetailViewModel { get; set; } = new TaskExpandDetailViewModel();
 
         #endregion
 
@@ -83,9 +115,12 @@ namespace CN_Presentation.ViewModel.Controls
 
         private void ExpandTask()
         {
+            if (!IsExpanded)
+            {
+                LoadDataToDetailExpanderView();
+            }
             IsExpanded ^= true;
         }
-
         private void OpenEditDialog()
         {
             IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
@@ -97,17 +132,11 @@ namespace CN_Presentation.ViewModel.Controls
             });
         }
 
-        #endregion
-
-        public void Refresh()
+        private void LoadDataToDetailExpanderView()
         {
-            Refreshed = true;
-            if (TaskInfo != null)
-            {
-                TaskTitle = TaskInfo.Content.GetFirstLineOrWords(50);
-                Urgency = TaskInfo.MapFourQuadrantTaskUrgency();
-                Status = TaskInfo.MapTaskCurrentStatus();
-            }
+            ExpandDetailViewModel = new TaskExpandDetailViewModel(TaskInfo);
         }
+
+        #endregion
     }
 }

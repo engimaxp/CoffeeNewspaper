@@ -1,4 +1,5 @@
-﻿using CN_Presentation.Input.Design;
+﻿using CN_Core;
+using CN_Presentation.Input.Design;
 
 namespace CN_Presentation.ViewModel.Form.Design
 {
@@ -9,7 +10,7 @@ namespace CN_Presentation.ViewModel.Form.Design
         /// <summary>
         ///     Default Constructor
         /// </summary>
-        public TaskDetailFormDesignModel()
+        public TaskDetailFormDesignModel():base(null)
         {
             Status = TaskCurrentStatus.PENDING;
             IsFail = true;

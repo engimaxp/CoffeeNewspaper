@@ -6,9 +6,10 @@
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="300"
+             d:DataContext="{x:Static design:TaskTreeDesignModel.Instance}">
 
-    <Border Margin="0 0 0 5">
+    <Border>
         <Grid Background="{StaticResource WordLightBlueBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -25,10 +26,12 @@
                 <!-- Child Tasks Tree View -->
                 <StackPanel ZIndex="2" Grid.Column="0" Orientation="Horizontal">
                     <Button Style="{StaticResource IconGrowButton}"
-                            Content="{StaticResource FontAwesomeAddIcon}" />
+                            Content="{StaticResource FontAwesomeAddIcon}" 
+                            Command="{Binding AddNextTaskCommand}"/>
                     <Button Style="{StaticResource IconGrowButton}"
                             FontFamily="{StaticResource CNCustomerFont}"
-                            Content="{StaticResource FontAwesomeAddChildNodeIcon}" />
+                            Content="{StaticResource FontAwesomeAddChildNodeIcon}" 
+                            Command="{Binding AddChildTaskCommand}"/>
                 </StackPanel>
 
                 <!-- Title -->
@@ -49,13 +52,14 @@
                 </StackPanel>
             </Grid>
             <!-- Child Tasks Tree View -->
-            <Border 
+            <Border BorderBrush="{StaticResource WordVeryLightBlueBrush}"
+                    BorderThickness="1 0 1 1"
                     Grid.Row="1">
 
                 <TreeView
-                    DataContext="{x:Static design:TaskTreeDesignModel.Instance}"
-                    local:TreeViewDisableDoubleClickAttackedProperties.Value="True"
-                    x:Name="FolderView" ItemsSource="{Binding Items}"
+                    Visibility="{Binding TreeHasItems,Converter={local:BooleanToVisiblityGoneConverter}}"
+                    x:Name="FolderView" 
+                    ItemsSource="{Binding Items}"
                     Style="{StaticResource VSTreeView}">
 
                     <TreeView.ItemContainerStyle>
@@ -66,23 +70,33 @@
 
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding ChildItems}">
-                            <Border
-                                Padding="4">
+                            <Border Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='d7e8ff'}"
+                                >
                                 <Grid local:MonitorGridHoverProperty.Value="True">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Width="4"
+                                            HorizontalAlignment="Left"
+                                            Background="{Binding Urgency, Converter={local:TaskUrgencyToBackGroundColorConverter}}" />
+
                                     <!-- Actual Title -->
-                                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2"
-                                               VerticalAlignment="Center"
-                                               Text="{Binding Title}"
-                                               TextWrapping="Wrap" />
+                                    <Border Grid.Column="1" Grid.ColumnSpan="2"
+                                            Padding="4">
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Text="{Binding Title}"
+                                            TextWrapping="Wrap" />
+                                    </Border>
 
                                     <!-- Child Relation Action -->
                                     <StackPanel
                                         Visibility="Hidden"
-                                        x:Name="BtnPanel" Grid.Column="1" Orientation="Horizontal">
+                                        x:Name="BtnPanel" Grid.Column="2" Orientation="Horizontal">
                                         <Button
                                             Style="{StaticResource TreeViewIconGrowButton}"
                                             Content="{StaticResource FontAwesomeChevronCircleUpIcon}" />
@@ -97,6 +111,10 @@
                                             Content="{StaticResource FontAwesomeChevronCircleDownIcon}" />
                                     </StackPanel>
                                 </Grid>
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}"></MouseBinding>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding SelectCommand}"></MouseBinding>
+                                </Border.InputBindings>
                             </Border>
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>

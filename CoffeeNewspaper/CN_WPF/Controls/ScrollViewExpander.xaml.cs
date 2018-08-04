@@ -15,24 +15,45 @@ namespace CN_WPF
         public ScrollViewExpander()
         {
             InitializeComponent();
-        } 
+        }
+
         #endregion
 
         #region Property Changed Method
+
+        private static object ViewModelPropertyChanged(DependencyObject d, object basevalue)
+        {
+            if (!(d is ScrollViewExpander expander)) return basevalue;
+            Task.Run(async () =>
+            {
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    if (expander.ToggleExpand && basevalue is BaseViewModel viewModel)
+                    {
+                        var control= viewModel.ViewModelToControl();
+                        expander.ExpanderContent.Content = control;
+                        await expander.ExpandScrollView.ScrollViewExpand(false, 0);
+                    }
+                });
+            });
+            return basevalue;
+        }
+
 
         private static object ToggleExpandPropertyChanged(DependencyObject d, object basevalue)
         {
             var expander = d as ScrollViewExpander;
             if (expander?.ContentViewModel == null) return basevalue;
-            
+
 
             Task.Run(async () =>
             {
                 await Application.Current.Dispatcher.InvokeAsync(async () =>
                 {
-                    if ((bool)basevalue)
+                    if ((bool) basevalue)
                     {
-                        expander.ExpanderContent.Content = expander.ContentViewModel.ViewModelToControl();
+                        var control = expander.ContentViewModel.ViewModelToControl();
+                        expander.ExpanderContent.Content = control;
                         await expander.ExpandScrollView.ScrollViewExpand(false, 0);
                     }
 
@@ -47,6 +68,7 @@ namespace CN_WPF
         }
 
         #endregion
+
         #region Denpendency Property
 
         /// <summary>
@@ -63,8 +85,7 @@ namespace CN_WPF
         /// </summary>
         public static readonly DependencyProperty ContentViewModelProperty =
             DependencyProperty.Register(nameof(ContentViewModel), typeof(BaseViewModel), typeof(ScrollViewExpander),
-                new UIPropertyMetadata());
-
+                new UIPropertyMetadata(default(BaseViewModel),null,ViewModelPropertyChanged));
 
         /// <summary>
         ///     The current expander's showing/hiding the content

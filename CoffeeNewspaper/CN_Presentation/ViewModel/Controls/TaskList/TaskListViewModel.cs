@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -30,8 +31,8 @@ namespace CN_Presentation.ViewModel.Controls
 
         public async Task RefreshTaskItems()
         {
-            var tasks = await IoC.Get<ITaskService>().GetAllTasks();
-
+            IEnumerable<CNTask> tasks = (await IoC.Get<ITaskService>().GetAllTasks()).Where(x => !x.HasParentTask());
+            
             if (Items.Count == 0)
             {
                 foreach (var cnTask in tasks)
@@ -60,22 +61,40 @@ namespace CN_Presentation.ViewModel.Controls
         public async Task RefreshSpecificTaskItem(int taskId)
         {
             var task = await IoC.Get<ITaskService>().GetTaskById(taskId);
-
-            if (Items.Count == 0)
+            //Parent Task
+            if (task.HasParentTask())
             {
-                Items.Add(new TaskListItemViewModel(task));
-            }
-            else
-            {
+                //find root node
+                var parentTask = task.ParentTask;
+                while (parentTask.ParentTask != null)
+                {
+                    parentTask = parentTask.ParentTask;
+                }
+                //refresh its expander
                 var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == taskId);
                 if (index >= 0)
                 {
-                    Items[index].TaskInfo = task;
-                    Items[index].Refresh();
+                    Items[index].RefreshExpanderView();
+                }
+            }
+            else
+            {
+                if (Items.Count == 0)
+                {
+                    Items.Add(new TaskListItemViewModel(task));
                 }
                 else
                 {
-                    Items.Add(new TaskListItemViewModel(task));
+                    var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == taskId);
+                    if (index >= 0)
+                    {
+                        Items[index].TaskInfo = task;
+                        Items[index].Refresh();
+                    }
+                    else
+                    {
+                        Items.Add(new TaskListItemViewModel(task));
+                    }
                 }
             }
         }
@@ -85,7 +104,7 @@ namespace CN_Presentation.ViewModel.Controls
             IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Add a Task",
-                FormContentViewModel = new TaskDetailFormViewModel(),
+                FormContentViewModel = new TaskDetailFormViewModel(null),
                 OKButtonText = "Confirm",
                 CancelButtonText = "Cancel"
             });

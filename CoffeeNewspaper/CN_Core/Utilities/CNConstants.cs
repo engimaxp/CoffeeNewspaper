@@ -5,7 +5,15 @@
     /// </summary>
     public static class CNConstants
     {
+        /// <summary>
+        /// Date format yyyy-MM-dd
+        /// </summary>
         public const string DIRECTORY_DATEFORMAT = "yyyy-MM-dd";
+
+        /// <summary>
+        /// Date time format yyyy-MM-dd HH-mm-ss
+        /// </summary>
+        public const string DIRECTORY_DATETIMEFORMAT = "yyyy-MM-dd HH:mm:ss";
 
         /// <summary>
         /// value -1 / means unknow

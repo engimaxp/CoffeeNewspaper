@@ -24,10 +24,14 @@ namespace CN_Presentation.ViewModel.Form
 
         #region Constructor
 
-        public TaskDetailFormViewModel(CNTask originTask = null)
+        /// <summary>
+        /// Constructor to create a task detail form view model
+        /// </summary>
+        /// <param name="originTask">Origin Task ,null if it's add a task</param>
+        /// <param name="parentTask">Parent Task ,if it's adding a task and parentTask is not null then its refresh a Detail View</param>
+        public TaskDetailFormViewModel(CNTask originTask,CNTask parentTask = null)
         {
             this.originTask = originTask;
-
             var dateTimeViewModel = new DateTimeEntryViewModel();
             dateTimeViewModel.SetParentInterface(this);
             DeadLineEntry = dateTimeViewModel;
@@ -35,9 +39,10 @@ namespace CN_Presentation.ViewModel.Form
             var timeRangeViewModel = new TimeRangeEntryViewModel();
             timeRangeViewModel.SetParentInterface(this);
             EstimatedDurationEntry = timeRangeViewModel;
-
+            
             if (originTask != null)
             {
+                ParentTaskTitle = originTask.ParentTask == null ? "Empty" : originTask.ParentTask.Content.GetFirstLineOrWords(50);
                 Status = originTask.MapTaskCurrentStatus();
                 IsFail = originTask.IsFail;
                 FailReason = originTask.FailReason;
@@ -59,10 +64,14 @@ namespace CN_Presentation.ViewModel.Form
             }
             else
             {
+                ParentTaskTitle = parentTask == null ? "Empty" : parentTask.Content.GetFirstLineOrWords(50);
+                if (parentTask != null) ParentTaskId = parentTask.TaskId;
                 UrgencyRating = RatingControlType.Urgency.GetNewModel(3);
                 PriorityRating = RatingControlType.Priority.GetNewModel(3);
             }
         }
+
+        private int? ParentTaskId { get; set; }
 
         #endregion
 
@@ -103,7 +112,11 @@ namespace CN_Presentation.ViewModel.Form
 
         private CNTask GenerateCNTask()
         {
-            var result = new CNTask {CreateTime = DateTime.Now};
+            var result = new CNTask
+            {
+                CreateTime = DateTime.Now,ParentTaskID = ParentTaskId
+
+            };
             if (originTask != null && originTask.TaskId > 0){ result = originTask;}
 
             result.Content = Content;
@@ -183,7 +196,7 @@ namespace CN_Presentation.ViewModel.Form
         #endregion
 
         #region Public Properties
-
+        
         /// <summary>
         ///     Display Current Task Status
         /// </summary>
@@ -252,6 +265,10 @@ namespace CN_Presentation.ViewModel.Form
 
         public RatingViewModel PriorityRating { get; set; }
 
+        /// <summary>
+        /// this task's parent task's title
+        /// </summary>
+        public string ParentTaskTitle { get; set; }
         #endregion
     }
 }

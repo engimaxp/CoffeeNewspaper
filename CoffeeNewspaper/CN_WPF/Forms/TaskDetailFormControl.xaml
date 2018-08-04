@@ -68,8 +68,12 @@
 
             <!-- Parent Task -->
             <TextBlock Grid.Row="2"
-                       Margin="0 5">
-                Parent Task:Task PlaceHolder
+                       Margin="0 5"
+                       TextTrimming="CharacterEllipsis">
+                <Run>Parent Task :</Run>
+                <Run FontFamily="Microsoft YaHei"
+                     FontWeight="Bold"
+                    Text="{Binding ParentTaskTitle,FallbackValue='Empty'}"></Run>
             </TextBlock>
 
             <!-- Child Tasks -->

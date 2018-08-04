@@ -310,6 +310,7 @@
     <Compile Include="Utilities\VisualTreeExtensionClass.cs" />
     <Compile Include="Utilities\ApplicationPageHelpers.cs" />
     <Compile Include="Utilities\WindowResizer.cs" />
+    <Compile Include="ValueConverters\BooleanToBorderBrushConverter.cs" />
     <Compile Include="ValueConverters\FormControlValueConverter.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />

@@ -83,7 +83,8 @@
                     <StackPanel VerticalAlignment="Center">
                         <!-- Name-->
                         <TextBlock Text="{Binding TaskTitle}"
-                                   MaxHeight="50"
+                                   FontFamily="Microsoft YaHei"
+                                   MaxHeight="76"
                                    Padding="0 0 0 2"
                                    Foreground="{StaticResource ForegroundVeryDarkBrush}"
                                    TextTrimming="CharacterEllipsis"
@@ -126,7 +127,7 @@
         <local:ScrollViewExpander
             Grid.Row="1"
             ToggleExpand="{Binding IsExpanded}"
-            ContentViewModel="{x:Static design:TaskExpandDetailDesignModel.Instance}"
+            ContentViewModel="{Binding ExpandDetailViewModel}"
             ></local:ScrollViewExpander>
     </Grid>
 
