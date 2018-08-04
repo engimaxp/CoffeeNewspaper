@@ -103,13 +103,15 @@
                             <StackPanel Orientation="Vertical">
                                 <TextBlock TextTrimming="CharacterEllipsis">
                                             <Run Text="Worked for " />
-                                            <Run Text="3 Hours"
+                                            <Run Text="{Binding WorkedDuration,FallbackValue=''}"
                                                  FontWeight="Bold"
                                                  Foreground="{StaticResource WordOrangeBrush}" />
                                 </TextBlock>
-                                <TextBlock TextTrimming="CharacterEllipsis">
+                                <TextBlock 
+                                    Visibility="{Binding DisplayEstimatedTimeLeft,Converter={local:BooleanToVisiblityGoneConverter}}"
+                                    TextTrimming="CharacterEllipsis">
                                             <Run Text="Estimated " />
-                                            <Run Text="2 hours "
+                                            <Run Text="{Binding EstimatedTimeLeft,FallbackValue=''}"
                                                  FontWeight="Bold"
                                                  Foreground="{StaticResource WordGreenBrush}" />
                                             <Run Text="Left" />
@@ -117,6 +119,7 @@
                             </StackPanel>
                         </Grid>
                         <Grid Grid.Column="2"
+                              Visibility="{Binding DisplayDeadLineTimeLeft,Converter={local:BooleanToVisiblityGoneConverter}}"
                                       ToolTip="Time Left for DeadLine">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -129,7 +132,7 @@
                                                FontFamily="{StaticResource FontAwesomeSolid}"
                                                Text="{StaticResource FontAwesomeStopWatchIcon}" />
                             <TextBlock Grid.Column="1"
-                                               Text="2 Days"
+                                               Text="{Binding DeadLineTimeLeft,FallbackValue=''}"
                                                FontWeight="Bold"
                                                Padding="10 0 0 0"
                                                FontSize="{StaticResource FontSizeRegular}"

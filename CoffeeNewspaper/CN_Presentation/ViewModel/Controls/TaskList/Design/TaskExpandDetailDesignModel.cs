@@ -27,6 +27,9 @@ namespace CN_Presentation.ViewModel.Controls.Design
             CreatedTime = DateTime.Now.AddDays(-1);
             UrgencyRating = RatingDesignModel2.Instance;
             PriorityRating = RatingDesignModel.Instance;
+            WorkedDuration = "3H";
+            EstimatedTimeLeft = "2H";
+            DeadLineTimeLeft = "2D";
         }
         #endregion
     }

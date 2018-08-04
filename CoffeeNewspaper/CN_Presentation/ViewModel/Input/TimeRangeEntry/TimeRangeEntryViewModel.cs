@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using CN_Core;
 using CN_Core.Utilities;
 using CN_Presentation.Input;
 using CN_Presentation.Input.Design;
@@ -90,7 +91,7 @@ namespace CN_Presentation.ViewModel.Input
                     return;
 
                 _selectedTimeDuration = value;
-                InputText = new TimeSpan(_selectedTimeDuration * 10000000).GetTimeSpanLeftInfo(false);
+                InputText = new TimeSpan(_selectedTimeDuration * CNConstants.OneSecondToTickUnit).GetTimeSpanLeftInfo(false);
                 SuggestButtons = null;
                 Editing = true;
                 ParentInterface?.NotifyUpdateTimeRange(_selectedTimeDuration);
@@ -207,7 +208,7 @@ namespace CN_Presentation.ViewModel.Input
             {
                 var btn = list.First();
                 SelectedTimeDuration = btn.TimeRangeSecondsCount;
-                InputText = new TimeSpan(btn.TimeRangeSecondsCount * 10000000).GetTimeSpanLeftInfo(false);
+                InputText = new TimeSpan(btn.TimeRangeSecondsCount * CNConstants.OneSecondToTickUnit).GetTimeSpanLeftInfo(false);
                 SuggestButtons = null;
             }
             else

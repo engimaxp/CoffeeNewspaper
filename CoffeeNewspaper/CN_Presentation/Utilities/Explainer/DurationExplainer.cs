@@ -1,4 +1,5 @@
 ﻿using System;
+using CN_Core;
 using CN_Core.Utilities;
 
 namespace CN_Presentation.Utilities
@@ -19,7 +20,7 @@ namespace CN_Presentation.Utilities
 
         protected override string GetTitle(string time)
         {
-            return new TimeSpan(Convert.ToInt64(time) * 10000000).GetTimeSpanLeftInfo(false);
+            return new TimeSpan(Convert.ToInt64(time) * CNConstants.OneSecondToTickUnit).GetTimeSpanLeftInfo(false);
         }
     }
 }

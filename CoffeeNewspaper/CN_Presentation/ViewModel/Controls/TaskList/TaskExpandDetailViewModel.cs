@@ -72,6 +72,27 @@ namespace CN_Presentation.ViewModel.Controls
         /// </summary>
         public RatingViewModel UrgencyRating { get; set; }
 
+        /// <summary>
+        ///     Worked Duration display on the detail
+        /// </summary>
+        public string WorkedDuration { get; set; }
+
+        /// <summary>
+        ///     Estimated Time Left display on the detail
+        ///     Meaning:Estimated Time - Worked Duration
+        /// </summary>
+        public string EstimatedTimeLeft { get; set; }
+
+        /// <summary>
+        ///     Time Remain Until DeadLine display on the detail
+        ///     Meaning:DeadLine - now
+        /// </summary>
+        public string DeadLineTimeLeft { get; set; }
+
+        public bool DisplayEstimatedTimeLeft => !string.IsNullOrEmpty(EstimatedTimeLeft);
+
+        public bool DisplayDeadLineTimeLeft => !string.IsNullOrEmpty(DeadLineTimeLeft);
+
         #endregion
 
         #region Constructor
@@ -83,15 +104,18 @@ namespace CN_Presentation.ViewModel.Controls
         public TaskExpandDetailViewModel(CNTask TaskInfo)
         {
             if (TaskInfo == null) return;
+
             //Child Tasks
             var childTaskModel = new TaskTreeViewModel(TaskInfo);
             childTaskModel.Items = MapToViewModel(TaskInfo.ChildTasks, childTaskModel);
             ChildTasksModel = childTaskModel;
+
             //Content
             TaskDetailContent = TaskInfo.Content;
 
             //Created Time
             CreatedTime = TaskInfo.CreateTime;
+
             //Rating Controls
             UrgencyRating = RatingControlType.Urgency.GetNewModel(
                 Enum.GetNames(typeof(CNUrgency)).ToList().IndexOf(TaskInfo.Urgency.ToString()) + 1,
@@ -121,6 +145,26 @@ namespace CN_Presentation.ViewModel.Controls
                     }
                 })
             );
+
+            //Worked Duration
+            var totalWorkedDays = TaskInfo.UsedTimeSlices.AsEnumerable().GetTotalDays();
+            var totalWorkedHours = TaskInfo.UsedTimeSlices.AsEnumerable().GetTotalHours();
+            WorkedDuration = totalWorkedDays <= 1
+                ? $"{Convert.ToInt32(totalWorkedHours)} Hours"
+                : $"{Convert.ToInt32(totalWorkedDays)} Day";
+
+            //Estimated Time Left
+            var workedDuration = Convert.ToInt64(totalWorkedHours * 3600);
+            if (TaskInfo.EstimatedDuration > 0 && workedDuration < TaskInfo.EstimatedDuration)
+                EstimatedTimeLeft =
+                    new TimeSpan((TaskInfo.EstimatedDuration - workedDuration) * CNConstants.OneSecondToTickUnit)
+                        .GetTimeSpanLeftInfo(false);
+
+            //DeadLine Left
+            if (TaskInfo.DeadLine.HasValue)
+                DeadLineTimeLeft = DateTime.Now < TaskInfo.DeadLine.Value
+                    ? (TaskInfo.DeadLine.Value - DateTime.Now).GetTimeSpanLeftInfo(false)
+                    : "Over Due";
         }
 
         #endregion

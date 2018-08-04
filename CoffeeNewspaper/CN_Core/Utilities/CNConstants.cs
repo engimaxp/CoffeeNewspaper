@@ -27,5 +27,10 @@
         /// Pengding reason for task
         /// </summary>
         public const string PENDINGREASON_PreTaskNotComplete = "preTask not finished";
+
+        /// <summary>
+        /// Mutiplier for convert from one second to ticks
+        /// </summary>
+        public const int OneSecondToTickUnit = 10000000;
     }
 }
