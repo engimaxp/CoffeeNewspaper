@@ -25,6 +25,8 @@ namespace CN_Presentation.ViewModel.Controls.Design
             TaskDetailContent =
                 "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree.";
             CreatedTime = DateTime.Now.AddDays(-1);
+            UrgencyRating = RatingDesignModel2.Instance;
+            PriorityRating = RatingDesignModel.Instance;
         }
         #endregion
     }

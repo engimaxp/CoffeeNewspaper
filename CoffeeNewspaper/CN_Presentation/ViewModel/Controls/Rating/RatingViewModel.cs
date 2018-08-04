@@ -6,6 +6,7 @@ namespace CN_Presentation.ViewModel.Controls
 {
     public class RatingViewModel : BaseViewModel
     {
+
         private int _selectedValue;
         private string _selectedValueTxt;
 
@@ -56,6 +57,7 @@ namespace CN_Presentation.ViewModel.Controls
                 _selectedValue = value;
                 OnPropertyChanged(nameof(SelectedValue));
                 OnPropertyChanged(nameof(SelectedValueTxt));
+                RateChangedEvent?.OnRateChangedEvent(_selectedValue);
             }
         }
 
@@ -70,7 +72,8 @@ namespace CN_Presentation.ViewModel.Controls
         }
 
         public Type EnumType { get; set; }
-        
+
+        public RateChangedSubsriber RateChangedEvent { get; set; }
         #endregion
 
         public void SetChildrensSolidStatus(int currentHoveredCurrentPosition)
