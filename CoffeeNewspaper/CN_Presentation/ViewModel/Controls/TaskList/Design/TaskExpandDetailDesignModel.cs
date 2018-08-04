@@ -30,6 +30,8 @@ namespace CN_Presentation.ViewModel.Controls.Design
             WorkedDuration = "3H";
             EstimatedTimeLeft = "2H";
             DeadLineTimeLeft = "2D";
+            FailReason = "This one fails becauce of blablablablabla";
+            PendingReason = "This one pending becauce of blablablablabla";
         }
         #endregion
     }

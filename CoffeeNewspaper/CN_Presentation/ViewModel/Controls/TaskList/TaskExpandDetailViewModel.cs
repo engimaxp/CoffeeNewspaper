@@ -89,9 +89,35 @@ namespace CN_Presentation.ViewModel.Controls
         /// </summary>
         public string DeadLineTimeLeft { get; set; }
 
+        /// <summary>
+        /// Whether Display the block of EstimatedTimeLeft
+        /// </summary>
         public bool DisplayEstimatedTimeLeft => !string.IsNullOrEmpty(EstimatedTimeLeft);
 
+        /// <summary>
+        /// Whether Display the block of DeadLineTimeLeft
+        /// </summary>
         public bool DisplayDeadLineTimeLeft => !string.IsNullOrEmpty(DeadLineTimeLeft);
+
+        /// <summary>
+        /// Fail Reason of this Task
+        /// </summary>
+        public string FailReason { get; set; }
+
+        /// <summary>
+        /// Whether Display the block of FailReason
+        /// </summary>
+        public bool DisplayFailReason => !string.IsNullOrEmpty(FailReason);
+
+        /// <summary>
+        /// Pending Reason of this Task
+        /// </summary>
+        public string PendingReason { get; set; }
+
+        /// <summary>
+        /// Whether Display the block of PendingReason
+        /// </summary>
+        public bool DisplayPendingReason => !string.IsNullOrEmpty(PendingReason);
 
         #endregion
 
@@ -165,6 +191,16 @@ namespace CN_Presentation.ViewModel.Controls
                 DeadLineTimeLeft = DateTime.Now < TaskInfo.DeadLine.Value
                     ? (TaskInfo.DeadLine.Value - DateTime.Now).GetTimeSpanLeftInfo(false)
                     : "Over Due";
+
+            //Fail Reason
+            if (TaskInfo.IsFail)
+                FailReason = string.IsNullOrEmpty(TaskInfo.FailReason) ? "No description" : TaskInfo.FailReason;
+
+            //Pending Reason
+            if (TaskInfo.Status == CNTaskStatus.PENDING)
+                PendingReason = string.IsNullOrEmpty(TaskInfo.PendingReason)
+                    ? "No description"
+                    : TaskInfo.PendingReason;
         }
 
         #endregion

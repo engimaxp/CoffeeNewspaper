@@ -28,6 +28,54 @@
             <Border Padding="10 10 14 10" Background="Transparent">
                 <!-- Real Expanded Content -->
                 <StackPanel>
+
+                    <!-- Fail Reason -->
+                    <Grid Margin="0"
+                          Visibility="{Binding DisplayFailReason,Converter={local:BooleanToVisiblityGoneConverter}}"
+                          ToolTip="Fail Reason">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeLarge}"
+                                   Foreground="{StaticResource WordRedBrush}"
+                                   FontFamily="{StaticResource FontAwesomeRegular}"
+                                   Text="{StaticResource FontAwesomeTimesCircleIcon}" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding FailReason,FallbackValue=''}"
+                                   Padding="10 0 0 0"
+                                   FontSize="{StaticResource FontSizeRegular}"
+                                   Foreground="{StaticResource WordRedBrush}"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap"/>
+                    </Grid>
+
+                    <!--Pending Reason-->
+                    <Grid Margin="0 5"
+                          Visibility="{Binding DisplayPendingReason,Converter={local:BooleanToVisiblityGoneConverter}}"
+                          ToolTip="Pending Reason">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Padding="3 0"
+                                   VerticalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeLarge}"
+                                   Foreground="{StaticResource WordOrangeBrush}"
+                                   FontFamily="{StaticResource FontAwesomeSolid}"
+                                   Text="{StaticResource FontAwesomeHalfHourGlassIcon}" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding PendingReason,FallbackValue=''}"
+                                   Padding="10 0 0 0"
+                                   FontSize="{StaticResource FontSizeRegular}"
+                                   Foreground="{StaticResource WordOrangeBrush}"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap" />
+                    </Grid>
+                        
                     <Border Background="{StaticResource ForegroundVeryLightBrush}">
                         <TextBlock 
                             Padding="5 0 5 10"
@@ -145,27 +193,6 @@
                     <!-- Tag Button -->
                     <local:TagPanelControl DataContext="{x:Static design:TagPanelDesignModel.Instance}" />
 
-                    <!-- Fail Reason -->
-                    <Grid Margin="0 10 0 0"
-                                  ToolTip="Fail Reason">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                           VerticalAlignment="Center"
-                                           FontSize="{StaticResource FontSizeLarge}"
-                                           Foreground="{StaticResource WordRedBrush}"
-                                           FontFamily="{StaticResource FontAwesomeRegular}"
-                                           Text="{StaticResource FontAwesomeTimesCircleIcon}" />
-                        <TextBlock Grid.Column="1"
-                                           Text="This one fails becauce of blablablablabla"
-                                           Padding="10 0 0 0"
-                                           FontSize="{StaticResource FontSizeRegular}"
-                                           Foreground="{StaticResource WordRedBrush}"
-                                           VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis" />
-                    </Grid>
                 </StackPanel>
             </Border>
 
