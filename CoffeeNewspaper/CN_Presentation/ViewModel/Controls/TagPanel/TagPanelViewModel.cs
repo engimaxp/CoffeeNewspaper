@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using CN_Presentation.Input.Design;
 using CN_Presentation.ViewModel.Base;
@@ -6,39 +7,62 @@ using CN_Presentation.ViewModel.Input;
 
 namespace CN_Presentation.ViewModel.Controls
 {
-    public class TagPanelViewModel : BaseViewModel,IAddNewTag
+    public class TagPanelViewModel : BaseViewModel, IAddNewTag
     {
-        public ObservableCollection<TagItemViewModel> TagItems { get; set; } = new ObservableCollection<TagItemViewModel>();
-        public void NotifyAddNewTag(string newTag)
-        {
-            if(!string.IsNullOrEmpty(newTag))
-                TagItems.Add(new TagItemViewModel(this){TagTitle = newTag});
-        }
-        /// <summary>
-        ///     Tagadding control view model
-        /// </summary>
-        public TagAddingControlViewModel AddTagEntry { get; set; }
-
         public TagPanelViewModel()
         {
             var tagAddingControlViewModel = TagAddingControlDesignModel.Instance;
             tagAddingControlViewModel.SetParentAddNewTagModel(this);
             AddTagEntry = tagAddingControlViewModel;
         }
+
+        public ObservableCollection<TagItemViewModel> TagItems { get; set; } =
+            new ObservableCollection<TagItemViewModel>();
+
+        /// <summary>
+        ///     Tagadding control view model
+        /// </summary>
+        public TagAddingControlViewModel AddTagEntry { get; set; }
+
+        public void NotifyAddNewTag(string newTag)
+        {
+            if (!string.IsNullOrEmpty(newTag))
+                TagItems.Add(new TagItemViewModel(this) {TagTitle = newTag});
+        }
     }
 
     public class TagItemViewModel : BaseViewModel
     {
-        public string TagTitle { get; set; }
-
-        public string TagId { get; set; }
-
-        private TagPanelViewModel Parent { get; set; }
+        #region Constructor
 
         public TagItemViewModel(TagPanelViewModel parent)
         {
             Parent = parent;
             DeleteCommand = new RelayCommand(DeleteFromParent);
+            JumpCommand = new RelayCommand(JumpToTagDetail);
+        }
+
+        #endregion
+
+        #region Private Properties
+
+        private TagPanelViewModel Parent { get; }
+
+        #endregion
+
+        #region Public Properties
+
+        public string TagTitle { get; set; }
+
+        public string TagId { get; set; }
+
+        #endregion
+
+        #region Private Methods
+
+        private void JumpToTagDetail()
+        {
+            Debug.WriteLine($"Jump to {TagId} {TagTitle}");
         }
 
         private void DeleteFromParent()
@@ -46,9 +70,14 @@ namespace CN_Presentation.ViewModel.Controls
             Parent.TagItems.Remove(this);
         }
 
+        #endregion
+
+        #region Commands
+
         public ICommand DeleteCommand { get; set; }
 
+        public ICommand JumpCommand { get; set; }
 
-
+        #endregion
     }
 }

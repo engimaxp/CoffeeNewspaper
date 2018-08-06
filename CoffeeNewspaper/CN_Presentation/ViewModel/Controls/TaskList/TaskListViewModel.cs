@@ -66,12 +66,12 @@ namespace CN_Presentation.ViewModel.Controls
             {
                 //find root node
                 var parentTask = task.ParentTask;
-                while (parentTask.ParentTask != null)
+                while (parentTask.HasParentTask())
                 {
                     parentTask = parentTask.ParentTask;
                 }
                 //refresh its expander
-                var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == taskId);
+                var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == parentTask.TaskId);
                 if (index >= 0)
                 {
                     Items[index].RefreshExpanderView();

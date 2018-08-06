@@ -191,7 +191,7 @@
                     </Grid>
 
                     <!-- Tag Button -->
-                    <local:TagPanelControl DataContext="{x:Static design:TagPanelDesignModel.Instance}" />
+                    <local:TagPanelControl DataContext="{Binding TagPanelViewModel}" />
 
                 </StackPanel>
             </Border>

@@ -32,6 +32,7 @@ namespace CN_Presentation.ViewModel.Controls.Design
             DeadLineTimeLeft = "2D";
             FailReason = "This one fails becauce of blablablablabla";
             PendingReason = "This one pending becauce of blablablablabla";
+            TagPanelViewModel = TagPanelDesignModel.Instance;
         }
         #endregion
     }

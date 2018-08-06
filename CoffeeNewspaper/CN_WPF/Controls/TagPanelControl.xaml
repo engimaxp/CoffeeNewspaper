@@ -19,7 +19,8 @@
             <DataTemplate>
                 <Button ToolTip="{Binding TagTitle}"
                         Style="{StaticResource TagButton}"
-                        Content="{Binding TagTitle}" />
+                        Content="{Binding TagTitle}"
+                        Command="{Binding JumpCommand}"/>
             </DataTemplate>
         </ItemsControl.ItemTemplate>
     </ItemsControl>

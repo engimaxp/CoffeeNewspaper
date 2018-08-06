@@ -11,54 +11,11 @@ using CN_Presentation.ViewModel.Form;
 namespace CN_Presentation.ViewModel
 {
     /// <summary>
-    /// Task Tree Model
+    ///     Task Tree Model
     /// </summary>
-    public class TaskTreeViewModel:BaseViewModel, ITreeNodeSubscribe
+    public class TaskTreeViewModel : BaseViewModel, ITreeNodeSubscribe
     {
-        private ObservableCollection<TaskTreeItemViewModel> _items = new ObservableCollection<TaskTreeItemViewModel>();
-
-        /// <summary>
-        /// Tree Root Items
-        /// </summary>
-        public ObservableCollection<TaskTreeItemViewModel> Items
-        {
-            get => _items;
-            set
-            {
-                _items = value; 
-                _items.ToList().ForEach(x=>NodeItems.AddRange(DFS(x)));
-            }
-        }
-
-        private IEnumerable<TaskTreeItemViewModel> DFS(TaskTreeItemViewModel a)
-        {
-            yield return a;
-            foreach (var b in a.ChildItems)
-            {
-                foreach (var c in DFS(b))
-                {
-                    yield return c;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Tree Node Plain Items
-        /// </summary>
-        public List<TaskTreeItemViewModel> NodeItems { get; set; } = new List<TaskTreeItemViewModel>();
-
-        public void SelectTargetNode(TaskTreeItemViewModel node)
-        {
-            foreach (var taskTreeItemViewModel in NodeItems.Where(x=>x!=node && x.IsSelected))
-            {
-                taskTreeItemViewModel.IsSelected = false;
-            }
-        }
-
-        public bool TreeHasItems => Items.Count > 0;
-
-        public ICommand AddNextTaskCommand { get; set; }
-        public ICommand AddChildTaskCommand { get; set; }
+        #region Constructors
 
         public TaskTreeViewModel(CNTask taskinfo)
         {
@@ -69,7 +26,69 @@ namespace CN_Presentation.ViewModel
             _taskinfo = taskinfo;
         }
 
-        private CNTask _taskinfo { get; set; }
+        #endregion
+
+        #region Public Methods
+
+        #region Interface Implement
+
+        public void SelectTargetNode(TaskTreeItemViewModel node)
+        {
+            foreach (var taskTreeItemViewModel in NodeItems.Where(x => x != node && x.IsSelected))
+                taskTreeItemViewModel.IsSelected = false;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        ///     Tree Root Items
+        /// </summary>
+        public ObservableCollection<TaskTreeItemViewModel> Items
+        {
+            get => _items;
+            set
+            {
+                _items = value;
+                _items.ToList().ForEach(x => NodeItems.AddRange(DFS(x)));
+            }
+        }
+
+        public bool TreeHasItems => Items.Count > 0;
+
+        #endregion
+
+        #region Commands
+
+        public ICommand AddNextTaskCommand { get; set; }
+        public ICommand AddChildTaskCommand { get; set; }
+
+        #endregion
+
+        #region Private Properties
+
+        private ObservableCollection<TaskTreeItemViewModel> _items = new ObservableCollection<TaskTreeItemViewModel>();
+        private CNTask _taskinfo { get; }
+
+        /// <summary>
+        ///     Tree Node Plain Items
+        /// </summary>
+        private List<TaskTreeItemViewModel> NodeItems { get; } = new List<TaskTreeItemViewModel>();
+
+        #endregion
+
+        #region Private Methods
+
+        private IEnumerable<TaskTreeItemViewModel> DFS(TaskTreeItemViewModel a)
+        {
+            yield return a;
+            foreach (var b in a.ChildItems)
+            foreach (var c in DFS(b))
+                yield return c;
+        }
 
         private CNTask GetSelectedItemParentTask()
         {
@@ -82,14 +101,15 @@ namespace CN_Presentation.ViewModel
 
         private CNTask GetSelectedItemTask()
         {
-            return (NodeItems.FirstOrDefault(x => x.IsSelected)?.TaskInfo)??_taskinfo;
+            return NodeItems.FirstOrDefault(x => x.IsSelected)?.TaskInfo ?? _taskinfo;
         }
+
         private void AddChildTask()
         {
             IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Add Task",
-                FormContentViewModel = new TaskDetailFormViewModel(null,GetSelectedItemTask()),
+                FormContentViewModel = new TaskDetailFormViewModel(null, GetSelectedItemTask()),
                 OKButtonText = "Confirm",
                 CancelButtonText = "Cancel"
             });
@@ -105,5 +125,7 @@ namespace CN_Presentation.ViewModel
                 CancelButtonText = "Cancel"
             });
         }
+
+        #endregion
     }
 }

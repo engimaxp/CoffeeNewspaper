@@ -33,6 +33,36 @@ namespace CN_Presentation.ViewModel.Controls
             return result;
         }
 
+        private static RateChangedSubsriber PriorityRateChangedEvent(CNTask taskInfo)
+        {
+            return new RateChangedSubsriber(async x =>
+            {
+                Enum.TryParse(Enum.GetNames(typeof(CNPriority))[x - 1], out CNPriority priority);
+                if (taskInfo.Priority != priority)
+                {
+                    taskInfo.Priority = priority;
+                    await IoC.Get<ITaskService>().EditATask(taskInfo);
+
+                    await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(taskInfo.TaskId);
+                }
+            });
+        }
+
+        private static RateChangedSubsriber UrgencyRateChangedEvent(CNTask taskInfo)
+        {
+            return new RateChangedSubsriber(async x =>
+            {
+                Enum.TryParse(Enum.GetNames(typeof(CNUrgency))[x - 1], out CNUrgency urgency);
+                if (taskInfo.Urgency != urgency)
+                {
+                    taskInfo.Urgency = urgency;
+                    await IoC.Get<ITaskService>().EditATask(taskInfo);
+
+                    await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(taskInfo.TaskId);
+                }
+            });
+        }
+
         #endregion
 
         #region Public Properties
@@ -119,6 +149,10 @@ namespace CN_Presentation.ViewModel.Controls
         /// </summary>
         public bool DisplayPendingReason => !string.IsNullOrEmpty(PendingReason);
 
+        /// <summary>
+        ///     Display Tag Panel ViewModels
+        /// </summary>
+        public TagPanelViewModel TagPanelViewModel { get; set; } = new TagPanelViewModel();
         #endregion
 
         #region Constructor
@@ -127,80 +161,69 @@ namespace CN_Presentation.ViewModel.Controls
         {
         }
 
-        public TaskExpandDetailViewModel(CNTask TaskInfo)
+        public TaskExpandDetailViewModel(CNTask taskInfo)
         {
-            if (TaskInfo == null) return;
+            if (taskInfo == null) return;
 
             //Child Tasks
-            var childTaskModel = new TaskTreeViewModel(TaskInfo);
-            childTaskModel.Items = MapToViewModel(TaskInfo.ChildTasks, childTaskModel);
+            var childTaskModel = new TaskTreeViewModel(taskInfo);
+            childTaskModel.Items = MapToViewModel(taskInfo.ChildTasks, childTaskModel);
             ChildTasksModel = childTaskModel;
 
             //Content
-            TaskDetailContent = TaskInfo.Content;
+            TaskDetailContent = taskInfo.Content;
 
             //Created Time
-            CreatedTime = TaskInfo.CreateTime;
+            CreatedTime = taskInfo.CreateTime;
 
             //Rating Controls
             UrgencyRating = RatingControlType.Urgency.GetNewModel(
-                Enum.GetNames(typeof(CNUrgency)).ToList().IndexOf(TaskInfo.Urgency.ToString()) + 1,
-                new RateChangedSubsriber(async x =>
-                {
-                    Enum.TryParse(Enum.GetNames(typeof(CNUrgency))[x - 1], out CNUrgency urgency);
-                    if (TaskInfo.Urgency != urgency)
-                    {
-                        TaskInfo.Urgency = urgency;
-                        await IoC.Get<ITaskService>().EditATask(TaskInfo);
-
-                        await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
-                    }
-                })
+                Enum.GetNames(typeof(CNUrgency)).ToList().IndexOf(taskInfo.Urgency.ToString()) + 1,
+                UrgencyRateChangedEvent(taskInfo)
             );
             PriorityRating = RatingControlType.Priority.GetNewModel(
-                Enum.GetNames(typeof(CNPriority)).ToList().IndexOf(TaskInfo.Priority.ToString()) + 1,
-                new RateChangedSubsriber(async x =>
-                {
-                    Enum.TryParse(Enum.GetNames(typeof(CNPriority))[x - 1], out CNPriority priority);
-                    if (TaskInfo.Priority != priority)
-                    {
-                        TaskInfo.Priority = priority;
-                        await IoC.Get<ITaskService>().EditATask(TaskInfo);
-
-                        await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
-                    }
-                })
+                Enum.GetNames(typeof(CNPriority)).ToList().IndexOf(taskInfo.Priority.ToString()) + 1,
+                PriorityRateChangedEvent(taskInfo)
             );
 
             //Worked Duration
-            var totalWorkedDays = TaskInfo.UsedTimeSlices.AsEnumerable().GetTotalDays();
-            var totalWorkedHours = TaskInfo.UsedTimeSlices.AsEnumerable().GetTotalHours();
+            var totalWorkedDays = taskInfo.UsedTimeSlices.AsEnumerable().GetTotalDays();
+            var totalWorkedHours = taskInfo.UsedTimeSlices.AsEnumerable().GetTotalHours();
             WorkedDuration = totalWorkedDays <= 1
                 ? $"{Convert.ToInt32(totalWorkedHours)} Hours"
                 : $"{Convert.ToInt32(totalWorkedDays)} Day";
 
             //Estimated Time Left
             var workedDuration = Convert.ToInt64(totalWorkedHours * 3600);
-            if (TaskInfo.EstimatedDuration > 0 && workedDuration < TaskInfo.EstimatedDuration)
+            if (taskInfo.EstimatedDuration > 0 && workedDuration < taskInfo.EstimatedDuration)
                 EstimatedTimeLeft =
-                    new TimeSpan((TaskInfo.EstimatedDuration - workedDuration) * CNConstants.OneSecondToTickUnit)
+                    new TimeSpan((taskInfo.EstimatedDuration - workedDuration) * CNConstants.OneSecondToTickUnit)
                         .GetTimeSpanLeftInfo(false);
 
             //DeadLine Left
-            if (TaskInfo.DeadLine.HasValue)
-                DeadLineTimeLeft = DateTime.Now < TaskInfo.DeadLine.Value
-                    ? (TaskInfo.DeadLine.Value - DateTime.Now).GetTimeSpanLeftInfo(false)
+            if (taskInfo.DeadLine.HasValue)
+                DeadLineTimeLeft = DateTime.Now < taskInfo.DeadLine.Value
+                    ? (taskInfo.DeadLine.Value - DateTime.Now).GetTimeSpanLeftInfo(false)
                     : "Over Due";
 
             //Fail Reason
-            if (TaskInfo.IsFail)
-                FailReason = string.IsNullOrEmpty(TaskInfo.FailReason) ? "No description" : TaskInfo.FailReason;
+            if (taskInfo.IsFail)
+                FailReason = string.IsNullOrEmpty(taskInfo.FailReason) ? "No description" : taskInfo.FailReason;
 
             //Pending Reason
-            if (TaskInfo.Status == CNTaskStatus.PENDING)
-                PendingReason = string.IsNullOrEmpty(TaskInfo.PendingReason)
+            if (taskInfo.Status == CNTaskStatus.PENDING)
+                PendingReason = string.IsNullOrEmpty(taskInfo.PendingReason)
                     ? "No description"
-                    : TaskInfo.PendingReason;
+                    : taskInfo.PendingReason;
+
+            //Tag Panels
+            TagPanelViewModel.TagItems = new ObservableCollection<TagItemViewModel>(taskInfo.TaskTaggers
+                .Select(x => x.Tag)
+                .Select(y => new TagItemViewModel(TagPanelViewModel)
+                {
+                    TagId = y.TagId,
+                    TagTitle = y.Title
+                }));
         }
 
         #endregion
