@@ -47,19 +47,32 @@ namespace CN_WPF
             // If we don't have a control, return
             if (sender is TextBoxBase control && (bool)value)
             {
-                // Focus this control
-                control.Focus();
+                void OnControlOnLoaded(object s, RoutedEventArgs se)
+                {
+                    control.Loaded -= OnControlOnLoaded;
+                    // Focus this control
+                    control.Focus();
 
-                // Select all text
-                control.SelectAll();
+                    // Select all text
+                    control.SelectAll();
+                }
+
+                control.Loaded += OnControlOnLoaded;
             }
             if (sender is PasswordBox password && (bool)value)
             {
-                // Focus this control
-                password.Focus();
 
-                // Select all text
-                password.SelectAll();
+                void OnControlOnLoaded(object s, RoutedEventArgs se)
+                {
+                    password.Loaded -= OnControlOnLoaded;
+                    // Focus this control
+                    password.Focus();
+
+                    // Select all text
+                    password.SelectAll();
+                }
+
+                password.Loaded += OnControlOnLoaded;
             }
         }
     }

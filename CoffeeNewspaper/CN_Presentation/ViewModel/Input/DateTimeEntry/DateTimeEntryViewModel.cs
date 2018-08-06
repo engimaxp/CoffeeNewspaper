@@ -90,7 +90,6 @@ namespace CN_Presentation.Input
                 ParentInterface?.NotifyUpdateDateTime(_selectedDateTime);
 
                 SuggestButtons = null;
-                Editing = true;
             }
         }
 

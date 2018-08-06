@@ -93,7 +93,6 @@ namespace CN_Presentation.ViewModel.Input
                 _selectedTimeDuration = value;
                 InputText = new TimeSpan(_selectedTimeDuration * CNConstants.OneSecondToTickUnit).GetTimeSpanLeftInfo(false);
                 SuggestButtons = null;
-                Editing = true;
                 ParentInterface?.NotifyUpdateTimeRange(_selectedTimeDuration);
             }
         }
@@ -136,7 +135,7 @@ namespace CN_Presentation.ViewModel.Input
         /// true if the textbox need to be in edit state
         /// have focus and selectall
         /// </summary>
-        public bool Editing { get; set; }
+        public bool Editing { get; set; } = false;
 
         /// <summary>
         /// true if the RecgonizeText Fail

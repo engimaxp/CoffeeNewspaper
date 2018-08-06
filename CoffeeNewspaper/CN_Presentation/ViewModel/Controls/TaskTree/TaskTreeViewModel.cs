@@ -86,8 +86,12 @@ namespace CN_Presentation.ViewModel
         {
             yield return a;
             foreach (var b in a.ChildItems)
-            foreach (var c in DFS(b))
-                yield return c;
+            {
+                foreach (var c in DFS(b))
+                {
+                    yield return c;
+                }
+            }
         }
 
         private CNTask GetSelectedItemParentTask()

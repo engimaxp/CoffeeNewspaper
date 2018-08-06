@@ -69,6 +69,7 @@ namespace CN_Presentation.ViewModel.Form
                 UrgencyRating = RatingControlType.Urgency.GetNewModel(3);
                 PriorityRating = RatingControlType.Priority.GetNewModel(3);
             }
+            IsEditing = true;
         }
 
         private int? ParentTaskId { get; set; }
@@ -227,6 +228,11 @@ namespace CN_Presentation.ViewModel.Form
         ///     Task mainly content
         /// </summary>
         public string Content { get; set; }
+
+        /// <summary>
+        /// Autofocus target TextBox
+        /// </summary>
+        public bool IsEditing { get; set; } = false;
 
         /// <summary>
         ///     Title is the first line of the tasks content
