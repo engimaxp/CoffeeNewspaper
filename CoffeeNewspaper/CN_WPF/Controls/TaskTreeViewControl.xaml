@@ -26,12 +26,12 @@
                 <!-- Child Tasks Tree View -->
                 <StackPanel ZIndex="2" Grid.Column="0" Orientation="Horizontal">
                     <Button Style="{StaticResource IconGrowButton}"
-                            Content="{StaticResource FontAwesomeAddIcon}" 
-                            Command="{Binding AddNextTaskCommand}"/>
+                            Content="{StaticResource FontAwesomeAddIcon}"
+                            Command="{Binding AddNextTaskCommand}" />
                     <Button Style="{StaticResource IconGrowButton}"
                             FontFamily="{StaticResource CNCustomerFont}"
-                            Content="{StaticResource FontAwesomeAddChildNodeIcon}" 
-                            Command="{Binding AddChildTaskCommand}"/>
+                            Content="{StaticResource FontAwesomeAddChildNodeIcon}"
+                            Command="{Binding AddChildTaskCommand}" />
                 </StackPanel>
 
                 <!-- Title -->
@@ -47,18 +47,19 @@
                 <!-- Child Tasks Tree View -->
                 <StackPanel ZIndex="2" Grid.Column="2" Orientation="Horizontal">
                     <Button Style="{StaticResource IconGrowButton}"
-                            Content="{StaticResource FontAwesomeTrashAltIcon}" 
-                            FontFamily="{StaticResource FontAwesomeRegular}"/>
+                            Content="{StaticResource FontAwesomeTrashAltIcon}"
+                            Command="{Binding DeleteChildTaskCommand}"
+                            FontFamily="{StaticResource FontAwesomeRegular}" />
                 </StackPanel>
             </Grid>
             <!-- Child Tasks Tree View -->
             <Border BorderBrush="{StaticResource WordVeryLightBlueBrush}"
-                    BorderThickness="1 0 1 1"
+                    BorderThickness="0 0 1 1"
                     Grid.Row="1">
 
                 <TreeView
                     Visibility="{Binding TreeHasItems,Converter={local:BooleanToVisiblityGoneConverter}}"
-                    x:Name="FolderView" 
+                    x:Name="FolderView"
                     ItemsSource="{Binding Items}"
                     Style="{StaticResource VSTreeView}">
 
@@ -70,8 +71,8 @@
 
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding ChildItems}">
-                            <Border Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='d7e8ff'}"
-                                >
+                            <Border
+                                Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='d7e8ff'}">
                                 <Grid local:MonitorGridHoverProperty.Value="True">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -86,34 +87,75 @@
 
                                     <!-- Actual Title -->
                                     <Border Grid.Column="1" Grid.ColumnSpan="2"
-                                            Padding="4">
+                                            Padding="4"
+                                            Visibility="{Binding IsCompleted,Converter={local:BooleanToVisiblityGoneConverter},ConverterParameter=True}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Visibility="{Binding CurrentStatus,Converter={local:TaskCurrentStatusToVisiblityGoneConverter}}"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{Binding CurrentStatus,Converter={local:TaskStatusToForeGroundConverter}}"
+                                                       Padding="0 0 5 0"
+                                                       FontFamily="{StaticResource FontAwesomeSolid}"
+                                                       Text="{Binding CurrentStatus,Converter={local:TaskStatusToFontCodeConverter}}" />
+                                            <TextBlock Grid.Column="1"
+                                                       VerticalAlignment="Center"
+                                                       TextWrapping="Wrap"
+                                                       Text="{Binding Title}" />
+                                        </Grid>
+                                    </Border>
+                                    <!-- Actual Title (Delete)-->
+                                    <Border Grid.Column="1" Grid.ColumnSpan="2"
+                                            Padding="4"
+                                            Visibility="{Binding IsCompleted,Converter={local:BooleanToVisiblityGoneConverter}}">
                                         <TextBlock
                                             VerticalAlignment="Center"
-                                            Text="{Binding Title}"
-                                            TextWrapping="Wrap" />
+                                            TextWrapping="Wrap"
+                                            TextDecorations="StrikeThrough"
+                                            Foreground="{StaticResource ForegroundDarkBrush}">
+                                            <Run />
+                                            <Run Text="{Binding Title}" />
+                                        </TextBlock>
                                     </Border>
-
                                     <!-- Child Relation Action -->
                                     <StackPanel
                                         Visibility="Hidden"
                                         x:Name="BtnPanel" Grid.Column="2" Orientation="Horizontal">
                                         <Button
+                                            Margin="0 0 4 0"
+                                            Command="{Binding UpCommand}"
+                                            Visibility="{Binding DisplayUpOperator,Converter={local:BooleanToVisiblityGoneConverter}}"
                                             Style="{StaticResource TreeViewIconGrowButton}"
                                             Content="{StaticResource FontAwesomeChevronCircleUpIcon}" />
                                         <Button
+                                            Margin="0 0 4 0"
+                                            Command="{Binding LeftCommand}"
+                                            Visibility="{Binding DisplayLeftOperator,Converter={local:BooleanToVisiblityGoneConverter}}"
+
                                             Style="{StaticResource TreeViewIconGrowButton}"
                                             Content="{StaticResource FontAwesomeChevronCircleLeftIcon}" />
                                         <Button
+                                            Margin="0 0 4 0"
+                                            Command="{Binding RightCommand}"
+                                            Visibility="{Binding DisplayRightOperator,Converter={local:BooleanToVisiblityGoneConverter}}"
+
                                             Style="{StaticResource TreeViewIconGrowButton}"
                                             Content="{StaticResource FontAwesomeChevronCircleRightIcon}" />
                                         <Button
+                                            Margin="0 0 4 0"
+                                            Command="{Binding DownCommand}"
+                                            Visibility="{Binding DisplayDownOperator,Converter={local:BooleanToVisiblityGoneConverter}}"
+
                                             Style="{StaticResource TreeViewIconGrowButton}"
                                             Content="{StaticResource FontAwesomeChevronCircleDownIcon}" />
                                     </StackPanel>
                                 </Grid>
                                 <Border.InputBindings>
-                                    <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}"></MouseBinding>
-                                    <MouseBinding MouseAction="LeftClick" Command="{Binding SelectCommand}"></MouseBinding>
+                                    <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}" />
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding SelectCommand}" />
                                 </Border.InputBindings>
                             </Border>
                         </HierarchicalDataTemplate>

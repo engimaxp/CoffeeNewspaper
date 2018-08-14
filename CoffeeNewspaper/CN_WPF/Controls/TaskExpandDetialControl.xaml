@@ -27,7 +27,9 @@
             </Border>
             <Border Padding="10 10 14 10" Background="Transparent">
                 <!-- Real Expanded Content -->
-                <StackPanel>
+                <StackPanel Orientation="Vertical"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top">
 
                     <!-- Fail Reason -->
                     <Grid Margin="0"

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CN_Core;
 using CN_Core.Interfaces.Repository;
 using CN_Core.Interfaces.Service;
+using CN_Core.Utilities;
 
 namespace CN_Service
 {
@@ -59,6 +60,8 @@ namespace CN_Service
 
         private async Task<CNTask> CreateATaskAsync(CNTask task)
         {
+            var parentTaskId = task.ParentTask?.TaskId ?? task.ParentTaskID;
+            task.Sort = await taskDataStore.GetMaxSort(parentTaskId) + 1;
             return await taskDataStore.AddTask(task);
         }
 
@@ -67,15 +70,19 @@ namespace CN_Service
             var targetTask = await taskDataStore.GetTask(taskId);
             if (targetTask == null) return false;
             if (targetTask.IsDeleted) return true;
-            if (targetTask.ChildTasks.Count > 0 && !force) throw new TaskHasChildTasksException();
-            if (targetTask.SufTaskConnectors.Count > 0 && !force) throw new TaskHasSufTasksException();
+            if (targetTask.ChildTasks.FilterDeletedAndOrderBySortTasks().Any() && !force) throw new TaskHasChildTasksException();
+            if (targetTask.SufTaskConnectors.Select(y=>y.SufTask).FilterDeletedAndOrderBySortTasks().Any() && !force) throw new TaskHasSufTasksException();
             //Delete the task itself
             targetTask.IsDeleted = true;
             //Delete the tasks children and suffix task
-            targetTask.ChildTasks.ToList()
-                .ForEach(x => Task.Run(async () => await DeleteTask(x.TaskId, force)));
-            targetTask.SufTaskConnectors.Select(y => y.SufTask).ToList()
-                .ForEach(x => Task.Run(async () => await DeleteTask(x.TaskId, force)));
+            foreach (var task in targetTask.ChildTasks.FilterDeletedAndOrderBySortTasks())
+            {
+                await DeleteTask(task.TaskId, force);
+            }
+            foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask).FilterDeletedAndOrderBySortTasks())
+            {
+                await DeleteTask(task.TaskId, force);
+            }
             return await taskDataStore.UpdateTask(targetTask);
         }
 
@@ -88,10 +95,14 @@ namespace CN_Service
             //Recover the task itself
             targetTask.IsDeleted = false;
             //Recover the tasks children and suffix task
-            targetTask.ChildTasks.ToList()
-                .ForEach(x => Task.Run(async () => await RecoverATask(x.TaskId)));
-            targetTask.SufTaskConnectors.Select(y => y.SufTask).ToList()
-                .ForEach(x => Task.Run(async () => await RecoverATask(x.TaskId)));
+            foreach (var task in targetTask.ChildTasks)
+            {
+                await RecoverATask(task.TaskId);
+            }
+            foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask))
+            {
+                await RecoverATask(task.TaskId);
+            }
             return await taskDataStore.UpdateTask(targetTask);
         }
 
@@ -151,15 +162,18 @@ namespace CN_Service
             var targetTask = await taskDataStore.GetTask(taskId);
             if (targetTask == null) return false;
             if (!targetTask.IsDeleted) return false;
-            if (targetTask.ChildTasks.Count > 0 && !force) throw new TaskHasChildTasksException();
+            if (targetTask.ChildTasks.Any() && !force) throw new TaskHasChildTasksException();
             if (targetTask.SufTaskConnectors.Count > 0 && !force) throw new TaskHasSufTasksException();
 
             //Remove the tasks children and suffix task
-            targetTask.ChildTasks.ToList()
-                .ForEach(x => Task.Run(async () => await RemoveATask(x.TaskId, force)));
-            targetTask.SufTaskConnectors.Select(y => y.SufTask).ToList()
-                .ForEach(x => Task.Run(async () => await RemoveATask(x.TaskId, force)));
-
+            foreach (var task in targetTask.ChildTasks)
+            {
+                await RemoveATask(task.TaskId, force);
+            }
+            foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask))
+            {
+                await RemoveATask(task.TaskId, force);
+            }
             return await taskDataStore.RemoveTask(targetTask);
         }
 
@@ -199,9 +213,26 @@ namespace CN_Service
             return true;
         }
 
-        public async Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask)
+        public async Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask,int pos)
         {
             if (targetTask == null) return false;
+            //directly add to the rear of tasklist
+            if (pos < 0)
+            {
+                targetTask.Sort = await taskDataStore.GetMaxSort(parentTask?.TaskId) + 1;
+            }
+            //add to a pos
+            else
+            {
+                var originOrder = parentTask == null ? (await GetAllTasks()).ToList() : parentTask.ChildTasks.FilterDeletedAndOrderBySortTasks().ToList();
+                if (pos >= originOrder.Count) pos = originOrder.Count - 1;
+                targetTask.Sort = originOrder[pos].Sort+1;
+                for (int i = pos+1, currentSort = targetTask.Sort; i < originOrder.Count; i++)
+                {
+                    originOrder[i].Sort = ++currentSort;
+                    await EditATaskAsync(originOrder[i]);
+                }
+            }
             targetTask.ParentTask = parentTask;
             return await taskDataStore.UpdateTask(targetTask);
         }
@@ -259,10 +290,15 @@ namespace CN_Service
         {
             var targetTask = await taskDataStore.GetTask(taskId);
             if (targetTask == null) return false;
-            targetTask.ChildTasks?.ToList()
-                .ForEach(x => Task.Run(async () => await DeleteAllTimeSlicesOfTask(x.TaskId)));
-            targetTask.SufTaskConnectors.Select(y => y.SufTask).ToList()
-                .ForEach(x => Task.Run(async () => await DeleteAllTimeSlicesOfTask(x.TaskId)));
+
+            foreach (var task in targetTask.ChildTasks??new List<CNTask>())
+            {
+                await DeleteAllTimeSlicesOfTask(task.TaskId);
+            }
+            foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask))
+            {
+                await DeleteAllTimeSlicesOfTask(task.TaskId);
+            }
             targetTask.StartTime = null;
             targetTask.EndTime = null;
             await taskDataStore.UpdateTask(targetTask);
@@ -345,11 +381,14 @@ namespace CN_Service
             lastSlice.EndDateTime = endTime;
 
             //EndTimeSlices of this task's children and suffix task
-            originDataTask.ChildTasks.ToList()
-                .ForEach(x => Task.Run(async () => await EndTimeSlice(x.TaskId, endTime)));
-            originDataTask.SufTaskConnectors.Select(y => y.SufTask).ToList()
-                .ForEach(x => Task.Run(async () => await EndTimeSlice(x.TaskId, endTime)));
-
+            foreach (var task in originDataTask.ChildTasks ?? new List<CNTask>())
+            {
+                await EndTimeSlice(task.TaskId, endTime);
+            }
+            foreach (var task in originDataTask.SufTaskConnectors.Select(y => y.SufTask))
+            {
+                await EndTimeSlice(task.TaskId, endTime);
+            }
             await taskDataStore.UpdateEndTaskTime(originDataTask, endTime);
             return await timeSliceDataStore.UpdateTimeSlice(lastSlice);
         }

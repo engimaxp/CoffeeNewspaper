@@ -18,15 +18,20 @@ namespace CN_Presentation.ViewModel.Controls
         /// </summary>
         /// <param name="taskInfoChildTasks"></param>
         /// <param name="container"></param>
+        /// <param name="selectedTaskId"></param>
         /// <returns></returns>
-        private ObservableCollection<TaskTreeItemViewModel> MapToViewModel(ICollection<CNTask> taskInfoChildTasks,
-            ITreeNodeSubscribe container)
+        private ObservableCollection<TaskTreeItemViewModel> MapToViewModel(IOrderedEnumerable<CNTask> taskInfoChildTasks,
+            ITreeNodeSubscribe container,int? selectedTaskId)
         {
             var result = new ObservableCollection<TaskTreeItemViewModel>();
             foreach (var a in taskInfoChildTasks)
             {
                 var viewModel =
-                    new TaskTreeItemViewModel(container, a) {ChildItems = MapToViewModel(a.ChildTasks, container)};
+                    new TaskTreeItemViewModel(container, a)
+                    {
+                        IsSelected = a.TaskId == (selectedTaskId ?? 0),
+                        ChildItems = MapToViewModel(a.ChildTasks.FilterDeletedAndOrderBySortTasks(), container,selectedTaskId)
+                    };
                 result.Add(viewModel);
             }
 
@@ -161,13 +166,13 @@ namespace CN_Presentation.ViewModel.Controls
         {
         }
 
-        public TaskExpandDetailViewModel(CNTask taskInfo)
+        public TaskExpandDetailViewModel(CNTask taskInfo,int? selectChildTaskId)
         {
             if (taskInfo == null) return;
 
             //Child Tasks
             var childTaskModel = new TaskTreeViewModel(taskInfo);
-            childTaskModel.Items = MapToViewModel(taskInfo.ChildTasks, childTaskModel);
+            childTaskModel.Items = MapToViewModel(taskInfo.ChildTasks.FilterDeletedAndOrderBySortTasks(), childTaskModel, selectChildTaskId);
             ChildTasksModel = childTaskModel;
 
             //Content

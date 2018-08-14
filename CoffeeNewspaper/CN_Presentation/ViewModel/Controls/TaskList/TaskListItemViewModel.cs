@@ -47,11 +47,11 @@ namespace CN_Presentation.ViewModel.Controls
             }
         }
 
-        public void RefreshExpanderView()
+        public void RefreshExpanderView(int? childTaskId = null)
         {
             if (IsExpanded)
             {
-                LoadDataToDetailExpanderView();
+                LoadDataToDetailExpanderView(childTaskId);
             }
         }
 
@@ -132,9 +132,9 @@ namespace CN_Presentation.ViewModel.Controls
             });
         }
 
-        private void LoadDataToDetailExpanderView()
+        private void LoadDataToDetailExpanderView(int? childTaskId = null)
         {
-            ExpandDetailViewModel = new TaskExpandDetailViewModel(TaskInfo);
+            ExpandDetailViewModel = new TaskExpandDetailViewModel(TaskInfo, childTaskId);
         }
 
         #endregion

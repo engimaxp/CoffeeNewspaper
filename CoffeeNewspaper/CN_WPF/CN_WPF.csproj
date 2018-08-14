@@ -253,6 +253,9 @@
       <DependentUpon>TaskListItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\BaseDialogUserControl.cs" />
+    <Compile Include="Dialogs\ConfirmDialogBox.xaml.cs">
+      <DependentUpon>ConfirmDialogBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\FormDialogBox.xaml.cs">
       <DependentUpon>FormDialogBox.xaml</DependentUpon>
     </Compile>
@@ -310,6 +313,8 @@
     <Compile Include="Utilities\ApplicationPageHelpers.cs" />
     <Compile Include="Utilities\WindowResizer.cs" />
     <Compile Include="ValueConverters\BooleanToBorderBrushConverter.cs" />
+    <Compile Include="ValueConverters\MutiValueConverter\SumConverter.cs" />
+    <Compile Include="ValueConverters\TaskCurrentStatusToVisiblityGoneConverter.cs" />
     <Compile Include="ValueConverters\FormControlValueConverter.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
@@ -379,6 +384,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\TaskListItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\ConfirmDialogBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

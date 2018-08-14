@@ -16,6 +16,87 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
     public class TaskDataStoreTest : RepositarySetupAndTearDown
     {
         [Test]
+        public async Task GetMaxSort_TopLevel_AllPass()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                //Arrange argument to be tested
+                var assesTask = DomainTestHelper.GetARandomTask();
+                assesTask.Sort = 19;
+                //initiate the datastore
+                var taskDataStore = new TaskDataStore(dbcontext);
+
+                //do testing action
+                await taskDataStore.AddTask(assesTask);
+
+                //query the result from db for assert
+                var result = await taskDataStore.GetMaxSort(null);
+                
+                Assert.AreEqual(19, result);
+            });
+        }
+
+        [Test]
+        public async Task GetMaxSort_EmptyTopLevel_ReturnZero()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                //initiate the datastore
+                var taskDataStore = new TaskDataStore(dbcontext);
+                
+                //query the result from db for assert
+                var result = await taskDataStore.GetMaxSort(null);
+
+                Assert.AreEqual(0, result);
+            });
+        }
+
+        [Test]
+        public async Task GetMaxSort_SecondLevel_AllPass()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                //Arrange argument to be tested
+                var assesTask1 = DomainTestHelper.GetARandomTask();
+                assesTask1.Sort = 19;
+                var assesTask2 = DomainTestHelper.GetARandomTask();
+                assesTask2.Sort = 20;
+                assesTask2.ParentTask = assesTask1;
+                //initiate the datastore
+                var taskDataStore = new TaskDataStore(dbcontext);
+
+                //do testing action
+                await taskDataStore.AddTask(assesTask1);
+                await taskDataStore.AddTask(assesTask2);
+
+                //query the result from db for assert
+                var result = await taskDataStore.GetMaxSort(assesTask2.ParentTaskID);
+
+                Assert.AreEqual(20, result);
+            });
+        }
+
+        [Test]
+        public async Task GetMaxSort_EmptySecondLevel_ReturnZero()
+        {
+            await UseMemoryContextRun(async dbcontext =>
+            {
+                //Arrange argument to be tested
+                var assesTask1 = DomainTestHelper.GetARandomTask();
+                assesTask1.Sort = 19;
+                //initiate the datastore
+                var taskDataStore = new TaskDataStore(dbcontext);
+
+                //do testing action
+                await taskDataStore.AddTask(assesTask1);
+
+                //query the result from db for assert
+                var result = await taskDataStore.GetMaxSort(assesTask1.TaskId);
+
+                Assert.AreEqual(0, result);
+            });
+        }
+        [Test]
         public async Task AddTask_QueryAllTask_QuerySpecifiedTask_AllPass()
         {
             await UseMemoryContextRun(async dbcontext =>

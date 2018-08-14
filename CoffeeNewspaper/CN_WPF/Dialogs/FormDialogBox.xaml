@@ -26,13 +26,8 @@
             />
             <!-- Cancel Button -->
             <Button Content="{Binding CancelButtonText}"
-                    Style="{StaticResource SimpleTxtButton}"
-                    BorderBrush="{StaticResource WordOrangeBrush}"
+                    Style="{StaticResource CancelButton}"
                     Visibility="{Binding FormContentViewModel.ConfirmIsRunning,Converter={local:BooleanToVisiblityGoneConverter},ConverterParameter=True}"
-                    BorderThickness="1"
-                    Background="{StaticResource ForegroundVeryLightBrush}"
-                    Foreground="{StaticResource WordOrangeBrush}"
-                    IsDefault="True"
                     IsCancel="True"
                     FontSize="{StaticResource FontSizeRegular}"
                     Command="{Binding CloseCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BaseDialogUserControl}}}"

@@ -1,28 +1,75 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CN_Core;
 using CN_Core.Interfaces;
+using CN_Core.Interfaces.Service;
+using CN_Core.Utilities;
 using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Controls;
 using CN_Presentation.ViewModel.Dialog;
 using CN_Presentation.ViewModel.Form;
 
 namespace CN_Presentation.ViewModel
 {
     /// <summary>
-    /// Task Tree Item Model
+    ///     Task Tree Item Model
     /// </summary>
     public class TaskTreeItemViewModel : BaseViewModel
     {
+        #region Constructor
+
+        public TaskTreeItemViewModel(ITreeNodeSubscribe Subscriber, CNTask taskinfo = null)
+        {
+            EditCommand = new RelayCommand(Edit);
+            SelectCommand = new RelayCommand(Select);
+            LeftCommand = new RelayCommand(async () => await Left());
+            RightCommand = new RelayCommand(async () => await Right());
+            UpCommand = new RelayCommand(async () => await Up());
+            DownCommand = new RelayCommand(async ()=>await Down());
+
+            this.Subscriber = Subscriber;
+
+            TaskInfo = taskinfo ?? new CNTask();
+            Title = TaskInfo.Content.GetFirstLineOrWords(50);
+            Urgency = TaskInfo.MapFourQuadrantTaskUrgency();
+            IsCompleted = TaskInfo.Status == CNTaskStatus.DONE;
+            CurrentStatus = TaskInfo.MapTaskCurrentStatus();
+
+            if (TaskInfo.HasParentTask())
+            {
+                DisplayLeftOperator = TaskInfo.ParentTask.HasParentTask();
+                DisplayRightOperator =
+                    TaskInfo.ParentTask.ChildTasks.FilterDeletedAndOrderBySortTasks().First().TaskId != TaskInfo.TaskId;
+                DisplayUpOperator =
+                    TaskInfo.ParentTask.ChildTasks.FilterDeletedAndOrderBySortTasks().First().TaskId != TaskInfo.TaskId;
+                DisplayDownOperator =
+                    TaskInfo.ParentTask.ChildTasks.FilterDeletedAndOrderBySortTasks().Last().TaskId != TaskInfo.TaskId;
+            }
+        }
+
+        #endregion
+
+        #region Private Properties
+
+        /// <summary>
+        ///     Contianer Model
+        /// </summary>
+        private ITreeNodeSubscribe Subscriber { get; }
+
+        #endregion
+
         #region Public Properties
 
         /// <summary>
-        /// TaskTitle
+        ///     TaskTitle
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Store the TaskInfo
+        ///     Store the TaskInfo
         /// </summary>
         public CNTask TaskInfo { get; set; }
 
@@ -32,33 +79,54 @@ namespace CN_Presentation.ViewModel
         public TaskUrgency Urgency { get; set; }
 
         /// <summary>
-        /// true if the treenode is selected
+        ///     true if the treenode is selected
         /// </summary>
         public bool IsSelected { get; set; }
 
         /// <summary>
-        /// Contianer Model
+        ///     true if the task is completed
         /// </summary>
-        private ITreeNodeSubscribe Subscriber { get; set; }
+        public bool IsCompleted { get; set; }
+
         /// <summary>
-        /// Child Tasks
+        ///     Current Task Status
         /// </summary>
-        public ObservableCollection<TaskTreeItemViewModel> ChildItems { get; set; } = new ObservableCollection<TaskTreeItemViewModel>();
+        public TaskCurrentStatus CurrentStatus { get; set; }
+
+        /// <summary>
+        ///     Child Tasks
+        /// </summary>
+        public ObservableCollection<TaskTreeItemViewModel> ChildItems { get; set; } =
+            new ObservableCollection<TaskTreeItemViewModel>();
+
+        public bool DisplayLeftOperator { get; set; }
+
+        public bool DisplayRightOperator { get; set; }
+
+        public bool DisplayUpOperator { get; set; }
+
+        public bool DisplayDownOperator { get; set; }
+
+
         #endregion
+
+        #region Commands
 
         public ICommand EditCommand { get; set; }
 
         public ICommand SelectCommand { get; set; }
 
-        public TaskTreeItemViewModel(ITreeNodeSubscribe Subscriber,CNTask taskinfo = null)
-        {
-            EditCommand = new RelayCommand(Edit);
-            SelectCommand = new RelayCommand(Select);
-            this.Subscriber = Subscriber;
-            this.TaskInfo = taskinfo??new CNTask();
-            this.Title = TaskInfo.Content.GetFirstLineOrWords(50);
-            this.Urgency = TaskInfo.MapFourQuadrantTaskUrgency();
-        }
+        public ICommand LeftCommand { get; set; }
+
+        public ICommand RightCommand { get; set; }
+
+        public ICommand UpCommand { get; set; }
+
+        public ICommand DownCommand { get; set; }
+
+        #endregion
+
+        #region Private Methods
 
         private void Select()
         {
@@ -76,5 +144,72 @@ namespace CN_Presentation.ViewModel
                 CancelButtonText = "Cancel"
             });
         }
+
+        private async Task Down()
+        {
+            //find next sibiling and exchange their sort
+            var nextSibling = TaskInfo?.ParentTask?.ChildTasks.FilterDeletedAndOrderBySortTasks()
+                .FirstOrDefault(x => x.Sort > TaskInfo.Sort);
+            if (nextSibling == null) return;
+
+            var temp = TaskInfo.Sort;
+            TaskInfo.Sort = nextSibling.Sort;
+            nextSibling.Sort = temp;
+
+            await IoC.Get<ITaskService>().EditATask(TaskInfo);
+            await IoC.Get<ITaskService>().EditATask(nextSibling);
+
+            //refresh view display
+            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+        }
+
+        private async Task Up()
+        {
+            //find prev sibiling and exchange their sort
+            var prevSibling = TaskInfo?.ParentTask?.ChildTasks.FilterDeletedAndOrderBySortTasks()
+                .FirstOrDefault(x => x.Sort < TaskInfo.Sort);
+            if (prevSibling == null) return;
+
+            var temp = TaskInfo.Sort;
+            TaskInfo.Sort = prevSibling.Sort;
+            prevSibling.Sort = temp;
+
+            await IoC.Get<ITaskService>().EditATask(TaskInfo);
+            await IoC.Get<ITaskService>().EditATask(prevSibling);
+
+            //refresh view display
+            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+        }
+
+        private async Task Right()
+        {
+            //find prev sibiling
+            var prevSibling = TaskInfo?.ParentTask?.ChildTasks.FilterDeletedAndOrderBySortTasks()
+                .FirstOrDefault(x => x.Sort < TaskInfo.Sort);
+            if (prevSibling == null) return;
+            //set current task's parent to sibiling
+            await IoC.Get<ITaskService>().SetParentTask(TaskInfo, prevSibling, -1);
+
+            //refresh view display
+            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+        }
+
+        private async Task Left()
+        {
+            //parent task will be a new prev sibiling
+            //1.find new sibiling position of new parent's childrens
+            //2.set current task's parent to new parent and set current task's position behind the new sibling
+            if (TaskInfo.ParentTask?.ParentTask == null) return;
+            var parentToBePrevSiblingPos = TaskInfo.ParentTask.ParentTask.ChildTasks.FilterDeletedAndOrderBySortTasks()
+                .ToList().FindIndex(x=>x.TaskId == TaskInfo.ParentTask.TaskId);
+
+            await IoC.Get<ITaskService>()
+                .SetParentTask(TaskInfo, TaskInfo.ParentTask.ParentTask, parentToBePrevSiblingPos);
+
+            //refresh view display
+            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+        }
+
+        #endregion
     }
 }

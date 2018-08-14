@@ -1,0 +1,52 @@
+﻿<local:BaseDialogUserControl x:Class="CN_WPF.ConfirmDialogBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                             xmlns:local="clr-namespace:CN_WPF"
+                             xmlns:core="clr-namespace:CN_Presentation.ViewModel.Dialog.Design;assembly=CN_Presentation"
+                             mc:Ignorable="d" >
+    <StackPanel d:DataContext="{x:Static core:ConfirmDialogBoxDesignModel.Instance}"
+                Background="{StaticResource ForegroundVeryLightBrush}"
+    >
+        <TextBlock Text="{Binding Message}"
+                   FontFamily="Microsoft YaHei"
+                   HorizontalAlignment="Center"
+                   FontSize="{StaticResource FontSizeLarge}"
+                   Padding="5"
+                   Foreground="{StaticResource ForegroundVeryDarkBrush}"
+        />
+        <TextBlock Text="{Binding SecondaryMessage}"
+                   Visibility="{Binding DisplaySecondaryMessage,Converter={local:BooleanToVisiblityGoneConverter}}"
+                   FontSize="{StaticResource FontSizeSmall}"
+                   Padding="5"
+                   HorizontalAlignment="Center"
+                   Foreground="{StaticResource ForegroundVeryDarkBrush}"
+        />
+
+        <StackPanel HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+            <!-- OK Button -->
+            <Button Content="{Binding CofirmText}"
+                    Style="{StaticResource SimpleTxtButton}"
+                    Command="{Binding ConfirmCommand}"
+                    local:IsBusyProperty.Value="{Binding ConfirmIsRunning,FallbackValue=false}"
+                    IsDefault="True"
+                    FontSize="{StaticResource FontSizeRegular}"
+                    HorizontalAlignment="Center"
+                    Margin="10"
+            />
+            <!-- Cancel Button -->
+            <Button Content="{Binding CancelText}"
+                    Style="{StaticResource CancelButton}"
+                    IsCancel="True"
+                    FontSize="{StaticResource FontSizeRegular}"
+                    Command="{Binding CloseCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BaseDialogUserControl}}}"
+                    HorizontalAlignment="Center"
+                    Margin="10"
+            />
+        </StackPanel>
+
+    </StackPanel>
+</local:BaseDialogUserControl>
+

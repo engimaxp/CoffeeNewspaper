@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
@@ -1232,7 +1233,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
 
             //Act
-            await targetService.SetParentTask(null, mockParentTask);
+            await targetService.SetParentTask(null, mockParentTask,-1);
 
             //Assert
             await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
@@ -1248,13 +1249,156 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
 
             //Act
-            await targetService.SetParentTask(mockTask, mockParentTask);
+            await targetService.SetParentTask(mockTask, mockParentTask,-1);
 
             //Assert
             await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask!=null && x.ParentTask.TaskId == mockParentTask.TaskId && x.TaskId == mockTask.TaskId));
         }
 
+        [Test]
+        public async Task SetParentTask_SetParentTaskNull_WithNoPos()
+        {
+            var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
+            var targetService = _kernel.Get<ITaskService>();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockSort = 10;
+            //Assess
+            mockTaskDataStore.GetMaxSort(null).Returns(Task.FromResult(mockSort));
 
+            //Act
+            await targetService.SetParentTask(mockTask, null, -1);
+
+            //Assert
+            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == null 
+                                                                              && x.TaskId == mockTask.TaskId
+                                                                              && x.Sort == mockSort+1));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNull_WithLastPos()
+        {
+            var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
+            var targetService = _kernel.Get<ITaskService>();
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            var targetTask = DomainTestHelper.GetARandomTask(4);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
+            //Assess
+            mockTaskDataStore.GetAllTask().Returns(new List<CNTask>(){mockTask1,mockTask2,mockTask3});
+
+            //Act
+            await targetService.SetParentTask(targetTask, null, 2);
+
+            //Assert
+            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == null
+                                                                              && x.TaskId == targetTask.TaskId
+                                                                              && x.Sort == mockTask3.Sort + 1));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNull_WithMiddlePos()
+        {
+            var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
+            var targetService = _kernel.Get<ITaskService>();
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            var targetTask = DomainTestHelper.GetARandomTask(4);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
+            //Assess
+            mockTaskDataStore.GetAllTask().Returns(new List<CNTask>() { mockTask1, mockTask2, mockTask3 });
+
+            //Act
+            await targetService.SetParentTask(targetTask, null, 1);
+
+            //Assert
+            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == null
+                                                                              && x.TaskId == targetTask.TaskId
+                                                                              && x.Sort == mockTask2.Sort + 1));
+            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.TaskId == mockTask3.TaskId
+                                                                              && x.Sort == mockTask2.Sort + 2));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNotNull_WithNoPos()
+        {
+            var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
+            var targetService = _kernel.Get<ITaskService>();
+            var mockParent = DomainTestHelper.GetARandomTask(10);
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockSort = 10;
+            //Assess
+            mockTaskDataStore.GetMaxSort(mockParent.TaskId).Returns(Task.FromResult(mockSort));
+
+            //Act
+            await targetService.SetParentTask(mockTask, mockParent, -1);
+
+            //Assert
+            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == mockParent
+                                                                              && x.TaskId == mockTask.TaskId
+                                                                              && x.Sort == mockSort + 1));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNotNull_WithLastPos()
+        {
+            var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
+            var targetService = _kernel.Get<ITaskService>();
+            var mockParent = DomainTestHelper.GetARandomTask(10);
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            var targetTask = DomainTestHelper.GetARandomTask(4);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
+            mockParent.ChildTasks.Add(mockTask1);
+            mockParent.ChildTasks.Add(mockTask2);
+            mockParent.ChildTasks.Add(mockTask3);
+            //Assess
+
+            //Act
+            await targetService.SetParentTask(targetTask, mockParent, 5);
+
+            //Assert
+            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == mockParent
+                                                                              && x.TaskId == targetTask.TaskId
+                                                                              && x.Sort == mockTask3.Sort + 1));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNotNull_WithMiddlePos()
+        {
+            var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
+            var targetService = _kernel.Get<ITaskService>();
+            var mockParent = DomainTestHelper.GetARandomTask(10);
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            var targetTask = DomainTestHelper.GetARandomTask(4);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
+            mockParent.ChildTasks.Add(mockTask1);
+            mockParent.ChildTasks.Add(mockTask2);
+            mockParent.ChildTasks.Add(mockTask3);
+            //Assess
+
+            //Act
+            await targetService.SetParentTask(targetTask, mockParent, 1);
+
+            //Assert
+            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == mockParent
+                                                                              && x.TaskId == targetTask.TaskId
+                                                                              && x.Sort == mockTask2.Sort + 1));
+            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.TaskId == mockTask3.TaskId
+                                                                              && x.Sort == mockTask2.Sort + 2));
+        }
         [Test]
         public async Task AddPreTask_TargetTaskIsNull_ReturnFalse()
         {
@@ -1263,7 +1407,6 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             var mockTask = DomainTestHelper.GetARandomTask(1);
             mockTask.Status = CNTaskStatus.DONE;
             //Assess
-//            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
 
             //Act
             var result = await targetService.AddPreTask(null, null);
@@ -1333,8 +1476,6 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             var mockTask = DomainTestHelper.GetARandomTask(1);
             mockTask.Status = CNTaskStatus.DONE;
             //Assess
-            //            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
-
             //Act
             var result = await targetService.DelPreTask(null, null);
 

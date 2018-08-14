@@ -1,6 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+using CN_Presentation;
+using CN_Presentation.Utilities;
 
 namespace CN_WPF
 {

@@ -74,7 +74,7 @@ namespace CN_Presentation.ViewModel.Controls
                 var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == parentTask.TaskId);
                 if (index >= 0)
                 {
-                    Items[index].RefreshExpanderView();
+                    Items[index].RefreshExpanderView(taskId);
                 }
             }
             else

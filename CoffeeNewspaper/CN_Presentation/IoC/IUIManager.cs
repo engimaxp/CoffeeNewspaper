@@ -19,5 +19,11 @@ namespace CN_Core.Interfaces
         /// <param name="viewModel">The view model</param>
         /// <returns></returns>
         Task ShowMessage(MessageBoxDialogViewModel viewModel);
+
+        /// <summary>
+        /// Displays a confirm message box to the user
+        /// </summary>
+        /// <returns></returns>
+        Task ShowConfirm(ConfirmDialogBoxViewModel confirmViewModel);
     }
 }

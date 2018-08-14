@@ -96,8 +96,9 @@ namespace CN_Core.Interfaces.Service
         /// </summary>
         /// <param name="targetTask"></param>
         /// <param name="parentTask"></param>
+        /// <param name="pos">new task will be put after this position,-1 if the task is add to the rear of list</param>
         /// <returns></returns>
-        Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask);
+        Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask,int pos);
 
         /// <summary>
         ///     Add pre task of this task

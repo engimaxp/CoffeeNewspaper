@@ -19,7 +19,7 @@
         </ScrollViewer.Tag>
         <ScrollViewer.Height>
             <MultiBinding Converter="{local:MultiplyConverter}">
-                <Binding Path="ActualHeight" ElementName="ExpanderContent" />
+                <Binding Path="ActualHeight" ElementName="ExpanderContent" UpdateSourceTrigger="PropertyChanged"/>
                 <Binding Path="Tag" RelativeSource="{RelativeSource Self}" />
             </MultiBinding>
         </ScrollViewer.Height>

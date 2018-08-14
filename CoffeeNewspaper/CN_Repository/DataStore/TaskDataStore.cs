@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
 using CN_Core.Interfaces.Repository;
+using CN_Core.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CN_Repository
@@ -133,11 +134,24 @@ namespace CN_Repository
 
         #region Select Methods
 
+        public async Task<int> GetMaxSort(int? parentTaskId)
+        {
+            return await IoC.Task.Run(
+                async () => 
+                    await (from c in mDbContext.Tasks
+                        where c.ParentTaskID == parentTaskId
+                        select c.Sort).DefaultIfEmpty().MaxAsync()
+            );
+        }
+
         public async Task<ICollection<CNTask>> GetAllTask()
         {
             return await IoC.Task.Run(
                 async () =>
-                    await mDbContext.Tasks.ToListAsync()
+                    await (from c in mDbContext.Tasks
+                        where !c.IsDeleted
+                        orderby c.Sort
+                        select c).ToListAsync()
             );
         }
 

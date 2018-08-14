@@ -49,6 +49,13 @@ namespace CN_Core.Interfaces.Repository
         /// <returns></returns>
         Task<CNTask> GetTask(int taskid);
 
+        /// <summary>
+        /// Get Max Sort
+        /// </summary>
+        /// <param name="parentTaskId"></param>
+        /// <returns></returns>
+        Task<int> GetMaxSort(int? parentTaskId);
+
         #endregion
 
         #region Update Methods
