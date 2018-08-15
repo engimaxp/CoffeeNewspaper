@@ -47,6 +47,8 @@
     <system:String x:Key="FontAwesomeSortAmountDownIcon">&#xf160;</system:String>
     <system:String x:Key="FontAwesomeCoffeeIcon">&#xf0f4;</system:String>
     <system:String x:Key="FontAwesomeCalendarAltIcon">&#xf073;</system:String>
+    <system:String x:Key="FontAwesomeThIcon">&#xf00a;</system:String>
+    
     
     <system:String x:Key="FontAwesomeChevronCircleDownIcon">&#xf13a;</system:String>
     <system:String x:Key="FontAwesomeChevronCircleLeftIcon">&#xf137;</system:String>
@@ -63,7 +65,7 @@
     <system:String x:Key="FontAwesomeCaretSquareUpIcon">&#xf151;</system:String>
     <system:String x:Key="FontAwesomeCaretSquareDownIcon">&#xf150;</system:String>
     <system:String x:Key="FontAwesomeCopyIcon">&#xf0c5;</system:String>
-
+    <system:String x:Key="FontAwesomeEditIcon">&#xf044;</system:String>
     <!-- Custom -->
     <system:String x:Key="FontAwesomeAddChildNodeIcon">&#xe70e;</system:String>
 

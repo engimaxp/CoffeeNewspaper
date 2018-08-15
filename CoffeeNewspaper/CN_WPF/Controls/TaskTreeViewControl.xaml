@@ -29,6 +29,7 @@
                             Content="{StaticResource FontAwesomeAddIcon}"
                             Command="{Binding AddNextTaskCommand}" />
                     <Button Style="{StaticResource IconGrowButton}"
+                            Visibility="{Binding ItemSeleted,Converter={local:BooleanToVisiblityGoneConverter}}"
                             FontFamily="{StaticResource CNCustomerFont}"
                             Content="{StaticResource FontAwesomeAddChildNodeIcon}"
                             Command="{Binding AddChildTaskCommand}" />
@@ -47,6 +48,7 @@
                 <!-- Child Tasks Tree View -->
                 <StackPanel ZIndex="2" Grid.Column="2" Orientation="Horizontal">
                     <Button Style="{StaticResource IconGrowButton}"
+                            Visibility="{Binding ItemSeleted,Converter={local:BooleanToVisiblityGoneConverter}}"
                             Content="{StaticResource FontAwesomeTrashAltIcon}"
                             Command="{Binding DeleteChildTaskCommand}"
                             FontFamily="{StaticResource FontAwesomeRegular}" />

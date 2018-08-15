@@ -7,6 +7,7 @@ using System.Windows.Input;
 using CN_Core;
 using CN_Core.Interfaces;
 using CN_Core.Interfaces.Service;
+using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Controls;
 using CN_Presentation.ViewModel.Dialog;
@@ -42,6 +43,7 @@ namespace CN_Presentation.ViewModel
         {
             foreach (var taskTreeItemViewModel in NodeItems.Where(x => x != node && x.IsSelected))
                 taskTreeItemViewModel.IsSelected = false;
+            OnPropertyChanged(nameof(ItemSeleted));
         }
 
         #endregion
@@ -63,7 +65,15 @@ namespace CN_Presentation.ViewModel
             }
         }
 
-        public bool TreeHasItems => Items.Count > 0;
+        /// <summary>
+        /// true if there is item in list
+        /// </summary>
+        public bool TreeHasItems => Items.Any();
+
+        /// <summary>
+        /// true if at least one Item is Selected
+        /// </summary>
+        public bool ItemSeleted => NodeItems.Any(x => x.IsSelected);
 
         #endregion
 
@@ -141,65 +151,20 @@ namespace CN_Presentation.ViewModel
 
         private void DeleteChildTask()
         {
-            IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(DeleteTask(false))
-            {
-                CofirmText = "Confirm",
-                CancelText = "Cancel",
-                Message = "Are you sure to delete this child task?",
-                SecondaryMessage = "You may restore it later.",
-            });
-        }
+            //find selected item
+            var selectedItem = NodeItems.FirstOrDefault(x => x.IsSelected);
 
-        private Func<Task<bool>> DeleteTask(bool force)
-        {
-            return async () =>
+            if (selectedItem?.TaskInfo != null)
             {
-                var result = false;
-                try
+                IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(TaskOperatorHelper.DeleteTask(false, selectedItem.TaskInfo))
                 {
-                    //find selected item
-                    var selectedItem = NodeItems.FirstOrDefault(x => x.IsSelected);
+                    CofirmText = "Confirm",
+                    CancelText = "Cancel",
+                    Message = "Are you sure to delete this child task?",
+                    SecondaryMessage = "You may restore it later.",
+                });
+            }
 
-                    if (selectedItem?.TaskInfo != null)
-                    {
-                        result = await IoC.Get<ITaskService>().DeleteTask(selectedItem.TaskInfo.TaskId, force);
-                        //refresh task
-                        await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(selectedItem.TaskInfo.TaskId);
-                    }
-                }
-                catch (TaskHasChildTasksException)
-                {
-                    await IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(DeleteTask(true))
-                    {
-                        CofirmText = "Confirm",
-                        CancelText = "Cancel",
-                        Message = "This task has child tasks",
-                        SecondaryMessage = "Do you really want delete it along with its child tasks?",
-                    });
-                    result = true;
-                }
-                catch (TaskHasSufTasksException)
-                {
-                    await IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(DeleteTask(true))
-                    {
-                        CofirmText = "Confirm",
-                        CancelText = "Cancel",
-                        Message = "This task has suf tasks,",
-                        SecondaryMessage = "Do you really want delete it along with its suf tasks?",
-                    });
-                    result = true;
-                }
-                catch (Exception exception)
-                {
-                    await IoC.Get<IUIManager>()
-                        .ShowMessage(new MessageBoxDialogViewModel
-                        {
-                            Title = "Error！",
-                            Message = exception.Message
-                        });
-                }
-                return result;
-            };
         }
 
         #endregion

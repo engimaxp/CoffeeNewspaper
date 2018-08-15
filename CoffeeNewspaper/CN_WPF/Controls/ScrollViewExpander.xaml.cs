@@ -31,11 +31,14 @@ namespace CN_WPF
                     if (expander.ToggleExpand && basevalue is BaseViewModel viewModel)
                     {
                         var control= viewModel.ViewModelToControl();
-                        expander.ExpanderContent.Height += 100;
                         expander.ExpanderContent.Content = control;
                         control.Loaded += (sou, ee) =>
                         {
-                            if (sou is FrameworkElement a) expander.ExpanderContent.Height = a.DesiredSize.Height;
+                            if (sou is FrameworkElement a)
+                            {
+                                expander.ExpanderContent.Height += 100;
+                                expander.ExpanderContent.Height = a.DesiredSize.Height;
+                            }
                         };
                         await expander.ExpandScrollView.ScrollViewExpand(false, 0);
                     }

@@ -25,5 +25,12 @@ namespace CN_Core.Interfaces
         /// </summary>
         /// <returns></returns>
         Task ShowConfirm(ConfirmDialogBoxViewModel confirmViewModel);
+
+        /// <summary>
+        /// Displays a prompt message box to the user
+        /// </summary>
+        /// <param name="promptViewModel"></param>
+        /// <returns></returns>
+        Task ShowPrompt(PromptDialogBoxViewModel promptViewModel);
     }
 }

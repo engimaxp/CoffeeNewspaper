@@ -21,5 +21,10 @@ namespace CN_WPF
         {
             return new ConfirmDialogBox().ShowDialog(confirmViewModel);
         }
+
+        public Task ShowPrompt(PromptDialogBoxViewModel promptViewModel)
+        {
+            return new PromptDialogBox().ShowDialog(promptViewModel);
+        }
     }
 }

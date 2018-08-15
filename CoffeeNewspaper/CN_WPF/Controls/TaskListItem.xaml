@@ -15,110 +15,280 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <!-- Content -->
-        <Border Grid.Row="0"
-                x:Name="background"
-                BorderThickness="1"
-                BorderBrush="{StaticResource WordVeryVeryLightBlueBrush}"
-                Background="{StaticResource ForegroundVeryLightBrush}">
+        <Border
+            x:Name="background"
+            Grid.Row="0"
+            Panel.ZIndex="1"
+            BorderThickness="1"
+            BorderBrush="{StaticResource WordVeryVeryLightBlueBrush}"
+            Background="{StaticResource ForegroundVeryLightBrush}">
 
             <Border.Triggers>
                 <EventTrigger RoutedEvent="Mouse.MouseEnter">
                     <BeginStoryboard>
                         <Storyboard>
                             <ColorAnimation To="{StaticResource WordVeryVeryLightBlue}"
-                                            Duration="0:0:0.3" Storyboard.TargetName="container"
+                                            Duration="0:0:0.03" Storyboard.TargetName="container"
                                             Storyboard.TargetProperty="Background.Color" />
+                            <DoubleAnimation To="1" Duration="0:0:0.03" Storyboard.TargetName="editBorder"
+                                             Storyboard.TargetProperty="Opacity" />
+                            <DoubleAnimation To="1" Duration="0:0:0.03" Storyboard.TargetName="moreBorder"
+                                             Storyboard.TargetProperty="Opacity" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
                 <EventTrigger RoutedEvent="Mouse.MouseLeave">
                     <BeginStoryboard>
                         <Storyboard>
-                            <ColorAnimation To="Transparent" Duration="0:0:0.3"
+                            <ColorAnimation To="Transparent" Duration="0:0:0.03"
                                             Storyboard.TargetName="container"
                                             Storyboard.TargetProperty="Background.Color" />
+
+                            <DoubleAnimation To="0" Duration="0:0:0.03" Storyboard.TargetName="editBorder"
+                                             Storyboard.TargetProperty="Opacity" />
+                            <DoubleAnimation To="0" Duration="0:0:0.03" Storyboard.TargetName="moreBorder"
+                                             Storyboard.TargetProperty="Opacity" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </Border.Triggers>
-            <Border.InputBindings>
-                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding OpenEditDialogCommand}"></MouseBinding>
-            </Border.InputBindings>
+
             <Grid x:Name="container" Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <!-- Task Urgency Indicator Bar -->
                     <!-- Task Status -->
-                    <ColumnDefinition Width="Auto" />
                     <!-- Main content -->
                     <ColumnDefinition Width="*" />
-                    <!-- Is Expanded Indicator Bar -->
+                    <!-- More op Indicator Bar -->
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <!-- Task Urgency Indicator Bar -->
-                <Border Grid.Column="0"
-                        Width="4"
-                        Margin="0 10"
-                        HorizontalAlignment="Left"
-                        Background="{Binding Urgency, Converter={local:TaskUrgencyToBackGroundColorConverter}}" />
-
-                <!-- TaskStatus Indicator padding -->
-                <Border Grid.Column="0"
-                        Padding="8 15">
-                    <!-- TaskStatus Indicator -->
-                    <TextBlock
-                        Text="{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}"
-                        Padding="0 4 0 0"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Height="40"
-                        TextAlignment="Center"
-                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                        Foreground="{Binding Status,Converter={local:TaskStatusToForeGroundConverter}}"
-                        FontSize="{StaticResource FontSizeXXLarge}"
-                        FontFamily="{StaticResource FontAwesomeSolid}" />
-                </Border>
-
-                <!-- Task Title -->
-                <Border Grid.Column="1" Padding="0 0 10 0">
-                    <StackPanel VerticalAlignment="Center">
-                        <!-- Name-->
-                        <TextBlock Text="{Binding TaskTitle}"
-                                   FontFamily="Microsoft YaHei"
-                                   MaxHeight="76"
-                                   Padding="0 0 0 2"
-                                   Foreground="{StaticResource ForegroundVeryDarkBrush}"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-
-                <!-- Expand Indicator Padding -->
-                <Border Grid.Column="2"
-                        Padding="0 0 15 0"
-                        Cursor="Hand">
-                    <!-- Click to Expand TaskDetail -->
+                <Border
+                    Grid.Column="0"
+                    Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='ecf6fb'}">
                     <Border.InputBindings>
-                        <MouseBinding MouseAction="LeftClick" Command="{Binding ExpandTaskCommand}" />
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding SelectTaskCommand}" />
+                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ExpandTaskCommand}" />
                     </Border.InputBindings>
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSizeXLarge}"
-                        Text="{StaticResource FontAwesomeAngleDownIcon}"
-                        FontFamily="{StaticResource FontAwesomeSolid}"
-                        Foreground="{StaticResource WordLightBlueBrush}"
-                        RenderTransformOrigin="0.5,0.5"
-                        local:AnimateCWProperty.Value="{Binding IsExpanded}">
-                        <TextBlock.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform />
-                                <SkewTransform />
-                                <RotateTransform x:Name="rtAngle" Angle="0" />
-                                <TranslateTransform />
-                            </TransformGroup>
-                        </TextBlock.RenderTransform>
-                    </TextBlock>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Task Urgency Indicator Bar -->
+                        <Border Grid.Column="0"
+                                Width="4"
+                                Margin="0 10"
+                                HorizontalAlignment="Left"
+                                Background="{Binding Urgency, Converter={local:TaskUrgencyToBackGroundColorConverter}}" />
+                        <!-- TaskStatus Indicator padding -->
+                        <Border Grid.Column="0"
+                                Padding="8 15"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch">
+                            <!-- TaskStatus Indicator -->
+                            <TextBlock
+                                Text="{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}"
+                                Padding="0 4 0 0"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Height="40"
+                                TextAlignment="Center"
+                                Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                Foreground="{Binding Status,Converter={local:TaskStatusToForeGroundConverter}}"
+                                FontSize="{StaticResource FontSizeXXLarge}"
+                                FontFamily="{StaticResource FontAwesomeSolid}" />
+                        </Border>
+
+                        <!-- Task Title -->
+                        <Border Grid.Column="1" Padding="0 0 10 0"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch">
+                            <StackPanel VerticalAlignment="Center">
+                                <!-- Name-->
+                                <TextBlock Text="{Binding TaskTitle}"
+                                           FontFamily="Microsoft YaHei"
+                                           MaxHeight="76"
+                                           Padding="0 0 0 2"
+                                           Foreground="{StaticResource ForegroundVeryDarkBrush}"
+                                           TextTrimming="CharacterEllipsis"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- More Op Bar -->
+                        <Border Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                Panel.ZIndex="5"
+                                Visibility="Collapsed"
+                                Background="{StaticResource BackgroundVeryLightBrush}"
+                                local:AnimateSlideInFromRightProperty.Value="{Binding IsMoreOpDisplayed}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                    <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                    <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Style="{StaticResource BackGroundIconButton}"
+                                        Grid.Row="0" 
+                                        Grid.Column="0" 
+                                        Grid.RowSpan="2"
+                                        Background="{StaticResource WordGreenBrush}"
+                                        FontFamily="{StaticResource FontAwesomeSolid}"
+                                        Content="{StaticResource FontAwesomePaperclipIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
+                                
+                                
+                                <Button Style="{StaticResource BackGroundIconButton}"
+                                        Grid.Row="0" 
+                                        Grid.Column="1"
+                                        ToolTip="Pending"
+                                        Command="{Binding PendingCommand}"
+                                        IsEnabled="{Binding CanPending}"
+                                        Background="{StaticResource WordOrangeBrush}"
+                                        FontFamily="{StaticResource FontAwesomeSolid}"
+                                        Content="{StaticResource FontAwesomeHalfHourGlassIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
+
+                                
+                                <Button Style="{StaticResource BackGroundIconButton}"
+                                        Grid.Row="1" 
+                                        Grid.Column="1"
+                                        ToolTip="Fail"
+                                        Command="{Binding FailingCommand}"
+                                        IsEnabled="{Binding CanFail}"
+                                        Background="{StaticResource WordRedBrush}"
+                                        FontFamily="{StaticResource FontAwesomeSolid}"
+                                        Content="{StaticResource FontAwesomeTimesCircleIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
+                                
+                                
+                                <Button Style="{StaticResource BackGroundIconButton}"
+                                        Grid.Row="0" 
+                                        Grid.Column="2"
+                                        ToolTip="Delete"
+                                        Command="{Binding DeleteCommand}"
+                                        Background="{StaticResource WordBlueBrush}"
+                                        FontFamily="{StaticResource FontAwesomeSolid}"
+                                        Content="{StaticResource FontAwesomeTrashAltIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
+
+                                <Button Style="{StaticResource BackGroundIconButton}"
+                                        Grid.Row="1" 
+                                        Grid.Column="2"
+                                        Background="{StaticResource ForegroundDarkBrush}"
+                                        FontFamily="{StaticResource FontAwesomeSolid}"
+                                        Content="{StaticResource FontAwesomeThIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </Grid>
                 </Border>
+
+                <!-- More Op Indicator Padding -->
+                <Grid Grid.Column="1"
+                      Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='ecf6fb'}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Grid.RowSpan="2" 
+                            Background="{StaticResource ForegroundDarkBrush}"
+                            Visibility="{Binding IsMoreOpDisplayed,Converter={local:BooleanToVisiblityGoneConverter}}"></Border>
+                    <Border
+                        x:Name="editBorder"
+                        Grid.Row="0"
+                        Padding="10 5"
+                        Opacity="0"
+                        Panel.ZIndex="2"
+                        Background="{StaticResource ForegroundVeryLightBrush}">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenEditDialogCommand}" />
+                        </Border.InputBindings>
+                        <TextBlock
+                            Margin="4 0 0 0"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSizeRegular}"
+                            Text="{StaticResource FontAwesomeEditIcon}"
+                            FontFamily="{StaticResource FontAwesomeSolid}"
+                            Foreground="{StaticResource ForegroundDarkBrush}" />
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.2"
+                                                        To="{StaticResource ForegroundMain}"
+                                                        Storyboard.TargetName="editBorder"
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.2"
+                                                        From="{StaticResource ForegroundMain}"
+                                                        Storyboard.TargetName="editBorder"
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
+                    <Border
+                        x:Name="moreBorder"
+                        Panel.ZIndex="2"
+                        Grid.Row="1"
+                        Padding="10 5"
+                        Opacity="0"
+                        Background="{StaticResource ForegroundVeryLightBrush}">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" Command="{Binding DisplayMoreOpCommand}" />
+                        </Border.InputBindings>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSizeRegular}"
+                            Text="{StaticResource FontAwesomeEllipsisHIcon}"
+                            FontFamily="{StaticResource FontAwesomeSolid}"
+                            Foreground="{StaticResource ForegroundDarkBrush}" />
+
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.2"
+                                                        To="{StaticResource ForegroundMain}"
+                                                        Storyboard.TargetName="moreBorder"
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.2"
+                                                        From="{StaticResource ForegroundMain}"
+                                                        Storyboard.TargetName="moreBorder"
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
+                </Grid>
             </Grid>
         </Border>
 
@@ -127,8 +297,7 @@
         <local:ScrollViewExpander
             Grid.Row="1"
             ToggleExpand="{Binding IsExpanded}"
-            ContentViewModel="{Binding ExpandDetailViewModel}"
-            ></local:ScrollViewExpander>
+            ContentViewModel="{Binding ExpandDetailViewModel}" />
     </Grid>
 
 </UserControl>

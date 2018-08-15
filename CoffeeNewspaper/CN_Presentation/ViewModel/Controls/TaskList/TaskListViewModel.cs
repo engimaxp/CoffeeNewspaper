@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -14,25 +13,39 @@ namespace CN_Presentation.ViewModel.Controls
 {
     public class TaskListViewModel : BaseViewModel
     {
+        #region Constructor
+
         public TaskListViewModel()
         {
             FilterCommand = new RelayCommand(Filter);
             SortCommand = new RelayCommand(Sort);
         }
 
+        #endregion
+
+        #region Public Properties
+
         public ObservableCollection<TaskListItemViewModel> Items { get; set; } =
             new ObservableCollection<TaskListItemViewModel>();
 
         public ObservableCollection<string> ActivatedSearchTxts { get; set; } = new ObservableCollection<string>();
 
+        #endregion
+
+        #region Commands
+
         public ICommand FilterCommand { get; set; }
 
         public ICommand SortCommand { get; set; }
 
+        #endregion
+
+        #region Public Methods
+
         public async Task RefreshTaskItems()
         {
-            IEnumerable<CNTask> tasks = (await IoC.Get<ITaskService>().GetAllTasks()).Where(x => !x.HasParentTask());
-            
+            var tasks = (await IoC.Get<ITaskService>().GetAllTasks()).Where(x => !x.HasParentTask());
+
             if (Items.Count == 0)
             {
                 foreach (var cnTask in tasks)
@@ -63,19 +76,21 @@ namespace CN_Presentation.ViewModel.Controls
             var task = await IoC.Get<ITaskService>().GetTaskById(taskId);
             //Parent Task
             if (task.HasParentTask())
+                RefreshChildTasks(task);
+            else
+                RefreshTopLevelTask(task);
+        }
+
+        #endregion
+
+        #region Private Properties
+
+        private void RefreshTopLevelTask(CNTask task)
+        {
+            if (task.IsDeleted)
             {
-                //find root node
-                var parentTask = task.ParentTask;
-                while (parentTask.HasParentTask())
-                {
-                    parentTask = parentTask.ParentTask;
-                }
-                //refresh its expander
-                var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == parentTask.TaskId);
-                if (index >= 0)
-                {
-                    Items[index].RefreshExpanderView(taskId);
-                }
+                var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == task.TaskId);
+                if (index >= 0) Items.RemoveAt(index);
             }
             else
             {
@@ -85,7 +100,7 @@ namespace CN_Presentation.ViewModel.Controls
                 }
                 else
                 {
-                    var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == taskId);
+                    var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == task.TaskId);
                     if (index >= 0)
                     {
                         Items[index].TaskInfo = task;
@@ -97,6 +112,17 @@ namespace CN_Presentation.ViewModel.Controls
                     }
                 }
             }
+        }
+
+        private void RefreshChildTasks(CNTask task)
+        {
+//find root node
+            var parentTask = task.ParentTask;
+            while (parentTask.HasParentTask()) parentTask = parentTask.ParentTask;
+
+            //refresh its expander
+            var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == parentTask.TaskId);
+            if (index >= 0) Items[index].RefreshExpanderView(task.TaskId);
         }
 
         private void Sort()
@@ -118,5 +144,7 @@ namespace CN_Presentation.ViewModel.Controls
                 Message = "The current password is invalid"
             });
         }
+
+        #endregion
     }
 }
