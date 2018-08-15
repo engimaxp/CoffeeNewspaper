@@ -39,7 +39,7 @@ namespace CN_Presentation.ViewModel.Form
             var timeRangeViewModel = new TimeRangeEntryViewModel();
             timeRangeViewModel.SetParentInterface(this);
             EstimatedDurationEntry = timeRangeViewModel;
-            
+            //Edit
             if (originTask != null)
             {
                 ParentTaskTitle = originTask.ParentTask == null ? "Empty" : originTask.ParentTask.Content.GetFirstLineOrWords(50);
@@ -62,12 +62,30 @@ namespace CN_Presentation.ViewModel.Form
                         TagTitle = y.Title
                     }));
             }
+            //Add New
             else
             {
                 ParentTaskTitle = parentTask == null ? "Empty" : parentTask.Content.GetFirstLineOrWords(50);
-                if (parentTask != null) ParentTaskId = parentTask.TaskId;
-                UrgencyRating = RatingControlType.Urgency.GetNewModel(3);
-                PriorityRating = RatingControlType.Priority.GetNewModel(3);
+                if (parentTask != null)
+                {
+                    ParentTaskId = parentTask.TaskId;
+                    UrgencyRating = RatingControlType.Urgency.GetNewModel(
+                        Enum.GetNames(typeof(CNUrgency)).ToList().IndexOf(parentTask.Urgency.ToString()) + 1);
+                    PriorityRating = RatingControlType.Priority.GetNewModel(
+                        Enum.GetNames(typeof(CNPriority)).ToList().IndexOf(parentTask.Priority.ToString()) + 1);
+                    TagPanelViewModel.TagItems = new ObservableCollection<TagItemViewModel>(parentTask.TaskTaggers
+                        .Select(x => x.Tag)
+                        .Select(y => new TagItemViewModel(TagPanelViewModel)
+                        {
+                            TagId = y.TagId,
+                            TagTitle = y.Title
+                        }));
+                }
+                else
+                {
+                    UrgencyRating = RatingControlType.Urgency.GetNewModel(3);
+                    PriorityRating = RatingControlType.Priority.GetNewModel(3);
+                }
             }
             IsEditing = true;
         }
