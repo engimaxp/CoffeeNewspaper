@@ -933,7 +933,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
             var mockTask = DomainTestHelper.GetARandomTask(1);
-            mockTask.Status = CNTaskStatus.DONE;
+            mockTask.Status = CNTaskStatus.DOING;
             //Assess
             mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
 

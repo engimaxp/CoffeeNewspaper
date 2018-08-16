@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CN_Core;
@@ -25,21 +22,17 @@ namespace CN_Presentation.ViewModel.Controls
         {
             ExpandTaskCommand = new RelayCommand(ExpandTask);
             OpenEditDialogCommand = new RelayCommand(OpenEditDialog);
-            SelectTaskCommand  = new RelayCommand(SelectTask);
+            SelectTaskCommand = new RelayCommand(SelectTask);
             DisplayMoreOpCommand = new RelayCommand(DisplayMoreOp);
-            PendingCommand= new RelayCommand(Pending);
+            PendingCommand = new RelayCommand(Pending);
             FailingCommand = new RelayCommand(Failing);
             DeleteCommand = new RelayCommand(Delete);
+            StartCommand = new RelayCommand(async () => await Start());
+            StopCommand = new RelayCommand(async () => await Stop());
+            FinishCommand = new RelayCommand(async () => await Finish());
 
             this.TaskInfo = TaskInfo;
-            if (TaskInfo != null)
-            {
-                TaskTitle = TaskInfo.Content.GetFirstLineOrWords(50);
-                Urgency = TaskInfo.MapFourQuadrantTaskUrgency();
-                Status = TaskInfo.MapTaskCurrentStatus();
-                CanPending = TaskInfo.Status != CNTaskStatus.PENDING && !TaskInfo.IsFail;
-                CanFail = !TaskInfo.IsFail;
-            }
+            if (TaskInfo != null) BindTaskToCurrentViewModel(TaskInfo);
         }
 
         #endregion
@@ -51,19 +44,14 @@ namespace CN_Presentation.ViewModel.Controls
             Refreshed = true;
             if (TaskInfo != null)
             {
-                TaskTitle = TaskInfo.Content.GetFirstLineOrWords(50);
-                Urgency = TaskInfo.MapFourQuadrantTaskUrgency();
-                Status = TaskInfo.MapTaskCurrentStatus();
+                BindTaskToCurrentViewModel(TaskInfo);
                 RefreshExpanderView();
             }
         }
 
         public void RefreshExpanderView(int? childTaskId = null)
         {
-            if (IsExpanded)
-            {
-                LoadDataToDetailExpanderView(childTaskId);
-            }
+            if (IsExpanded) LoadDataToDetailExpanderView(childTaskId);
         }
 
         #endregion
@@ -111,6 +99,16 @@ namespace CN_Presentation.ViewModel.Controls
         public bool CanFail { get; set; }
 
         /// <summary>
+        ///     true if task is paused
+        /// </summary>
+        public bool IsPaused { get; set; }
+
+        /// <summary>
+        ///     true if task is finished
+        /// </summary>
+        public bool IsFinished { get; set; }
+
+        /// <summary>
         ///     Store TaskInfo for future use
         /// </summary>
         public CNTask TaskInfo { get; set; }
@@ -146,37 +144,61 @@ namespace CN_Presentation.ViewModel.Controls
         public ICommand SelectTaskCommand { get; set; }
 
         /// <summary>
-        /// Toggle display More Op
+        ///     Toggle display More Op
         /// </summary>
         public ICommand DisplayMoreOpCommand { get; set; }
 
         /// <summary>
-        /// Set task to pending
+        ///     Set task to pending
         /// </summary>
         public ICommand PendingCommand { get; set; }
 
         /// <summary>
-        /// Set task to Fail
+        ///     Set task to Fail
         /// </summary>
         public ICommand FailingCommand { get; set; }
 
         /// <summary>
-        /// Delete target task
+        ///     Delete target task
         /// </summary>
         public ICommand DeleteCommand { get; set; }
+
+        /// <summary>
+        ///     Start task
+        /// </summary>
+        public ICommand StartCommand { get; set; }
+
+        /// <summary>
+        ///     Stop task
+        /// </summary>
+        public ICommand StopCommand { get; set; }
+
+        /// <summary>
+        ///     Finish task
+        /// </summary>
+        public ICommand FinishCommand { get; set; }
 
         #endregion
 
         #region Private Methods
 
+        private void BindTaskToCurrentViewModel(CNTask taskInfo)
+        {
+            TaskTitle = taskInfo.Content.GetFirstLineOrWords(50);
+            Urgency = taskInfo.MapFourQuadrantTaskUrgency();
+            Status = taskInfo.MapTaskCurrentStatus();
+            CanPending = taskInfo.Status != CNTaskStatus.DONE && !taskInfo.IsFail;
+            CanFail = !taskInfo.IsFail;
+            IsPaused = taskInfo.Status != CNTaskStatus.DOING;
+            IsFinished = taskInfo.Status == CNTaskStatus.DONE;
+        }
+
         private void ExpandTask()
         {
-            if (!IsExpanded)
-            {
-                LoadDataToDetailExpanderView();
-            }
+            if (!IsExpanded) LoadDataToDetailExpanderView();
             IsExpanded ^= true;
         }
+
         private void OpenEditDialog()
         {
             IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
@@ -190,27 +212,21 @@ namespace CN_Presentation.ViewModel.Controls
 
         private void SelectTask()
         {
-            this.IsSelected = true;
+            IsSelected = true;
             //other task deselct
-            foreach (var model in IoC.Get<TaskListViewModel>().Items.
-                Where(x=>x.TaskInfo?.TaskId!=this.TaskInfo?.TaskId && x.IsSelected))
-            {
+            foreach (var model in IoC.Get<TaskListViewModel>().Items
+                .Where(x => x.TaskInfo?.TaskId != TaskInfo?.TaskId && x.IsSelected))
                 model.IsSelected = false;
-            }
         }
 
         private void DisplayMoreOp()
         {
-            this.IsMoreOpDisplayed ^= true;
+            IsMoreOpDisplayed ^= true;
             //other task deselct
             if (IsMoreOpDisplayed)
-            {
-                foreach (var model in IoC.Get<TaskListViewModel>().Items.
-                    Where(x => x.TaskInfo?.TaskId != this.TaskInfo?.TaskId && x.IsMoreOpDisplayed))
-                {
+                foreach (var model in IoC.Get<TaskListViewModel>().Items
+                    .Where(x => x.TaskInfo?.TaskId != TaskInfo?.TaskId && x.IsMoreOpDisplayed))
                     model.IsMoreOpDisplayed = false;
-                }
-            }
         }
 
         private void LoadDataToDetailExpanderView(int? childTaskId = null)
@@ -222,29 +238,21 @@ namespace CN_Presentation.ViewModel.Controls
         {
             IsMoreOpDisplayed = false;
             if (TaskInfo == null) return;
-            IoC.Get<IUIManager>().ShowPrompt(new PromptDialogBoxViewModel(async (input) =>
+            IoC.Get<IUIManager>().ShowPrompt(new PromptDialogBoxViewModel(async input =>
             {
                 var result = true;
-                try
+                await TaskOperatorHelper.WrapException(async () =>
                 {
                     result = await IoC.Get<ITaskService>().PendingATask(TaskInfo.TaskId, input);
                     //refresh task
                     await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
-                }
-                catch (Exception exception)
-                {
-                    await IoC.Get<IUIManager>()
-                        .ShowMessage(new MessageBoxDialogViewModel
-                        {
-                            Title = "Error！",
-                            Message = exception.Message
-                        });
-                }
+                });
                 return result;
             })
             {
                 Message = $"Pending task {TaskInfo.Content.GetFirstLineOrWords(50)}:",
-                PromptMessage = "(optional)pending reason of this task"
+                PromptMessage = "(optional)pending reason of this task",
+                TextInput = TaskInfo.PendingReason
             });
         }
 
@@ -252,41 +260,72 @@ namespace CN_Presentation.ViewModel.Controls
         {
             IsMoreOpDisplayed = false;
             if (TaskInfo == null) return;
-            IoC.Get<IUIManager>().ShowPrompt(new PromptDialogBoxViewModel(async (input) =>
+            IoC.Get<IUIManager>().ShowPrompt(new PromptDialogBoxViewModel(async input =>
             {
                 var result = true;
-                try
+                await TaskOperatorHelper.WrapException(async () =>
                 {
                     result = await IoC.Get<ITaskService>().FailATask(TaskInfo.TaskId, input);
                     //refresh task
                     await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
-                }
-                catch (Exception exception)
-                {
-                    await IoC.Get<IUIManager>()
-                        .ShowMessage(new MessageBoxDialogViewModel
-                        {
-                            Title = "Error！",
-                            Message = exception.Message
-                        });
-                }
+                });
                 return result;
             })
             {
                 Message = $"Fail task {TaskInfo.Content.GetFirstLineOrWords(50)}:",
-                PromptMessage = "(optional)fail reason of this task"
+                PromptMessage = "(optional)fail reason of this task",
+                TextInput = TaskInfo.FailReason
             });
         }
 
         private void Delete()
         {
             IsMoreOpDisplayed = false;
-            IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(TaskOperatorHelper.DeleteTask(false, TaskInfo))
+            IoC.Get<IUIManager>().ShowConfirm(
+                new ConfirmDialogBoxViewModel(TaskOperatorHelper.DeleteTask(false, TaskInfo))
+                {
+                    CofirmText = "Confirm",
+                    CancelText = "Cancel",
+                    Message = "Are you sure to delete this child task?",
+                    SecondaryMessage = "You may restore it later."
+                });
+        }
+
+        private async Task Finish()
+        {
+            await TaskOperatorHelper.WrapException(async () =>
             {
-                CofirmText = "Confirm",
-                CancelText = "Cancel",
-                Message = "Are you sure to delete this child task?",
-                SecondaryMessage = "You may restore it later.",
+                IsMoreOpDisplayed = false;
+                if (TaskInfo == null) return;
+                await IoC.Get<ITaskService>().FinishATask(TaskInfo.TaskId);
+                //refresh task
+                await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+            });
+        }
+
+        private async Task Stop()
+        {
+            await TaskOperatorHelper.WrapException(async () =>
+            {
+                IsMoreOpDisplayed = false;
+                if (TaskInfo == null) return;
+                await IoC.Get<ITaskService>().PauseATask(TaskInfo.TaskId);
+                IsPaused = true;
+                //refresh task
+                await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+            });
+        }
+
+        private async Task Start()
+        {
+            await TaskOperatorHelper.WrapException(async () =>
+            {
+                IsMoreOpDisplayed = false;
+                if (TaskInfo == null) return;
+                await IoC.Get<ITaskService>().StartATask(TaskInfo.TaskId);
+                IsPaused = false;
+                //refresh task
+                await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
             });
         }
 

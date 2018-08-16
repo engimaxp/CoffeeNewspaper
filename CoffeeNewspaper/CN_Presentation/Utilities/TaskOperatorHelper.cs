@@ -10,6 +10,23 @@ namespace CN_Presentation.Utilities
 {
     public static class TaskOperatorHelper
     {
+        public static async Task WrapException(Func<Task> doWork)
+        {
+            try
+            {
+                await doWork();
+            }
+            catch (Exception exception)
+            {
+                await IoC.Get<IUIManager>()
+                    .ShowMessage(new MessageBoxDialogViewModel
+                    {
+                        Title = "Error！",
+                        Message = exception.Message
+                    });
+            }
+        }
+
         public static Func<Task<bool>> DeleteTask(bool force, CNTask targetTask)
         {
             return async () =>

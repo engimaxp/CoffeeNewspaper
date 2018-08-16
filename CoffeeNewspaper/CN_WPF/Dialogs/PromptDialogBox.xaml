@@ -24,6 +24,7 @@
         />
         <TextBox Text="{Binding TextInput,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                  Style="{StaticResource MemoContent}"
+                 local:FocusAndSelectProperty.Value="True"
                  Width="320"
                  Height="100"
                  TextAlignment="Left"

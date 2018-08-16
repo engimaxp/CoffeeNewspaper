@@ -132,7 +132,7 @@
                            FontSize="{StaticResource FontSizeSmall}">
                     <Run FontFamily="{StaticResource FontAwesomeSolid}"
                          Text="{StaticResource FontAwesomeHalfHourGlassIcon}" />
-                    <Run Text="{Binding PendingReason,FallbackValue=''}" />
+                    <Run Text="{Binding PendingReason,FallbackValue='No description'}" />
                 </TextBlock>
             </Border>
 
@@ -150,7 +150,7 @@
                            Foreground="{StaticResource ForegroundVeryLightBrush}">
                     <Run FontFamily="{StaticResource FontAwesomeSolid}"
                          Text="{StaticResource FontAwesomeTimesCircleIcon}" />
-                    <Run Text="{Binding FailReason,FallbackValue=''}" />
+                    <Run Text="{Binding FailReason,FallbackValue='No description'}" />
                 </TextBlock>
             </Border>
             <!--Urgency-->

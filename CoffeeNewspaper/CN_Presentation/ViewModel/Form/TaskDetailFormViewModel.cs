@@ -3,13 +3,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
-using CN_Core.Interfaces;
 using CN_Core.Interfaces.Service;
 using CN_Core.Utilities;
 using CN_Presentation.Input;
 using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Controls;
-using CN_Presentation.ViewModel.Dialog;
 using CN_Presentation.ViewModel.Input;
 
 namespace CN_Presentation.ViewModel.Form
@@ -22,14 +20,97 @@ namespace CN_Presentation.ViewModel.Form
 
         #endregion
 
+        #region Base Confirm Action Implement
+
+        public override async Task<bool> Confirm()
+        {
+            return await RunCommandAsyncGeneric(() => ConfirmIsRunning, async () =>
+            {
+                var result = false;
+                await TaskOperatorHelper.WrapException(async () =>
+                {
+                    var newTask = GenerateCNTask();
+                    if (originTask == null)
+                        result = (await IoC.Get<ITaskService>().CreateATask(newTask))?.TaskId > 0;
+                    else
+                        result = await IoC.Get<ITaskService>().EditATask(newTask);
+
+                    await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(newTask.TaskId);
+                });
+                return result;
+            });
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private CNTask GenerateCNTask()
+        {
+            var result = new CNTask
+            {
+                CreateTime = DateTime.Now,
+                ParentTaskID = ParentTaskId
+            };
+            if (originTask != null && originTask.TaskId > 0) result = originTask;
+
+            result.Content = Content;
+            result.DeadLine = DeadLineEntry.SelectedDateTime;
+            result.EstimatedDuration = EstimatedDurationEntry.SelectedTimeDuration;
+
+            Enum.TryParse(Enum.GetNames(typeof(CNUrgency))[UrgencyRating.SelectedValue - 1], out CNUrgency urgency);
+            result.Urgency = urgency;
+
+            Enum.TryParse(Enum.GetNames(typeof(CNPriority))[PriorityRating.SelectedValue - 1], out CNPriority priority);
+            result.Priority = priority;
+
+            //Delete Tags
+            if (result.TaskTaggers.Count > 0)
+            {
+                var remainOldTags = TagPanelViewModel.TagItems.Where(x => !string.IsNullOrEmpty(x.TagId))
+                    .Select(y => y.TagId);
+                foreach (var cnTaskTagger in result.TaskTaggers.Where(x => !remainOldTags.Contains(x.TagId)).ToList())
+                    result.TaskTaggers.Remove(cnTaskTagger);
+            }
+
+            //Add Tags
+            foreach (var tagItemViewModel in TagPanelViewModel.TagItems)
+            {
+                //Jump over old tags
+                if (result.TaskTaggers.FirstOrDefault(x =>
+                        x.TagId == tagItemViewModel.TagId && !string.IsNullOrEmpty(tagItemViewModel.TagId)) != null)
+                    continue;
+
+                var curTaskTagger = string.IsNullOrEmpty(tagItemViewModel.TagId)
+                    ? new CNTaskTagger
+                    {
+                        Task = result,
+                        Tag = new CNTag
+                        {
+                            Title = tagItemViewModel.TagTitle
+                        }
+                    }
+                    : new CNTaskTagger
+                    {
+                        Task = result,
+                        TagId = tagItemViewModel.TagId
+                    };
+                result.TaskTaggers.Add(curTaskTagger);
+            }
+
+            return result;
+        }
+
+        #endregion
+
         #region Constructor
 
         /// <summary>
-        /// Constructor to create a task detail form view model
+        ///     Constructor to create a task detail form view model
         /// </summary>
         /// <param name="originTask">Origin Task ,null if it's add a task</param>
         /// <param name="parentTask">Parent Task ,if it's adding a task and parentTask is not null then its refresh a Detail View</param>
-        public TaskDetailFormViewModel(CNTask originTask,CNTask parentTask = null)
+        public TaskDetailFormViewModel(CNTask originTask, CNTask parentTask = null)
         {
             this.originTask = originTask;
             var dateTimeViewModel = new DateTimeEntryViewModel();
@@ -42,7 +123,9 @@ namespace CN_Presentation.ViewModel.Form
             //Edit
             if (originTask != null)
             {
-                ParentTaskTitle = originTask.ParentTask == null ? "Empty" : originTask.ParentTask.Content.GetFirstLineOrWords(50);
+                ParentTaskTitle = originTask.ParentTask == null
+                    ? "Empty"
+                    : originTask.ParentTask.Content.GetFirstLineOrWords(50);
                 Status = originTask.MapTaskCurrentStatus();
                 IsFail = originTask.IsFail;
                 FailReason = originTask.FailReason;
@@ -87,105 +170,11 @@ namespace CN_Presentation.ViewModel.Form
                     PriorityRating = RatingControlType.Priority.GetNewModel(3);
                 }
             }
+
             IsEditing = true;
         }
 
-        private int? ParentTaskId { get; set; }
-
-        #endregion
-
-        #region Base Confirm Action Implement
-
-        public override async Task<bool> Confirm()
-        {
-            return await RunCommandAsyncGeneric(() => ConfirmIsRunning, async () =>
-            {
-                var result = false;
-                try
-                {
-                    var newTask = GenerateCNTask();
-                    if (originTask == null)
-                        result = (await IoC.Get<ITaskService>().CreateATask(newTask))?.TaskId > 0;
-                    else
-                        result = await IoC.Get<ITaskService>().EditATask(newTask);
-
-                    await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(newTask.TaskId);
-                }
-                catch (Exception exception)
-                {
-                    await IoC.Get<IUIManager>()
-                        .ShowMessage(new MessageBoxDialogViewModel
-                        {
-                            Title = "Error！",
-                            Message = exception.Message
-                        });
-                }
-
-                return result;
-            });
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private CNTask GenerateCNTask()
-        {
-            var result = new CNTask
-            {
-                CreateTime = DateTime.Now,ParentTaskID = ParentTaskId
-
-            };
-            if (originTask != null && originTask.TaskId > 0){ result = originTask;}
-
-            result.Content = Content;
-            result.DeadLine = DeadLineEntry.SelectedDateTime;
-            result.EstimatedDuration = EstimatedDurationEntry.SelectedTimeDuration;
-
-            Enum.TryParse(Enum.GetNames(typeof(CNUrgency))[UrgencyRating.SelectedValue - 1], out CNUrgency urgency);
-            result.Urgency = urgency;
-
-            Enum.TryParse(Enum.GetNames(typeof(CNPriority))[PriorityRating.SelectedValue - 1], out CNPriority priority);
-            result.Priority = priority;
-
-            //Delete Tags
-            if (result.TaskTaggers.Count>0)
-            {
-                var remainOldTags =  TagPanelViewModel.TagItems.Where(x => !string.IsNullOrEmpty(x.TagId)).Select(y => y.TagId);
-                foreach (var cnTaskTagger in result.TaskTaggers.Where(x => !remainOldTags.Contains(x.TagId)).ToList())
-                {
-                    result.TaskTaggers.Remove(cnTaskTagger);
-                }
-            }
-            //Add Tags
-            foreach (var tagItemViewModel in TagPanelViewModel.TagItems)
-            {
-                //Jump over old tags
-                if (result.TaskTaggers.FirstOrDefault(x =>
-                        x.TagId == tagItemViewModel.TagId && !string.IsNullOrEmpty(tagItemViewModel.TagId)) != null)
-                {
-                    continue;
-                }
-
-                var curTaskTagger = string.IsNullOrEmpty(tagItemViewModel.TagId)
-                    ? new CNTaskTagger
-                    {
-                        Task = result,
-                        Tag = new CNTag
-                        {
-                            Title = tagItemViewModel.TagTitle
-                        }
-                    }
-                    : new CNTaskTagger
-                    {
-                        Task = result,
-                        TagId = tagItemViewModel.TagId
-                    };
-                result.TaskTaggers.Add(curTaskTagger);
-            }
-
-            return result;
-        }
+        private int? ParentTaskId { get; }
 
         #endregion
 
@@ -215,7 +204,7 @@ namespace CN_Presentation.ViewModel.Form
         #endregion
 
         #region Public Properties
-        
+
         /// <summary>
         ///     Display Current Task Status
         /// </summary>
@@ -248,9 +237,9 @@ namespace CN_Presentation.ViewModel.Form
         public string Content { get; set; }
 
         /// <summary>
-        /// Autofocus target TextBox
+        ///     Autofocus target TextBox
         /// </summary>
-        public bool IsEditing { get; set; } = false;
+        public bool IsEditing { get; set; }
 
         /// <summary>
         ///     Title is the first line of the tasks content
@@ -290,9 +279,10 @@ namespace CN_Presentation.ViewModel.Form
         public RatingViewModel PriorityRating { get; set; }
 
         /// <summary>
-        /// this task's parent task's title
+        ///     this task's parent task's title
         /// </summary>
         public string ParentTaskTitle { get; set; }
+
         #endregion
     }
 }

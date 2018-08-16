@@ -32,7 +32,7 @@
                             VerticalAlignment="Top">
 
                     <!-- Fail Reason -->
-                    <Grid Margin="0"
+                    <Grid Margin="0 0 0 5"
                           Visibility="{Binding DisplayFailReason,Converter={local:BooleanToVisiblityGoneConverter}}"
                           ToolTip="Fail Reason">
                         <Grid.ColumnDefinitions>
@@ -55,7 +55,7 @@
                     </Grid>
 
                     <!--Pending Reason-->
-                    <Grid Margin="0 5"
+                    <Grid Margin="0 0 0 5"
                           Visibility="{Binding DisplayPendingReason,Converter={local:BooleanToVisiblityGoneConverter}}"
                           ToolTip="Pending Reason">
                         <Grid.ColumnDefinitions>

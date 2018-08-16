@@ -111,11 +111,21 @@ namespace CN_Service
             var targetTask = await taskDataStore.GetTask(taskId);
             if (targetTask == null) return false;
             if (targetTask.IsDeleted) return false; 
-            if (targetTask.Status != CNTaskStatus.TODO && targetTask.Status != CNTaskStatus.PENDING)
-                throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.TODO, CNTaskStatus.PENDING},
+            if (targetTask.Status != CNTaskStatus.TODO && targetTask.Status != CNTaskStatus.PENDING && targetTask.Status != CNTaskStatus.DONE)
+                throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.TODO, CNTaskStatus.PENDING, CNTaskStatus.DONE },
                     targetTask.Status);
             //set status to doing
+            if (targetTask.Status == CNTaskStatus.PENDING)
+            {
+                targetTask.PendingReason = null;
+            }
             targetTask.Status = CNTaskStatus.DOING;
+            if (targetTask.IsFail)
+            {
+                targetTask.FailReason = null;
+                targetTask.IsFail = false;
+            }
+
             await taskDataStore.UpdateTask(targetTask);
             //if this is the first start then update targetTask's startTime
             //add a timeslice to this task
@@ -185,7 +195,16 @@ namespace CN_Service
             if (targetTask.Status == CNTaskStatus.DONE)
                 throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING },
                     targetTask.Status);
+            if (targetTask.Status == CNTaskStatus.PENDING)
+            {
+                targetTask.PendingReason = null;
+            }
             targetTask.Status = CNTaskStatus.DONE;
+            if (targetTask.IsFail)
+            {
+                targetTask.FailReason = null;
+                targetTask.IsFail = false;
+            }
             await taskDataStore.UpdateTask(targetTask);
 
             //EndTimeSlices of this task's children and suffix task
@@ -375,7 +394,8 @@ namespace CN_Service
             var originDatas = originDataTask.UsedTimeSlices.ToList();
             originDatas.Sort();
             // if the last timeslice is ended then return true
-            if (!(originDatas.Last().Clone() is CNTimeSlice lastSlice) || lastSlice.EndDateTime != null) return true;
+            CNTimeSlice lastSlice = originDatas.Last();
+            if (lastSlice.EndDateTime != null) return true;
             // if the last timeslice's starttime is bigger than endtime return false
             if (lastSlice.StartDateTime > endTime) return false;
             lastSlice.EndDateTime = endTime;

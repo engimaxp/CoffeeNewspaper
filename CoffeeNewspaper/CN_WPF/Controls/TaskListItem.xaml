@@ -64,7 +64,7 @@
                 </Grid.ColumnDefinitions>
                 <Border
                     Grid.Column="0"
-                    Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='ecf6fb'}">
+                    Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='D0F4DC'}">
                     <Border.InputBindings>
                         <MouseBinding MouseAction="LeftClick" Command="{Binding SelectTaskCommand}" />
                         <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ExpandTaskCommand}" />
@@ -134,17 +134,40 @@
                                     <ColumnDefinition Width="0.4*"></ColumnDefinition>
                                 </Grid.ColumnDefinitions>
 
-                                <Button Style="{StaticResource BackGroundIconButton}"
+                                <Button Style="{StaticResource BackGroundIconButtonWithText}"
                                         Grid.Row="0" 
                                         Grid.Column="0" 
-                                        Grid.RowSpan="2"
-                                        Background="{StaticResource WordGreenBrush}"
-                                        FontFamily="{StaticResource FontAwesomeSolid}"
-                                        Content="{StaticResource FontAwesomePaperclipIcon}"
+                                        Tag="Start"
+                                        Visibility="{Binding IsPaused,Converter={local:BooleanToVisiblityGoneConverter}}"
+                                        Command="{Binding StartCommand}"
+                                        Background="{StaticResource IconHoverBlueBrush}"
+                                        Content="{StaticResource FontAwesomePlayIcon}"
                                         FontSize="{StaticResource FontSizeLarge}">
                                 </Button>
-                                
-                                
+
+                                <Button Style="{StaticResource BackGroundIconButtonWithText}"
+                                        Grid.Row="0" 
+                                        Grid.Column="0" 
+                                        Tag="Stop"
+                                        Command="{Binding StopCommand}"
+                                        Visibility="{Binding IsPaused,Converter={local:BooleanToVisiblityGoneConverter},ConverterParameter=True}"
+                                        Background="{StaticResource IconHoverBlueBrush}"
+                                        Content="{StaticResource FontAwesomePauseIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
+
+                                <Button Style="{StaticResource BackGroundIconButtonWithText}"
+                                        Grid.Row="1" 
+                                        Grid.Column="0" 
+                                        Tag="Finish"
+                                        IsEnabled="{Binding IsFinished,Converter={local:BooleanInvertConverter}}"
+                                        Command="{Binding FinishCommand}"
+                                        Background="{StaticResource WordGreenBrush}"
+                                        Content="{StaticResource FontAwesomeCheckIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
+
+
                                 <Button Style="{StaticResource BackGroundIconButton}"
                                         Grid.Row="0" 
                                         Grid.Column="1"
@@ -197,7 +220,7 @@
 
                 <!-- More Op Indicator Padding -->
                 <Grid Grid.Column="1"
-                      Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='ecf6fb'}">
+                      Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='D0F4DC'}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="1*" />
                         <RowDefinition Height="1*" />
