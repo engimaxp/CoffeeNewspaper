@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CN_WPF"
         mc:Ignorable="d"
-        Title="Coffee Newspapaer!" 
+        Title="Coffee Newspapaer!"
         AllowsTransparency="False"
-        Height="660" 
+        Height="660"
         Width="780"
         MinWidth="780"
         MinHeight="660"
-        
+
         Deactivated="AppWindow_Deactivated"
         Activated="AppWindow_Activated">
     <Grid>
@@ -25,47 +25,26 @@
         </Grid.RowDefinitions>
 
         <!--Navagation Bar-->
-        <local:HeadMenuControl Grid.Row="0"></local:HeadMenuControl>
+        <local:HeadMenuControl Grid.Row="0" />
 
 
-<!--        <Frame Grid.Row="1" x:Name="MainFrame" Content="{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:ApplicationPageValueConverter}}"></Frame>-->
+        <!--        <Frame Grid.Row="1" x:Name="MainFrame" Content="{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:ApplicationPageValueConverter}}"></Frame>-->
         <!--Page Content-->
-        <local:PageHost Grid.Row="1" 
+        <local:PageHost Grid.Row="1"
                         CurrentPage="{Binding ApplicationViewModel.CurrentPage,
                                         Source={x:Static local:ViewModelLocator.Instance}}"
                         CurrentPageViewModel="{Binding ApplicationViewModel.CurrentPageViewModel,
-                                        Source={x:Static local:ViewModelLocator.Instance}}"                            
-        />
+                                        Source={x:Static local:ViewModelLocator.Instance}}" />
 
         <!--Status Bar-->
-        <Border Grid.Row="2"
-                Background="{StaticResource BackgroundVeryLightBrush}"
-                Height="40"
-                BorderBrush="{StaticResource BackgroundLightBrush}"
-                BorderThickness="0 1">
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
-                <TextBlock FontFamily="{StaticResource FontAwesomeSolid}"
-                           Text="{StaticResource FontAwesomeCheckIcon}"
-                           Margin="0 0 10 0"
-                           Foreground="{StaticResource WordGreenBrush}" 
-                           FontSize="{StaticResource FontSizeXLarge}"/>
-                <TextBlock
-                    Text="This is a status bar"
-                    Foreground="{StaticResource ForegroundDarkBrush}"
-                    FontSize="{StaticResource FontSizeLarge}"/>
-            </StackPanel>
-        </Border>
-
+        <local:StatusBarControl Grid.Row="2"></local:StatusBarControl>
 
         <!-- Dimmed overlay -->
         <Border Grid.Row="0" Grid.RowSpan="3"
                 Panel.ZIndex="10"
                 Opacity="0.3">
             <Border Background="{StaticResource ForegroundVeryDarkBrush}"
-                    local:AnimateFadeInProperty.Value="{Binding DimmableOverlayVisible}"
-            />
+                    local:AnimateFadeInProperty.Value="{Binding DimmableOverlayVisible}" />
         </Border>
     </Grid>
 </Window>

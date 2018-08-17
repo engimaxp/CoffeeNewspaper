@@ -2,6 +2,7 @@
 using CN_Presentation.ViewModel.Application;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Controls;
+using CN_Presentation.ViewModel.Controls.StatusBar;
 using Ninject;
 
 namespace CN_Presentation
@@ -63,6 +64,7 @@ namespace CN_Presentation
                     },
                 }
             });
+            Kernel.BindViewModel(new StatusBarViewModel());
             Kernel.BindViewModel(new TasksListPageViewModel());
             Kernel.BindViewModel(new WorkSpaceViewModel());
             Kernel.BindViewModel(new MemoListViewModel());

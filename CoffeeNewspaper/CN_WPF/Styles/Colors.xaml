@@ -53,6 +53,10 @@
     <Color x:Key="WordRed">#ff4747</Color>
     <SolidColorBrush x:Key="WordRedBrush" Color="{StaticResource WordRed}" />
 
+
+    <Color x:Key="WordCoffee">#6E4123</Color>
+    <SolidColorBrush x:Key="WordCoffeeBrush" Color="{StaticResource WordCoffee}" />
+
     <Color x:Key="WordLightRed">#ffdddd</Color>
     <SolidColorBrush x:Key="WordLightRedBrush" Color="{StaticResource WordLightRed}" />
 

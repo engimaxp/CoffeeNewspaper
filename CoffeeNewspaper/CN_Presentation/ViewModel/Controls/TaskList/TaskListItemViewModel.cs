@@ -6,6 +6,7 @@ using CN_Core.Interfaces;
 using CN_Core.Interfaces.Service;
 using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Controls.StatusBar;
 using CN_Presentation.ViewModel.Dialog;
 using CN_Presentation.ViewModel.Form;
 
@@ -191,6 +192,19 @@ namespace CN_Presentation.ViewModel.Controls
             CanFail = !taskInfo.IsFail;
             IsPaused = taskInfo.Status != CNTaskStatus.DOING;
             IsFinished = taskInfo.Status == CNTaskStatus.DONE;
+            Task.Run(async () =>
+            {
+                if (IsPaused)
+                {
+                    await IoC.Get<StatusBarViewModel>().ChangeToRest(taskInfo.TaskId);
+                }
+                else
+                {
+                    await IoC.Get<StatusBarViewModel>().ChangeToWork(taskInfo.Content.GetFirstLineOrWords(20),
+                        taskInfo.TaskId,
+                        taskInfo.GetLastStartWorkTimeSpan());
+                }
+            });
         }
 
         private void ExpandTask()

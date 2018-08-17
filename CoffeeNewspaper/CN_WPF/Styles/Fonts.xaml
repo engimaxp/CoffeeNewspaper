@@ -50,6 +50,7 @@
     <system:String x:Key="FontAwesomeThIcon">&#xf00a;</system:String>
     <system:String x:Key="FontAwesomePlayIcon">&#xf04b;</system:String>
     <system:String x:Key="FontAwesomePauseIcon">&#xf04c;</system:String>
+    <system:String x:Key="FontAwesomePencilAltIcon">&#xf303;</system:String>
     
     
     <system:String x:Key="FontAwesomeChevronCircleDownIcon">&#xf13a;</system:String>

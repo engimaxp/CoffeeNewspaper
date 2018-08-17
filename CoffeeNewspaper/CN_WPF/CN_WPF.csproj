@@ -234,6 +234,9 @@
     <Compile Include="Controls\ScrollViewExpander.xaml.cs">
       <DependentUpon>ScrollViewExpander.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\StatusBarControl.xaml.cs">
+      <DependentUpon>StatusBarControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TagPanelControlWithCancel.xaml.cs">
       <DependentUpon>TagPanelControlWithCancel.xaml</DependentUpon>
     </Compile>
@@ -363,6 +366,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ScrollViewExpander.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\StatusBarControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
