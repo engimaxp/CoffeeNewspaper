@@ -14,6 +14,7 @@ namespace CN_Repository
             Kernel.Bind<IMemoDataStore>().To<MemoDataStore>();
             Kernel.Bind<ITimeSliceDataStore>().To<TimeSliceDataStore>();
             Kernel.Bind<ITaskDataStore>().To<TaskDataStore>();
+            Kernel.Bind<ITagDataStore>().To<TagDataStore>();
         }
     }
 }

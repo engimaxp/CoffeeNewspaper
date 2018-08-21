@@ -40,7 +40,7 @@
                     FontFamily="{StaticResource FontAwesomeSolid}"
                     FontSize="{StaticResource FontSizeRegular}"
                     Foreground="{StaticResource WordDarkBlueBrush}"
-                    Text="{StaticResource FontAwesomeCoffeeIcon}" />
+                    Text="{StaticResource FontAwesomePencilAltIcon}" />
                 <TextBlock
                     TextWrapping="Wrap"
                     FontWeight="Bold"

@@ -26,6 +26,10 @@
     <Color x:Key="ForegroundDark">#6a6a6a</Color>
     <SolidColorBrush x:Key="ForegroundDarkBrush" Color="{StaticResource ForegroundDark}" />
 
+    <Color x:Key="ForegroundLightDark">#777777</Color>
+    <SolidColorBrush x:Key="ForegroundLightDarkBrush" Color="{StaticResource ForegroundLightDark}" />
+    
+
     <Color x:Key="IconHoverBlue">#4d97ff</Color>
     <SolidColorBrush x:Key="IconHoverBlueBrush" Color="{StaticResource IconHoverBlue}" />
 

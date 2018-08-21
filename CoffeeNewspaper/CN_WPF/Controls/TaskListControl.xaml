@@ -8,13 +8,8 @@
              mc:Ignorable="d"
              d:DesignHeight="450" 
              Width="300">
-    <Border Padding="1 5 0 0">
-        <Border.Background>
-            <LinearGradientBrush StartPoint="0 0.5" EndPoint="1 0.5">
-                    <GradientStop Color="{StaticResource WordLightBlue}" Offset="0.0" />
-                    <GradientStop Color="{StaticResource IconHoverBlue}" Offset="1" />
-                </LinearGradientBrush>
-        </Border.Background>
+    <Border Padding="1 5 0 0" 
+            Background="{StaticResource WordVeryVeryLightBlueBrush}">
         <Grid d:DataContext="{x:Static design:TaskListDesignModel.Instance}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -32,40 +27,80 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0"
-                            Margin="5"
-                            CornerRadius="15"
-                            Background="{StaticResource ForegroundMainBrush}">
-                        <TextBox Style="{StaticResource SearchBox}"
-                            Padding="30 0 15 0" 
-                                 Text="1234" 
-                                 FontSize="{StaticResource FontSizeRegular}"
-                                 VerticalAlignment="Center"></TextBox>
-                    </Border>
-                    <TextBlock
-                        Foreground="{StaticResource IconHoverBlueBrush}"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Left"
+                    <Border 
                         Grid.Column="0"
-                        Margin="10 0"
-                        Panel.ZIndex="2"
-                        FontSize="{StaticResource FontSizeXLarge}"
-                        FontFamily="{StaticResource FontAwesomeSolid}"
-                        Text="{StaticResource FontAwesomeSearchIcon}"
-                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                        />
+                            Margin="5"
+                            BorderBrush="{StaticResource ForegroundLightDarkBrush}"
+                            BorderThickness="2"
+                            CornerRadius="10"
+                            Background="{StaticResource ForegroundVeryLightBrush}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Foreground="{StaticResource ForegroundLightDarkBrush}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Left"
+                                Grid.Column="0"
+                                Margin="5 1 5 0"
+                                FontSize="{StaticResource FontSizeLarge}"
+                                FontFamily="{StaticResource FontAwesomeSolid}"
+                                Text="{StaticResource FontAwesomeSearchIcon}"
+                                Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                            />
+                            <TextBox 
+                                x:Name="SearchBox"
+                                Grid.Column="1"
+                                Style="{StaticResource SearchBox}"
+                                Padding="0"
+                                     Margin="0 0 10 0" 
+                                     Text="{Binding SearchInput,UpdateSourceTrigger=PropertyChanged}" 
+                                     FontSize="{StaticResource FontSizeRegular}"
+                                     VerticalAlignment="Center">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" Command="{Binding SearchCommand}"></KeyBinding>
+                                    <KeyBinding Key="Up" Command="{Binding AutoCompleteBoxUpCommand}"></KeyBinding>
+                                    <KeyBinding Key="Down" Command="{Binding AutoCompleteBoxDownCommand}"></KeyBinding>
+                                </TextBox.InputBindings>
+                            </TextBox>
+                        </Grid>
+                    </Border>
+                    <Popup 
+                        x:Name="SearchTagAutoCompletePopup"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Width="{Binding ElementName=SearchBox,Path=ActualWidth}"
+                        StaysOpen="True"
+                        AllowsTransparency="True"
+                        Placement="Bottom"
+                        IsOpen="{Binding IsSearchAutoCompletePanelPopup}"
+                        PlacementTarget="{Binding ElementName=SearchBox}">
+                        <ListBox ItemsSource="{Binding SearchAutoCompleteOptions}"
+                                 local:MonitorListBoxSelectProperty.Value="True"
+                                 SelectedItem="{Binding SelectedSearchAutoComplete,Mode=TwoWay}"
+                                 ItemContainerStyle="{StaticResource TimePickerListBoxItemStyle}" />
+                    </Popup>
                     <StackPanel Orientation="Horizontal"
                                 Grid.Column="1">
                         <!-- Sort Icon -->
                         <Button Style="{StaticResource IconGrowButton}"
-                                Foreground="{StaticResource ForegroundMainBrush}"
+                                Foreground="{StaticResource ForegroundLightDarkBrush}"
                                 Content="{StaticResource FontAwesomeSortAmountDownIcon}" 
                                 Command="{Binding SortCommand}"/>
                         <!-- Filter Icon -->
                         <Button Style="{StaticResource IconGrowButton}"
-                                Foreground="{StaticResource ForegroundMainBrush}"
+                                Foreground="{StaticResource ForegroundLightDarkBrush}"
                                 Content="{StaticResource FontAwesomeFilterIcon}"
                                 Command="{Binding FilterCommand}"/>
+
+                        <Button Style="{StaticResource IconGrowButton}"
+                                Margin="5 0"
+                                Foreground="{StaticResource ForegroundLightDarkBrush}"
+                                Content="{StaticResource FontAwesomeEllipsisVerticalIcon}"
+                                Command="{Binding MoreCommand}"/>
                     </StackPanel>
                 </Grid>
                 <!-- Search Activated Tags -->
@@ -84,20 +119,23 @@
                             <Button
                                 Foreground="{StaticResource ForegroundLightBrush}"
                                 Style="{StaticResource SearchCancelButton}" 
-                                Content="{Binding}"/>
+                                Content="{Binding Text}"
+                                Command="{Binding DeleteSearchCommand}"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </Grid>
             <!-- task list container -->
-            <ScrollViewer Grid.Row="1"
+            <ScrollViewer 
+                x:Name="ScrollViewer"
+                Grid.Row="1"
+                local:MouseWheelEventBubbleUpAttachedProperty.Value="True"
                           CanContentScroll="False"
                           Background="{StaticResource ForegroundMainBrush}"
-                          local:MouseWheelEventBubbleUpAttachedProperty.Value="True"
                           VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical">
                     <ItemsControl
-                        ItemsSource="{Binding Items}">
+                        ItemsSource="{Binding FilteredItems}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel IsItemsHost="True" VirtualizingStackPanel.IsVirtualizing="True"

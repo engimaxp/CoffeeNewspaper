@@ -61,10 +61,17 @@ namespace CN_Presentation.ViewModel.Controls.Design
                 }
             };
 
-            ActivatedSearchTxts = new ObservableCollection<string>()
+            ActivatedSearchTxts = new ObservableCollection<SearchTxtViewModel>()
             {
-                "Hello","My","您好","Boun"
+                new SearchTxtViewModel("Hello"),
+                new SearchTxtViewModel("My"),
+                new SearchTxtViewModel("您好"),
+                new SearchTxtViewModel("Boun")
             };
+
+            IsSearchAutoCompletePanelPopup = true;
+            SearchAutoCompleteOptions = new ObservableCollection<string>(){"newtag"};
+            SelectedSearchAutoComplete = string.Empty;
         }
 
         #endregion

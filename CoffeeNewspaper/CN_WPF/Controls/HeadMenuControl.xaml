@@ -17,6 +17,10 @@
         </Grid.ColumnDefinitions>
 
         <!--ShorCut Bar-->
+        <Button Height="64"
+                Content="{StaticResource FontAwesomeAddIcon}"
+                Style="{StaticResource SolidIconButton}"
+                Command="{Binding AddCommand}"/>
 
         <!--Main Function and Settings UserInfo Bar-->
         <ItemsControl Grid.Column="2"
