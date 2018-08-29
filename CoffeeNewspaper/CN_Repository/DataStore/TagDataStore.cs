@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
 using CN_Core.Interfaces.Repository;
+using CN_Core.Specification;
 using Microsoft.EntityFrameworkCore;
 
 namespace CN_Repository
@@ -15,11 +17,27 @@ namespace CN_Repository
 
         #region Select Methods
 
-        public async Task<ICollection<CNTag>> GetAllTaskTags()
+        public async Task<ICollection<CNTag>> GetAllTagsBySpecification(ISpecification<CNTag> spec)
         {
             return await IoC.Task.Run(
-                async () => await mDbContext.Tags.Where(x=> x.TaskTaggers!=null && x.TaskTaggers.Any(y=>!y.Task.IsDeleted)).ToListAsync());
+                async () =>
+                {
+                    // fetch a Queryable that includes all expression-based includes
+                    var queryableResultWithIncludes = spec.Includes
+                        .Aggregate(mDbContext.Set<CNTag>().AsQueryable(),
+                            (current, include) => current.Include(include));
+
+                    // modify the IQueryable to include any string-based include statements
+                    var secondaryResult = spec.IncludeStrings
+                        .Aggregate(queryableResultWithIncludes,
+                            (current, include) => current.Include(include));
+
+                    // return the result of the query using the specification's criteria expression
+                    return await secondaryResult
+                        .Where(spec.Criteria).ToListAsync();
+                });
         }
+        
         #endregion
     }
 }

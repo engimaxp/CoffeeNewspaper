@@ -27,20 +27,20 @@ namespace CN_Presentation.Utilities
             }
         }
 
-        public static Func<Task<bool>> DeleteTask(bool force, CNTask targetTask)
+        public static Func<Task<bool>> DeleteTask(bool force, int targetTaskId)
         {
             return async () =>
             {
                 var result = true;
                 try
                 {
-                    result = await IoC.Get<ITaskService>().DeleteTask(targetTask.TaskId, force);
+                    result = await IoC.Get<ITaskService>().DeleteTask(targetTaskId, force);
                     //refresh task
-                    await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(targetTask.TaskId);
+                    await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(targetTaskId);
                 }
                 catch (TaskHasChildTasksException)
                 {
-                    await IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(DeleteTask(true, targetTask))
+                    await IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(DeleteTask(true, targetTaskId))
                     {
                         CofirmText = "Confirm",
                         CancelText = "Cancel",
@@ -50,7 +50,7 @@ namespace CN_Presentation.Utilities
                 }
                 catch (TaskHasSufTasksException)
                 {
-                    await IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(DeleteTask(true, targetTask))
+                    await IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(DeleteTask(true, targetTaskId))
                     {
                         CofirmText = "Confirm",
                         CancelText = "Cancel",

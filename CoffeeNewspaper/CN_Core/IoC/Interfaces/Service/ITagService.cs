@@ -11,5 +11,12 @@ namespace CN_Core.Interfaces.Service
         /// </summary>
         /// <returns></returns>
         Task<ICollection<CNTag>> GetAllTaskTags();
+
+        /// <summary>
+        /// Get all tag starting with substring <see cref="tagSubstring"/>
+        /// </summary>
+        /// <param name="tagSubstring"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTag>> GetStartStringTag(string tagSubstring);
     }
 }

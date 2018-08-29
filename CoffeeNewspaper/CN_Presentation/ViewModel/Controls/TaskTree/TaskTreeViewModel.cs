@@ -156,7 +156,7 @@ namespace CN_Presentation.ViewModel
 
             if (selectedItem?.TaskInfo != null)
             {
-                IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(TaskOperatorHelper.DeleteTask(false, selectedItem.TaskInfo))
+                IoC.Get<IUIManager>().ShowConfirm(new ConfirmDialogBoxViewModel(TaskOperatorHelper.DeleteTask(false, selectedItem.TaskInfo.TaskId))
                 {
                     CofirmText = "Confirm",
                     CancelText = "Cancel",

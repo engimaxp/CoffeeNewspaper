@@ -48,6 +48,13 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="taskid"></param>
         /// <returns></returns>
         Task<CNTask> GetTask(int taskid);
+        
+        /// <summary>
+        ///     Get Task by id (No tracking) used as clone object
+        /// </summary>
+        /// <param name="taskid"></param>
+        /// <returns></returns>
+        Task<CNTask> GetTaskNoTracking(int taskid);
 
         /// <summary>
         /// Get Max Sort

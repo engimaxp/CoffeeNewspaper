@@ -20,11 +20,10 @@ namespace CN_Presentation.ViewModel.Controls
 
         private ObservableCollection<TaskListItemViewModel> _items = new ObservableCollection<TaskListItemViewModel>();
 
-        private readonly Dictionary<string,Func<TaskListItemViewModel,bool>> searchFilters = new Dictionary<string,Func<TaskListItemViewModel, bool>>()
+        private readonly Dictionary<string,Func<TaskListItemViewModel,string,bool>> searchFilters = new Dictionary<string,Func<TaskListItemViewModel,string, bool>>()
         {
             //Basic Filter
-            {"*basic*", (item) => item?.TaskInfo != null &&
-                        item.TaskInfo?.Content != null}
+            {"*basic*", (item,str) => item?.TaskInfo?.Content != null}
         };
 
         private string _selectedSearchAutoComplete;
@@ -153,7 +152,7 @@ namespace CN_Presentation.ViewModel.Controls
                     if (index >= 0)
                     {
                         Items[index].TaskInfo = cnTask;
-                        Items[index].Refresh();
+                        await Items[index].Refresh();
                     }
                     else
                     {
@@ -170,9 +169,9 @@ namespace CN_Presentation.ViewModel.Controls
             var task = await IoC.Get<ITaskService>().GetTaskById(taskId);
             //Parent Task
             if (task.HasParentTask())
-                RefreshChildTasks(task);
+                await RefreshChildTasks(taskId);
             else
-                RefreshTopLevelTask(task);
+                await RefreshTopLevelTask(await IoC.Get<ITaskService>().GetTaskByIdNoTracking(taskId));
         }
 
         #endregion
@@ -202,9 +201,9 @@ namespace CN_Presentation.ViewModel.Controls
         {
             IEnumerable<TaskListItemViewModel> tempItems = Items;
             //Apply Search
-            foreach (var searchFilter in searchFilters.Values)
+            foreach (var searchFilter in searchFilters.Keys)
             {
-                tempItems = tempItems.Where(searchFilter);
+                tempItems = tempItems.Where(x=>searchFilters[searchFilter](x,searchFilter));
             }
             FilteredItems =  new ObservableCollection<TaskListItemViewModel>(tempItems);
         }
@@ -212,15 +211,15 @@ namespace CN_Presentation.ViewModel.Controls
         private bool PassFilter(TaskListItemViewModel itemViewModel)
         {
             //Apply Search
-            foreach (var searchFilter in searchFilters.Values)
+            foreach (var searchFilter in searchFilters.Keys)
             {
-                if (!searchFilter(itemViewModel)) return false;
+                if (!searchFilters[searchFilter](itemViewModel, searchFilter)) return false;
             }
 
             return true;
         }
 
-        private void RefreshTopLevelTask(CNTask task)
+        private async Task RefreshTopLevelTask(CNTask task)
         {
             if (task.IsDeleted)
             {
@@ -239,7 +238,7 @@ namespace CN_Presentation.ViewModel.Controls
                     if (index >= 0)
                     {
                         Items[index].TaskInfo = task;
-                        Items[index].Refresh();
+                        await Items[index].Refresh();
                     }
                     else
                     {
@@ -249,15 +248,14 @@ namespace CN_Presentation.ViewModel.Controls
             }
         }
 
-        private void RefreshChildTasks(CNTask task)
+        private async Task RefreshChildTasks(int taskid)
         {
-//find root node
-            var parentTask = task.ParentTask;
-            while (parentTask.HasParentTask()) parentTask = parentTask.ParentTask;
+            //find root node
+            var parentTaskId = await IoC.Get<ITaskService>().GetTaskRootParentId(taskid);
 
             //refresh its expander
-            var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == parentTask.TaskId);
-            if (index >= 0) Items[index].RefreshExpanderView(task.TaskId);
+            var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == parentTaskId);
+            if (index >= 0) await Items[index].RefreshExpanderView(taskid);
         }
 
         private void Sort()
@@ -288,12 +286,11 @@ namespace CN_Presentation.ViewModel.Controls
 
             if (search.StartsWith("#"))
             {
-                var tagSearch = search.TrimStart('#');
-                searchFilters.Add(search,item => item.TaskInfo.TaskTaggers.Any(x=>x.Tag?.Title!=null && x.Tag.Title.ToLower().Contains(tagSearch)));
+                searchFilters.Add(search, (item, str) => item.TaskInfo.TaskTaggers.Any(x=>x.Tag?.Title!=null && x.Tag.Title.ToLower().Contains(str.TrimStart('#'))));
             }
             else
             {
-                searchFilters.Add(search, item => item.TaskInfo.Content.ToLower().Contains(SearchInput));
+                searchFilters.Add(search, (item, str) => item.TaskInfo.Content.ToLower().Contains(str));
             }
 
             ActivatedSearchTxts.Add(new SearchTxtViewModel(search,this));

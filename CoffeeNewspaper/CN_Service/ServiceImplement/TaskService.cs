@@ -52,6 +52,21 @@ namespace CN_Service
             return await taskDataStore.GetTask(taskId);
         }
 
+        public async Task<CNTask> GetTaskByIdNoTracking(int taskId)
+        {
+            return await taskDataStore.GetTaskNoTracking(taskId);
+        }
+
+        public async Task<int> GetTaskRootParentId(int taskId)
+        {
+            var task = await taskDataStore.GetTask(taskId);
+            while (task.HasParentTask())
+            {
+                task = task.ParentTask;
+            }
+            return task.TaskId;
+        }
+
         public Task<CNTask> CreateATask(CNTask task)
         {
             if (string.IsNullOrEmpty(task.Content) || string.IsNullOrEmpty(task.Content.Trim())) throw new ArgumentException("The Content Field is needed");

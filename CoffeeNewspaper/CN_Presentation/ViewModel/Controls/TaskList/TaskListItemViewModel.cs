@@ -21,8 +21,8 @@ namespace CN_Presentation.ViewModel.Controls
 
         public TaskListItemViewModel(CNTask TaskInfo = null)
         {
-            ExpandTaskCommand = new RelayCommand(ExpandTask);
-            OpenEditDialogCommand = new RelayCommand(OpenEditDialog);
+            ExpandTaskCommand = new RelayCommand(async ()=>await ExpandTask());
+            OpenEditDialogCommand = new RelayCommand(async ()=>await OpenEditDialog());
             SelectTaskCommand = new RelayCommand(SelectTask);
             DisplayMoreOpCommand = new RelayCommand(DisplayMoreOp);
             PendingCommand = new RelayCommand(Pending);
@@ -40,19 +40,19 @@ namespace CN_Presentation.ViewModel.Controls
 
         #region Public Methods
 
-        public void Refresh()
+        public async Task Refresh()
         {
             Refreshed = true;
             if (TaskInfo != null)
             {
                 BindTaskToCurrentViewModel(TaskInfo);
-                RefreshExpanderView();
+                await RefreshExpanderView();
             }
         }
 
-        public void RefreshExpanderView(int? childTaskId = null)
+        public async Task RefreshExpanderView(int? childTaskId = null)
         {
-            if (IsExpanded) LoadDataToDetailExpanderView(childTaskId);
+            if (IsExpanded) await LoadDataToDetailExpanderView(childTaskId);
         }
 
         #endregion
@@ -207,18 +207,18 @@ namespace CN_Presentation.ViewModel.Controls
             });
         }
 
-        private void ExpandTask()
+        private async Task ExpandTask()
         {
-            if (!IsExpanded) LoadDataToDetailExpanderView();
+            if (!IsExpanded) await LoadDataToDetailExpanderView();
             IsExpanded ^= true;
         }
 
-        private void OpenEditDialog()
+        private async Task OpenEditDialog()
         {
-            IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
+            await IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Edit Task",
-                FormContentViewModel = new TaskDetailFormViewModel(TaskInfo),
+                FormContentViewModel = new TaskDetailFormViewModel(await IoC.Get<ITaskService>().GetTaskByIdNoTracking(TaskInfo.TaskId)),
                 OKButtonText = "Confirm",
                 CancelButtonText = "Cancel"
             });
@@ -243,9 +243,10 @@ namespace CN_Presentation.ViewModel.Controls
                     model.IsMoreOpDisplayed = false;
         }
 
-        private void LoadDataToDetailExpanderView(int? childTaskId = null)
+        private async Task LoadDataToDetailExpanderView(int? childTaskId = null)
         {
-            ExpandDetailViewModel = new TaskExpandDetailViewModel(TaskInfo, childTaskId);
+            var taskModel = await IoC.Get<ITaskService>().GetTaskById(TaskInfo.TaskId);
+            ExpandDetailViewModel = new TaskExpandDetailViewModel(taskModel, childTaskId);
         }
 
         private void Pending()
@@ -296,7 +297,7 @@ namespace CN_Presentation.ViewModel.Controls
         {
             IsMoreOpDisplayed = false;
             IoC.Get<IUIManager>().ShowConfirm(
-                new ConfirmDialogBoxViewModel(TaskOperatorHelper.DeleteTask(false, TaskInfo))
+                new ConfirmDialogBoxViewModel(TaskOperatorHelper.DeleteTask(false, TaskInfo.TaskId))
                 {
                     CofirmText = "Confirm",
                     CancelText = "Cancel",

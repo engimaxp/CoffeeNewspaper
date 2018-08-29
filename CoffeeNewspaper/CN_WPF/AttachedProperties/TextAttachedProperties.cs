@@ -50,6 +50,11 @@ namespace CN_WPF
             // If we don't have a control, return
             if (sender is TextBoxBase control && (bool)value)
             {
+                control.Focus();
+
+                // Select all text
+                control.SelectAll();
+
                 void OnControlOnLoaded(object s, RoutedEventArgs se)
                 {
                     control.Loaded -= OnControlOnLoaded;
@@ -64,6 +69,10 @@ namespace CN_WPF
             }
             if (sender is PasswordBox password && (bool)value)
             {
+                password.Focus();
+
+                // Select all text
+                password.SelectAll();
 
                 void OnControlOnLoaded(object s, RoutedEventArgs se)
                 {

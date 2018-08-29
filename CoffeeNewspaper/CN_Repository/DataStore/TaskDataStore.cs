@@ -134,6 +134,15 @@ namespace CN_Repository
 
         #region Select Methods
 
+        public async Task<CNTask> GetTaskNoTracking(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () =>
+                    await mDbContext.Tasks.Include(x=>x.TaskTaggers).ThenInclude(y=>y.Tag).AsNoTracking()
+                        .FirstOrDefaultAsync(r => r.TaskId == taskid)
+            );
+        }
+
         public async Task<int> GetMaxSort(int? parentTaskId)
         {
             return await IoC.Task.Run(

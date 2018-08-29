@@ -17,7 +17,13 @@ namespace CN_Service
 
         public async Task<ICollection<CNTag>> GetAllTaskTags()
         {
-            return await _tagDataStore.GetAllTaskTags();
+            return await _tagDataStore.GetAllTagsBySpecification(new TaskBoundedTagsSpecification());
+        }
+
+
+        public async Task<ICollection<CNTag>> GetStartStringTag(string tagSubstring)
+        {
+            return await _tagDataStore.GetAllTagsBySpecification(new TagSpecification(tagSubstring));
         }
     }
 }

@@ -91,6 +91,21 @@ namespace CN_Core.Interfaces.Service
         /// <returns></returns>
         Task<CNTask> GetTaskById(int taskId);
 
+        
+        /// <summary>
+        ///     Get task by id as no tracking
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        Task<CNTask> GetTaskByIdNoTracking(int taskId);
+        
+        /// <summary>
+        ///     Get task root parent
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        Task<int> GetTaskRootParentId(int taskId);
+
         /// <summary>
         ///     Set Parent task of this task
         /// </summary>
