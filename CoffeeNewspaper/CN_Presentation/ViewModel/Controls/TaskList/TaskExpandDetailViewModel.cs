@@ -21,7 +21,7 @@ namespace CN_Presentation.ViewModel.Controls
         /// <param name="container"></param>
         /// <param name="selectedTaskId"></param>
         /// <returns></returns>
-        private async Task<ObservableCollection<TaskTreeItemViewModel>> MapToViewModel(IOrderedEnumerable<CNTask> taskInfoChildTasks,
+        private ObservableCollection<TaskTreeItemViewModel> MapToViewModel(IOrderedEnumerable<CNTask> taskInfoChildTasks,
             ITreeNodeSubscribe container,int? selectedTaskId)
         {
             var result = new ObservableCollection<TaskTreeItemViewModel>();
@@ -31,7 +31,7 @@ namespace CN_Presentation.ViewModel.Controls
                     new TaskTreeItemViewModel(container, a)
                     {
                         IsSelected = a.TaskId == (selectedTaskId ?? 0),
-                        ChildItems = await MapToViewModel((await IoC.Get<ITaskService>().GetChildTasksNoTracking(a.TaskId)).FilterDeletedAndOrderBySortTasks(), container,selectedTaskId)
+                        ChildItems = MapToViewModel(a.ChildTasks.FilterDeletedAndOrderBySortTasks(), container,selectedTaskId)
                     };
                 result.Add(viewModel);
             }
@@ -172,13 +172,10 @@ namespace CN_Presentation.ViewModel.Controls
             if (taskInfo == null) return;
 
             //Child Tasks
-            var task = Task.Run(async () =>
-            {
-                var childTaskModel = new TaskTreeViewModel(taskInfo);
-                childTaskModel.Items = await MapToViewModel((await IoC.Get<ITaskService>().GetChildTasksNoTracking(taskInfo.TaskId)).FilterDeletedAndOrderBySortTasks(), childTaskModel, selectChildTaskId);
-                ChildTasksModel = childTaskModel;
-            });
-            task.Wait();
+            var childTaskModel = new TaskTreeViewModel(taskInfo);
+            childTaskModel.Items = MapToViewModel(taskInfo.ChildTasks.FilterDeletedAndOrderBySortTasks(), childTaskModel, selectChildTaskId);
+            ChildTasksModel = childTaskModel;
+
             //Content
             TaskDetailContent = taskInfo.Content;
 

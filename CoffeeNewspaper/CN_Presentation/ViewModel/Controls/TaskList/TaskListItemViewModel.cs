@@ -245,8 +245,7 @@ namespace CN_Presentation.ViewModel.Controls
 
         private async Task LoadDataToDetailExpanderView(int? childTaskId = null)
         {
-            var taskModel = await IoC.Get<ITaskService>().GetTaskByIdNoTracking(TaskInfo.TaskId);
-            ExpandDetailViewModel = new TaskExpandDetailViewModel(taskModel, childTaskId);
+            ExpandDetailViewModel = new TaskExpandDetailViewModel(TaskInfo, childTaskId);
         }
 
         private void Pending()

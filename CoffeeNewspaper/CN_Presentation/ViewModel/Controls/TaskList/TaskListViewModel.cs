@@ -171,7 +171,7 @@ namespace CN_Presentation.ViewModel.Controls
             if (task.HasParentTask())
                 await RefreshChildTasks(taskId);
             else
-                await RefreshTopLevelTask(await IoC.Get<ITaskService>().GetTaskByIdNoTracking(taskId));
+                await RefreshTopLevelTask(task);
         }
 
         #endregion
