@@ -1,22 +1,37 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using CN_Core;
+using CN_Core.Interfaces.Service;
 using CN_Presentation.ViewModel.Base;
 
 namespace CN_Presentation.ViewModel.Input
 {
     public class TagAddingControlViewModel : BaseViewModel
     {
+        #region Private Properties
+
         private string _tagInput;
-        private string _selectedRecommandTag;
+
+        private IAddNewTag ParentModel { get; set; }
+
+        #endregion
+        #region Constructor
 
         public TagAddingControlViewModel()
         {
             ClickAddCommand = new RelayCommand(ClickAdd);
             ConfirmAddCommand = new RelayCommand(ConfirmAdd);
             CancelAddCommand = new RelayCommand(CancelAdd);
+            AutoCompleteBoxUpCommand = new RelayCommand(AutoCompleteBoxUp);
+            AutoCompleteBoxDownCommand = new RelayCommand(AutoCompleteBoxDown);
         }
+        #endregion
+        #region Commands
 
         public ICommand ClickAddCommand { get; set; }
 
@@ -24,81 +39,122 @@ namespace CN_Presentation.ViewModel.Input
 
         public ICommand CancelAddCommand { get; set; }
 
+        public ICommand AutoCompleteBoxUpCommand { get; set; }
+
+        public ICommand AutoCompleteBoxDownCommand { get; set; }
+
         public bool DisplayTextBox { get; set; }
 
-        public bool PopupAutoTagMenul { get; set; }
-
-        public bool SelectAndFocus { get; set; }
-
-        private IAddNewTag ParentModel { get; set; }
-
-        public void SetParentAddNewTagModel(IAddNewTag addNewTagModel)
-        {
-            ParentModel = addNewTagModel;
-        }
+        public string SelectedSearchAutoComplete { get; set; }
 
         public string TagInput
         {
             get => _tagInput;
             set
             {
-                SelectAndFocus = false;
                 if (value == _tagInput) return;
-                PopupAutoTagMenul = !string.IsNullOrEmpty(value) && !TagRecommandCollection.Contains(value);
                 _tagInput = value;
-                if (PopupAutoTagMenul)
+                if (string.IsNullOrEmpty(_tagInput))
                 {
-                    TagRecommandCollection = new ObservableCollection<string>()
-                    {
-                        "Test1",
-                        "Test2",
-                        "Test3",
-                        "Test4",
-                        "Test5",
-                        "Test6",
-                    };
+                    TagRecommandCollection.Clear();
+                    SelectedSearchAutoComplete = String.Empty;
+                    IsAutoCompleteTagMenuOpened = false;
                 }
                 else
                 {
-                    TagRecommandCollection = new ObservableCollection<string>();
-                    SelectedRecommandTag = string.Empty;
+                    Task.Run(async () =>
+                    {
+                        var recommendlist = await IoC.Get<ITagService>().GetStartStringTag(_tagInput);
+                        TagRecommandCollection = new ObservableCollection<string>(recommendlist.Select(x=>x.Title).Except(ParentModel?.GetExistsTagsTitle()??new List<string>()));
+                        IsAutoCompleteTagMenuOpened = TagRecommandCollection.Any();
+                    });
                 }
             }
         }
 
-        public string SelectedRecommandTag
-        {
-            get => _selectedRecommandTag;
-            set
-            {
-                _selectedRecommandTag = value;
-                if (!string.IsNullOrEmpty(_selectedRecommandTag))
-                {
-                    TagInput = value;
-                    PopupAutoTagMenul = false;
-                    SelectAndFocus = true;
-                }
-            }
-        }
 
         public ObservableCollection<string> TagRecommandCollection { get; set; } = new ObservableCollection<string>();
-        
+
+        public bool IsAutoCompleteTagMenuOpened { get; set; }
+
+        public bool SelectAndFocus { get; set; }
+
+        #endregion
+
+        #region Public Methods
+
+        public void SetParentAddNewTagModel(IAddNewTag addNewTagModel)
+        {
+            ParentModel = addNewTagModel;
+        }
+        #endregion
+        #region Private Methods
+
+        private void AutoCompleteBoxDown()
+        {
+            if (!IsAutoCompleteTagMenuOpened) return;
+            if (!TagRecommandCollection.Any()) return;
+            int index = 0;
+            var seachoptions = TagRecommandCollection.ToList();
+
+            if (!string.IsNullOrEmpty(SelectedSearchAutoComplete))
+            {
+                index = seachoptions.FindIndex(x => x == SelectedSearchAutoComplete);
+                if (index != seachoptions.Count - 1)
+                {
+                    index++;
+                }
+            }
+            SelectedSearchAutoComplete = seachoptions[index];
+        }
+
+        private void AutoCompleteBoxUp()
+        {
+            if (!IsAutoCompleteTagMenuOpened) return;
+            if (!TagRecommandCollection.Any()) return;
+            int index = TagRecommandCollection.Count - 1;
+            var seachoptions = TagRecommandCollection.ToList();
+            if (!string.IsNullOrEmpty(SelectedSearchAutoComplete))
+            {
+                index = seachoptions.FindIndex(x => x == SelectedSearchAutoComplete);
+                if (index != 0)
+                {
+                    index--;
+                }
+            }
+            SelectedSearchAutoComplete = seachoptions[index];
+        }
+
         private void ConfirmAdd()
         {
-            if (!string.IsNullOrEmpty(TagInput))
+            if (IsAutoCompleteTagMenuOpened && !string.IsNullOrEmpty(SelectedSearchAutoComplete))
             {
-                ParentModel?.NotifyAddNewTag(TagInput);
+                TagInput = SelectedSearchAutoComplete;
+                IsAutoCompleteTagMenuOpened = false;
+                SelectedSearchAutoComplete = string.Empty;
+                SelectAndFocus = true;
+
+                TagRecommandCollection.Clear();
+                SelectedSearchAutoComplete = string.Empty;
+                IsAutoCompleteTagMenuOpened = false;
             }
-            DisplayTextBox = false;
-            PopupAutoTagMenul = false;
-            SelectAndFocus = false;
-            TagInput = string.Empty;
+            else
+            {
+                if (!string.IsNullOrEmpty(TagInput))
+                {
+                    ParentModel?.NotifyAddNewTag(TagInput);
+                }
+                DisplayTextBox = false;
+                IsAutoCompleteTagMenuOpened = false;
+                SelectAndFocus = false;
+                TagInput = string.Empty;
+            }
         }
 
         private void CancelAdd()
         {
             DisplayTextBox = false;
-            PopupAutoTagMenul = false;
+            IsAutoCompleteTagMenuOpened = false;
             SelectAndFocus = false;
             TagInput = string.Empty;
         }
@@ -107,6 +163,7 @@ namespace CN_Presentation.ViewModel.Input
         {
             DisplayTextBox = true;
             SelectAndFocus = true;
-        }
+        } 
+        #endregion
     }
 }

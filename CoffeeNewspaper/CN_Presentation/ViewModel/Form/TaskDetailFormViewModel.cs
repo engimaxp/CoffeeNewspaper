@@ -27,16 +27,15 @@ namespace CN_Presentation.ViewModel.Form
             return await RunCommandAsyncGeneric(() => ConfirmIsRunning, async () =>
             {
                 var result = false;
+                var newTask = GenerateCNTask();
                 await TaskOperatorHelper.WrapException(async () =>
                 {
-                    var newTask = GenerateCNTask();
                     if (originTask == null)
                         result = (await IoC.Get<ITaskService>().CreateATask(newTask))?.TaskId > 0;
                     else
                         result = await IoC.Get<ITaskService>().EditATask(newTask);
-
-                    await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(newTask.TaskId);
                 });
+                await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(newTask.TaskId);
                 return result;
             });
         }

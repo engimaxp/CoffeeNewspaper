@@ -14,5 +14,12 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="spec">spec contain Criteria</param>
         /// <returns></returns>
         Task<ICollection<CNTag>> GetAllTagsBySpecification(ISpecification<CNTag> spec);
+
+        /// <summary>
+        /// Get function by filter
+        /// </summary>
+        /// <param name="spec">spec contain Criteria</param>
+        /// <returns></returns>
+        Task<CNTag> GetFirstTagBySpecification(ISpecification<CNTag> spec);
     }
 }

@@ -182,6 +182,11 @@ namespace CN_Service
             return await taskDataStore.UpdateTask(targetTask);
         }
 
+        public async Task<ICollection<CNTask>> GetChildTasksNoTracking(int taskId)
+        {
+            return await taskDataStore.GetChildTasksNoTracking(taskId);
+        }
+
         public async Task<bool> RemoveATask(int taskId, bool force = false)
         {
             var targetTask = await taskDataStore.GetTask(taskId);

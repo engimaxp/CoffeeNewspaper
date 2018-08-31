@@ -218,7 +218,7 @@ namespace CN_Presentation.ViewModel.Controls
             await IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Edit Task",
-                FormContentViewModel = new TaskDetailFormViewModel(await IoC.Get<ITaskService>().GetTaskByIdNoTracking(TaskInfo.TaskId)),
+                FormContentViewModel = new TaskDetailFormViewModel(TaskInfo),
                 OKButtonText = "Confirm",
                 CancelButtonText = "Cancel"
             });
@@ -245,7 +245,7 @@ namespace CN_Presentation.ViewModel.Controls
 
         private async Task LoadDataToDetailExpanderView(int? childTaskId = null)
         {
-            var taskModel = await IoC.Get<ITaskService>().GetTaskById(TaskInfo.TaskId);
+            var taskModel = await IoC.Get<ITaskService>().GetTaskByIdNoTracking(TaskInfo.TaskId);
             ExpandDetailViewModel = new TaskExpandDetailViewModel(taskModel, childTaskId);
         }
 

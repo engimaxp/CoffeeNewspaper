@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CN_Core;
 using CN_Core.Interfaces.Service;
 using CN_Core.Utilities;
@@ -20,7 +21,7 @@ namespace CN_Presentation.ViewModel.Controls
         /// <param name="container"></param>
         /// <param name="selectedTaskId"></param>
         /// <returns></returns>
-        private ObservableCollection<TaskTreeItemViewModel> MapToViewModel(IOrderedEnumerable<CNTask> taskInfoChildTasks,
+        private async Task<ObservableCollection<TaskTreeItemViewModel>> MapToViewModel(IOrderedEnumerable<CNTask> taskInfoChildTasks,
             ITreeNodeSubscribe container,int? selectedTaskId)
         {
             var result = new ObservableCollection<TaskTreeItemViewModel>();
@@ -30,7 +31,7 @@ namespace CN_Presentation.ViewModel.Controls
                     new TaskTreeItemViewModel(container, a)
                     {
                         IsSelected = a.TaskId == (selectedTaskId ?? 0),
-                        ChildItems = MapToViewModel(a.ChildTasks.FilterDeletedAndOrderBySortTasks(), container,selectedTaskId)
+                        ChildItems = await MapToViewModel((await IoC.Get<ITaskService>().GetChildTasksNoTracking(a.TaskId)).FilterDeletedAndOrderBySortTasks(), container,selectedTaskId)
                     };
                 result.Add(viewModel);
             }
@@ -171,10 +172,13 @@ namespace CN_Presentation.ViewModel.Controls
             if (taskInfo == null) return;
 
             //Child Tasks
-            var childTaskModel = new TaskTreeViewModel(taskInfo);
-            childTaskModel.Items = MapToViewModel(taskInfo.ChildTasks.FilterDeletedAndOrderBySortTasks(), childTaskModel, selectChildTaskId);
-            ChildTasksModel = childTaskModel;
-
+            var task = Task.Run(async () =>
+            {
+                var childTaskModel = new TaskTreeViewModel(taskInfo);
+                childTaskModel.Items = await MapToViewModel((await IoC.Get<ITaskService>().GetChildTasksNoTracking(taskInfo.TaskId)).FilterDeletedAndOrderBySortTasks(), childTaskModel, selectChildTaskId);
+                ChildTasksModel = childTaskModel;
+            });
+            task.Wait();
             //Content
             TaskDetailContent = taskInfo.Content;
 

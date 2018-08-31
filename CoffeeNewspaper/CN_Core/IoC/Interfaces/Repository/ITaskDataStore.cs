@@ -57,6 +57,13 @@ namespace CN_Core.Interfaces.Repository
         Task<CNTask> GetTaskNoTracking(int taskid);
 
         /// <summary>
+        ///  Get all child tasks of a parent task
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTask>> GetChildTasksNoTracking(int taskId);
+
+        /// <summary>
         /// Get Max Sort
         /// </summary>
         /// <param name="parentTaskId"></param>
@@ -102,6 +109,5 @@ namespace CN_Core.Interfaces.Repository
         Task ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime);
 
         #endregion
-
     }
 }

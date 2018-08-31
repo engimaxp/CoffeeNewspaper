@@ -23,7 +23,7 @@ namespace CN_Presentation.ViewModel
 
         public TaskTreeItemViewModel(ITreeNodeSubscribe Subscriber, CNTask taskinfo = null)
         {
-            EditCommand = new RelayCommand(Edit);
+            EditCommand = new RelayCommand(async ()=>await Edit());
             SelectCommand = new RelayCommand(Select);
             LeftCommand = new RelayCommand(async () => await Left());
             RightCommand = new RelayCommand(async () => await Right());
@@ -134,9 +134,9 @@ namespace CN_Presentation.ViewModel
             Subscriber?.SelectTargetNode(this);
         }
 
-        private void Edit()
+        private async Task Edit()
         {
-            IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
+            await IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Edit Task",
                 FormContentViewModel = new TaskDetailFormViewModel(TaskInfo),

@@ -20,5 +20,12 @@ namespace CN_Service
         {
         }
     }
-
+    
+    public class TagTitleSpecification : BaseSpecification<CNTag>
+    {
+        public TagTitleSpecification(string tagTitle)
+            : base(x => x.Title == tagTitle)
+        {
+        }
+    }
 }

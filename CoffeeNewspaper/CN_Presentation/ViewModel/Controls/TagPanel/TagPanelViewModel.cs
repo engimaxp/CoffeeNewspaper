@@ -1,6 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using CN_Core;
+using CN_Core.Interfaces.Service;
 using CN_Presentation.Input.Design;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Input;
@@ -24,10 +29,19 @@ namespace CN_Presentation.ViewModel.Controls
         /// </summary>
         public TagAddingControlViewModel AddTagEntry { get; set; }
 
-        public void NotifyAddNewTag(string newTag)
+        public async Task NotifyAddNewTag(string newTag)
         {
-            if (!string.IsNullOrEmpty(newTag))
-                TagItems.Add(new TagItemViewModel(this) {TagTitle = newTag});
+            if (string.IsNullOrEmpty(newTag)) return;
+            if (TagItems.Any(x => x.TagTitle == newTag)) return;
+            var existTag = await IoC.Get<ITagService>().GetTagByTitle(newTag);
+            TagItems.Add(existTag != null
+                ? new TagItemViewModel(this) {TagTitle = newTag, TagId = existTag.TagId}
+                : new TagItemViewModel(this) {TagTitle = newTag});
+        }
+
+        public IEnumerable<string> GetExistsTagsTitle()
+        {
+            return TagItems.Select(x => x.TagTitle);
         }
     }
 

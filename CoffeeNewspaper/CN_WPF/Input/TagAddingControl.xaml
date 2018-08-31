@@ -69,15 +69,17 @@
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding ConfirmAddCommand}"></KeyBinding>
                                         <KeyBinding Key="Escape" Command="{Binding CancelAddCommand}"></KeyBinding>
+                                        <KeyBinding Key="Up" Command="{Binding AutoCompleteBoxUpCommand}"></KeyBinding>
+                                        <KeyBinding Key="Down" Command="{Binding AutoCompleteBoxDownCommand}"></KeyBinding>
                                     </TextBox.InputBindings>
                                 </TextBox>
                                 <Popup 
                                     x:Name="CalendarPopup"
                                     Grid.Column="0"
-                                    StaysOpen="False"
+                                    StaysOpen="True"
                                     AllowsTransparency="True"
                                     Placement="Bottom"
-                                    IsOpen="{Binding PopupAutoTagMenul}"
+                                    IsOpen="{Binding IsAutoCompleteTagMenuOpened}"
                                     PlacementTarget="{Binding ElementName=TextBox}">
                                     <ListBox 
                                         Width="120"
@@ -85,7 +87,7 @@
                                         ItemContainerStyle="{StaticResource TimePickerListBoxItemStyle}"
                                         ItemsSource="{Binding TagRecommandCollection}"
                                         SelectionMode="Single"
-                                        SelectedItem="{Binding SelectedRecommandTag}">
+                                        SelectedItem="{Binding SelectedSearchAutoComplete}">
                                     </ListBox>
                                 </Popup>
                             </Grid>

@@ -98,7 +98,14 @@ namespace CN_Core.Interfaces.Service
         /// <param name="taskId"></param>
         /// <returns></returns>
         Task<CNTask> GetTaskByIdNoTracking(int taskId);
-        
+
+        /// <summary>
+        /// Get all child tasks of a parent task
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTask>> GetChildTasksNoTracking(int taskId);
+
         /// <summary>
         ///     Get task root parent
         /// </summary>
@@ -175,9 +182,9 @@ namespace CN_Core.Interfaces.Service
         ///     Pending a task with reason
         ///     this task and its suf children tasks cannot start
         /// </summary>
-        /// <param name="TaskId"></param>
+        /// <param name="taskId"></param>
         /// <param name="reason"></param>
         /// <returns></returns>
-        Task<bool> PendingATask(int TaskId, string reason);
+        Task<bool> PendingATask(int taskId, string reason);
     }
 }

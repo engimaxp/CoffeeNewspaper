@@ -25,5 +25,10 @@ namespace CN_Service
         {
             return await _tagDataStore.GetAllTagsBySpecification(new TagSpecification(tagSubstring));
         }
+
+        public async Task<CNTag> GetTagByTitle(string tagTitle)
+        {
+            return await _tagDataStore.GetFirstTagBySpecification(new TagTitleSpecification(tagTitle));
+        }
     }
 }

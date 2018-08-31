@@ -143,6 +143,15 @@ namespace CN_Repository
             );
         }
 
+        public async Task<ICollection<CNTask>> GetChildTasksNoTracking(int taskId)
+        {
+            return await IoC.Task.Run(
+                async () =>
+                    await mDbContext.Tasks.Include(x => x.TaskTaggers).ThenInclude(y => y.Tag).AsNoTracking()
+                        .Where(r => r.ParentTaskID == taskId).ToListAsync()
+            );
+        }
+
         public async Task<int> GetMaxSort(int? parentTaskId)
         {
             return await IoC.Task.Run(
