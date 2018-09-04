@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\command\backcommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using Colorful;
+
+namespace CoffeeNewspaper_CLI
+{
+    public class BackCommand : BaseCommand
+    {
+        public BackCommand(BaseState state) : base(state)
+        {
+            Name = &quot;back&quot;;
+        }
+
+        public override async Task&lt;BaseState&gt; Excute(ArgumentParser input)
+        {
+            await Task.Delay(1);
+            if (State.LastState == null)
+            {
+                Console.WriteLine(&quot;you have already back to the begining !&quot;);
+                Console.WriteLine();
+                return State;
+            }
+            else
+            {
+                Console.WriteLine();
+                return State.LastState;
+            }
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,47,8,58,0],[9,9,9,10,0],[10,13,10,27,0],[11,9,11,10,0],[14,9,14,10,0],[15,13,15,33,0],[16,13,16,41,0],[17,13,17,14,0],[18,17,18,78,0],[19,17,19,37,0],[20,17,20,30,0],[23,13,23,14,0],[24,17,24,37,0],[25,17,25,40,0],[27,9,27,10,0]]);
+    </script>
+  </body>
+</html>

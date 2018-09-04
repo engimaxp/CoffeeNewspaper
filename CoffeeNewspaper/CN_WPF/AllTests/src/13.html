@@ -1,4 +1,14 @@
-﻿using System;
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_service\serviceimplement\taskservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,50 +43,50 @@ namespace CN_Service
 
         #region Task relevent
 
-        public Task<bool> EditATask(CNTask task)
+        public Task&lt;bool&gt; EditATask(CNTask task)
         {
-            if (task == null || task.TaskId <= 0) return Task.FromResult(false);
+            if (task == null || task.TaskId &lt;= 0) return Task.FromResult(false);
             if (string.IsNullOrEmpty(task.Content) || string.IsNullOrEmpty(task.Content.Trim()))
-                throw new ArgumentException("The Content Field is needed");
+                throw new ArgumentException(&quot;The Content Field is needed&quot;);
             return EditATaskAsync(task);
         }
 
-        private async Task<bool> EditATaskAsync(CNTask task)
+        private async Task&lt;bool&gt; EditATaskAsync(CNTask task)
         {
                 taskDataStore.UpdateTask(task);
                 return await unitOfWork.Commit();
         }
 
-        public async Task<ICollection<CNTask>> GetAllTasks()
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetAllTasks()
         {
                 return await taskDataStore.GetAllTask();
         }
 
-        public async Task<CNTask> GetTaskById(int taskId)
+        public async Task&lt;CNTask&gt; GetTaskById(int taskId)
         {
                 return await taskDataStore.GetTask(taskId);
         }
 
-        public async Task<CNTask> GetTaskByIdNoTracking(int taskId)
+        public async Task&lt;CNTask&gt; GetTaskByIdNoTracking(int taskId)
         {
                 return await taskDataStore.GetTaskNoTracking(taskId);
         }
 
-        public async Task<int> GetTaskRootParentId(int taskId)
+        public async Task&lt;int&gt; GetTaskRootParentId(int taskId)
         {
                 var task = await taskDataStore.GetTask(taskId);
                 while (task.HasParentTask()) task = task.ParentTask;
                 return task.TaskId;
         }
 
-        public Task<CNTask> CreateATask(CNTask task)
+        public Task&lt;CNTask&gt; CreateATask(CNTask task)
         {
             if (string.IsNullOrEmpty(task.Content) || string.IsNullOrEmpty(task.Content.Trim()))
-                throw new ArgumentException("The Content Field is needed");
+                throw new ArgumentException(&quot;The Content Field is needed&quot;);
             return CreateATaskAsync(task);
         }
 
-        private async Task<CNTask> CreateATaskAsync(CNTask task)
+        private async Task&lt;CNTask&gt; CreateATaskAsync(CNTask task)
         {
                 var parentTaskId = task.ParentTask?.TaskId ?? task.ParentTaskID;
                 task.Sort = await taskDataStore.GetMaxSort(parentTaskId) + 1;
@@ -84,27 +94,27 @@ namespace CN_Service
                 return await unitOfWork.Commit() ? result : null;
         }
 
-        public async Task<bool> DeleteTask(int taskId, bool force = false)
+        public async Task&lt;bool&gt; DeleteTask(int taskId, bool force = false)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
                 if (targetTask == null) return false;
                 if (targetTask.IsDeleted) return true;
-                if (targetTask.ChildTasks.FilterDeletedAndOrderBySortTasks().Any() && !force)
+                if (targetTask.ChildTasks.FilterDeletedAndOrderBySortTasks().Any() &amp;&amp; !force)
                     throw new TaskHasChildTasksException();
-                if (targetTask.SufTaskConnectors.Select(y => y.SufTask).FilterDeletedAndOrderBySortTasks().Any() &&
+                if (targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask).FilterDeletedAndOrderBySortTasks().Any() &amp;&amp;
                     !force) throw new TaskHasSufTasksException();
                 //Delete the task itself
                 targetTask.IsDeleted = true;
                 //Delete the tasks children and suffix task
                 foreach (var task in targetTask.ChildTasks.FilterDeletedAndOrderBySortTasks())
                     await DeleteTask(task.TaskId, force);
-                foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask)
+                foreach (var task in targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask)
                     .FilterDeletedAndOrderBySortTasks()) await DeleteTask(task.TaskId, force);
                 taskDataStore.UpdateTask(targetTask);
                 return await unitOfWork.Commit();
         }
 
-        public async Task<bool> RecoverATask(int taskId)
+        public async Task&lt;bool&gt; RecoverATask(int taskId)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
                 if (targetTask == null) return false;
@@ -114,21 +124,21 @@ namespace CN_Service
                 targetTask.IsDeleted = false;
                 //Recover the tasks children and suffix task
                 foreach (var task in targetTask.ChildTasks) await RecoverATask(task.TaskId);
-                foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask))
+                foreach (var task in targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask))
                     await RecoverATask(task.TaskId);
                 taskDataStore.UpdateTask(targetTask);
                 return await unitOfWork.Commit();
         }
 
-        public async Task<bool> StartATask(int taskId)
+        public async Task&lt;bool&gt; StartATask(int taskId)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
                 if (targetTask == null) return false;
                 if (targetTask.IsDeleted) return false;
-                if (targetTask.Status != CNTaskStatus.TODO && targetTask.Status != CNTaskStatus.PENDING &&
+                if (targetTask.Status != CNTaskStatus.TODO &amp;&amp; targetTask.Status != CNTaskStatus.PENDING &amp;&amp;
                     targetTask.Status != CNTaskStatus.DONE)
                     throw new TaskStatusException(
-                        new List<CNTaskStatus> {CNTaskStatus.TODO, CNTaskStatus.PENDING, CNTaskStatus.DONE},
+                        new List&lt;CNTaskStatus&gt; {CNTaskStatus.TODO, CNTaskStatus.PENDING, CNTaskStatus.DONE},
                         targetTask.Status);
                 //set status to doing
                 if (targetTask.Status == CNTaskStatus.PENDING) targetTask.PendingReason = null;
@@ -140,38 +150,38 @@ namespace CN_Service
                 }
 
                 taskDataStore.UpdateTask(targetTask);
-                //if this is the first start then update targetTask's startTime
+                //if this is the first start then update targetTask&#39;s startTime
                 //add a timeslice to this task
                 await AddATimeSlice(targetTask.TaskId, new CNTimeSlice(DateTime.Now));
                 return await unitOfWork.Commit();
         }
 
-        public async Task<bool> PauseATask(int taskId)
+        public async Task&lt;bool&gt; PauseATask(int taskId)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
                 if (targetTask == null) return false;
                 if (targetTask.IsDeleted) return false;
                 if (targetTask.Status != CNTaskStatus.DOING)
-                    throw new TaskStatusException(new List<CNTaskStatus> {CNTaskStatus.DOING}, targetTask.Status);
+                    throw new TaskStatusException(new List&lt;CNTaskStatus&gt; {CNTaskStatus.DOING}, targetTask.Status);
                 targetTask.Status = CNTaskStatus.TODO;
                 taskDataStore.UpdateTask(targetTask);
 
-            //EndTimeSlices of this task's children and suffix task
+            //EndTimeSlices of this task&#39;s children and suffix task
             return await EndTimeSlice(targetTask.TaskId, DateTime.Now);
         }
 
-        public async Task<bool> PendingATask(int taskId, string reason)
+        public async Task&lt;bool&gt; PendingATask(int taskId, string reason)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
                 if (targetTask == null) return false;
                 if (targetTask.IsDeleted) return false;
                 if (targetTask.Status != CNTaskStatus.DOING
-                    && targetTask.Status != CNTaskStatus.TODO
-                    && targetTask.Status != CNTaskStatus.PENDING)
+                    &amp;&amp; targetTask.Status != CNTaskStatus.TODO
+                    &amp;&amp; targetTask.Status != CNTaskStatus.PENDING)
                     throw new TaskStatusException(
-                        new List<CNTaskStatus> {CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING},
+                        new List&lt;CNTaskStatus&gt; {CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING},
                         targetTask.Status);
-                //EndTimeSlices of this task's children and suffix task
+                //EndTimeSlices of this task&#39;s children and suffix task
                 if (targetTask.Status == CNTaskStatus.DOING) await EndTimeSlice(targetTask.TaskId, DateTime.Now);
                 targetTask.Status = CNTaskStatus.PENDING;
                 targetTask.PendingReason = reason;
@@ -179,35 +189,35 @@ namespace CN_Service
                 return await unitOfWork.Commit();
         }
         
-        public async Task<ICollection<CNTask>> GetChildTasksNoTracking(int taskId)
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetChildTasksNoTracking(int taskId)
         {
                 return await taskDataStore.GetChildTasksNoTracking(taskId);
         }
 
-        public async Task<bool> RemoveATask(int taskId, bool force = false)
+        public async Task&lt;bool&gt; RemoveATask(int taskId, bool force = false)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
                 if (targetTask == null) return false;
                 if (!targetTask.IsDeleted) return false;
-                if (targetTask.ChildTasks.Any() && !force) throw new TaskHasChildTasksException();
-                if (targetTask.SufTaskConnectors.Count > 0 && !force) throw new TaskHasSufTasksException();
+                if (targetTask.ChildTasks.Any() &amp;&amp; !force) throw new TaskHasChildTasksException();
+                if (targetTask.SufTaskConnectors.Count &gt; 0 &amp;&amp; !force) throw new TaskHasSufTasksException();
 
                 //Remove the tasks children and suffix task
                 foreach (var task in targetTask.ChildTasks) await RemoveATask(task.TaskId, force);
-                foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask))
+                foreach (var task in targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask))
                     await RemoveATask(task.TaskId, force);
                 taskDataStore.RemoveTask(targetTask);
                 return await unitOfWork.Commit();
         }
 
-        public async Task<bool> FinishATask(int taskId)
+        public async Task&lt;bool&gt; FinishATask(int taskId)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
                 if (targetTask == null) return false;
                 if (targetTask.IsDeleted) return false;
                 if (targetTask.Status == CNTaskStatus.DONE)
                     throw new TaskStatusException(
-                        new List<CNTaskStatus> {CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING},
+                        new List&lt;CNTaskStatus&gt; {CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING},
                         targetTask.Status);
                 if (targetTask.Status == CNTaskStatus.PENDING) targetTask.PendingReason = null;
                 targetTask.Status = CNTaskStatus.DONE;
@@ -219,11 +229,11 @@ namespace CN_Service
 
                 taskDataStore.UpdateTask(targetTask);
 
-            //EndTimeSlices of this task's children and suffix task
+            //EndTimeSlices of this task&#39;s children and suffix task
             return await EndTimeSlice(targetTask.TaskId, DateTime.Now);
         }
 
-        public async Task<bool> FailATask(int taskId, string reason)
+        public async Task&lt;bool&gt; FailATask(int taskId, string reason)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
                 if (targetTask == null) return false;
@@ -242,19 +252,19 @@ namespace CN_Service
                     targetTask.Status = CNTaskStatus.TODO;
                 taskDataStore.UpdateTask(targetTask);
 
-                    //EndTimeSlices of this task's children and suffix task
+                    //EndTimeSlices of this task&#39;s children and suffix task
                     return await EndTimeSlice(targetTask.TaskId, DateTime.Now);
                 }
 
         }
 
-        public async Task<bool> SetParentTask(int targetTaskId, int parentTaskId, int pos)
+        public async Task&lt;bool&gt; SetParentTask(int targetTaskId, int parentTaskId, int pos)
         {
-                if (targetTaskId<=0) return false;
+                if (targetTaskId&lt;=0) return false;
             var targetTask =await taskDataStore.GetTask(targetTaskId);
-            var parentTask = parentTaskId>0?await taskDataStore.GetTask(parentTaskId):null;
+            var parentTask = parentTaskId&gt;0?await taskDataStore.GetTask(parentTaskId):null;
                 //directly add to the rear of tasklist
-                if (pos < 0)
+                if (pos &lt; 0)
                 {
                     targetTask.Sort = await taskDataStore.GetMaxSort(parentTaskId) + 1;
                 }
@@ -264,9 +274,9 @@ namespace CN_Service
                     var originOrder = parentTask == null
                         ? (await GetAllTasks()).ToList()
                         : parentTask.ChildTasks.FilterDeletedAndOrderBySortTasks().ToList();
-                    if (pos >= originOrder.Count) pos = originOrder.Count - 1;
+                    if (pos &gt;= originOrder.Count) pos = originOrder.Count - 1;
                     targetTask.Sort = originOrder[pos].Sort + 1;
-                    for (int i = pos + 1, currentSort = targetTask.Sort; i < originOrder.Count; i++)
+                    for (int i = pos + 1, currentSort = targetTask.Sort; i &lt; originOrder.Count; i++)
                     {
                         originOrder[i].Sort = ++currentSort;
                         await EditATaskAsync(originOrder[i]);
@@ -278,10 +288,10 @@ namespace CN_Service
                 return await unitOfWork.Commit();
         }
 
-        public async Task<bool> AddPreTask(CNTask targetTask, CNTask preTask)
+        public async Task&lt;bool&gt; AddPreTask(CNTask targetTask, CNTask preTask)
         {
                 if (targetTask == null || preTask == null) return false;
-                if (targetTask.PreTaskConnectors.Any(r => r.PreTask.TaskId == preTask.TaskId)) return false;
+                if (targetTask.PreTaskConnectors.Any(r =&gt; r.PreTask.TaskId == preTask.TaskId)) return false;
                 targetTask.PreTaskConnectors.Add(new CNTaskConnector {PreTask = preTask, SufTask = targetTask});
 
                 //if pretask not complete update current task status to pending
@@ -291,19 +301,19 @@ namespace CN_Service
                 return await unitOfWork.Commit();
         }
 
-        public async Task<bool> DelPreTask(CNTask targetTask, CNTask preTask)
+        public async Task&lt;bool&gt; DelPreTask(CNTask targetTask, CNTask preTask)
         {
                 if (targetTask == null || preTask == null) return false;
 
                 var preTasks = targetTask.PreTaskConnectors.ToList();
-                var connector = preTasks.FirstOrDefault(r => r.PreTask.TaskId == preTask.TaskId);
+                var connector = preTasks.FirstOrDefault(r =&gt; r.PreTask.TaskId == preTask.TaskId);
                 if (connector == null) return false;
 
                 taskDataStore.RemoveTaskConnector(connector);
 
-                var otherPreTasks = preTasks.Where(r => r.PreTask.TaskId != preTask.TaskId);
-                if (otherPreTasks.Select(y => y.PreTask).All(x => x.Status == CNTaskStatus.DONE)
-                    && targetTask.Status == CNTaskStatus.PENDING)
+                var otherPreTasks = preTasks.Where(r =&gt; r.PreTask.TaskId != preTask.TaskId);
+                if (otherPreTasks.Select(y =&gt; y.PreTask).All(x =&gt; x.Status == CNTaskStatus.DONE)
+                    &amp;&amp; targetTask.Status == CNTaskStatus.PENDING)
                 {
                     targetTask.Status = CNTaskStatus.TODO;
                     targetTask.PendingReason = null;
@@ -317,14 +327,14 @@ namespace CN_Service
 
         #region TimeSlices relevent
 
-        public async Task<bool> DeleteAllTimeSlicesOfTask(int taskId)
+        public async Task&lt;bool&gt; DeleteAllTimeSlicesOfTask(int taskId)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
                 if (targetTask == null) return false;
 
-                foreach (var task in targetTask.ChildTasks ?? new List<CNTask>())
+                foreach (var task in targetTask.ChildTasks ?? new List&lt;CNTask&gt;())
                     await DeleteAllTimeSlicesOfTask(task.TaskId);
-                foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask))
+                foreach (var task in targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask))
                     await DeleteAllTimeSlicesOfTask(task.TaskId);
                 targetTask.StartTime = null;
                 targetTask.EndTime = null;
@@ -333,25 +343,25 @@ namespace CN_Service
                 return await unitOfWork.Commit();
         }
 
-        public async Task<ICollection<CNTimeSlice>> GetTaskTimeSlices(int taskid)
+        public async Task&lt;ICollection&lt;CNTimeSlice&gt;&gt; GetTaskTimeSlices(int taskid)
         {
                 var task = await taskDataStore.GetTask(taskid);
-                if (task == null) return new List<CNTimeSlice>();
+                if (task == null) return new List&lt;CNTimeSlice&gt;();
                 return await timeSliceDataStore.GetTimeSliceByTaskID(taskid);
         }
 
-        public async Task<CNTimeSlice> AddATimeSlice(int taskid, CNTimeSlice timeSlice)
+        public async Task&lt;CNTimeSlice&gt; AddATimeSlice(int taskid, CNTimeSlice timeSlice)
         {
                 //get original task
                 var task = await taskDataStore.GetTask(taskid);
                 if (task == null) return null;
 
                 //detect conflict
-                if (task.UsedTimeSlices.Any(r => r.InterceptWith(timeSlice)))
+                if (task.UsedTimeSlices.Any(r =&gt; r.InterceptWith(timeSlice)))
                     throw new TimeSliceInterveneException();
 
-                //Update Task's StartTime or EndTime
-                var source = new List<CNTimeSlice>(task.UsedTimeSlices) {timeSlice};
+                //Update Task&#39;s StartTime or EndTime
+                var source = new List&lt;CNTimeSlice&gt;(task.UsedTimeSlices) {timeSlice};
                 source.Sort();
                 taskDataStore.ExpandTaskTime(task, source.First().StartDateTime, source.Last().EndDateTime);
 
@@ -362,12 +372,12 @@ namespace CN_Service
         }
 
 
-        public async Task<bool> DeleteTimeSlices(CNTimeSlice timeSlice)
+        public async Task&lt;bool&gt; DeleteTimeSlices(CNTimeSlice timeSlice)
         {
                 //Get original slice by id
                 var originSlice = await timeSliceDataStore.GetTimeSliceById(timeSlice.TimeSliceId);
                 if (originSlice == null) return false;
-                //Update Task's StartTime or EndTime
+                //Update Task&#39;s StartTime or EndTime
                 var originDatas = originSlice.Task.UsedTimeSlices.ToList();
 
                 //if only contain one slice
@@ -398,7 +408,7 @@ namespace CN_Service
                 return await unitOfWork.Commit();
         }
 
-        public async Task<bool> EndTimeSlice(int taskId, DateTime endTime)
+        public async Task&lt;bool&gt; EndTimeSlice(int taskId, DateTime endTime)
         {
                 var originDataTask = await taskDataStore.GetTask(taskId);
                 if (originDataTask?.UsedTimeSlices == null || originDataTask.UsedTimeSlices.Count == 0) return false;
@@ -407,14 +417,14 @@ namespace CN_Service
                 // if the last timeslice is ended then return true
                 var lastSlice = originDatas.Last();
                 if (lastSlice.EndDateTime != null) return true;
-                // if the last timeslice's starttime is bigger than endtime return false
-                if (lastSlice.StartDateTime > endTime) return false;
+                // if the last timeslice&#39;s starttime is bigger than endtime return false
+                if (lastSlice.StartDateTime &gt; endTime) return false;
                 lastSlice.EndDateTime = endTime;
 
-                //EndTimeSlices of this task's children and suffix task
-                foreach (var task in originDataTask.ChildTasks ?? new List<CNTask>())
+                //EndTimeSlices of this task&#39;s children and suffix task
+                foreach (var task in originDataTask.ChildTasks ?? new List&lt;CNTask&gt;())
                     await EndTimeSlice(task.TaskId, endTime);
-                foreach (var task in originDataTask.SufTaskConnectors.Select(y => y.SufTask))
+                foreach (var task in originDataTask.SufTaskConnectors.Select(y =&gt; y.SufTask))
                     await EndTimeSlice(task.TaskId, endTime);
                 taskDataStore.UpdateEndTaskTime(originDataTask, endTime);
                 timeSliceDataStore.UpdateTimeSlice(lastSlice);
@@ -424,3 +434,9 @@ namespace CN_Service
         #endregion
     }
 }
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,121,1],[18,9,18,10,1],[19,13,19,37,1],[20,13,20,53,1],[21,13,21,43,1],[22,9,22,10,1],[37,9,37,10,1],[38,13,38,50,1],[38,51,38,81,1],[39,13,39,97,1],[40,17,40,76,1],[41,13,41,41,1],[42,9,42,10,1],[45,9,45,10,1],[46,17,46,48,1],[47,17,47,50,1],[48,9,48,10,1],[51,9,51,10,1],[52,17,52,57,1],[53,9,53,10,1],[56,9,56,10,1],[57,17,57,60,1],[58,9,58,10,1],[61,9,61,10,0],[62,17,62,70,0],[63,9,63,10,0],[66,9,66,10,0],[67,17,67,64,0],[68,17,68,45,0],[68,46,68,69,0],[69,17,69,36,0],[70,9,70,10,0],[73,9,73,10,1],[74,13,74,97,1],[75,17,75,76,1],[76,13,76,43,1],[77,9,77,10,1],[80,9,80,10,1],[81,17,81,81,1],[82,17,82,78,1],[83,17,83,58,1],[84,17,84,66,1],[85,9,85,10,1],[88,9,88,10,1],[89,17,89,70,1],[90,17,90,40,1],[90,41,90,54,1],[91,17,91,42,1],[91,43,91,55,1],[92,17,92,94,1],[93,21,93,60,1],[94,17,94,62,1],[94,62,94,71,1],[94,71,95,28,1],[94,17,95,28,1],[95,29,95,66,1],[97,17,97,45,1],[99,17,99,24,1],[99,26,99,34,1],[99,35,99,37,1],[99,38,99,94,1],[100,21,100,58,1],[101,17,101,24,1],[101,26,101,34,1],[101,35,101,37,1],[101,38,101,79,1],[101,79,101,88,1],[101,88,102,56,1],[101,38,102,56,1],[102,58,102,95,1],[103,17,103,54,1],[104,17,104,50,1],[105,9,105,10,1],[108,9,108,10,1],[109,17,109,70,1],[110,17,110,40,1],[110,41,110,54,1],[111,17,111,43,1],[111,44,111,56,1],[114,17,114,46,1],[116,17,116,24,1],[116,26,116,34,1],[116,35,116,37,1],[116,38,116,59,1],[116,61,116,93,1],[117,17,117,24,1],[117,26,117,34,1],[117,35,117,37,1],[117,38,117,79,1],[117,79,117,88,1],[117,88,117,89,1],[117,38,117,89,1],[118,21,118,53,1],[119,17,119,54,1],[120,17,120,50,1],[121,9,121,10,1],[124,9,124,10,1],[125,17,125,70,1],[126,17,126,40,1],[126,41,126,54,1],[127,17,127,42,1],[127,43,127,56,1],[128,17,129,60,1],[130,21,132,44,1],[134,17,134,63,1],[134,64,134,96,0],[135,17,135,56,1],[136,17,136,39,1],[137,17,137,18,0],[138,21,138,50,0],[139,21,139,47,0],[140,17,140,18,0],[142,17,142,54,1],[145,17,145,87,1],[146,17,146,50,1],[147,9,147,10,1],[150,9,150,10,1],[151,17,151,70,1],[152,17,152,40,1],[152,41,152,54,1],[153,17,153,42,1],[153,43,153,56,1],[154,17,154,61,1],[155,21,155,115,1],[156,17,156,55,1],[157,17,157,54,1],[160,13,160,72,1],[161,9,161,10,1],[164,9,164,10,1],[165,17,165,70,1],[166,17,166,40,1],[166,41,166,54,1],[167,17,167,42,1],[167,43,167,56,1],[168,17,170,66,1],[171,21,173,44,1],[175,17,175,61,1],[175,62,175,114,1],[176,17,176,58,1],[177,17,177,51,1],[178,17,178,54,1],[179,17,179,50,1],[180,9,180,10,1],[183,9,183,10,0],[184,17,184,76,0],[185,9,185,10,0],[188,9,188,10,1],[189,17,189,70,1],[190,17,190,40,1],[190,41,190,54,1],[191,17,191,43,1],[191,44,191,57,1],[192,17,192,59,1],[192,60,192,99,1],[193,17,193,70,1],[193,71,193,108,1],[196,17,196,24,1],[196,26,196,34,1],[196,35,196,37,1],[196,38,196,59,1],[196,61,196,99,1],[197,17,197,24,1],[197,26,197,34,1],[197,35,197,37,1],[197,38,197,79,1],[197,79,197,88,1],[197,88,197,89,1],[197,38,197,89,1],[198,21,198,59,1],[199,17,199,54,1],[200,17,200,50,1],[201,9,201,10,1],[204,9,204,10,1],[205,17,205,70,1],[206,17,206,40,1],[206,41,206,54,1],[207,17,207,42,1],[207,43,207,56,1],[208,17,208,60,1],[209,21,211,44,1],[212,17,212,63,1],[212,64,212,96,0],[213,17,213,55,1],[214,17,214,39,1],[215,17,215,18,0],[216,21,216,50,0],[217,21,217,47,0],[218,17,218,18,0],[220,17,220,54,1],[223,13,223,72,1],[224,9,224,10,1],[227,9,227,10,1],[228,17,228,70,1],[229,17,229,40,1],[229,41,229,54,1],[231,17,231,39,1],[232,17,232,18,1],[233,21,233,52,1],[234,21,234,58,1],[235,21,235,54,1],[238,17,238,18,1],[240,21,240,46,1],[241,21,241,52,1],[242,21,242,59,1],[243,17,243,54,1],[246,21,246,80,1],[249,9,249,10,1],[252,9,252,10,1],[253,17,253,37,1],[253,38,253,51,1],[254,13,254,71,1],[255,13,255,92,1],[257,17,257,29,1],[258,17,258,18,1],[259,21,259,88,1],[260,17,260,18,1],[263,17,263,18,1],[264,21,266,93,1],[267,21,267,50,1],[267,51,267,79,1],[268,21,268,65,1],[269,26,269,41,1],[269,43,269,72,1],[269,74,269,95,1],[269,97,269,100,1],[270,21,270,22,1],[271,25,271,61,1],[272,25,272,62,1],[273,21,273,22,1],[274,17,274,18,1],[276,17,276,56,1],[277,17,277,54,1],[278,17,278,50,1],[279,9,279,10,1],[282,9,282,10,1],[283,17,283,59,1],[283,60,283,73,1],[284,17,284,59,1],[284,59,284,93,1],[284,93,284,95,1],[284,17,284,95,1],[284,96,284,109,1],[285,17,285,113,1],[288,17,288,57,1],[289,21,289,105,1],[290,17,290,54,1],[291,17,291,50,1],[292,9,292,10,1],[295,9,295,10,1],[296,17,296,59,1],[296,60,296,73,1],[298,17,298,70,1],[299,17,299,62,1],[299,62,299,96,1],[299,96,299,98,1],[299,17,299,98,1],[300,17,300,39,1],[300,40,300,53,1],[302,17,302,62,1],[304,17,304,57,1],[304,57,304,91,1],[304,91,304,93,1],[304,17,304,93,1],[305,17,305,47,1],[305,47,305,56,1],[305,56,305,67,1],[305,67,305,96,1],[305,96,306,66,1],[305,17,306,66,1],[307,17,307,18,1],[308,21,308,59,1],[309,21,309,53,1],[310,17,310,18,1],[312,17,312,54,1],[313,17,313,50,1],[314,9,314,10,1],[321,9,321,10,1],[322,17,322,70,1],[323,17,323,40,1],[323,41,323,54,1],[325,17,325,24,1],[325,26,325,34,1],[325,35,325,37,1],[325,38,325,81,1],[326,21,326,66,1],[327,17,327,24,1],[327,26,327,34,1],[327,35,327,37,1],[327,38,327,79,1],[327,79,327,88,1],[327,88,327,89,1],[327,38,327,89,1],[328,21,328,66,1],[329,17,329,45,1],[330,17,330,43,1],[331,17,331,54,1],[332,17,332,77,1],[333,17,333,50,1],[334,9,334,10,1],[337,9,337,10,1],[338,17,338,64,1],[339,17,339,34,1],[339,35,339,66,1],[340,17,340,78,1],[341,9,341,10,1],[344,9,344,10,1],[346,17,346,64,1],[347,17,347,34,1],[347,35,347,47,1],[350,17,350,50,1],[350,50,350,76,1],[350,76,350,78,1],[350,17,350,78,1],[351,21,351,61,1],[354,17,354,85,1],[355,17,355,31,1],[356,17,356,109,1],[359,17,359,39,1],[360,17,360,73,1],[361,17,361,62,1],[362,9,362,10,1],[366,9,366,10,1],[368,17,368,100,1],[369,17,369,41,1],[369,42,369,55,1],[371,17,371,76,1],[374,17,374,44,1],[375,17,375,18,1],[376,21,376,79,1],[377,21,377,77,1],[378,17,378,18,1],[380,17,380,18,1],[382,21,382,40,1],[383,21,383,64,1],[384,21,384,22,1],[385,25,385,55,1],[386,25,386,112,1],[387,21,387,22,1],[388,26,388,68,1],[389,21,389,22,1],[390,25,390,55,1],[391,25,391,107,1],[392,21,392,22,1],[393,17,393,18,1],[397,17,397,65,1],[398,17,398,50,1],[399,9,399,10,1],[402,9,402,10,1],[403,17,403,74,1],[404,17,404,104,1],[404,105,404,118,1],[405,17,405,74,1],[406,17,406,36,1],[408,17,408,52,1],[409,17,409,51,1],[409,52,409,64,1],[411,17,411,55,1],[411,56,411,69,1],[412,17,412,49,1],[415,17,415,24,1],[415,26,415,34,1],[415,35,415,37,1],[415,38,415,85,1],[416,21,416,62,1],[417,17,417,24,1],[417,26,417,34,1],[417,35,417,37,1],[417,38,417,83,1],[417,83,417,92,1],[417,92,417,93,1],[417,38,417,93,1],[418,21,418,62,1],[419,17,419,74,1],[420,17,420,63,1],[421,17,421,50,1],[422,9,422,10,1]]);
+    </script>
+  </body>
+</html>

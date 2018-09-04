@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\taskdatastore.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Repository;
+using Microsoft.EntityFrameworkCore;
+
+namespace CN_Repository
+{
+    public class TaskDataStore : BaseDataStore, ITaskDataStore
+    {
+        public TaskDataStore(CNDbContext dbContext) : base(dbContext)
+        {
+        }
+
+        #region Delete Methods
+
+        public void RemoveTask(CNTask targetTask)
+        {
+            mDbContext.Tasks.Remove(targetTask);
+        }
+
+        public void RemoveTaskConnector(CNTaskConnector connector)
+        {
+            mDbContext.TaskConnectors.Remove(connector);
+        }
+
+        #endregion
+
+        #region Add Methods
+
+        public CNTask AddTask(CNTask targetTask)
+        {
+            mDbContext.Tasks.Add(targetTask);
+            return targetTask;
+        }
+
+        #endregion
+
+        #region Update Methods
+
+        public void UpdateTask(CNTask targetTask)
+        {
+            var existingTask = mDbContext.Tasks
+                .Include(b =&gt; b.TaskTaggers)
+                .FirstOrDefault(b =&gt; b.TaskId == targetTask.TaskId);
+
+            if (existingTask == null)
+            {
+                IoC.Logger.Log($&quot;targetTask id {targetTask.TaskId} not exists&quot;);
+            }
+            else
+            {
+                mDbContext.Entry(existingTask).CurrentValues.SetValues(targetTask);
+                foreach (var taskTagger in targetTask.TaskTaggers)
+                {
+                    var existingTaskTagger = existingTask.TaskTaggers
+                        .FirstOrDefault(p =&gt; p.TaskTaggerId == taskTagger.TaskTaggerId);
+
+                    if (existingTaskTagger == null)
+                    {
+                        existingTask.TaskTaggers.Add(taskTagger);
+                    }
+                    else
+                    {
+                        mDbContext.Entry(existingTaskTagger).CurrentValues.SetValues(taskTagger);
+                    }
+                }
+
+                foreach (var taskTagger in existingTask.TaskTaggers)
+                {
+                    if (targetTask.TaskTaggers.All(p =&gt; p.TaskTaggerId != taskTagger.TaskTaggerId))
+                    {
+                        mDbContext.Remove(taskTagger);
+                    }
+                }
+            }
+        }
+
+        public void UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime)
+        {
+            if (originDataTask == null) return;
+            if (originDataTask.EndTime == null &amp;&amp; targetEndTime == null) return;
+            if (originDataTask.EndTime != null &amp;&amp; originDataTask.EndTime.Equals(targetEndTime)) return;
+            originDataTask.EndTime = targetEndTime;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        public void UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime)
+        {
+            if (originDataTask == null) return;
+            if (originDataTask.StartTime == null &amp;&amp; targetStartTime == null) return;
+            if (originDataTask.StartTime != null &amp;&amp; originDataTask.StartTime.Equals(targetStartTime)) return;
+            originDataTask.StartTime = targetStartTime;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        public void ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime)
+        {
+            //origintask null return
+            if (originDataTask == null) return;
+            //if this condition is fulfilled,than new time is smaller-or-equal compare to old ,do noting and return
+            if (originDataTask.StartTime != null &amp;&amp; originDataTask.EndTime != null &amp;&amp;
+                !(originDataTask.StartTime &gt; targetStartTime) &amp;&amp; !(originDataTask.EndTime &lt; targetEndTime) &amp;&amp;
+                targetEndTime != null) return;
+
+            //flag for update db
+            var needUpdate = false;
+            if (originDataTask.StartTime == null || originDataTask.StartTime &gt; targetStartTime)
+            {
+                originDataTask.StartTime = targetStartTime;
+                needUpdate = true;
+            }
+
+            if (originDataTask.EndTime == null &amp;&amp; targetEndTime != null || //Pause A Task
+                originDataTask.EndTime != null &amp;&amp; targetEndTime == null || //Start A Task
+                originDataTask.EndTime != null &amp;&amp; targetEndTime != null &amp;&amp;
+                originDataTask.EndTime &lt; targetEndTime
+            ) //Update A Task timeslice
+            {
+                originDataTask.EndTime = targetEndTime;
+                needUpdate = true;
+            }
+
+            if (!needUpdate) return;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        #endregion
+
+        #region Select Methods
+
+        public async Task&lt;CNTask&gt; GetTaskNoTracking(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await mDbContext.Tasks.Include(x=&gt;x.ParentTask).Include(x=&gt;x.TaskTaggers).ThenInclude(y=&gt;y.Tag).AsNoTracking()
+                        .FirstOrDefaultAsync(r =&gt; r.TaskId == taskid)
+            );
+        }
+
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetChildTasksNoTracking(int taskId)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await mDbContext.Tasks.Include(x =&gt; x.TaskTaggers).ThenInclude(y =&gt; y.Tag).AsNoTracking()
+                        .Where(r =&gt; r.ParentTaskID == taskId).ToListAsync()
+            );
+        }
+
+        public async Task&lt;int&gt; GetMaxSort(int? parentTaskId)
+        {
+            return await IoC.Task.Run(
+                async () =&gt; 
+                    await (from c in mDbContext.Tasks
+                        where c.ParentTaskID == parentTaskId
+                        select c.Sort).DefaultIfEmpty().MaxAsync()
+            );
+        }
+
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetAllTask()
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await (from c in mDbContext.Tasks
+                        where !c.IsDeleted
+                        orderby c.Sort
+                        select c).ToListAsync()
+            );
+        }
+
+        public async Task&lt;CNTask&gt; GetTask(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await mDbContext.Tasks
+                        .FirstOrDefaultAsync(r =&gt; r.TaskId == taskid)
+            );
+        }
+
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,55,13,70,1],[14,9,14,10,1],[15,9,15,10,1],[20,9,20,10,1],[21,13,21,49,1],[22,9,22,10,1],[25,9,25,10,1],[26,13,26,57,1],[27,9,27,10,1],[34,9,34,10,1],[35,13,35,46,1],[36,13,36,31,1],[37,9,37,10,1],[44,9,44,10,1],[45,13,47,69,1],[49,13,49,38,1],[50,13,50,14,1],[51,17,51,81,1],[52,13,52,14,1],[54,13,54,14,1],[55,17,55,84,1],[56,17,56,24,1],[56,26,56,40,1],[56,41,56,43,1],[56,44,56,66,1],[57,17,57,18,1],[58,21,59,46,1],[59,46,59,87,1],[59,87,59,89,1],[58,21,59,89,1],[61,21,61,52,1],[62,21,62,22,0],[63,25,63,66,0],[64,21,64,22,0],[66,21,66,22,1],[67,25,67,98,1],[68,21,68,22,1],[69,17,69,18,1],[71,17,71,24,1],[71,26,71,40,1],[71,41,71,43,1],[71,44,71,68,1],[72,17,72,18,1],[73,21,73,57,1],[73,57,73,98,1],[73,98,73,100,1],[73,21,73,100,1],[74,21,74,22,0],[75,25,75,55,0],[76,21,76,22,0],[77,17,77,18,1],[78,13,78,14,1],[79,9,79,10,1],[82,9,82,10,1],[83,13,83,40,1],[83,41,83,48,1],[84,13,84,73,1],[84,74,84,81,1],[85,13,85,96,1],[85,97,85,104,1],[86,13,86,52,1],[87,13,87,53,1],[88,9,88,10,1],[91,9,91,10,1],[92,13,92,40,1],[92,41,92,48,1],[93,13,93,77,1],[93,78,93,85,1],[94,13,94,102,1],[94,103,94,110,1],[95,13,95,56,1],[96,13,96,53,1],[97,9,97,10,1],[100,9,100,10,1],[102,13,102,40,1],[102,41,102,48,1],[104,13,106,39,1],[106,40,106,47,1],[109,13,109,36,1],[110,13,110,96,1],[111,13,111,14,1],[112,17,112,60,1],[113,17,113,35,1],[114,13,114,14,1],[116,13,120,14,1],[121,13,121,14,1],[122,17,122,56,1],[123,17,123,35,1],[124,13,124,14,1],[126,13,126,29,1],[126,30,126,37,1],[127,13,127,53,1],[128,9,128,10,1],[135,9,135,10,0],[136,13,138,21,0],[138,21,139,70,0],[139,70,140,15,0],[136,13,140,15,0],[141,9,141,10,0],[144,9,144,10,0],[145,13,147,21,0],[147,21,148,76,0],[148,76,149,15,0],[145,13,149,15,0],[150,9,150,10,0],[153,9,153,10,1],[154,13,156,21,1],[156,21,158,67,1],[158,67,159,15,1],[154,13,159,15,1],[160,9,160,10,1],[163,9,163,10,1],[164,13,166,21,1],[166,21,169,48,1],[169,48,170,15,1],[164,13,170,15,1],[171,9,171,10,1],[174,9,174,10,1],[175,13,177,21,1],[177,21,178,70,1],[178,70,179,15,1],[175,13,179,15,1],[180,9,180,10,1]]);
+    </script>
+  </body>
+</html>

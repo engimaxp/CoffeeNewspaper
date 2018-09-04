@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\domainmodel\cntask.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace CN_Core
+{
+    public class CNTask : IComparable&lt;CNTask&gt;
+    {
+        
+
+        #region Constructor
+
+        public CNTask()
+        {
+            
+        }
+        #endregion
+
+        #region Public Properties
+
+        /// &lt;summary&gt;
+        ///     The id of this task
+        /// &lt;/summary&gt;
+        public int TaskId { get; set; }
+
+        /// &lt;summary&gt;
+        ///     The sortIndex of this task
+        /// &lt;/summary&gt;
+        public int Sort { get; set; }
+
+        /// &lt;summary&gt;
+        ///     The detail of this task most likely plain text
+        /// &lt;/summary&gt;
+        public string Content { get; set; }
+
+        /// &lt;summary&gt;
+        ///     CreatedTime of this task
+        /// &lt;/summary&gt;
+        public DateTime CreateTime { get; set; }
+
+        /// &lt;summary&gt;
+        ///     StartTime of this task
+        /// &lt;/summary&gt;
+        public DateTime? StartTime { get; set; }
+
+        /// &lt;summary&gt;
+        ///     The importance of this task
+        /// &lt;/summary&gt;
+        public CNPriority Priority { get; set; }
+
+        /// &lt;summary&gt;
+        ///     How urgent is this task
+        /// &lt;/summary&gt;
+        public CNUrgency Urgency { get; set; }
+
+        /// &lt;summary&gt;
+        ///     Estimated duration of this task
+        ///     count by minute
+        ///     -1 means unkonwn
+        ///     -2 means never will end
+        ///     0 means user doest fill this property
+        /// &lt;/summary&gt;
+        public long EstimatedDuration { get; set; }
+
+        /// &lt;summary&gt;
+        ///     The EndTime of this task
+        ///     EndTime must greater than StartTime
+        /// &lt;/summary&gt;
+        public DateTime? EndTime { get; set; }
+
+        /// &lt;summary&gt;
+        ///     Time before which this task must be finished
+        /// &lt;/summary&gt;
+        public DateTime? DeadLine { get; set; }
+
+        /// &lt;summary&gt;
+        ///     the status of this task
+        /// &lt;/summary&gt;
+        public CNTaskStatus Status { get; set; } = CNTaskStatus.TODO;
+
+        /// &lt;summary&gt;
+        ///     Define this task is deleted or not
+        /// &lt;/summary&gt;
+        public bool IsDeleted { get; set; }
+
+        /// &lt;summary&gt;
+        ///     Define this task is failed or not
+        /// &lt;/summary&gt;
+        public bool IsFail { get; set; }
+
+        /// &lt;summary&gt;
+        ///     The fail reason of this task
+        ///     if this task&#39;s &lt;see cref=&quot;IsFail&quot; /&gt; is true ,this properties shall store the fail reason
+        /// &lt;/summary&gt;
+        public string FailReason { get; set; }
+
+        /// &lt;summary&gt;
+        ///     The pending reason of this task
+        ///     if this task&#39;s &lt;see cref=&quot;CNTaskStatus.PENDING&quot; /&gt; ,this properties shall store the pending reason
+        /// &lt;/summary&gt;
+        public string PendingReason { get; set; }
+
+        /// &lt;summary&gt;
+        ///     the tasks memos relation entites
+        /// &lt;/summary&gt;
+        public virtual ICollection&lt;CNTaskMemo&gt; TaskMemos { get; set; } = new HashSet&lt;CNTaskMemo&gt;();
+
+        /// &lt;summary&gt;
+        ///     Tags of this task
+        /// &lt;/summary&gt;
+        public virtual ICollection&lt;CNTaskTagger&gt; TaskTaggers { get; set; } = new HashSet&lt;CNTaskTagger&gt;();
+
+        /// &lt;summary&gt;
+        ///     ParentTaskId
+        /// &lt;/summary&gt;
+        public int? ParentTaskID { get; set; }
+
+        /// &lt;summary&gt;
+        ///     ParentTask of this task
+        ///     one task only have one parent ,so its a tree structure
+        /// &lt;/summary&gt;
+        public virtual CNTask ParentTask { get; set; } 
+
+        /// &lt;summary&gt;
+        ///     PreTasks of this task
+        ///     one task may have many pretasks , only when these tasks is done when this task can start
+        /// &lt;/summary&gt;
+        public virtual ICollection&lt;CNTaskConnector&gt; PreTaskConnectors { get; set; } = new HashSet&lt;CNTaskConnector&gt;();
+
+
+        /// &lt;summary&gt;
+        ///     SufTasks of this task
+        ///     one task may have many Suftasks , only this task is done when these tasks can start
+        /// &lt;/summary&gt;
+        public virtual ICollection&lt;CNTaskConnector&gt; SufTaskConnectors { get; set; } = new HashSet&lt;CNTaskConnector&gt;();
+
+        /// &lt;summary&gt;
+        ///     ChildTasks of this task
+        /// &lt;/summary&gt;
+        public virtual ICollection&lt;CNTask&gt; ChildTasks { get; set; } = new HashSet&lt;CNTask&gt;();
+
+        /// &lt;summary&gt;
+        ///     The timeslices this task has used
+        /// &lt;/summary&gt;
+        public virtual ICollection&lt;CNTimeSlice&gt; UsedTimeSlices { get; set; } = new HashSet&lt;CNTimeSlice&gt;();
+
+        #endregion
+
+        #region Interface Implementation
+
+
+        #region Formatting implement
+
+        public override string ToString()
+        {
+            return $&quot;{nameof(TaskId)}: {TaskId}, {nameof(Content)}: {Content},{nameof(ParentTaskID)}:{ParentTaskID},{nameof(Sort)}:{Sort}&quot;;
+        }
+
+        #endregion
+
+        #region Comparable Implement
+
+        /// &lt;summary&gt;
+        ///     Compare two tasks,usable on default sorting
+        ///     1. compare urgency
+        ///     2. compare priority
+        ///     3. compare deadline the earlier is greater
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;other&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public int CompareTo(CNTask other)
+        {
+            if (Urgency &gt; other.Urgency) return 1;
+            if (Urgency &lt; other.Urgency) return -1;
+            if (Priority &gt; other.Priority) return 1;
+            if (Priority &lt; other.Priority) return -1;
+            if (DeadLine == null &amp;&amp; other.DeadLine == null) return 0;
+            if (DeadLine == null &amp;&amp; other.DeadLine != null) return -1;
+            if (DeadLine != null &amp;&amp; other.DeadLine == null) return 1;
+            if (DeadLine &gt; other.DeadLine) return -1;
+            if (DeadLine &lt; other.DeadLine) return 1;
+            return 0;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Public Methods
+
+        /// &lt;summary&gt;
+        ///     Defines this task has or not memos
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public bool HasMemo()
+        {
+            return TaskMemos.Any();
+        }
+
+        /// &lt;summary&gt;
+        ///     Defines this task has specified id&#39;s memo
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;memoId&quot;&gt;the id to find&lt;/param&gt;
+        /// &lt;returns&gt;true if it has this memo&lt;/returns&gt;
+        public bool HasMemo(string memoId)
+        {
+            return TaskMemos.Any(x =&gt; x.MemoId.Equals(memoId));
+        }
+
+        /// &lt;summary&gt;
+        ///     Get all Memos
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;a list of this task&#39;s memo&lt;/returns&gt;
+        public List&lt;CNMemo&gt; GetAllMemos()
+        {
+            return TaskMemos.Select(x =&gt; x.Memo).ToList();
+        }
+
+        /// &lt;summary&gt;
+        ///     Defines this Task has parent Task
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;true if it has&lt;/returns&gt;
+        public bool HasParentTask()
+        {
+            return (ParentTaskID ?? 0) &gt; 0;
+        }
+
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,24,1],[14,9,14,10,1],[16,9,16,10,1],[24,29,24,33,1],[24,34,24,38,1],[29,27,29,31,1],[29,32,29,36,1],[34,33,34,37,1],[34,38,34,42,1],[39,38,39,42,1],[39,43,39,47,1],[44,38,44,42,1],[44,43,44,47,1],[49,38,49,42,1],[49,43,49,47,1],[54,36,54,40,1],[54,41,54,45,1],[63,41,63,45,1],[63,46,63,50,1],[69,36,69,40,1],[69,41,69,45,1],[74,37,74,41,1],[74,42,74,46,1],[79,38,79,42,1],[79,43,79,47,1],[79,52,79,69,1],[84,33,84,37,1],[84,38,84,42,1],[89,30,89,34,1],[89,35,89,39,1],[95,36,95,40,1],[95,41,95,45,1],[101,39,101,43,1],[101,44,101,48,1],[106,60,106,64,0],[106,65,106,69,1],[106,74,106,99,1],[111,64,111,68,1],[111,69,111,73,1],[111,78,111,105,1],[116,36,116,40,1],[116,41,116,45,1],[122,44,122,48,1],[122,49,122,53,1],[128,73,128,77,1],[128,78,128,82,1],[128,87,128,117,1],[135,73,135,77,1],[135,78,135,82,0],[135,87,135,117,1],[140,57,140,61,1],[140,62,140,66,0],[140,71,140,92,1],[145,66,145,70,1],[145,71,145,75,1],[145,80,145,106,1],[155,9,155,10,1],[156,13,156,140,1],[157,9,157,10,1],[172,9,172,10,1],[173,13,173,41,1],[173,42,173,51,1],[174,13,174,41,1],[174,42,174,52,1],[175,13,175,43,1],[175,44,175,53,1],[176,13,176,43,1],[176,44,176,54,1],[177,13,177,60,1],[177,61,177,70,0],[178,13,178,60,1],[178,61,178,71,0],[179,13,179,60,1],[179,61,179,70,0],[180,13,180,43,1],[180,44,180,54,1],[181,13,181,43,1],[181,44,181,53,1],[182,13,182,22,0],[183,9,183,10,1],[196,9,196,10,0],[197,13,197,36,0],[198,9,198,10,0],[206,9,206,10,0],[207,13,207,39,0],[207,39,207,62,0],[207,62,207,64,0],[207,13,207,64,0],[208,9,208,10,0],[215,9,215,10,0],[216,13,216,42,0],[216,42,216,48,0],[216,48,216,59,0],[216,13,216,59,0],[217,9,217,10,0],[224,9,224,10,0],[225,13,225,44,0],[226,9,226,10,0]]);
+    </script>
+  </body>
+</html>

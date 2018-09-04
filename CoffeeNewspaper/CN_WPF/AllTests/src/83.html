@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\attachedproperties\treeviewdisabledoubleclickattackedproperties.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Windows;
+using System.Windows.Controls;
+
+namespace CN_WPF
+{
+    public class TreeViewDisableDoubleClickAttackedProperties:BaseAttachedProperty&lt;TreeViewDisableDoubleClickAttackedProperties,bool&gt;
+    {
+        public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(sender is TreeView treeView)) return;
+            if (!(bool) e.NewValue) return;
+
+            void OnLoaded(object s, RoutedEventArgs ee)
+            {
+                treeView.Loaded -= OnLoaded;
+
+                //Hook the event
+                treeView.PreviewMouseLeftButtonDown += (ss, eee) =&gt;
+                {
+                    if (eee.ClickCount &gt; 1)
+                    {
+                        //here you would probably want to include code that is called by your
+                        //mouse down event handler.
+                        eee.Handled = true;
+                    }
+                };
+            }
+
+            treeView.Loaded += OnLoaded;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,48,0],[10,49,10,56,0],[11,13,11,36,0],[11,37,11,44,0],[14,13,14,14,0],[15,17,15,45,0],[18,17,19,17,0],[19,17,19,18,0],[19,18,20,21,0],[20,21,20,44,0],[20,44,21,21,0],[21,21,21,22,0],[21,22,24,25,0],[24,25,24,44,0],[24,44,25,21,0],[25,21,25,22,0],[25,22,26,17,0],[26,17,26,18,0],[26,18,26,19,0],[18,17,26,19,0],[27,13,27,14,0],[29,13,29,41,0],[30,9,30,10,0]]);
+    </script>
+  </body>
+</html>

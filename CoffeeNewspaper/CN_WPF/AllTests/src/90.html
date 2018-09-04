@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\ioc\uimanager.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Threading.Tasks;
+using CN_Core.Interfaces;
+using CN_Presentation.ViewModel.Dialog;
+
+namespace CN_WPF
+{
+    public class UIManager:IUIManager
+    {
+        public Task ShowForm(FormDialogViewModel form)
+        {
+            return new FormDialogBox().ShowDialog(form);
+        }
+
+        public Task ShowMessage(MessageBoxDialogViewModel viewModel)
+        {
+            return new DialogMessageBox().ShowDialog(viewModel);
+        }
+
+        public Task ShowConfirm(ConfirmDialogBoxViewModel confirmViewModel)
+        {
+            return new ConfirmDialogBox().ShowDialog(confirmViewModel);
+        }
+
+        public Task ShowPrompt(PromptDialogBoxViewModel promptViewModel)
+        {
+            return new PromptDialogBox().ShowDialog(promptViewModel);
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,10,0],[12,13,12,57,0],[13,9,13,10,0],[16,9,16,10,0],[17,13,17,65,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,72,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,70,0],[28,9,28,10,0]]);
+    </script>
+  </body>
+</html>

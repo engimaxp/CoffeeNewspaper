@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\tasklistitem.xaml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+&lt;UserControl x:Class=&quot;CN_WPF.TaskListItem&quot;
+             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
+             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
+             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
+             xmlns:system=&quot;clr-namespace:System;assembly=mscorlib&quot;
+             mc:Ignorable=&quot;d&quot;
+             d:DesignWidth=&quot;300&quot;&gt;
+
+    &lt;Grid d:DataContext=&quot;{x:Static design:TaskListItemDesignModel.Instance}&quot;&gt;
+        &lt;Grid.RowDefinitions&gt;
+            &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+            &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+        &lt;/Grid.RowDefinitions&gt;
+        &lt;!-- Content --&gt;
+        &lt;Border
+            x:Name=&quot;background&quot;
+            Grid.Row=&quot;0&quot;
+            Panel.ZIndex=&quot;1&quot;
+            BorderThickness=&quot;1&quot;
+            BorderBrush=&quot;{StaticResource WordVeryVeryLightBlueBrush}&quot;
+            Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
+
+            &lt;Border.Triggers&gt;
+                &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseEnter&quot;&gt;
+                    &lt;BeginStoryboard&gt;
+                        &lt;Storyboard&gt;
+                            &lt;ColorAnimation To=&quot;{StaticResource WordVeryVeryLightBlue}&quot;
+                                            Duration=&quot;0:0:0.03&quot; Storyboard.TargetName=&quot;container&quot;
+                                            Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
+                            &lt;DoubleAnimation To=&quot;1&quot; Duration=&quot;0:0:0.03&quot; Storyboard.TargetName=&quot;editBorder&quot;
+                                             Storyboard.TargetProperty=&quot;Opacity&quot; /&gt;
+                            &lt;DoubleAnimation To=&quot;1&quot; Duration=&quot;0:0:0.03&quot; Storyboard.TargetName=&quot;moreBorder&quot;
+                                             Storyboard.TargetProperty=&quot;Opacity&quot; /&gt;
+                        &lt;/Storyboard&gt;
+                    &lt;/BeginStoryboard&gt;
+                &lt;/EventTrigger&gt;
+                &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseLeave&quot;&gt;
+                    &lt;BeginStoryboard&gt;
+                        &lt;Storyboard&gt;
+                            &lt;ColorAnimation To=&quot;Transparent&quot; Duration=&quot;0:0:0.03&quot;
+                                            Storyboard.TargetName=&quot;container&quot;
+                                            Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
+
+                            &lt;DoubleAnimation To=&quot;0&quot; Duration=&quot;0:0:0.03&quot; Storyboard.TargetName=&quot;editBorder&quot;
+                                             Storyboard.TargetProperty=&quot;Opacity&quot; /&gt;
+                            &lt;DoubleAnimation To=&quot;0&quot; Duration=&quot;0:0:0.03&quot; Storyboard.TargetName=&quot;moreBorder&quot;
+                                             Storyboard.TargetProperty=&quot;Opacity&quot; /&gt;
+                        &lt;/Storyboard&gt;
+                    &lt;/BeginStoryboard&gt;
+                &lt;/EventTrigger&gt;
+            &lt;/Border.Triggers&gt;
+
+            &lt;Grid x:Name=&quot;container&quot; Background=&quot;Transparent&quot;&gt;
+                &lt;Grid.ColumnDefinitions&gt;
+                    &lt;!-- Task Urgency Indicator Bar --&gt;
+                    &lt;!-- Task Status --&gt;
+                    &lt;!-- Main content --&gt;
+                    &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                    &lt;!-- More op Indicator Bar --&gt;
+                    &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                &lt;/Grid.ColumnDefinitions&gt;
+                &lt;Border
+                    Grid.Column=&quot;0&quot;
+                    Background=&quot;{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter=&#39;D0F4DC&#39;}&quot;&gt;
+                    &lt;Border.InputBindings&gt;
+                        &lt;MouseBinding MouseAction=&quot;LeftClick&quot; Command=&quot;{Binding SelectTaskCommand}&quot; /&gt;
+                        &lt;MouseBinding MouseAction=&quot;LeftDoubleClick&quot; Command=&quot;{Binding ExpandTaskCommand}&quot; /&gt;
+                    &lt;/Border.InputBindings&gt;
+                    &lt;Grid&gt;
+                        &lt;Grid.ColumnDefinitions&gt;
+                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                        &lt;/Grid.ColumnDefinitions&gt;
+
+                        &lt;!-- Task Urgency Indicator Bar --&gt;
+                        &lt;Border Grid.Column=&quot;0&quot;
+                                Width=&quot;4&quot;
+                                Margin=&quot;0 10&quot;
+                                HorizontalAlignment=&quot;Left&quot;
+                                Background=&quot;{Binding Urgency, Converter={local:TaskUrgencyToBackGroundColorConverter}}&quot; /&gt;
+                        &lt;!-- TaskStatus Indicator padding --&gt;
+                        &lt;Border Grid.Column=&quot;0&quot;
+                                Padding=&quot;8 15&quot;
+                                VerticalAlignment=&quot;Stretch&quot;
+                                HorizontalAlignment=&quot;Stretch&quot;&gt;
+                            &lt;!-- TaskStatus Indicator --&gt;
+                            &lt;TextBlock
+                                Text=&quot;{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}&quot;
+                                Padding=&quot;0 4 0 0&quot;
+                                VerticalAlignment=&quot;Center&quot;
+                                HorizontalAlignment=&quot;Center&quot;
+                                Height=&quot;40&quot;
+                                TextAlignment=&quot;Center&quot;
+                                Width=&quot;{Binding ActualHeight, RelativeSource={RelativeSource Self}}&quot;
+                                Foreground=&quot;{Binding Status,Converter={local:TaskStatusToForeGroundConverter}}&quot;
+                                FontSize=&quot;{StaticResource FontSizeXXLarge}&quot;
+                                FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot; /&gt;
+                        &lt;/Border&gt;
+
+                        &lt;!-- Task Title --&gt;
+                        &lt;Border Grid.Column=&quot;1&quot; Padding=&quot;0 0 10 0&quot;
+                                VerticalAlignment=&quot;Stretch&quot;
+                                HorizontalAlignment=&quot;Stretch&quot;&gt;
+                            &lt;StackPanel VerticalAlignment=&quot;Center&quot;&gt;
+                                &lt;!-- Name--&gt;
+                                &lt;TextBlock Text=&quot;{Binding TaskTitle}&quot;
+                                           FontFamily=&quot;Microsoft YaHei&quot;
+                                           MaxHeight=&quot;76&quot;
+                                           Padding=&quot;0 0 0 2&quot;
+                                           Foreground=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
+                                           TextTrimming=&quot;CharacterEllipsis&quot;
+                                           TextWrapping=&quot;Wrap&quot; /&gt;
+                            &lt;/StackPanel&gt;
+                        &lt;/Border&gt;
+                        
+                        &lt;!-- More Op Bar --&gt;
+                        &lt;Border Grid.Column=&quot;0&quot;
+                                Grid.ColumnSpan=&quot;2&quot;
+                                Panel.ZIndex=&quot;5&quot;
+                                Visibility=&quot;Collapsed&quot;
+                                Background=&quot;{StaticResource BackgroundVeryLightBrush}&quot;
+                                local:AnimateSlideInFromRightProperty.Value=&quot;{Binding IsMoreOpDisplayed}&quot;&gt;
+                            &lt;Grid&gt;
+                                &lt;Grid.RowDefinitions&gt;
+                                    &lt;RowDefinition Height=&quot;*&quot;&gt;&lt;/RowDefinition&gt;
+                                    &lt;RowDefinition Height=&quot;*&quot;&gt;&lt;/RowDefinition&gt;
+                                &lt;/Grid.RowDefinitions&gt;
+                                &lt;Grid.ColumnDefinitions&gt;
+                                    &lt;ColumnDefinition Width=&quot;*&quot;&gt;&lt;/ColumnDefinition&gt;
+                                    &lt;ColumnDefinition Width=&quot;0.4*&quot;&gt;&lt;/ColumnDefinition&gt;
+                                    &lt;ColumnDefinition Width=&quot;0.4*&quot;&gt;&lt;/ColumnDefinition&gt;
+                                &lt;/Grid.ColumnDefinitions&gt;
+
+                                &lt;Button Style=&quot;{StaticResource BackGroundIconButtonWithText}&quot;
+                                        Grid.Row=&quot;0&quot; 
+                                        Grid.Column=&quot;0&quot; 
+                                        Tag=&quot;Start&quot;
+                                        Visibility=&quot;{Binding IsPaused,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                                        Command=&quot;{Binding StartCommand}&quot;
+                                        Background=&quot;{StaticResource IconHoverBlueBrush}&quot;
+                                        Content=&quot;{StaticResource FontAwesomePlayIcon}&quot;
+                                        FontSize=&quot;{StaticResource FontSizeLarge}&quot;&gt;
+                                &lt;/Button&gt;
+
+                                &lt;Button Style=&quot;{StaticResource BackGroundIconButtonWithText}&quot;
+                                        Grid.Row=&quot;0&quot; 
+                                        Grid.Column=&quot;0&quot; 
+                                        Tag=&quot;Stop&quot;
+                                        Command=&quot;{Binding StopCommand}&quot;
+                                        Visibility=&quot;{Binding IsPaused,Converter={local:BooleanToVisiblityGoneConverter},ConverterParameter=True}&quot;
+                                        Background=&quot;{StaticResource IconHoverBlueBrush}&quot;
+                                        Content=&quot;{StaticResource FontAwesomePauseIcon}&quot;
+                                        FontSize=&quot;{StaticResource FontSizeLarge}&quot;&gt;
+                                &lt;/Button&gt;
+
+                                &lt;Button Style=&quot;{StaticResource BackGroundIconButtonWithText}&quot;
+                                        Grid.Row=&quot;1&quot; 
+                                        Grid.Column=&quot;0&quot; 
+                                        Tag=&quot;Finish&quot;
+                                        IsEnabled=&quot;{Binding IsFinished,Converter={local:BooleanInvertConverter}}&quot;
+                                        Command=&quot;{Binding FinishCommand}&quot;
+                                        Background=&quot;{StaticResource WordGreenBrush}&quot;
+                                        Content=&quot;{StaticResource FontAwesomeCheckIcon}&quot;
+                                        FontSize=&quot;{StaticResource FontSizeLarge}&quot;&gt;
+                                &lt;/Button&gt;
+
+
+                                &lt;Button Style=&quot;{StaticResource BackGroundIconButton}&quot;
+                                        Grid.Row=&quot;0&quot; 
+                                        Grid.Column=&quot;1&quot;
+                                        ToolTip=&quot;Pending&quot;
+                                        Command=&quot;{Binding PendingCommand}&quot;
+                                        IsEnabled=&quot;{Binding CanPending}&quot;
+                                        Background=&quot;{StaticResource WordOrangeBrush}&quot;
+                                        FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                        Content=&quot;{StaticResource FontAwesomeHalfHourGlassIcon}&quot;
+                                        FontSize=&quot;{StaticResource FontSizeLarge}&quot;&gt;
+                                &lt;/Button&gt;
+
+                                
+                                &lt;Button Style=&quot;{StaticResource BackGroundIconButton}&quot;
+                                        Grid.Row=&quot;1&quot; 
+                                        Grid.Column=&quot;1&quot;
+                                        ToolTip=&quot;Fail&quot;
+                                        Command=&quot;{Binding FailingCommand}&quot;
+                                        IsEnabled=&quot;{Binding CanFail}&quot;
+                                        Background=&quot;{StaticResource WordRedBrush}&quot;
+                                        FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                        Content=&quot;{StaticResource FontAwesomeTimesCircleIcon}&quot;
+                                        FontSize=&quot;{StaticResource FontSizeLarge}&quot;&gt;
+                                &lt;/Button&gt;
+                                
+                                
+                                &lt;Button Style=&quot;{StaticResource BackGroundIconButton}&quot;
+                                        Grid.Row=&quot;0&quot; 
+                                        Grid.Column=&quot;2&quot;
+                                        ToolTip=&quot;Delete&quot;
+                                        Command=&quot;{Binding DeleteCommand}&quot;
+                                        Background=&quot;{StaticResource WordBlueBrush}&quot;
+                                        FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                        Content=&quot;{StaticResource FontAwesomeTrashAltIcon}&quot;
+                                        FontSize=&quot;{StaticResource FontSizeLarge}&quot;&gt;
+                                &lt;/Button&gt;
+
+                                &lt;Button Style=&quot;{StaticResource BackGroundIconButton}&quot;
+                                        Grid.Row=&quot;1&quot; 
+                                        Grid.Column=&quot;2&quot;
+                                        Background=&quot;{StaticResource ForegroundDarkBrush}&quot;
+                                        FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                        Content=&quot;{StaticResource FontAwesomeThIcon}&quot;
+                                        FontSize=&quot;{StaticResource FontSizeLarge}&quot;&gt;
+                                &lt;/Button&gt;
+                            &lt;/Grid&gt;
+                        &lt;/Border&gt;
+                    &lt;/Grid&gt;
+                &lt;/Border&gt;
+
+                &lt;!-- More Op Indicator Padding --&gt;
+                &lt;Grid Grid.Column=&quot;1&quot;
+                      Background=&quot;{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter=&#39;D0F4DC&#39;}&quot;&gt;
+                    &lt;Grid.RowDefinitions&gt;
+                        &lt;RowDefinition Height=&quot;1*&quot; /&gt;
+                        &lt;RowDefinition Height=&quot;1*&quot; /&gt;
+                    &lt;/Grid.RowDefinitions&gt;
+
+                    &lt;Border Grid.Row=&quot;0&quot; Grid.RowSpan=&quot;2&quot; 
+                            Background=&quot;{StaticResource ForegroundDarkBrush}&quot;
+                            Visibility=&quot;{Binding IsMoreOpDisplayed,Converter={local:BooleanToVisiblityGoneConverter}}&quot;&gt;&lt;/Border&gt;
+                    &lt;Border
+                        x:Name=&quot;editBorder&quot;
+                        Grid.Row=&quot;0&quot;
+                        Padding=&quot;10 5&quot;
+                        Opacity=&quot;0&quot;
+                        Panel.ZIndex=&quot;2&quot;
+                        Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
+                        &lt;Border.InputBindings&gt;
+                            &lt;MouseBinding MouseAction=&quot;LeftClick&quot; Command=&quot;{Binding OpenEditDialogCommand}&quot; /&gt;
+                        &lt;/Border.InputBindings&gt;
+                        &lt;TextBlock
+                            Margin=&quot;4 0 0 0&quot;
+                            VerticalAlignment=&quot;Center&quot;
+                            HorizontalAlignment=&quot;Center&quot;
+                            FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                            Text=&quot;{StaticResource FontAwesomeEditIcon}&quot;
+                            FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                            Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot; /&gt;
+                        &lt;Border.Triggers&gt;
+                            &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseEnter&quot;&gt;
+                                &lt;BeginStoryboard&gt;
+                                    &lt;Storyboard&gt;
+                                        &lt;ColorAnimation Duration=&quot;0:0:0.2&quot;
+                                                        To=&quot;{StaticResource ForegroundMain}&quot;
+                                                        Storyboard.TargetName=&quot;editBorder&quot;
+                                                        Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
+                                    &lt;/Storyboard&gt;
+                                &lt;/BeginStoryboard&gt;
+                            &lt;/EventTrigger&gt;
+                            &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseLeave&quot;&gt;
+                                &lt;BeginStoryboard&gt;
+                                    &lt;Storyboard&gt;
+                                        &lt;ColorAnimation Duration=&quot;0:0:0.2&quot;
+                                                        From=&quot;{StaticResource ForegroundMain}&quot;
+                                                        Storyboard.TargetName=&quot;editBorder&quot;
+                                                        Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
+                                    &lt;/Storyboard&gt;
+                                &lt;/BeginStoryboard&gt;
+                            &lt;/EventTrigger&gt;
+                        &lt;/Border.Triggers&gt;
+                    &lt;/Border&gt;
+                    &lt;Border
+                        x:Name=&quot;moreBorder&quot;
+                        Panel.ZIndex=&quot;2&quot;
+                        Grid.Row=&quot;1&quot;
+                        Padding=&quot;10 5&quot;
+                        Opacity=&quot;0&quot;
+                        Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
+                        &lt;Border.InputBindings&gt;
+                            &lt;MouseBinding MouseAction=&quot;LeftClick&quot; Command=&quot;{Binding DisplayMoreOpCommand}&quot; /&gt;
+                        &lt;/Border.InputBindings&gt;
+                        &lt;TextBlock
+                            VerticalAlignment=&quot;Center&quot;
+                            HorizontalAlignment=&quot;Center&quot;
+                            FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                            Text=&quot;{StaticResource FontAwesomeEllipsisHIcon}&quot;
+                            FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                            Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot; /&gt;
+
+                        &lt;Border.Triggers&gt;
+                            &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseEnter&quot;&gt;
+                                &lt;BeginStoryboard&gt;
+                                    &lt;Storyboard&gt;
+                                        &lt;ColorAnimation Duration=&quot;0:0:0.2&quot;
+                                                        To=&quot;{StaticResource ForegroundMain}&quot;
+                                                        Storyboard.TargetName=&quot;moreBorder&quot;
+                                                        Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
+                                    &lt;/Storyboard&gt;
+                                &lt;/BeginStoryboard&gt;
+                            &lt;/EventTrigger&gt;
+                            &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseLeave&quot;&gt;
+                                &lt;BeginStoryboard&gt;
+                                    &lt;Storyboard&gt;
+                                        &lt;ColorAnimation Duration=&quot;0:0:0.2&quot;
+                                                        From=&quot;{StaticResource ForegroundMain}&quot;
+                                                        Storyboard.TargetName=&quot;moreBorder&quot;
+                                                        Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
+                                    &lt;/Storyboard&gt;
+                                &lt;/BeginStoryboard&gt;
+                            &lt;/EventTrigger&gt;
+                        &lt;/Border.Triggers&gt;
+                    &lt;/Border&gt;
+                &lt;/Grid&gt;
+            &lt;/Grid&gt;
+        &lt;/Border&gt;
+
+        &lt;!-- Expandable Content --&gt;
+        &lt;!-- ScrollView Animation Wrapper --&gt;
+        &lt;local:ScrollViewExpander
+            Grid.Row=&quot;1&quot;
+            ToggleExpand=&quot;{Binding IsExpanded}&quot;
+            ContentViewModel=&quot;{Binding ExpandDetailViewModel}&quot; /&gt;
+    &lt;/Grid&gt;
+
+&lt;/UserControl&gt;
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[1,13,1,77,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\argumentparser.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Globalization;
+using System.Reflection;
+
+namespace CoffeeNewspaper_CLI
+{
+	public class ArgumentParser
+	{
+		private string CmdLine;
+		private Dictionary&lt;string, List&lt;string&gt;&gt; Switches;
+		private string CurrentSwitch;
+
+		/// &lt;summary&gt;
+		/// Parser the input into cmd and muti params
+		/// &lt;/summary&gt;
+		/// &lt;param name=&quot;input&quot;&gt;input like &quot;task -s 1 2 3 --start --name \&quot;Start A Task\&quot;&quot;&lt;/param&gt;
+		public ArgumentParser(string input)
+		{
+			Parse(input);
+		}
+
+		private void Parse(string input)
+		{
+			if (string.IsNullOrEmpty(input)) throw new ArgumentException(&quot;Input cannot be empty&quot;);
+			CmdLine = input.Trim();
+			Switches = new Dictionary&lt;string, List&lt;string&gt;&gt;();
+
+			bool InQuote = false;
+			StringBuilder CurTok = new StringBuilder();
+
+			/*Console.WriteLine(CmdLine);
+			Console.WriteLine();*/
+
+			for (int i = 0; i &lt; CmdLine.Length; i++)
+			{
+				char C = CmdLine[i];
+				char PC = i &gt; 0 ? CmdLine[i - 1] : (char)0;
+				char PPC = i &gt; 1 ? CmdLine[i - 2] : (char)0;
+
+				if (C == &#39;\&quot;&#39;)
+				{//quote situation
+					if (!InQuote)
+					{
+						InQuote = true;
+						if (CurTok.Length &gt; 0)
+							EmitToken(CurTok.ToString());
+						CurTok.Clear();
+						//CurTok.Append(C);
+					}
+					else if (PC != &#39;\\&#39; || (PC == &#39;\\&#39; &amp;&amp; PPC == &#39;\\&#39;))
+					{//in quote quote situation
+						InQuote = false;
+						//CurTok.Append(C);
+						EmitToken(CurTok.ToString());
+						CurTok.Clear();
+					}
+					else
+						CurTok.Append(C);
+				}
+				else
+				{
+					if (!InQuote &amp;&amp; char.IsWhiteSpace(C) &amp;&amp; CurTok.Length &gt; 0)
+					{
+						EmitToken(CurTok.ToString());
+						CurTok.Clear();
+					}
+					else if (!char.IsWhiteSpace(C) || InQuote)
+						CurTok.Append(C);
+				}
+			}
+			//last end situation
+			if (CurTok.Length &gt; 0)
+				EmitToken(CurTok.ToString());
+
+			//get the cmd
+			if (CmdLine.Contains(&quot; &quot;))
+			{
+				CmdLine = CmdLine.Substring(0,CmdLine.IndexOf(&#39; &#39;));
+			}
+		}
+
+		private void EmitToken(string Tok)
+		{
+			Tok = Tok.Replace(&quot;\\\\&quot;, &quot;\\&quot;).Replace(&quot;\\\&quot;&quot;, &quot;\&quot;&quot;);
+
+			if (Tok.StartsWith(&quot;--&quot;))
+			{
+				if (Tok.Length &gt; 2)
+					EmitSwitch(Tok.Substring(2));
+				return;
+			}
+			else if (Tok.StartsWith(&quot;-&quot;))
+			{
+				EmitSwitch(Tok.Substring(1, 1));
+				if (Tok.Length &gt; 2)
+					EmitToken(Tok.Substring(2));
+				return;
+			}
+
+			if (CurrentSwitch != null)
+				Switches[CurrentSwitch].Add(Tok);
+			else
+			{
+			}
+		}
+
+		private void EmitSwitch(string S)
+		{
+			CurrentSwitch = S;
+			if (!Switches.ContainsKey(CurrentSwitch))
+				Switches.Add(CurrentSwitch, new List&lt;string&gt;());
+		}
+
+		private T ParseToT&lt;T&gt;(string Src)
+		{
+			Type TT = typeof(T);
+
+			// If no value found, return default
+			if (string.IsNullOrEmpty(Src))
+				return default(T);
+
+			// If it&#39;s a string, return it
+			if (TT == typeof(string))
+				return (T)(object)Src;
+
+			// If it contains a public string constructor
+			if (TT.GetConstructor(new[] { typeof(string) }) != null)
+				return (T)Activator.CreateInstance(TT, Src);
+
+			// If it has a Type.Parse static method
+			MethodInfo ParseMethod;
+			if ((ParseMethod = TT.GetMethod(&quot;Parse&quot;, new[] { typeof(string), typeof(IFormatProvider) })) != null)
+				return (T)ParseMethod.Invoke(null, new object[] { Src, CultureInfo.InvariantCulture });
+			else if ((ParseMethod = TT.GetMethod(&quot;Parse&quot;, new[] { typeof(string) })) != null)
+				return (T)ParseMethod.Invoke(null, new object[] { Src });
+
+			throw new NotImplementedException(&quot;Could not parse type &quot; + TT);
+		}
+
+		////////////////////////////////////////////////////////////////////////////// Public functions
+
+		/// &lt;summary&gt;
+		/// Get all argument names and values passed to the program
+		/// &lt;/summary&gt;
+		public IEnumerable&lt;KeyValuePair&lt;string, string[]&gt;&gt; All
+		{
+			get
+			{
+				foreach (var V in Switches)
+					yield return new KeyValuePair&lt;string, string[]&gt;(V.Key, V.Value.ToArray());
+			}
+		}
+
+		/// &lt;summary&gt;
+		/// Get raw command line without the exe path
+		/// &lt;/summary&gt;
+		public string CommandLine =&gt; CmdLine;
+
+		/// &lt;summary&gt;
+		/// Get defined values as string array for argument
+		/// &lt;/summary&gt;
+		/// &lt;param name=&quot;Name&quot;&gt;Name of the argument&lt;/param&gt;
+		/// &lt;returns&gt;Value array&lt;/returns&gt;
+		public string[] Get(string Name)
+		{
+			if (Switches.ContainsKey(Name))
+				return Switches[Name].ToArray();
+			return null;
+		}
+
+		/// &lt;summary&gt;
+		/// Get defined values as array for argument parsed to type T
+		/// &lt;/summary&gt;
+		/// &lt;typeparam name=&quot;T&quot;&gt;Return type, has to have either a constructor that takes a string or a static Parse method&lt;/typeparam&gt;
+		/// &lt;param name=&quot;Name&quot;&gt;Name of the argument&lt;/param&gt;
+		/// &lt;returns&gt;Value array&lt;/returns&gt;
+		public T[] Get&lt;T&gt;(string Name = null)
+		{
+			string[] SrcArr = Get(Name);
+			if (SrcArr == null) return new T[0];
+			T[] Val = new T[SrcArr.Length];
+
+			for (int i = 0; i &lt; SrcArr.Length; i++)
+				Val[i] = ParseToT&lt;T&gt;(SrcArr[i]);
+			return Val;
+		}
+
+		/// &lt;summary&gt;
+		/// Get last defined value for argument as string
+		/// &lt;/summary&gt;
+		/// &lt;param name=&quot;Name&quot;&gt;Name of the argument&lt;/param&gt;
+		/// &lt;returns&gt;Value&lt;/returns&gt;
+		public string GetSingle(string Name)
+		{
+			string[] Values = Get(Name);
+			if (Values != null &amp;&amp; Values.Length &gt; 0)
+				return Values[Values.Length - 1];
+			if (Values != null &amp;&amp; Values.Length == 0)
+				return &quot;&quot;;
+			return null;
+		}
+
+		/// &lt;summary&gt;
+		/// Get last defined value for argument parsed to type T
+		/// &lt;/summary&gt;
+		/// &lt;typeparam name=&quot;T&quot;&gt;Return type, has to have either a constructor that takes a string or a static Parse method&lt;/typeparam&gt;
+		/// &lt;param name=&quot;Name&quot;&gt;Name of the argument&lt;/param&gt;
+		/// &lt;returns&gt;Value&lt;/returns&gt;
+		public T GetSingle&lt;T&gt;(string Name = null)
+		{
+			// If no value name found, assume same as type name except lower case
+			if (string.IsNullOrEmpty(Name))
+				Name = typeof(T).Name.ToLower();
+
+			return ParseToT&lt;T&gt;(GetSingle(Name));
+		}
+
+		/// &lt;summary&gt;
+		/// Check if argument was defined
+		/// &lt;/summary&gt;
+		/// &lt;param name=&quot;Name&quot;&gt;Name of argument&lt;/param&gt;
+		/// &lt;returns&gt;True when defined, False when not defined&lt;/returns&gt;
+		public bool Defined(string Name)
+		{
+			return Get(Name) != null;
+		}
+	}
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,3,20,38,0],[21,3,21,4,0],[22,4,22,17,0],[23,3,23,4,0],[26,3,26,4,0],[27,4,27,36,0],[27,37,27,90,0],[28,4,28,27,0],[29,4,29,54,0],[31,4,31,25,0],[32,4,32,47,0],[37,9,37,18,0],[37,20,37,38,0],[37,40,37,43,0],[38,4,38,5,0],[39,5,39,25,0],[40,5,40,48,0],[41,5,41,49,0],[43,5,43,19,0],[44,5,44,6,0],[45,6,45,19,0],[46,6,46,7,0],[47,7,47,22,0],[48,7,48,29,0],[49,8,49,37,0],[50,7,50,22,0],[52,6,52,7,0],[53,11,53,57,0],[54,6,54,7,0],[55,7,55,23,0],[57,7,57,36,0],[58,7,58,22,0],[59,6,59,7,0],[61,7,61,24,0],[62,5,62,6,0],[64,5,64,6,0],[65,6,65,64,0],[66,6,66,7,0],[67,7,67,36,0],[68,7,68,22,0],[69,6,69,7,0],[70,11,70,48,0],[71,7,71,24,0],[72,5,72,6,0],[73,4,73,5,0],[75,4,75,26,0],[76,5,76,34,0],[79,4,79,30,0],[80,4,80,5,0],[81,5,81,57,0],[82,4,82,5,0],[83,3,83,4,0],[86,3,86,4,0],[87,4,87,58,0],[89,4,89,29,0],[90,4,90,5,0],[91,5,91,24,0],[92,6,92,35,0],[93,5,93,12,0],[95,9,95,33,0],[96,4,96,5,0],[97,5,97,37,0],[98,5,98,24,0],[99,6,99,34,0],[100,5,100,12,0],[103,4,103,30,0],[104,5,104,38,0],[106,4,106,5,0],[107,4,107,5,0],[108,3,108,4,0],[111,3,111,4,0],[112,4,112,22,0],[113,4,113,45,0],[114,5,114,53,0],[115,3,115,4,0],[118,3,118,4,0],[119,4,119,24,0],[122,4,122,34,0],[123,5,123,23,0],[126,4,126,29,0],[127,5,127,27,0],[130,4,130,60,0],[131,5,131,49,0],[135,4,135,105,0],[136,5,136,92,0],[137,9,137,85,0],[138,5,138,62,0],[140,4,140,68,0],[141,3,141,4,0],[151,4,151,5,0],[152,5,152,12,0],[152,14,152,19,0],[152,20,152,22,0],[152,23,152,31,0],[153,6,153,80,0],[154,4,154,5,0],[160,32,160,39,0],[168,3,168,4,0],[169,4,169,35,0],[170,5,170,37,0],[171,4,171,16,0],[172,3,172,4,0],[181,3,181,4,0],[182,4,182,32,0],[183,4,183,23,0],[183,24,183,40,0],[184,4,184,35,0],[186,9,186,18,0],[186,20,186,37,0],[186,39,186,42,0],[187,5,187,37,0],[188,4,188,15,0],[189,3,189,4,0],[197,3,197,4,0],[198,4,198,32,0],[199,4,199,44,0],[200,5,200,38,0],[201,4,201,45,0],[202,5,202,15,0],[203,4,203,16,0],[204,3,204,4,0],[213,3,213,4,0],[215,4,215,35,0],[216,5,216,37,0],[218,4,218,40,0],[219,3,219,4,0],[227,3,227,4,0],[228,4,228,29,0],[229,3,229,4,0]]);
+    </script>
+  </body>
+</html>

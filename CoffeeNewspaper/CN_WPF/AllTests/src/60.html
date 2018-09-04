@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\utilitiestest\datetimeheplertest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using CN_Core.Utilities;
+using NUnit.Framework;
+
+namespace CoffeeNewspaper_UnitTest.UtilitiesTest
+{
+    [TestFixture]
+    public class DateTimeHeplerTest
+    {
+        [Test]
+        public void SecondsAgoTest()
+        {
+            DateTime target = DateTime.Now.AddSeconds(-8);
+            Assert.AreEqual(&quot;Just Now&quot;,target.EarlyTimeFormat());
+
+            target = DateTime.Now.AddSeconds(-18);
+            Assert.AreEqual(&quot;Just Now&quot;, target.EarlyTimeFormat());
+
+            target = DateTime.Now.AddSeconds(-59);
+            Assert.AreEqual(&quot;Just Now&quot;, target.EarlyTimeFormat());
+        }
+
+        [Test]
+        public void MiniutesAgoTest()
+        {
+            DateTime target = DateTime.Now.AddMinutes(-1);
+            Assert.AreEqual(&quot;1 Minute Ago&quot;, target.EarlyTimeFormat());
+
+            target = DateTime.Now.AddMinutes(-9);
+            Assert.AreEqual(&quot;9 Minutes Ago&quot;, target.EarlyTimeFormat());
+
+            target = DateTime.Now.AddMinutes(-18);
+            Assert.AreEqual(&quot;18 Minutes Ago&quot;, target.EarlyTimeFormat());
+
+            target = DateTime.Now.AddMinutes(-59).AddSeconds(-59);
+            Assert.AreEqual(&quot;59 Minutes Ago&quot;, target.EarlyTimeFormat());
+        }
+
+        [Test]
+        public void HoursAgoTest()
+        {
+            DateTime target = DateTime.Now.AddHours(-1);
+            Assert.AreEqual(&quot;1 Hour Ago&quot;, target.EarlyTimeFormat());
+
+            target = DateTime.Now.AddHours(-6).AddMinutes(-59);
+            Assert.AreEqual(&quot;6 Hours Ago&quot;, target.EarlyTimeFormat());
+        }
+
+
+        [Test]
+        public void EarlyThisDayTest()
+        {
+            DateTime now = new DateTime(2018,8,3,12,0,0);
+            DateTime target = now.AddHours(-11).AddMinutes(-59).AddSeconds(-59);
+            Assert.AreEqual(&quot;Early Today&quot;, target.EarlyTimeFormat(now));
+
+            target = now.AddHours(-7);
+            Assert.AreEqual(&quot;Early Today&quot;, target.EarlyTimeFormat(now));
+        }
+
+        [Test]
+        public void YesterDayTest()
+        {
+            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
+            DateTime target = now.AddHours(-12).AddSeconds(-1);
+            Assert.AreEqual(&quot;Yesterday&quot;, target.EarlyTimeFormat(now));
+
+            target = now.AddHours(-35).AddMinutes(-59).AddSeconds(-59);
+            Assert.AreEqual(&quot;Yesterday&quot;, target.EarlyTimeFormat(now));
+        }
+
+        [Test]
+        public void DayAgoTest()
+        {
+            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
+            DateTime target = now.AddHours(-36).AddSeconds(-1);
+            Assert.AreEqual(&quot;2 Days Ago&quot;, target.EarlyTimeFormat(now));
+
+            target = now.AddDays(-6).AddSeconds(1);
+            Assert.AreEqual(&quot;6 Days Ago&quot;, target.EarlyTimeFormat(now));
+        }
+
+
+        [Test]
+        public void WeekAgoTest()
+        {
+            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
+            DateTime target = now.AddDays(-7);
+            Assert.AreEqual(&quot;1 Week Ago&quot;, target.EarlyTimeFormat(now));
+            
+            target = now.AddMonths(-1).AddSeconds(1);
+            Assert.AreEqual(&quot;4 Weeks Ago&quot;, target.EarlyTimeFormat(now));
+        }
+        
+        [Test]
+        public void MonthAgoTest()
+        {
+            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
+            DateTime target = now.AddMonths(-1).AddSeconds(-1);
+            Assert.AreEqual(&quot;1 Month Ago&quot;, target.EarlyTimeFormat(now));
+
+            target = now.AddMonths(-12).AddSeconds(1);
+            Assert.AreEqual(&quot;12 Months Ago&quot;, target.EarlyTimeFormat(now));
+        }
+
+
+        [Test]
+        public void YearAgoTest()
+        {
+            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
+            DateTime target = now.AddYears(-1).AddSeconds(-1);
+            Assert.AreEqual(&quot;1 Year Ago&quot;, target.EarlyTimeFormat(now));
+
+            target = now.AddYears(-12);
+            Assert.AreEqual(&quot;12 Years Ago&quot;, target.EarlyTimeFormat(now));
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,1],[13,13,13,59,1],[14,13,14,66,1],[16,13,16,51,1],[17,13,17,67,1],[19,13,19,51,1],[20,13,20,67,1],[21,9,21,10,1],[25,9,25,10,1],[26,13,26,59,1],[27,13,27,71,1],[29,13,29,50,1],[30,13,30,72,1],[32,13,32,51,1],[33,13,33,73,1],[35,13,35,67,1],[36,13,36,73,1],[37,9,37,10,1],[41,9,41,10,1],[42,13,42,57,1],[43,13,43,69,1],[45,13,45,64,1],[46,13,46,70,1],[47,9,47,10,1],[52,9,52,10,1],[53,13,53,58,1],[54,13,54,81,1],[55,13,55,73,1],[57,13,57,39,1],[58,13,58,73,1],[59,9,59,10,1],[63,9,63,10,1],[64,13,64,63,1],[65,13,65,64,1],[66,13,66,71,1],[68,13,68,72,1],[69,13,69,71,1],[70,9,70,10,1],[74,9,74,10,1],[75,13,75,63,1],[76,13,76,64,1],[77,13,77,72,1],[79,13,79,52,1],[80,13,80,72,1],[81,9,81,10,1],[86,9,86,10,1],[87,13,87,63,1],[88,13,88,47,1],[89,13,89,72,1],[91,13,91,54,1],[92,13,92,73,1],[93,9,93,10,1],[97,9,97,10,1],[98,13,98,63,1],[99,13,99,64,1],[100,13,100,73,1],[102,13,102,55,1],[103,13,103,75,1],[104,9,104,10,1],[109,9,109,10,1],[110,13,110,63,1],[111,13,111,63,1],[112,13,112,72,1],[114,13,114,40,1],[115,13,115,74,1],[116,9,116,10,1]]);
+    </script>
+  </body>
+</html>

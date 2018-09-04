@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\utilities\timespanhelper.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Text;
+
+namespace CN_Core.Utilities
+{
+    public static class TimeSpanHelper
+    {
+        public static string GetTimeSpanLeftInfo(this TimeSpan timeSpan,bool showLeft)
+        {
+            StringBuilder result = new StringBuilder();
+
+            //these two var is used to determine how many D\H\M\S is show
+            //only show max-count units of time.like 1D2H
+            int count = 0;
+            int max = 2;
+
+            if (timeSpan.Days &gt;= 1)
+            {
+                result.AppendFormat(&quot;{0}D&quot;, timeSpan.Days);
+                count++;
+            }
+
+            if (timeSpan.Hours &gt;= 1 &amp;&amp; count &lt; max)
+            {
+                result.AppendFormat(&quot;{0}H&quot;, timeSpan.Hours);
+                count++;
+            }
+
+            if (timeSpan.Minutes &gt;= 1 &amp;&amp; count &lt; max)
+            {
+                result.AppendFormat(&quot;{0}M&quot;, timeSpan.Minutes);
+                count++;
+            }
+
+            if (timeSpan.Seconds &gt;= 1 &amp;&amp; count &lt; max)
+            {
+                result.AppendFormat(&quot;{0}S&quot;, timeSpan.Seconds);
+            }
+
+            //if the time left is less than 1 sec than return right now
+            if (result.Length == 0)
+            {
+                result.Append(&quot;Right Now&quot;);
+            }
+            else if(showLeft)
+            {
+                //add a left sign to the end of the timetip
+                result.Append(&quot; Left&quot;);
+            }
+            return result.ToString();
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,56,0],[14,13,14,27,0],[15,13,15,25,0],[17,13,17,36,0],[18,13,18,14,0],[19,17,19,60,0],[20,17,20,25,0],[21,13,21,14,0],[23,13,23,52,0],[24,13,24,14,0],[25,17,25,61,0],[26,17,26,25,0],[27,13,27,14,0],[29,13,29,54,0],[30,13,30,14,0],[31,17,31,63,0],[32,17,32,25,0],[33,13,33,14,0],[35,13,35,54,0],[36,13,36,14,0],[37,17,37,63,0],[38,13,38,14,0],[41,13,41,36,0],[42,13,42,14,0],[43,17,43,44,0],[44,13,44,14,0],[45,18,45,30,0],[46,13,46,14,0],[48,17,48,40,0],[49,13,49,14,0],[50,13,50,38,0],[51,9,51,10,0]]);
+    </script>
+  </body>
+</html>

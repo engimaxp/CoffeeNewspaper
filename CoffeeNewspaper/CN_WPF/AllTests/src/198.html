@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\icontypetofontawesomeconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+
+using System;
+using System.Globalization;
+using CN_Presentation;
+using CN_Presentation.Utilities;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// A converter that takes in a &lt;see cref=&quot;IconType&quot;/&gt; and returns 
+    /// the FontAwesome string for that icon
+    /// &lt;/summary&gt;
+    public class IconTypeToFontAwesomeConverter : BaseValueConverter&lt;IconTypeToFontAwesomeConverter&gt;
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+                return ((IconType) value).ToFontAwesomeText();
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,10,0],[17,17,17,63,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,49,0]]);
+    </script>
+  </body>
+</html>

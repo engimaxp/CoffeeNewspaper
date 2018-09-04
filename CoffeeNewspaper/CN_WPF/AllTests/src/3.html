@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datacontext\datastoreimplementbinder.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using CN_Core.Interfaces;
+using CN_Core.Interfaces.Repository;
+using Ninject;
+
+namespace CN_Repository
+{
+    public static class DataStoreImplementBinder
+    {
+        /// &lt;summary&gt;
+        /// Bind ioc to actual datastore
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;Kernel&quot;&gt;&lt;/param&gt;
+        public static void BindSqliteDataStore(this IKernel Kernel)
+        {
+            Kernel.Bind&lt;IMemoDataStore&gt;().To&lt;MemoDataStore&gt;();
+            Kernel.Bind&lt;ITimeSliceDataStore&gt;().To&lt;TimeSliceDataStore&gt;();
+            Kernel.Bind&lt;ITaskDataStore&gt;().To&lt;TaskDataStore&gt;();
+            Kernel.Bind&lt;ITagDataStore&gt;().To&lt;TagDataStore&gt;();
+
+            Kernel.Bind&lt;IUnitOfWork&gt;().To&lt;UnitOfWork&gt;();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,63,0],[16,13,16,73,0],[17,13,17,63,0],[18,13,18,61,0],[20,13,20,57,0],[21,9,21,10,0]]);
+    </script>
+  </body>
+</html>

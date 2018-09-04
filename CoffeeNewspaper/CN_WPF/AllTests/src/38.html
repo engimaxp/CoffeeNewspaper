@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\utilities\expressionhelpers.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq.Expressions;
+using System.Reflection;
+
+namespace CN_Core.Utilities
+{
+    /// &lt;summary&gt;
+    /// A helper for expressions
+    /// &lt;/summary&gt;
+    public static class ExpressionHelpers
+    {
+        /// &lt;summary&gt;
+        /// Compiles an expression and gets the functions return value
+        /// &lt;/summary&gt;
+        /// &lt;typeparam name=&quot;T&quot;&gt;The type of return value&lt;/typeparam&gt;
+        /// &lt;param name=&quot;lamba&quot;&gt;The expression to compile&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static T GetPropertyValue&lt;T&gt;(this Expression&lt;Func&lt;T&gt;&gt; lamba)
+        {
+            return lamba.Compile().Invoke();
+        }
+
+        /// &lt;summary&gt;
+        /// Sets the underlying properties value to the given value
+        /// from an expression that contains the property
+        /// &lt;/summary&gt;
+        /// &lt;typeparam name=&quot;T&quot;&gt;The type of value to set&lt;/typeparam&gt;
+        /// &lt;param name=&quot;lamba&quot;&gt;The expression&lt;/param&gt;
+        /// &lt;param name=&quot;value&quot;&gt;The value to set the property to&lt;/param&gt;
+        public static void SetPropertyValue&lt;T&gt;(this Expression&lt;Func&lt;T&gt;&gt; lamba, T value)
+        {
+            // Get the property information so we can set it
+            if (!(lamba.Body is MemberExpression expression)) return;
+            var propertyInfo = (PropertyInfo)expression.Member;
+            var target = Expression.Lambda(expression.Expression).Compile().DynamicInvoke();
+
+            // Set the property value
+            propertyInfo.SetValue(target, value);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,9,19,10,0],[20,13,20,45,0],[21,9,21,10,0],[31,9,31,10,0],[33,13,33,62,0],[33,63,33,70,0],[34,13,34,64,0],[35,13,35,93,0],[38,13,38,50,0],[39,9,39,10,0]]);
+    </script>
+  </body>
+</html>

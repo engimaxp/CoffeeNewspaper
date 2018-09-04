@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\cnexceptions\taskhaschildtasksexception.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Runtime.Serialization;
+
+namespace CN_Core
+{
+    /// &lt;summary&gt;
+    ///     This &lt;see cref=&quot;CNTask&quot; /&gt; has child tasks
+    ///     throw this exception while try to remove or delete a task
+    /// &lt;/summary&gt;
+    [Serializable]
+    public class TaskHasChildTasksException : Exception
+    {
+        #region Construction
+
+        public TaskHasChildTasksException()
+        {
+        }
+
+        public TaskHasChildTasksException(string message) : base(message)
+        {
+        }
+
+        public TaskHasChildTasksException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected TaskHasChildTasksException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,44,1],[16,9,16,10,1],[17,9,17,10,1],[19,61,19,74,0],[20,9,20,10,0],[21,9,21,10,0],[23,87,23,116,0],[24,9,24,10,0],[25,9,25,10,0],[27,98,27,117,0],[28,9,28,10,0],[29,9,29,10,0]]);
+    </script>
+  </body>
+</html>
