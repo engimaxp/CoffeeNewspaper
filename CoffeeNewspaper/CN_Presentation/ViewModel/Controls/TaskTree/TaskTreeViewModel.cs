@@ -113,18 +113,18 @@ namespace CN_Presentation.ViewModel
             }
         }
 
-        private CNTask GetSelectedItemParentTask()
+        private int GetSelectedItemParentTaskId()
         {
             //find selected item
             var selectedItem = NodeItems.FirstOrDefault(x => x.IsSelected);
-            if (selectedItem != null) return selectedItem.TaskInfo.ParentTask;
+            if (selectedItem != null) return selectedItem.TaskInfo.ParentTaskID??0;
             //if not find a selected item, add to root _taskinfo
-            return _taskinfo;
+            return 0;
         }
 
-        private CNTask GetSelectedItemTask()
+        private int GetSelectedItemTaskId()
         {
-            return NodeItems.FirstOrDefault(x => x.IsSelected)?.TaskInfo ?? _taskinfo;
+            return (NodeItems.FirstOrDefault(x => x.IsSelected)?.TaskInfo ?? _taskinfo).TaskId;
         }
 
         private void AddChildTask()
@@ -132,7 +132,7 @@ namespace CN_Presentation.ViewModel
             IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Add Task",
-                FormContentViewModel = new TaskDetailFormViewModel(null, GetSelectedItemTask()),
+                FormContentViewModel = new TaskDetailFormViewModel(null, GetSelectedItemTaskId()),
                 OKButtonText = "Confirm",
                 CancelButtonText = "Cancel"
             });
@@ -143,7 +143,7 @@ namespace CN_Presentation.ViewModel
             IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Add Task",
-                FormContentViewModel = new TaskDetailFormViewModel(null, GetSelectedItemParentTask()),
+                FormContentViewModel = new TaskDetailFormViewModel(null, GetSelectedItemParentTaskId()),
                 OKButtonText = "Confirm",
                 CancelButtonText = "Cancel"
             });

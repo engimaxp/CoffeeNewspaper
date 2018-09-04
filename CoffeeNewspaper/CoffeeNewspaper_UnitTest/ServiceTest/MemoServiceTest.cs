@@ -23,14 +23,14 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //Assess
             mockTaskDataStore.GetTask(1).Returns(Task.FromResult(DomainTestHelper.GetARandomTask()));
             mockMemoDataStore.AddMemo(Arg.Any<CNMemo>())
-                .Returns(Task.FromResult(DomainTestHelper.GetARandomMemo(true)));
+                .Returns(DomainTestHelper.GetARandomMemo(true));
 
             //Act
             var result = await targetService.AddAMemoToTask(null, 1);
 
             //Assert
             Assert.True(string.IsNullOrEmpty(result));
-            await mockMemoDataStore.DidNotReceiveWithAnyArgs().AddMemo(Arg.Any<CNMemo>());
+            mockMemoDataStore.DidNotReceiveWithAnyArgs().AddMemo(Arg.Any<CNMemo>());
         }
         [Test]
         public async Task AddAMemoToTask_TaskExist_Success()
@@ -44,14 +44,14 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //Assess
             mockTaskDataStore.GetTask(1).Returns(Task.FromResult(mockTask));
             mockMemoDataStore.AddMemo(Arg.Any<CNMemo>())
-                .Returns(Task.FromResult(DomainTestHelper.GetARandomMemo(true)));
+                .Returns(DomainTestHelper.GetARandomMemo(true));
 
             //Act
             var result = await targetService.AddAMemoToTask(DomainTestHelper.GetARandomMemo(), 1);
 
             //Assert
             Assert.IsFalse(string.IsNullOrEmpty(result));
-            await mockMemoDataStore.Received().AddMemo(Arg.Is<CNMemo>(x => x.TaskMemos.Count > 0 && x.MemoTaggers.Count>0));
+            mockMemoDataStore.Received().AddMemo(Arg.Is<CNMemo>(x => x.TaskMemos.Count > 0 && x.MemoTaggers.Count>0));
         }
 
         [Test]
@@ -63,15 +63,14 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assess
             mockTaskDataStore.GetTask(1).Returns(Task.FromResult(DomainTestHelper.GetARandomTask()));
-            mockMemoDataStore.UpdateMemo(Arg.Any<CNMemo>())
-                .Returns(Task.FromResult(true));
+            mockMemoDataStore.UpdateMemo(Arg.Any<CNMemo>());
 
             //Act
             var result = await targetService.AddAMemoToTask(DomainTestHelper.GetARandomMemo(true), 1);
 
             //Assert
             Assert.IsFalse(string.IsNullOrEmpty(result));
-            await mockMemoDataStore.Received().UpdateMemo(Arg.Is<CNMemo>(x => x.TaskMemos.Count > 0));
+            mockMemoDataStore.Received().UpdateMemo(Arg.Is<CNMemo>(x => x.TaskMemos.Count > 0));
         }
 
         [Test]
@@ -83,15 +82,13 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assess
             mockTaskDataStore.GetTask(1).Returns(Task.FromResult(DomainTestHelper.GetARandomTask()));
-            mockMemoDataStore.UpdateMemo(Arg.Any<CNMemo>())
-                .Returns(Task.FromResult(false));
+            mockMemoDataStore.UpdateMemo(Arg.Any<CNMemo>());
 
             //Act
-            var result = await targetService.AddAMemoToTask(DomainTestHelper.GetARandomMemo(true), 1);
+            await targetService.AddAMemoToTask(DomainTestHelper.GetARandomMemo(true), 1);
 
             //Assert
-            Assert.IsTrue(string.IsNullOrEmpty(result));
-            await mockMemoDataStore.Received().UpdateMemo(Arg.Is<CNMemo>(x => x.TaskMemos.Count > 0));
+            mockMemoDataStore.Received().UpdateMemo(Arg.Is<CNMemo>(x => x.TaskMemos.Count > 0));
         }
         [Test]
         public async Task AddAMemoToTask_TaskNotExist_Fail()
@@ -108,7 +105,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsTrue(string.IsNullOrEmpty(result));
-            await mockMemoDataStore.DidNotReceiveWithAnyArgs().AddMemo(Arg.Any<CNMemo>());
+            mockMemoDataStore.DidNotReceiveWithAnyArgs().AddMemo(Arg.Any<CNMemo>());
         }
 
         [Test]
@@ -126,7 +123,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockMemoDataStore.Received().DeleteMemo(Arg.Is<CNMemo>(x => x.MemoId == testMemo.MemoId));
+            mockMemoDataStore.Received().DeleteMemo(Arg.Is<CNMemo>(x => x.MemoId == testMemo.MemoId));
         }
 
         [Test]
@@ -144,7 +141,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockMemoDataStore.DidNotReceiveWithAnyArgs().DeleteMemo(Arg.Any<CNMemo>());
+            mockMemoDataStore.DidNotReceiveWithAnyArgs().DeleteMemo(Arg.Any<CNMemo>());
         }
 
 
@@ -163,7 +160,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.False(result);
-            await mockMemoDataStore.DidNotReceiveWithAnyArgs().UpdateMemo(Arg.Any<CNMemo>());
+            mockMemoDataStore.DidNotReceiveWithAnyArgs().UpdateMemo(Arg.Any<CNMemo>());
         }
 
         [Test]
@@ -183,13 +180,12 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
                 TaskId = assesTask.TaskId
             });
             mockMemoDataStore.GetMemoById(assesMemo.MemoId).Returns(Task.FromResult(assesMemo));
-            mockMemoDataStore.UpdateMemo(Arg.Any<CNMemo>()).Returns(Task.FromResult(true));
+            mockMemoDataStore.UpdateMemo(Arg.Any<CNMemo>());
             //Act
-            var result = await targetService.RemoveAMemoFromTask(assesMemo.MemoId, assesTask.TaskId);
+            await targetService.RemoveAMemoFromTask(assesMemo.MemoId, assesTask.TaskId);
 
             //Assert
-            Assert.True(result);
-            await mockMemoDataStore.Received().UpdateMemo(Arg.Is<CNMemo>(x => x.TaskMemos.Count == 0));
+            mockMemoDataStore.Received().UpdateMemo(Arg.Is<CNMemo>(x => x.TaskMemos.Count == 0));
         }
 
         [Test]
@@ -207,7 +203,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.False(result);
-            await mockMemoDataStore.DidNotReceiveWithAnyArgs().UpdateMemo(Arg.Any<CNMemo>());
+            mockMemoDataStore.DidNotReceiveWithAnyArgs().UpdateMemo(Arg.Any<CNMemo>());
         }
         [Test]
         public async Task AddAMemoToGlobal_Success()
@@ -217,14 +213,13 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assess
             var assesMemo = DomainTestHelper.GetARandomMemo(true);
-            mockMemoDataStore.AddMemo(assesMemo).Returns(Task.FromResult(assesMemo));
+            mockMemoDataStore.AddMemo(assesMemo).Returns(assesMemo);
 
             //Act
-            var result = await targetService.AddAMemoToGlobal(assesMemo);
+            await targetService.AddAMemoToGlobal(assesMemo);
 
             //Assert
-            Assert.AreEqual(assesMemo.MemoId,result);
-            await mockMemoDataStore.Received().AddMemo(Arg.Is<CNMemo>(x=>x.MemoId == assesMemo.MemoId));
+            mockMemoDataStore.Received().AddMemo(Arg.Is<CNMemo>(x=>x.MemoId == assesMemo.MemoId));
         }
         [Test]
         public async Task AddAMemoToGlobal_Null_Fail()
@@ -239,7 +234,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsTrue(string.IsNullOrEmpty(result));
-            await mockMemoDataStore.DidNotReceiveWithAnyArgs().AddMemo(assesMemo);
+            mockMemoDataStore.DidNotReceiveWithAnyArgs().AddMemo(assesMemo);
         }
 
         [Test]
@@ -250,14 +245,13 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assess
             var assesMemo = DomainTestHelper.GetARandomMemo(true);
-            mockMemoDataStore.UpdateMemo(assesMemo).Returns(Task.FromResult(true));
+            mockMemoDataStore.UpdateMemo(assesMemo);
 
             //Act
-            var result = await targetService.UpdateAMemo(assesMemo);
+            await targetService.UpdateAMemo(assesMemo);
 
             //Assert
-            Assert.IsTrue(result);
-            await mockMemoDataStore.Received().UpdateMemo(Arg.Is<CNMemo>(x => x.MemoId == assesMemo.MemoId));
+            mockMemoDataStore.Received().UpdateMemo(Arg.Is<CNMemo>(x => x.MemoId == assesMemo.MemoId));
         }
         [Test]
         public async Task UpdateAMemo_Null_Fail()
@@ -272,7 +266,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockMemoDataStore.DidNotReceiveWithAnyArgs().UpdateMemo(assesMemo);
+            mockMemoDataStore.DidNotReceiveWithAnyArgs().UpdateMemo(assesMemo);
         }
         [Test]
         public async Task GetAllGlobalMemos_Traverse()

@@ -153,7 +153,7 @@ namespace CN_Core
 
         public override string ToString()
         {
-            return $"{nameof(TaskId)}: {TaskId}, {nameof(Content)}: {Content}";
+            return $"{nameof(TaskId)}: {TaskId}, {nameof(Content)}: {Content},{nameof(ParentTaskID)}:{ParentTaskID},{nameof(Sort)}:{Sort}";
         }
 
         #endregion
@@ -222,7 +222,7 @@ namespace CN_Core
         /// <returns>true if it has</returns>
         public bool HasParentTask()
         {
-            return ParentTask != null;
+            return (ParentTaskID ?? 0) > 0;
         }
 
         #endregion

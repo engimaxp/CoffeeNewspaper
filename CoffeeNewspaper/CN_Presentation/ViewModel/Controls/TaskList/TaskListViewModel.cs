@@ -152,7 +152,7 @@ namespace CN_Presentation.ViewModel.Controls
                     if (index >= 0)
                     {
                         Items[index].TaskInfo = cnTask;
-                        await Items[index].Refresh();
+                        Items[index].Refresh();
                     }
                     else
                     {
@@ -171,7 +171,7 @@ namespace CN_Presentation.ViewModel.Controls
             if (task.HasParentTask())
                 await RefreshChildTasks(taskId);
             else
-                await RefreshTopLevelTask(task);
+                RefreshTopLevelTask(task);
         }
 
         #endregion
@@ -219,7 +219,7 @@ namespace CN_Presentation.ViewModel.Controls
             return true;
         }
 
-        private async Task RefreshTopLevelTask(CNTask task)
+        private void RefreshTopLevelTask(CNTask task)
         {
             if (task.IsDeleted)
             {
@@ -238,7 +238,7 @@ namespace CN_Presentation.ViewModel.Controls
                     if (index >= 0)
                     {
                         Items[index].TaskInfo = task;
-                        await Items[index].Refresh();
+                        Items[index].Refresh();
                     }
                     else
                     {
@@ -255,7 +255,7 @@ namespace CN_Presentation.ViewModel.Controls
 
             //refresh its expander
             var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == parentTaskId);
-            if (index >= 0) await Items[index].RefreshExpanderView(taskid);
+            if (index >= 0) Items[index].RefreshExpanderView(taskid);
         }
 
         private void Sort()
@@ -286,7 +286,12 @@ namespace CN_Presentation.ViewModel.Controls
 
             if (search.StartsWith("#"))
             {
-                searchFilters.Add(search, (item, str) => item.TaskInfo.TaskTaggers.Any(x=>x.Tag?.Title!=null && x.Tag.Title.ToLower().Contains(str.TrimStart('#'))));
+                searchFilters.Add(search, (item, str) =>
+                {
+                    var task = Task.Run(async () => await IoC.Get<ITagService>().GetAllTagByTaskIdAndTagTitle(item.TaskInfo.TaskId,str.TrimStart('#')));
+                    task.Wait();
+                    return task.Result.Any();
+                });
             }
             else
             {

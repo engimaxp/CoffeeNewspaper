@@ -167,9 +167,12 @@ namespace CN_Presentation.ViewModel.Controls
         {
         }
 
-        public TaskExpandDetailViewModel(CNTask taskInfo,int? selectChildTaskId)
+        public TaskExpandDetailViewModel(int taskid,int? selectChildTaskId)
         {
-            if (taskInfo == null) return;
+            if (taskid <= 0) return;
+            var task = Task.Run(async () => await IoC.Get<ITaskService>().GetTaskById(taskid));
+            task.Wait();
+            var taskInfo = task.Result;
 
             //Child Tasks
             var childTaskModel = new TaskTreeViewModel(taskInfo);
@@ -193,8 +196,8 @@ namespace CN_Presentation.ViewModel.Controls
             );
 
             //Worked Duration
-            var totalWorkedDays = taskInfo.UsedTimeSlices.AsEnumerable().GetTotalDays();
-            var totalWorkedHours = taskInfo.UsedTimeSlices.AsEnumerable().GetTotalHours();
+            var totalWorkedDays = taskInfo.UsedTimeSlices.GetTotalDays();
+            var totalWorkedHours = taskInfo.UsedTimeSlices.GetTotalHours();
             WorkedDuration = totalWorkedDays <= 1
                 ? $"{Convert.ToInt32(totalWorkedHours)} Hours"
                 : $"{Convert.ToInt32(totalWorkedDays)} Day";
@@ -224,7 +227,7 @@ namespace CN_Presentation.ViewModel.Controls
 
             //Tag Panels
             TagPanelViewModel.TagItems = new ObservableCollection<TagItemViewModel>(taskInfo.TaskTaggers
-                .Select(x => x.Tag)
+                .Select(x=>x.Tag)
                 .Select(y => new TagItemViewModel(TagPanelViewModel)
                 {
                     TagId = y.TagId,

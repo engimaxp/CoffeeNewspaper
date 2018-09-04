@@ -19,7 +19,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task AddMemo_QueryAllMemo_QuerySpecifiedMemo_AllPass()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //Arrange argument to be tested
                 var assesMemo = DomainTestHelper.GetARandomMemo();
@@ -28,8 +28,8 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var MemoDataStore = new MemoDataStore(dbcontext);
 
                 //do testing action
-                await MemoDataStore.AddMemo(assesMemo);
-
+                MemoDataStore.AddMemo(assesMemo);
+                await unitOfWork.Commit();
                 //query the result from db for assert
                 var Memos = await MemoDataStore.GetAllGlobalMemos();
                 Memos.ToList().ForEach(Console.WriteLine);
@@ -44,14 +44,16 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task DeleteAMemo_Success()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
                 var assesMemo = DomainTestHelper.GetARandomMemo();
-                var addedMemo = await MemoDataStore.AddMemo(assesMemo);
+                var addedMemo = MemoDataStore.AddMemo(assesMemo);
 
+                await unitOfWork.Commit();
+                MemoDataStore.DeleteMemo(addedMemo);
 
-                var beforeDeleteResult = await MemoDataStore.DeleteMemo(addedMemo);
+                var beforeDeleteResult = await unitOfWork.Commit();
                 Assert.IsTrue(beforeDeleteResult);
 
                 var afterDeleteResult = await MemoDataStore.GetMemoById(addedMemo.MemoId);
@@ -62,11 +64,12 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task DeleteAMemo_MemoIdNotExist_Fail()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
                 var assesMemo = DomainTestHelper.GetARandomMemo(true);
-                var beforeDeleteResult = await MemoDataStore.DeleteMemo(assesMemo);
+                MemoDataStore.DeleteMemo(assesMemo);
+                var beforeDeleteResult = await unitOfWork.Commit();
                 Assert.IsFalse(beforeDeleteResult);
             });
         }
@@ -74,7 +77,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task QuerySpecifiedMemoDoesntExist_ReturnNull()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
                 var firstMemo = await MemoDataStore.GetMemoById(Guid.NewGuid().ToString("D"));
@@ -86,18 +89,19 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task UpdateMemo()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
                 var assesMemo = DomainTestHelper.GetARandomMemo();
-                var addedMemo = await MemoDataStore.AddMemo(assesMemo);
-
+                var addedMemo = MemoDataStore.AddMemo(assesMemo);
+                await unitOfWork.Commit();
                 //update the added Memo content,make sure its not equal to original Memo
                 addedMemo.Content = "testing update";
 
                 //update to database ,make sure what ef return is equal to modified Memo
-                var updatedResult = await MemoDataStore.UpdateMemo(addedMemo);
+                 MemoDataStore.UpdateMemo(addedMemo);
 
+                var updatedResult = await unitOfWork.Commit();
                 Assert.IsTrue(updatedResult);
                 //select from db again ,make sure the Memo is updated
                 var selectedMemo = await MemoDataStore.GetMemoById(addedMemo.MemoId);
@@ -108,7 +112,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task UpdateMemo_MemoIdNotExist_Fail()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
                 var assesMemo = DomainTestHelper.GetARandomMemo(true);
@@ -117,8 +121,9 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 assesMemo.Content = "testing update";
 
                 //update to database ,make sure what ef return is equal to modified Memo
-                var updatedResult = await MemoDataStore.UpdateMemo(assesMemo);
+                 MemoDataStore.UpdateMemo(assesMemo);
 
+                var updatedResult = await unitOfWork.Commit();
                 Assert.False(updatedResult);
             });
         }
@@ -126,12 +131,14 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task Clone_SimpleGlobalMemo()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
                 var assesMemo = DomainTestHelper.GetARandomMemo();
-                var addedMemo = await MemoDataStore.AddMemo(assesMemo);
-                var cloneMemo = await MemoDataStore.CloneAMemo(addedMemo.MemoId);
+                var addedMemo = MemoDataStore.AddMemo(assesMemo);
+                await unitOfWork.Commit();
+                var cloneMemo = MemoDataStore.CloneAMemo(addedMemo.MemoId);
+                await unitOfWork.Commit();
 
                 var allMemos = await MemoDataStore.GetAllGlobalMemos();
                 Assert.AreEqual(2,allMemos.Count);
@@ -144,12 +151,14 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task Clone_OriginalMemoNull_ReturnFalse()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
                 var assesMemo = DomainTestHelper.GetARandomMemo();
-                var addedMemo = await MemoDataStore.AddMemo(assesMemo);
-                var cloneMemo = await MemoDataStore.CloneAMemo(Guid.NewGuid().ToString("N"));
+                var addedMemo = MemoDataStore.AddMemo(assesMemo);
+                await unitOfWork.Commit();
+                var cloneMemo = MemoDataStore.CloneAMemo(Guid.NewGuid().ToString("N"));
+                await unitOfWork.Commit();
 
                 var allMemos = await MemoDataStore.GetAllGlobalMemos();
                 Assert.AreEqual(1, allMemos.Count);
@@ -161,7 +170,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task GetAllTaskMemos_Success()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
 
@@ -169,8 +178,9 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var assesMemo = DomainTestHelper.GetARandomMemo();
                 var assesTask = DomainTestHelper.GetARandomTask();
                 assesTask.TaskMemos = new List<CNTaskMemo>(){new CNTaskMemo(){Memo = assesMemo,Task = assesTask}};
-                var addedTask = await taskDataStore.AddTask(assesTask);
+                var addedTask = taskDataStore.AddTask(assesTask);
 
+                await unitOfWork.Commit();
                 var allMemos = await MemoDataStore.GetAllTaskMemos(addedTask.TaskId);
                 Assert.AreEqual(1, allMemos.Count);
                 Assert.AreEqual(assesMemo.Content, allMemos.First().Content);
@@ -185,7 +195,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task Clone_ComplicatedMemo()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var MemoDataStore = new MemoDataStore(dbcontext);
 
@@ -199,8 +209,10 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 task.TaskTaggers = tags.Select(x=>new CNTaskTagger(){Tag =x,Task = task}).ToList();
                 assesMemo.MemoTaggers = tags.Select(x => new CNMemoTagger() { Tag = x, Memo = assesMemo }).ToList();
 
-                var addedMemo = await MemoDataStore.AddMemo(assesMemo);
-                var cloneMemo = await MemoDataStore.CloneAMemo(addedMemo.MemoId);
+                var addedMemo = MemoDataStore.AddMemo(assesMemo);
+                await unitOfWork.Commit();
+                var cloneMemo = MemoDataStore.CloneAMemo(addedMemo.MemoId);
+                await unitOfWork.Commit();
 
                 Assert.AreEqual(addedMemo.TaskMemos.First().TaskId, cloneMemo.TaskMemos.First().TaskId);
                 Assert.AreEqual(addedMemo.MemoTaggers.First().TagId, cloneMemo.MemoTaggers.First().TagId);

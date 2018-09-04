@@ -25,5 +25,20 @@ namespace CN_Core.Interfaces.Service
         /// <param name="tagTitle"></param>
         /// <returns></returns>
         Task<CNTag> GetTagByTitle(string tagTitle);
+
+        /// <summary>
+        /// Find tag by taskid
+        /// </summary>
+        /// <param name="taskid"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTag>> GetAllTagByTaskId(int taskid);
+
+        /// <summary>
+        /// Find tag by taskid
+        /// </summary>
+        /// <param name="taskid"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTag>> GetAllTagByTaskIdAndTagTitle(int taskid, string tagSubstring);
+
     }
 }

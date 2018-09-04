@@ -116,11 +116,11 @@ namespace CN_Core.Interfaces.Service
         /// <summary>
         ///     Set Parent task of this task
         /// </summary>
-        /// <param name="targetTask"></param>
-        /// <param name="parentTask"></param>
+        /// <param name="targetTaskId"></param>
+        /// <param name="parentTaskId"></param>
         /// <param name="pos">new task will be put after this position,-1 if the task is add to the rear of list</param>
         /// <returns></returns>
-        Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask,int pos);
+        Task<bool> SetParentTask(int targetTaskId, int parentTaskId,int pos);
 
         /// <summary>
         ///     Add pre task of this task
@@ -186,5 +186,7 @@ namespace CN_Core.Interfaces.Service
         /// <param name="reason"></param>
         /// <returns></returns>
         Task<bool> PendingATask(int taskId, string reason);
+        
+        
     }
 }

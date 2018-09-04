@@ -139,7 +139,7 @@ namespace CN_Presentation.ViewModel
             await IoC.Get<IUIManager>().ShowForm(new FormDialogViewModel
             {
                 Title = "Edit Task",
-                FormContentViewModel = new TaskDetailFormViewModel(TaskInfo),
+                FormContentViewModel = new TaskDetailFormViewModel(await IoC.Get<ITaskService>().GetTaskByIdNoTracking(TaskInfo.TaskId)),
                 OKButtonText = "Confirm",
                 CancelButtonText = "Cancel"
             });
@@ -147,51 +147,57 @@ namespace CN_Presentation.ViewModel
 
         private async Task Down()
         {
+            var taskinfo = await IoC.Get<ITaskService>().GetTaskById(TaskInfo.TaskId);
+
             //find next sibiling and exchange their sort
-            var nextSibling = TaskInfo?.ParentTask?.ChildTasks.FilterDeletedAndOrderBySortTasks()
-                .FirstOrDefault(x => x.Sort > TaskInfo.Sort);
+            var nextSibling = taskinfo?.ParentTask?.ChildTasks.FilterDeletedAndOrderBySortTasks()
+                .FirstOrDefault(x => x.Sort > taskinfo.Sort);
             if (nextSibling == null) return;
 
-            var temp = TaskInfo.Sort;
-            TaskInfo.Sort = nextSibling.Sort;
+            var temp = taskinfo.Sort;
+            taskinfo.Sort = nextSibling.Sort;
             nextSibling.Sort = temp;
 
-            await IoC.Get<ITaskService>().EditATask(TaskInfo);
+            await IoC.Get<ITaskService>().EditATask(taskinfo);
             await IoC.Get<ITaskService>().EditATask(nextSibling);
 
             //refresh view display
-            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(taskinfo.TaskId);
         }
 
         private async Task Up()
         {
+            var taskinfo = await IoC.Get<ITaskService>().GetTaskById(TaskInfo.TaskId);
+
             //find prev sibiling and exchange their sort
-            var prevSibling = TaskInfo?.ParentTask?.ChildTasks.FilterDeletedAndOrderBySortTasks()
-                .FirstOrDefault(x => x.Sort < TaskInfo.Sort);
+            var prevSibling = taskinfo?.ParentTask?.ChildTasks.FilterDeletedAndOrderBySortTasks()
+                .LastOrDefault(x => x.Sort < taskinfo.Sort);
             if (prevSibling == null) return;
 
-            var temp = TaskInfo.Sort;
-            TaskInfo.Sort = prevSibling.Sort;
+            var temp = taskinfo.Sort;
+            taskinfo.Sort = prevSibling.Sort;
             prevSibling.Sort = temp;
 
-            await IoC.Get<ITaskService>().EditATask(TaskInfo);
+            await IoC.Get<ITaskService>().EditATask(taskinfo);
             await IoC.Get<ITaskService>().EditATask(prevSibling);
 
             //refresh view display
-            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(taskinfo.TaskId);
         }
 
         private async Task Right()
         {
             //find prev sibiling
-            var prevSibling = TaskInfo?.ParentTask?.ChildTasks.FilterDeletedAndOrderBySortTasks()
-                .FirstOrDefault(x => x.Sort < TaskInfo.Sort);
+            var taskinfo = await IoC.Get<ITaskService>().GetTaskById(TaskInfo.TaskId);
+
+            var prevSibling = taskinfo?.ParentTask?.ChildTasks.FilterDeletedAndOrderBySortTasks()
+                .LastOrDefault(x => x.Sort < taskinfo.Sort);
             if (prevSibling == null) return;
             //set current task's parent to sibiling
-            await IoC.Get<ITaskService>().SetParentTask(TaskInfo, prevSibling, -1);
+            await IoC.Get<ITaskService>().SetParentTask(taskinfo.TaskId, prevSibling.TaskId, -1);
 
             //refresh view display
-            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(taskinfo.TaskId);
         }
 
         private async Task Left()
@@ -199,15 +205,18 @@ namespace CN_Presentation.ViewModel
             //parent task will be a new prev sibiling
             //1.find new sibiling position of new parent's childrens
             //2.set current task's parent to new parent and set current task's position behind the new sibling
-            if (TaskInfo.ParentTask?.ParentTask == null) return;
-            var parentToBePrevSiblingPos = TaskInfo.ParentTask.ParentTask.ChildTasks.FilterDeletedAndOrderBySortTasks()
-                .ToList().FindIndex(x=>x.TaskId == TaskInfo.ParentTask.TaskId);
+
+            var taskinfo = await IoC.Get<ITaskService>().GetTaskById(TaskInfo.TaskId);
+
+            if (taskinfo.ParentTask?.ParentTask == null) return;
+            var parentToBePrevSiblingPos = taskinfo.ParentTask.ParentTask.ChildTasks.FilterDeletedAndOrderBySortTasks()
+                .ToList().FindIndex(x=>x.TaskId == taskinfo.ParentTask.TaskId);
 
             await IoC.Get<ITaskService>()
-                .SetParentTask(TaskInfo, TaskInfo.ParentTask.ParentTask, parentToBePrevSiblingPos);
+                .SetParentTask(taskinfo.TaskId, taskinfo.ParentTask.ParentTask.TaskId, parentToBePrevSiblingPos);
 
             //refresh view display
-            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+            await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(taskinfo.TaskId);
         }
 
         #endregion

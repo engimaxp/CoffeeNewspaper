@@ -32,16 +32,17 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task DeleteAParentChildTaskRelation_BothTaskExist()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetChildTaskBindTestTask(1);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
-
+                 taskDataStore.AddTask(assesTask);
+                await unitOfWork.Commit();
                 assesTask.ChildTasks.Remove(assesTask.ChildTasks.First());
-                await taskDataStore.UpdateTask(assesTask);
+                taskDataStore.UpdateTask(assesTask);
 
+                await unitOfWork.Commit();
                 Assert.AreEqual(2,dbcontext.Tasks.Count());
                 Assert.AreEqual(0,dbcontext.Tasks.First().ChildTasks.Count());
             });
@@ -49,17 +50,19 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task AddDupplicateTaskTaskRelation_ReturnFalse()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetChildTaskBindTestTask(1);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
+                taskDataStore.AddTask(assesTask);
 
+                await unitOfWork.Commit();
                 assesTask.ChildTasks.Add(assesTask.ChildTasks.First());
-                var result = await taskDataStore.UpdateTask(assesTask);
+                taskDataStore.UpdateTask(assesTask);
 
-                Assert.IsTrue(result);
+                var result = await unitOfWork.Commit();
+                Assert.IsFalse(result);
 
 
                 Assert.AreEqual(2, dbcontext.Tasks.Count());
@@ -69,15 +72,15 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task DeleteParentTask_RelatedChildTaskExist_ParentChangeToNull()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetChildTaskBindTestTask(1);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
-                
-                var result = await taskDataStore.RemoveTask(assesTask);
-
+                taskDataStore.AddTask(assesTask);
+                await unitOfWork.Commit();
+                taskDataStore.RemoveTask(assesTask);
+                var result = await unitOfWork.Commit();
                 Assert.IsTrue(result);
                 Assert.AreEqual(1, dbcontext.Tasks.Count());
                 Assert.IsNull(dbcontext.Tasks.First().ParentTask);
@@ -86,15 +89,15 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task DeleteChildTask_RelatedParentTaskExis()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetChildTaskBindTestTask(1);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
-
-                var result = await taskDataStore.RemoveTask(assesTask.ChildTasks.First());
-
+                 taskDataStore.AddTask(assesTask);
+                await unitOfWork.Commit();
+                 taskDataStore.RemoveTask(assesTask.ChildTasks.First());
+                var result = await unitOfWork.Commit();
                 Assert.IsTrue(result);
                 var testresult = await taskDataStore.GetAllTask();
                 Assert.AreEqual(assesTask.TaskId, testresult.First().TaskId);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
+using CN_Core.Interfaces;
 using CN_Core.Interfaces.Repository;
 using CN_Core.Interfaces.Service;
 using CoffeeNewspaper_UnitTest.DomainTest;
@@ -39,10 +40,10 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.AddATimeSlice(assesTask.TaskId, addedTimeslice);
 
             //Assert
-            await mockTaskDataStore.Received()
+            mockTaskDataStore.Received()
                 .ExpandTaskTime(Arg.Is<CNTask>(
                     x => x.TaskId == assesTask.TaskId), now.AddHours(1), null);
-            await mockTimesliceDataStore.Received()
+            mockTimesliceDataStore.Received()
                 .AddTimeSlice(Arg.Is<CNTimeSlice>(x =>
                     x.Equals(addedTimeslice) && x.Task.TaskId == assesTask.TaskId));
         }
@@ -70,10 +71,10 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.AddATimeSlice(assesTask.TaskId, addedTimeslice);
 
             //Assert
-            await mockTaskDataStore.Received()
+            mockTaskDataStore.Received()
                 .ExpandTaskTime(Arg.Is<CNTask>(
                     x => x.TaskId == assesTask.TaskId), now.AddHours(1), null);
-            await mockTimesliceDataStore.Received()
+            mockTimesliceDataStore.Received()
                 .AddTimeSlice(Arg.Is<CNTimeSlice>(x =>
                     x.Equals(addedTimeslice) && x.Task.TaskId == assesTask.TaskId));
         }
@@ -93,7 +94,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsNull(result);
-            await mockTimesliceDataStore.DidNotReceive().AddTimeSlice(Arg.Any<CNTimeSlice>());
+            mockTimesliceDataStore.DidNotReceive().AddTimeSlice(Arg.Any<CNTimeSlice>());
         }
 
         [Test]
@@ -119,7 +120,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
                 await targetService.AddATimeSlice(assesTask.TaskId, new CNTimeSlice(now.AddHours(4))));
 
             //Assert
-            await mockTimesliceDataStore.DidNotReceive().AddTimeSlice(Arg.Any<CNTimeSlice>());
+             mockTimesliceDataStore.DidNotReceive().AddTimeSlice(Arg.Any<CNTimeSlice>());
         }
 
         [Test]
@@ -177,9 +178,9 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.DeleteAllTimeSlicesOfTask(assesTask.TaskId);
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs()
+             mockTaskDataStore.DidNotReceiveWithAnyArgs()
                 .UpdateTask(assesTask);
-            await mockTimesliceDataStore.DidNotReceiveWithAnyArgs().DeleteTimeSliceByTask(0);
+             mockTimesliceDataStore.DidNotReceiveWithAnyArgs().DeleteTimeSliceByTask(0);
         }
         [Test]
         public async Task DeleteAllTimeSlicesOfTask_Success()
@@ -210,9 +211,9 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.DeleteAllTimeSlicesOfTask(assesTask.TaskId);
 
             //Assert
-            await mockTaskDataStore.Received()
+             mockTaskDataStore.Received()
                 .UpdateTask(Arg.Is<CNTask>(x=>x.StartTime == null && x.EndTime == null));
-            await mockTimesliceDataStore.Received().DeleteTimeSliceByTask(assesTask.TaskId);
+             mockTimesliceDataStore.Received().DeleteTimeSliceByTask(assesTask.TaskId);
         }
         [Test]
         public async Task DeleteTimeSlices_ContainOnlyOneSlice_Success()
@@ -245,11 +246,11 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.DeleteTimeSlices(addedTimeslice);
 
             //Assert
-            await mockTaskDataStore.Received()
+             mockTaskDataStore.Received()
                 .UpdateStartTaskTime(Arg.Is<CNTask>(x => x.TaskId == assesTask.TaskId), null);
-            await mockTaskDataStore.Received()
+             mockTaskDataStore.Received()
                 .UpdateStartTaskTime(Arg.Is<CNTask>(x => x.TaskId == assesTask.TaskId), null);
-            await mockTimesliceDataStore.Received().DeleteTimeSlice(addedTimeslice);
+             mockTimesliceDataStore.Received().DeleteTimeSlice(addedTimeslice);
         }
 
         [Test]
@@ -284,11 +285,10 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.DeleteTimeSlices(addedTimeslice);
 
             //Assert
-//            await mockTaskDataStore.Received().UpdateStartTaskTime(Arg.Is<CNTask>(x=>x.TaskId == assesTask.TaskId), null);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateStartTaskTime(assesTask, null);
-            await mockTaskDataStore.Received()
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateStartTaskTime(assesTask, null);
+             mockTaskDataStore.Received()
                 .UpdateEndTaskTime(Arg.Is<CNTask>(x => x.TaskId == assesTask.TaskId), now.AddHours(2));
-            await mockTimesliceDataStore.Received().DeleteTimeSlice(addedTimeslice);
+             mockTimesliceDataStore.Received().DeleteTimeSlice(addedTimeslice);
         }
         
         [Test]
@@ -324,9 +324,9 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateStartTaskTime(assesTask, null);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateEndTaskTime(assesTask, null);
-            await mockTimesliceDataStore.DidNotReceiveWithAnyArgs().DeleteTimeSlice(addedTimeslice);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateStartTaskTime(assesTask, null);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateEndTaskTime(assesTask, null);
+             mockTimesliceDataStore.DidNotReceiveWithAnyArgs().DeleteTimeSlice(addedTimeslice);
         }
 
         [Test]
@@ -361,11 +361,10 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.DeleteTimeSlices(addedTimeslice);
 
             //Assert
-            //            await mockTaskDataStore.Received().UpdateStartTaskTime(Arg.Is<CNTask>(x=>x.TaskId == assesTask.TaskId), null);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateEndTaskTime(assesTask, null);
-            await mockTaskDataStore.Received()
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateEndTaskTime(assesTask, null);
+             mockTaskDataStore.Received()
                 .UpdateStartTaskTime(Arg.Is<CNTask>(x => x.TaskId == assesTask.TaskId), now.AddHours(2));
-            await mockTimesliceDataStore.Received().DeleteTimeSlice(addedTimeslice);
+             mockTimesliceDataStore.Received().DeleteTimeSlice(addedTimeslice);
         }
         
         [Test]
@@ -406,10 +405,10 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.EndTimeSlice(assesTask.TaskId, now.AddHours(4));
 
             //Assert
-            await mockTaskDataStore.Received()
+             mockTaskDataStore.Received()
                 .UpdateEndTaskTime(Arg.Is<CNTask>(x => x.TaskId == assesTask.TaskId), now.AddHours(4));
             addedTimeslice.EndDateTime = now.AddHours(4);
-            await mockTimesliceDataStore.Received().UpdateTimeSlice(addedTimeslice);
+             mockTimesliceDataStore.Received().UpdateTimeSlice(addedTimeslice);
         }
 
         [Test]
@@ -450,10 +449,10 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.EndTimeSlice(assesTask.TaskId, now.AddHours(1));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs()
+             mockTaskDataStore.DidNotReceiveWithAnyArgs()
                 .UpdateEndTaskTime(assesTask, now.AddHours(4));
             addedTimeslice.EndDateTime = now.AddHours(4);
-            await mockTimesliceDataStore.DidNotReceiveWithAnyArgs().UpdateTimeSlice(addedTimeslice);
+             mockTimesliceDataStore.DidNotReceiveWithAnyArgs().UpdateTimeSlice(addedTimeslice);
         }
 
         [Test]
@@ -494,10 +493,10 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.EndTimeSlice(assesTask.TaskId, now.AddHours(4));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs()
+             mockTaskDataStore.DidNotReceiveWithAnyArgs()
                 .UpdateEndTaskTime(assesTask, now.AddHours(4));
             addedTimeslice.EndDateTime = now.AddHours(4);
-            await mockTimesliceDataStore.DidNotReceiveWithAnyArgs().UpdateTimeSlice(addedTimeslice);
+             mockTimesliceDataStore.DidNotReceiveWithAnyArgs().UpdateTimeSlice(addedTimeslice);
         }
         [Test]
         public async Task DeleteTask_EndOfTwoSlice_Success()
@@ -527,10 +526,10 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.EndTimeSlice(assesTask.TaskId, now.AddHours(4));
 
             //Assert
-            await mockTaskDataStore.Received()
+             mockTaskDataStore.Received()
                 .UpdateEndTaskTime(Arg.Is<CNTask>(x => x.TaskId == assesTask.TaskId), now.AddHours(4));
             addedTimeslice.EndDateTime = now.AddHours(4);
-            await mockTimesliceDataStore.Received().UpdateTimeSlice(addedTimeslice);
+             mockTimesliceDataStore.Received().UpdateTimeSlice(addedTimeslice);
         }
 
         [Test]
@@ -545,7 +544,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(null);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(null);
         }
         [Test]
         public async Task EditATask_TaskContentEmpty_Fail()
@@ -559,24 +558,25 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.ThrowsAsync<ArgumentException>(async()=>await targetService.EditATask(task));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(null);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(null);
         }
         [Test]
         public async Task EditATask_Success()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
+            var unitOfWork = _kernel.Get<IUnitOfWork>();
             var mockTask = DomainTestHelper.GetARandomTask(1);
 
             //Assess
-            mockTaskDataStore.UpdateTask(mockTask).Returns(Task.FromResult(true));
+            unitOfWork.Commit().Returns(Task.FromResult(true));
 
             //Act
             var result = await targetService.EditATask(mockTask);
 
             //Assert
             Assert.IsTrue(result);
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x=>x.Content.Equals(mockTask.Content)));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x=>x.Content.Equals(mockTask.Content)));
         }
         [Test]
         public async Task GetAllTasks_Traverse()
@@ -615,7 +615,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.CreateATask(mockTask);
 
             //Assert
-            await mockTaskDataStore.Received().AddTask(Arg.Is<CNTask>(x=>x.Content.Equals(mockTask.Content)));
+             mockTaskDataStore.Received().AddTask(Arg.Is<CNTask>(x=>x.Content.Equals(mockTask.Content)));
         }
 
         [Test]
@@ -630,7 +630,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             Assert.ThrowsAsync<ArgumentException>(async()=>await targetService.CreateATask(mockTask));
 
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().AddTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().AddTask(mockTask);
         }
 
         [Test]
@@ -647,7 +647,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
         public async Task DeleteTask_TaskIsDeleted_ReturnTrue()
@@ -664,7 +664,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsTrue(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
         public async Task DeleteTask_TaskHasChildTasks_ThrowException()
@@ -682,7 +682,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.ThrowsAsync<TaskHasChildTasksException>(async ()=> await targetService.DeleteTask(mockTask.TaskId)); 
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
         public async Task DeleteTask_TaskHasSufTasks_ThrowException()
@@ -704,7 +704,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.ThrowsAsync<TaskHasSufTasksException>(async () => await targetService.DeleteTask(mockTask.TaskId));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
 
         [Test]
@@ -729,7 +729,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.DeleteTask(mockTask.TaskId,true);
             
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => (x.TaskId == mockTask.TaskId) && x.IsDeleted));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => (x.TaskId == mockTask.TaskId) && x.IsDeleted));
         }
 
 
@@ -748,7 +748,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
         public async Task RecoverATask_TaskIsRecoverAd_ReturnTrue()
@@ -765,7 +765,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsTrue(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
         public async Task RecoverATask_TaskHasSufTasksHasChildTasksForceRecoverA_ReturnTrue()
@@ -789,7 +789,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.RecoverATask(mockTask.TaskId);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => (x.TaskId == mockTask.TaskId) && !x.IsDeleted));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => (x.TaskId == mockTask.TaskId) && !x.IsDeleted));
         }
 
 
@@ -808,7 +808,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
         public async Task RemoveTask_TaskIsRemoved_ReturnTrue()
@@ -825,7 +825,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
         public async Task RemoveTask_TaskHasChildTasks_ThrowException()
@@ -843,7 +843,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.ThrowsAsync<TaskHasChildTasksException>(async () => await targetService.RemoveATask(mockTask.TaskId));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
         public async Task RemoveTask_TaskHasSufTasks_ThrowException()
@@ -865,7 +865,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.ThrowsAsync<TaskHasSufTasksException>(async () => await targetService.RemoveATask(mockTask.TaskId));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
 
         [Test]
@@ -890,7 +890,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.RemoveATask(mockTask.TaskId, true);
 
             //Assert
-            await mockTaskDataStore.Received().RemoveTask(Arg.Is<CNTask>(x => x.TaskId == mockTask.TaskId));
+             mockTaskDataStore.Received().RemoveTask(Arg.Is<CNTask>(x => x.TaskId == mockTask.TaskId));
         }
 
         [Test]
@@ -907,7 +907,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
 
         [Test]
@@ -925,7 +925,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
         public async Task StartATask_TaskStatusNotValid_ThrowsException()
@@ -941,24 +941,25 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.ThrowsAsync<TaskStatusException>(async () => await targetService.StartATask(mockTask.TaskId));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
         public async Task StartATask_Success()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
+            var unitOfWork = _kernel.Get<IUnitOfWork>();
             var mockTask = DomainTestHelper.GetARandomTask(1);
             mockTask.Status = CNTaskStatus.TODO;
             //Assess
             mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
-
+            unitOfWork.Commit().Returns(Task.FromResult(true));
             //Act
             var result = await targetService.StartATask(mockTask.TaskId);
 
             //Assert
             Assert.IsTrue(result);
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.Status == CNTaskStatus.DOING && x.TaskId == mockTask.TaskId));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.Status == CNTaskStatus.DOING && x.TaskId == mockTask.TaskId));
         }
 
 
@@ -977,7 +978,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
 
         [Test]
@@ -995,7 +996,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
         public async Task PauseATask_TaskStatusNotValid_ThrowsException()
@@ -1011,7 +1012,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.ThrowsAsync<TaskStatusException>(async () => await targetService.PauseATask(mockTask.TaskId));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
         public async Task PauseATask_Success()
@@ -1027,7 +1028,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.PauseATask(mockTask.TaskId);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.Status == CNTaskStatus.TODO && x.TaskId == mockTask.TaskId));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.Status == CNTaskStatus.TODO && x.TaskId == mockTask.TaskId));
         }
 
 
@@ -1045,7 +1046,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
 
         [Test]
@@ -1063,7 +1064,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
         public async Task PendingATask_TaskStatusNotValid_ThrowsException()
@@ -1079,7 +1080,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.ThrowsAsync<TaskStatusException>(async () => await targetService.PendingATask(mockTask.TaskId, null));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
         public async Task PendingATask_Success()
@@ -1095,7 +1096,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.PendingATask(mockTask.TaskId, "pending reason");
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => 
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => 
                 x.Status == CNTaskStatus.PENDING 
                 && "pending reason".Equals(x.PendingReason)
                 && x.TaskId == mockTask.TaskId));
@@ -1116,7 +1117,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
 
         [Test]
@@ -1134,7 +1135,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
         public async Task FinishATask_TaskStatusNotValid_ThrowsException()
@@ -1150,7 +1151,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             Assert.ThrowsAsync<TaskStatusException>(async () => await targetService.FinishATask(mockTask.TaskId));
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
         public async Task FinishATask_Success()
@@ -1166,7 +1167,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.FinishATask(mockTask.TaskId);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.Status == CNTaskStatus.DONE && x.TaskId == mockTask.TaskId));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.Status == CNTaskStatus.DONE && x.TaskId == mockTask.TaskId));
         }
 
 
@@ -1184,7 +1185,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
 
 
@@ -1202,7 +1203,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.FailATask(mockTask.TaskId, "reason");
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x=>x.FailReason.Equals("reason") && x.TaskId == mockTask.TaskId));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x=>x.FailReason.Equals("reason") && x.TaskId == mockTask.TaskId));
         }
         [Test]
         public async Task FailATask_TaskNotAlreadyFail_UpdateBothFields()
@@ -1218,7 +1219,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             await targetService.FailATask(mockTask.TaskId, "reason");
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.FailReason.Equals("reason") && x.IsFail && x.TaskId == mockTask.TaskId));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.FailReason.Equals("reason") && x.IsFail && x.TaskId == mockTask.TaskId));
         }
 
 
@@ -1233,10 +1234,10 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
 
             //Act
-            await targetService.SetParentTask(null, mockParentTask,-1);
+            await targetService.SetParentTask(0, mockParentTask.TaskId,-1);
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
         public async Task SetParentTask_Success()
@@ -1248,11 +1249,12 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //Assess
             mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
 
+            mockTaskDataStore.GetTask(mockParentTask.TaskId).Returns(Task.FromResult(mockParentTask));
             //Act
-            await targetService.SetParentTask(mockTask, mockParentTask,-1);
+            await targetService.SetParentTask(mockTask.TaskId, mockParentTask.TaskId,-1);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask!=null && x.ParentTask.TaskId == mockParentTask.TaskId && x.TaskId == mockTask.TaskId));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTaskID == mockParentTask.TaskId && x.TaskId == mockTask.TaskId));
         }
 
         [Test]
@@ -1260,16 +1262,24 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
-            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockTask = DomainTestHelper.GetARandomTask(4);
             var mockSort = 10;
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
             //Assess
-            mockTaskDataStore.GetMaxSort(null).Returns(Task.FromResult(mockSort));
+            mockTaskDataStore.GetAllTask().Returns(new List<CNTask>() { mockTask1, mockTask2, mockTask3 });
+            mockTaskDataStore.GetMaxSort(0).Returns(Task.FromResult(mockSort));
 
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
             //Act
-            await targetService.SetParentTask(mockTask, null, -1);
+            await targetService.SetParentTask(mockTask.TaskId, 0, -1);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == null 
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTaskID == 0
                                                                               && x.TaskId == mockTask.TaskId
                                                                               && x.Sort == mockSort+1));
         }
@@ -1289,11 +1299,12 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //Assess
             mockTaskDataStore.GetAllTask().Returns(new List<CNTask>(){mockTask1,mockTask2,mockTask3});
 
+            mockTaskDataStore.GetTask(targetTask.TaskId).Returns(Task.FromResult(targetTask));
             //Act
-            await targetService.SetParentTask(targetTask, null, 2);
+            await targetService.SetParentTask(targetTask.TaskId, 0, 2);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == null
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTaskID == 0
                                                                               && x.TaskId == targetTask.TaskId
                                                                               && x.Sort == mockTask3.Sort + 1));
         }
@@ -1313,14 +1324,15 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //Assess
             mockTaskDataStore.GetAllTask().Returns(new List<CNTask>() { mockTask1, mockTask2, mockTask3 });
 
+            mockTaskDataStore.GetTask(targetTask.TaskId).Returns(Task.FromResult(targetTask));
             //Act
-            await targetService.SetParentTask(targetTask, null, 1);
+            await targetService.SetParentTask(targetTask.TaskId, 0, 1);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == null
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTaskID == 0
                                                                               && x.TaskId == targetTask.TaskId
                                                                               && x.Sort == mockTask2.Sort + 1));
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.TaskId == mockTask3.TaskId
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.TaskId == mockTask3.TaskId
                                                                               && x.Sort == mockTask2.Sort + 2));
         }
 
@@ -1335,11 +1347,13 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //Assess
             mockTaskDataStore.GetMaxSort(mockParent.TaskId).Returns(Task.FromResult(mockSort));
 
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+            mockTaskDataStore.GetTask(mockParent.TaskId).Returns(Task.FromResult(mockParent));
             //Act
-            await targetService.SetParentTask(mockTask, mockParent, -1);
+            await targetService.SetParentTask(mockTask.TaskId, mockParent.TaskId, -1);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == mockParent
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTaskID == mockParent.TaskId
                                                                               && x.TaskId == mockTask.TaskId
                                                                               && x.Sort == mockSort + 1));
         }
@@ -1361,12 +1375,14 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             mockParent.ChildTasks.Add(mockTask2);
             mockParent.ChildTasks.Add(mockTask3);
             //Assess
+            mockTaskDataStore.GetTask(targetTask.TaskId).Returns(Task.FromResult(targetTask));
+            mockTaskDataStore.GetTask(mockParent.TaskId).Returns(Task.FromResult(mockParent));
 
             //Act
-            await targetService.SetParentTask(targetTask, mockParent, 5);
+            await targetService.SetParentTask(targetTask.TaskId, mockParent.TaskId, 5);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == mockParent
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTaskID == mockParent.TaskId
                                                                               && x.TaskId == targetTask.TaskId
                                                                               && x.Sort == mockTask3.Sort + 1));
         }
@@ -1388,15 +1404,17 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             mockParent.ChildTasks.Add(mockTask2);
             mockParent.ChildTasks.Add(mockTask3);
             //Assess
+            mockTaskDataStore.GetTask(targetTask.TaskId).Returns(Task.FromResult(targetTask));
+            mockTaskDataStore.GetTask(mockParent.TaskId).Returns(Task.FromResult(mockParent));
 
             //Act
-            await targetService.SetParentTask(targetTask, mockParent, 1);
+            await targetService.SetParentTask(targetTask.TaskId, mockParent.TaskId, 1);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTask == mockParent
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.ParentTaskID == mockParent.TaskId
                                                                               && x.TaskId == targetTask.TaskId
                                                                               && x.Sort == mockTask2.Sort + 1));
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.TaskId == mockTask3.TaskId
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x => x.TaskId == mockTask3.TaskId
                                                                               && x.Sort == mockTask2.Sort + 2));
         }
         [Test]
@@ -1413,7 +1431,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
 
 
@@ -1432,14 +1450,13 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
                 SufTaskId = mockTask.TaskId
             });
             //Assess
-            //            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
 
             //Act
             var result = await targetService.AddPreTask(mockTask, mockPreTask);
 
             //Assert
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
 
 
@@ -1454,13 +1471,12 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             mockPreTask.Status = CNTaskStatus.TODO;
             mockPreTask.Status = CNTaskStatus.TODO;
             //Assess
-            //            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
 
             //Act
             await targetService.AddPreTask(mockTask, mockPreTask);
 
             //Assert
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x=>
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x=>
                 x.TaskId == mockTask.TaskId
                 && x.PreTaskConnectors!=null
                 && x.PreTaskConnectors.Count>0
@@ -1480,7 +1496,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             var result = await targetService.DelPreTask(null, null);
 
             //Assert
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
 
 
@@ -1512,15 +1528,15 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             });
             //Assess
             mockTaskDataStore.RemoveTaskConnector(Arg.Is<CNTaskConnector>(x =>
-                x.PreTaskId == mockPreTask.TaskId && x.SufTaskId == mockTask.TaskId)).Returns(Task.FromResult(true));
+                x.PreTaskId == mockPreTask.TaskId && x.SufTaskId == mockTask.TaskId));
 
             //Act
             await targetService.DelPreTask(mockTask, mockPreTask);
 
             //Assert
-            await mockTaskDataStore.Received().RemoveTaskConnector(Arg.Is<CNTaskConnector>(x =>
+             mockTaskDataStore.Received().RemoveTaskConnector(Arg.Is<CNTaskConnector>(x =>
                 x.PreTaskId == mockPreTask.TaskId && x.SufTaskId == mockTask.TaskId));
-            await mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x =>
+             mockTaskDataStore.Received().UpdateTask(Arg.Is<CNTask>(x =>
                 x.TaskId == mockTask.TaskId
                 && x.PreTaskConnectors != null
                 && x.PreTaskConnectors.Count > 0
@@ -1545,39 +1561,9 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
             //Assert
 
             Assert.IsFalse(result);
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
 
 
-        [Test]
-        public async Task DelPreTask_DBFail_ReturnFalse()
-        {
-            var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
-            var targetService = _kernel.Get<ITaskService>();
-            var mockTask = DomainTestHelper.GetARandomTask(1);
-            mockTask.Status = CNTaskStatus.PENDING;
-            mockTask.PendingReason = CNConstants.PENDINGREASON_PreTaskNotComplete;
-            var mockPreTask = DomainTestHelper.GetARandomTask(2);
-            mockPreTask.Status = CNTaskStatus.TODO;
-            mockTask.PreTaskConnectors.Add(new CNTaskConnector()
-            {
-                PreTask = mockPreTask,
-                PreTaskId = mockPreTask.TaskId,
-                SufTask = mockTask,
-                SufTaskId = mockTask.TaskId
-            });
-            //Assess
-            mockTaskDataStore.RemoveTaskConnector(Arg.Is<CNTaskConnector>(x =>
-                x.PreTaskId == mockPreTask.TaskId && x.SufTaskId == mockTask.TaskId)).Returns(Task.FromResult(false));
-
-            //Act
-            var result = await targetService.DelPreTask(mockTask, mockPreTask);
-
-            //Assert
-            Assert.IsFalse(result);
-            await mockTaskDataStore.Received().RemoveTaskConnector(Arg.Is<CNTaskConnector>(x =>
-                x.PreTaskId == mockPreTask.TaskId && x.SufTaskId == mockTask.TaskId));
-            await mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
-        }
     }
 }

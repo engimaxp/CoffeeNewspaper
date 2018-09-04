@@ -63,6 +63,7 @@ namespace CN_Presentation.ViewModel.Form
             Enum.TryParse(Enum.GetNames(typeof(CNPriority))[PriorityRating.SelectedValue - 1], out CNPriority priority);
             result.Priority = priority;
 
+
             //Delete Tags
             if (result.TaskTaggers.Count > 0)
             {
@@ -76,8 +77,8 @@ namespace CN_Presentation.ViewModel.Form
             foreach (var tagItemViewModel in TagPanelViewModel.TagItems)
             {
                 //Jump over old tags
-                if (result.TaskTaggers.FirstOrDefault(x =>
-                        x.TagId == tagItemViewModel.TagId && !string.IsNullOrEmpty(tagItemViewModel.TagId)) != null)
+                if (result.TaskTaggers.Where(x => !string.IsNullOrEmpty(x.TagId)).Any(x =>
+                        x.TagId == tagItemViewModel.TagId))
                     continue;
 
                 var curTaskTagger = string.IsNullOrEmpty(tagItemViewModel.TagId)
@@ -108,8 +109,8 @@ namespace CN_Presentation.ViewModel.Form
         ///     Constructor to create a task detail form view model
         /// </summary>
         /// <param name="originTask">Origin Task ,null if it's add a task</param>
-        /// <param name="parentTask">Parent Task ,if it's adding a task and parentTask is not null then its refresh a Detail View</param>
-        public TaskDetailFormViewModel(CNTask originTask, CNTask parentTask = null)
+        /// <param name="parentTaskId">Parent Task ,if it's adding a task and parentTask is not null then its refresh a Detail View</param>
+        public TaskDetailFormViewModel(CNTask originTask, int parentTaskId = 0)
         {
             this.originTask = originTask;
             var dateTimeViewModel = new DateTimeEntryViewModel();
@@ -147,25 +148,32 @@ namespace CN_Presentation.ViewModel.Form
             //Add New
             else
             {
-                ParentTaskTitle = parentTask == null ? "Empty" : parentTask.Content.GetFirstLineOrWords(50);
-                if (parentTask != null)
+                if (parentTaskId >0 )
                 {
-                    ParentTaskId = parentTask.TaskId;
-                    UrgencyRating = RatingControlType.Urgency.GetNewModel(
-                        Enum.GetNames(typeof(CNUrgency)).ToList().IndexOf(parentTask.Urgency.ToString()) + 1);
-                    PriorityRating = RatingControlType.Priority.GetNewModel(
-                        Enum.GetNames(typeof(CNPriority)).ToList().IndexOf(parentTask.Priority.ToString()) + 1);
-                    TagPanelViewModel.TagItems = new ObservableCollection<TagItemViewModel>(parentTask.TaskTaggers
-                        .Select(x => x.Tag)
-                        .Select(y => new TagItemViewModel(TagPanelViewModel)
-                        {
-                            TagId = y.TagId,
-                            TagTitle = y.Title
-                        }));
+                    var task = Task.Run(async () => await IoC.Get<ITaskService>().GetTaskById(parentTaskId));
+                    task.Wait();
+                    if (task.Result != null)
+                    {
+                        ParentTaskTitle = task.Result.Content.GetFirstLineOrWords(50);
+                        ParentTaskId = parentTaskId;
+                        UrgencyRating = RatingControlType.Urgency.GetNewModel(
+                            Enum.GetNames(typeof(CNUrgency)).ToList().IndexOf(task.Result.Urgency.ToString()) + 1);
+                        PriorityRating = RatingControlType.Priority.GetNewModel(
+                            Enum.GetNames(typeof(CNPriority)).ToList().IndexOf(task.Result.Priority.ToString()) + 1);
+                        TagPanelViewModel.TagItems = new ObservableCollection<TagItemViewModel>(task.Result.TaskTaggers
+                            .Select(x => x.Tag)
+                            .Select(y => new TagItemViewModel(TagPanelViewModel)
+                            {
+                                TagId = y.TagId,
+                                TagTitle = y.Title
+                            }));
+                    }
                 }
                 else
                 {
-                    UrgencyRating = RatingControlType.Urgency.GetNewModel(3);
+                    ParentTaskTitle = "Empty";
+
+                UrgencyRating = RatingControlType.Urgency.GetNewModel(3);
                     PriorityRating = RatingControlType.Priority.GetNewModel(3);
                 }
             }

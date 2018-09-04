@@ -13,14 +13,14 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="targetTask"></param>
         /// <returns></returns>
-        Task<bool> RemoveTask(CNTask targetTask);
+        void RemoveTask(CNTask targetTask);
 
         /// <summary>
         ///  Remove a PreSufTaskConnector from datasource
         /// </summary>
         /// <param name="connector"></param>
         /// <returns></returns>
-        Task<bool> RemoveTaskConnector(CNTaskConnector connector);
+        void RemoveTaskConnector(CNTaskConnector connector);
         #endregion
 
         #region Add Methods
@@ -30,7 +30,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="targetTask"></param>
         /// <returns></returns>
-        Task<CNTask> AddTask(CNTask targetTask);
+        CNTask AddTask(CNTask targetTask);
 
         #endregion
 
@@ -79,7 +79,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="targetTask"></param>
         /// <returns></returns>
-        Task<bool> UpdateTask(CNTask targetTask);
+        void UpdateTask(CNTask targetTask);
 
         /// <summary>
         ///     Update EndTaskTime
@@ -87,7 +87,7 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="originDataTask">taskToBeUpdated</param>
         /// <param name="targetEndTime">EndTime</param>
         /// <returns></returns>
-        Task UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime);
+        void UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime);
 
         /// <summary>
         ///     Update StartTaskTime
@@ -95,7 +95,7 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="originDataTask">taskToBeUpdated</param>
         /// <param name="targetStartTime">StartTime</param>
         /// <returns></returns>
-        Task UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime);
+        void UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime);
 
         /// <summary>
         ///     ExpandTaskTime,Both StartTime and EndTime
@@ -106,7 +106,7 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="targetStartTime"></param>
         /// <param name="targetEndTime"></param>
         /// <returns></returns>
-        Task ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime);
+        void ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime);
 
         #endregion
     }

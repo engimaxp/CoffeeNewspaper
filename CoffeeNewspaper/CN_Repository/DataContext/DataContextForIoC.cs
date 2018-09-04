@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
+using CN_Core;
 using Ninject;
+using Ninject.Extensions.NamedScope;
 
 namespace CN_Repository
 {
@@ -14,16 +16,17 @@ namespace CN_Repository
         /// </summary>
         /// <param name="Kernel"></param>
         /// <param name="InMemoryMode">true if used in unittest</param>
-        public static async Task BindCNDBContext(this IKernel Kernel, bool InMemoryMode = false)
+        public static void BindCNDBContext(this IKernel Kernel, bool InMemoryMode = false)
         {
             if (Kernel == null) return;
-
-            // create a default dbContext object
-            var dbContext = InMemoryMode ? CNDbContext.GetMemorySqlDatabase() : CNDbContext.GetFileSqlDatabase();
-            if(!InMemoryMode)
-                await dbContext.Database.EnsureCreatedAsync();
-            // bind a default DBContext to IoC
-            Kernel.Bind<CNDbContext>().ToConstant(dbContext);
+            if (InMemoryMode)
+            {
+                Kernel.Bind<CNDbContext>().ToConstant(CNDbContext.GetMemorySqlDatabase()).InNamedScope(CNConstants.NinjectNamedScopeForService);
+            }
+            else
+            {
+                Kernel.Bind<CNDbContext>().ToMethod(context => CNDbContext.GetFileSqlDatabase()).InNamedScope(CNConstants.NinjectNamedScopeForService);
+            }
         }
         
     }

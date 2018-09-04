@@ -43,7 +43,9 @@ namespace CN_Repository
             var builder = new DbContextOptionsBuilder<CNDbContext>();
             builder.UseSqlite($"Data Source={dbfilename}");
             DbContextOptions<CNDbContext> options = builder.Options;
-            return new CNDbContext(options);
+            var dbcontext = new CNDbContext(options);
+            dbcontext.Database.EnsureCreated();
+            return dbcontext;
         }
         /// <summary>
         /// Get a In-Memory Sqlite Database context
@@ -75,6 +77,7 @@ namespace CN_Repository
             //Add ConsoleLogging
             optionsBuilder
                 .ConfigureWarnings(warnnings=>warnnings.Log(CoreEventId.DetachedLazyLoadingWarning))
+                .ConfigureWarnings(warnnings=>warnnings.Log(CoreEventId.LazyLoadOnDisposedContextWarning))
                 .UseLoggerFactory(MyLoggerFactory)
                 .UseLazyLoadingProxies();
         }

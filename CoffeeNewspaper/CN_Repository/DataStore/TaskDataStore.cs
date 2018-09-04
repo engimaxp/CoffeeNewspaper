@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
 using CN_Core.Interfaces.Repository;
-using CN_Core.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CN_Repository
@@ -17,117 +16,115 @@ namespace CN_Repository
 
         #region Delete Methods
 
-        public async Task<bool> RemoveTask(CNTask targetTask)
+        public void RemoveTask(CNTask targetTask)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.Tasks.Remove(targetTask);
-                    return await mDbContext.SaveChangesAsync() > 0;
-                }, false);
+            mDbContext.Tasks.Remove(targetTask);
         }
 
-        public async Task<bool> RemoveTaskConnector(CNTaskConnector connector)
+        public void RemoveTaskConnector(CNTaskConnector connector)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.TaskConnectors.Remove(connector);
-                    return await mDbContext.SaveChangesAsync() > 0;
-                }, false);
+            mDbContext.TaskConnectors.Remove(connector);
         }
 
         #endregion
 
         #region Add Methods
 
-        public async Task<CNTask> AddTask(CNTask targetTask)
+        public CNTask AddTask(CNTask targetTask)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.Tasks.Add(targetTask);
-                    await mDbContext.SaveChangesAsync();
-                    return targetTask;
-                }, (CNTask) null);
+            mDbContext.Tasks.Add(targetTask);
+            return targetTask;
         }
 
         #endregion
 
         #region Update Methods
 
-        public async Task<bool> UpdateTask(CNTask targetTask)
+        public void UpdateTask(CNTask targetTask)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.Tasks.Update(targetTask);
-                    return await mDbContext.SaveChangesAsync() > 0;
-                }, false);
-        }
+            var existingTask = mDbContext.Tasks
+                .Include(b => b.TaskTaggers)
+                .FirstOrDefault(b => b.TaskId == targetTask.TaskId);
 
-        public async Task UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime)
-        {
-            await IoC.Task.Run(
-                async () =>
+            if (existingTask == null)
+            {
+                IoC.Logger.Log($"targetTask id {targetTask.TaskId} not exists");
+            }
+            else
+            {
+                mDbContext.Entry(existingTask).CurrentValues.SetValues(targetTask);
+                foreach (var taskTagger in targetTask.TaskTaggers)
                 {
-                    if (originDataTask == null) return;
-                    if (originDataTask.EndTime == null && targetEndTime == null) return;
-                    if (originDataTask.EndTime != null && originDataTask.EndTime.Equals(targetEndTime)) return;
-                    originDataTask.EndTime = targetEndTime;
-                    mDbContext.Tasks.Update(originDataTask);
-                    await mDbContext.SaveChangesAsync();
-                });
-        }
+                    var existingTaskTagger = existingTask.TaskTaggers
+                        .FirstOrDefault(p => p.TaskTaggerId == taskTagger.TaskTaggerId);
 
-        public async Task UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime)
-        {
-            await IoC.Task.Run(
-                async () =>
-                {
-                    if (originDataTask == null) return;
-                    if (originDataTask.StartTime == null && targetStartTime == null) return;
-                    if (originDataTask.StartTime != null && originDataTask.StartTime.Equals(targetStartTime)) return;
-                    originDataTask.StartTime = targetStartTime;
-                    mDbContext.Tasks.Update(originDataTask);
-                    await mDbContext.SaveChangesAsync();
-                });
-        }
-
-        public async Task ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime)
-        {
-            await IoC.Task.Run(
-                async () =>
-                {
-                    //origintask null return
-                    if (originDataTask == null) return;
-                    //if this condition is fulfilled,than new time is smaller-or-equal compare to old ,do noting and return
-                    if (originDataTask.StartTime != null && originDataTask.EndTime != null &&
-                        !(originDataTask.StartTime > targetStartTime) && !(originDataTask.EndTime < targetEndTime) &&
-                        targetEndTime != null) return;
-
-                    //flag for update db
-                    var needUpdate = false;
-                    if (originDataTask.StartTime == null || originDataTask.StartTime > targetStartTime)
+                    if (existingTaskTagger == null)
                     {
-                        originDataTask.StartTime = targetStartTime;
-                        needUpdate = true;
+                        existingTask.TaskTaggers.Add(taskTagger);
                     }
-
-                    if (originDataTask.EndTime == null && targetEndTime != null || //Pause A Task
-                        originDataTask.EndTime != null && targetEndTime == null || //Start A Task
-                        originDataTask.EndTime != null && targetEndTime != null &&
-                        originDataTask.EndTime < targetEndTime
-                    ) //Update A Task timeslice
+                    else
                     {
-                        originDataTask.EndTime = targetEndTime;
-                        needUpdate = true;
+                        mDbContext.Entry(existingTaskTagger).CurrentValues.SetValues(taskTagger);
                     }
+                }
 
-                    if (!needUpdate) return;
-                    mDbContext.Tasks.Update(originDataTask);
-                    await mDbContext.SaveChangesAsync();
-                });
+                foreach (var taskTagger in existingTask.TaskTaggers)
+                {
+                    if (targetTask.TaskTaggers.All(p => p.TaskTaggerId != taskTagger.TaskTaggerId))
+                    {
+                        mDbContext.Remove(taskTagger);
+                    }
+                }
+            }
+        }
+
+        public void UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime)
+        {
+            if (originDataTask == null) return;
+            if (originDataTask.EndTime == null && targetEndTime == null) return;
+            if (originDataTask.EndTime != null && originDataTask.EndTime.Equals(targetEndTime)) return;
+            originDataTask.EndTime = targetEndTime;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        public void UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime)
+        {
+            if (originDataTask == null) return;
+            if (originDataTask.StartTime == null && targetStartTime == null) return;
+            if (originDataTask.StartTime != null && originDataTask.StartTime.Equals(targetStartTime)) return;
+            originDataTask.StartTime = targetStartTime;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        public void ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime)
+        {
+            //origintask null return
+            if (originDataTask == null) return;
+            //if this condition is fulfilled,than new time is smaller-or-equal compare to old ,do noting and return
+            if (originDataTask.StartTime != null && originDataTask.EndTime != null &&
+                !(originDataTask.StartTime > targetStartTime) && !(originDataTask.EndTime < targetEndTime) &&
+                targetEndTime != null) return;
+
+            //flag for update db
+            var needUpdate = false;
+            if (originDataTask.StartTime == null || originDataTask.StartTime > targetStartTime)
+            {
+                originDataTask.StartTime = targetStartTime;
+                needUpdate = true;
+            }
+
+            if (originDataTask.EndTime == null && targetEndTime != null || //Pause A Task
+                originDataTask.EndTime != null && targetEndTime == null || //Start A Task
+                originDataTask.EndTime != null && targetEndTime != null &&
+                originDataTask.EndTime < targetEndTime
+            ) //Update A Task timeslice
+            {
+                originDataTask.EndTime = targetEndTime;
+                needUpdate = true;
+            }
+
+            if (!needUpdate) return;
+            mDbContext.Tasks.Update(originDataTask);
         }
 
         #endregion
@@ -138,7 +135,7 @@ namespace CN_Repository
         {
             return await IoC.Task.Run(
                 async () =>
-                    await mDbContext.Tasks.Include(x=>x.TaskTaggers).ThenInclude(y=>y.Tag).AsNoTracking()
+                    await mDbContext.Tasks.Include(x=>x.ParentTask).Include(x=>x.TaskTaggers).ThenInclude(y=>y.Tag).AsNoTracking()
                         .FirstOrDefaultAsync(r => r.TaskId == taskid)
             );
         }

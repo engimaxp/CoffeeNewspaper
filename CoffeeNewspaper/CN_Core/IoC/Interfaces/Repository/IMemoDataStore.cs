@@ -12,7 +12,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="memo"></param>
         /// <returns></returns>
-        Task<bool> UpdateMemo(CNMemo memo);
+        void UpdateMemo(CNMemo memo);
 
         #endregion
 
@@ -23,7 +23,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="memo"></param>
         /// <returns></returns>
-        Task<bool> DeleteMemo(CNMemo memo);
+        void DeleteMemo(CNMemo memo);
 
         #endregion
 
@@ -58,7 +58,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="memo"></param>
         /// <returns></returns>
-        Task<CNMemo> AddMemo(CNMemo memo);
+        CNMemo AddMemo(CNMemo memo);
 
         /// <summary>
         ///     Deep copy of this memo
@@ -66,7 +66,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="memoid">origin Memo's id</param>
         /// <returns>cloned Memo</returns>
-        Task<CNMemo> CloneAMemo(string memoid);
+        CNMemo CloneAMemo(string memoid);
 
         #endregion
     }

@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using CN_Core;
+using CN_Core.Interfaces.Service;
 
 namespace CN_Presentation.Utilities
 {
     public static class TaskMapHelper
     {
-        public static TimeSpan GetLastStartWorkTimeSpan(this CNTask task)
+        public static async Task<TimeSpan> GetLastStartWorkTimeSpan(this CNTask task)
         {
-            if (task == null || !task.UsedTimeSlices.Any()) return TimeSpan.Zero;
-            var ts = task.UsedTimeSlices.ToList();
+            if(task == null || task.TaskId<=0) return TimeSpan.Zero;
+            var timeslices = await IoC.Get<ITaskService>().GetTaskTimeSlices(task.TaskId);
+            if (!timeslices.Any()) return TimeSpan.Zero;
+            var ts = timeslices.ToList();
             ts.Sort();
             if (DateTime.Now < ts.Last().StartDateTime) return TimeSpan.Zero;
             return DateTime.Now - ts.Last().StartDateTime;

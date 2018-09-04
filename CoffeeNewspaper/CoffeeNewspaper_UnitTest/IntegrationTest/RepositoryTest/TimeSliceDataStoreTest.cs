@@ -16,7 +16,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task AddTimeSlice_QueryAllTimeSlice_QuerySpecifiedTimeSlice_AllPass()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //Arrange argument to be tested
                 var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
@@ -29,8 +29,9 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
 
                 //do testing action
-                var addedTimeSlice = await TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
+                var addedTimeSlice = TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
 
+                await unitOfWork.Commit();
                 //query the result from db for assert
                 var TimeSlices = await TimeSliceDataStore.GetTimeSliceByTaskID(addedTimeSlice.TaskId);
 
@@ -44,7 +45,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task AddTimeSlice_WithoutTask_Fail()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //Arrange argument to be tested
                 var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
@@ -53,16 +54,17 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
 
                 //do testing action
-                var addedTimeSlice = await TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
+                 TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
 
-                Assert.IsNull(addedTimeSlice);
+                var result = await unitOfWork.Commit();
+                Assert.IsFalse(result);
             });
         }
 
         [Test]
         public async Task DeleteATimeSlice_Success()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
                 //Arrange argument to be tested
@@ -72,10 +74,13 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 //add this timeslice to task
                 assesTimeSlice.Task = task;
 
-                var addedTimeSlice = await TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
+                var addedTimeSlice = TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
 
+                await unitOfWork.Commit();
 
-                var beforeDeleteResult = await TimeSliceDataStore.DeleteTimeSlice(addedTimeSlice);
+                 TimeSliceDataStore.DeleteTimeSlice(addedTimeSlice);
+
+                var beforeDeleteResult = await unitOfWork.Commit();
                 Assert.IsTrue(beforeDeleteResult);
 
                 var afterDeleteResult = await TimeSliceDataStore.GetTimeSliceById(addedTimeSlice.TimeSliceId);
@@ -86,12 +91,13 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task DeleteATimeSlice_TimeSliceIdNotExist_Fail()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
                 var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
                 assesTimeSlice.TimeSliceId = Guid.NewGuid().ToString("D");
-                var beforeDeleteResult = await TimeSliceDataStore.DeleteTimeSlice(assesTimeSlice);
+                TimeSliceDataStore.DeleteTimeSlice(assesTimeSlice);
+                var beforeDeleteResult = await unitOfWork.Commit();
                 Assert.IsFalse(beforeDeleteResult);
             });
         }
@@ -99,7 +105,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task QuerySpecifiedTimeSliceDoesntExist_ReturnNull()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
                 var firstTimeSlice = await TimeSliceDataStore.GetTimeSliceById(Guid.NewGuid().ToString("D"));
@@ -111,7 +117,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task UpdateTimeSlice()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
                 //Arrange argument to be tested
@@ -120,14 +126,14 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
 
                 //add this timeslice to task
                 assesTimeSlice.Task = task;
-                var addedTimeSlice = await TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
-
+                var addedTimeSlice = TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
+                await unitOfWork.Commit();
                 //update the added TimeSlice content,make sure its not equal to original TimeSlice
                 addedTimeSlice.EndDateTime = DateTime.Now.AddDays(1);
 
                 //update to database ,make sure what ef return is equal to modified TimeSlice
-                var updatedResult = await TimeSliceDataStore.UpdateTimeSlice(addedTimeSlice);
-
+                TimeSliceDataStore.UpdateTimeSlice(addedTimeSlice);
+                var updatedResult = await unitOfWork.Commit();
                 Assert.IsTrue(updatedResult);
                 //select from db again ,make sure the TimeSlice is updated
                 var selectedTimeSlice = await TimeSliceDataStore.GetTimeSliceById(addedTimeSlice.TimeSliceId);
@@ -138,7 +144,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task UpdateTimeSlice_TimeSliceIdNotExist_Fail()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
                 var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
@@ -148,8 +154,8 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 assesTimeSlice.EndDateTime = DateTime.Now.AddDays(1);
 
                 //update to database ,make sure what ef return is equal to modified TimeSlice
-                var updatedResult = await TimeSliceDataStore.UpdateTimeSlice(assesTimeSlice);
-
+                 TimeSliceDataStore.UpdateTimeSlice(assesTimeSlice);
+                var updatedResult = await unitOfWork.Commit();
                 Assert.False(updatedResult);
             });
         }
@@ -157,7 +163,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test]
         public async Task UpdateTimeSlice_TryDeleteTheTaskId_Fail()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
                 //Arrange argument to be tested
@@ -166,15 +172,15 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
 
                 //add this timeslice to task
                 assesTimeSlice.Task = task;
-                var addedTimeSlice = await TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
-
+                var addedTimeSlice = TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
+                await unitOfWork.Commit();
                 //try delete the task relation
                 addedTimeSlice.Task = null;
                 addedTimeSlice.TaskId = 0;
 
                 //update to database ,make sure what ef return is equal to modified TimeSlice
-                var updatedResult = await TimeSliceDataStore.UpdateTimeSlice(addedTimeSlice);
-
+                TimeSliceDataStore.UpdateTimeSlice(addedTimeSlice);
+                var updatedResult = await unitOfWork.Commit();
                 Assert.IsFalse(updatedResult);
             });
         }
@@ -182,7 +188,7 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
         [Test] 
         public async Task DeleteTimeSliceByTask_Success()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
                 //Arrange argument to be tested
@@ -191,11 +197,11 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
                 //add this timeslice to task
                 task.UsedTimeSlices.Add(assesTimeSlice);
                 var TaskDataStore = new TaskDataStore(dbcontext);
-                await TaskDataStore.AddTask(task);
-
+                TaskDataStore.AddTask(task);
+                await unitOfWork.Commit();
                 //action
-                var result = await TimeSliceDataStore.DeleteTimeSliceByTask(task.TaskId);
-                
+                TimeSliceDataStore.DeleteTimeSliceByTask(task.TaskId);
+                var result = await unitOfWork.Commit();
                 Assert.IsTrue(result);
 
                 var finalTask = await TaskDataStore.GetTask(task.TaskId);

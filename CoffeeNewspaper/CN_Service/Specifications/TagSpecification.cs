@@ -28,4 +28,21 @@ namespace CN_Service
         {
         }
     }
+
+    public class TaskSpecification : BaseSpecification<CNTag>
+    {
+        public TaskSpecification(int taskid)
+            : base(x => x.TaskTaggers != null && x.TaskTaggers.Any(y=>y.TaskId == taskid))
+        {
+        }
+    }
+    public class TagAndTaskSpecification : BaseSpecification<CNTag>
+    {
+        public TagAndTaskSpecification(int taskid,string tagStart)
+    : base(b => b.Title.ToLower().Contains(tagStart.ToLower()) && b.TaskTaggers != null && b.TaskTaggers.Any(y => y.TaskId == taskid))
+    {
+        }
+    }
+
+
 }

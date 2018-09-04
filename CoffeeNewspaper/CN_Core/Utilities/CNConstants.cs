@@ -6,6 +6,12 @@
     public static class CNConstants
     {
         /// <summary>
+        /// Ninject scope for service
+        /// one service get will create one dbcontext ,for more info see https://github.com/ninject/Ninject.Extensions.NamedScope/wiki/InNamedScope
+        /// </summary>
+        public const string NinjectNamedScopeForService = "Service";
+
+        /// <summary>
         /// Date format yyyy-MM-dd
         /// </summary>
         public const string DIRECTORY_DATEFORMAT = "yyyy-MM-dd";

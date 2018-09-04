@@ -12,7 +12,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="timeSlice"></param>
         /// <returns></returns>
-        Task<CNTimeSlice> AddTimeSlice(CNTimeSlice timeSlice);
+        CNTimeSlice AddTimeSlice(CNTimeSlice timeSlice);
 
         #endregion
 
@@ -40,7 +40,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="lastSlice"></param>
         /// <returns></returns>
-        Task<bool> UpdateTimeSlice(CNTimeSlice lastSlice);
+        void UpdateTimeSlice(CNTimeSlice lastSlice);
 
         #endregion
 
@@ -51,14 +51,14 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="originSlice"></param>
         /// <returns></returns>
-        Task<bool> DeleteTimeSlice(CNTimeSlice originSlice);
+        void DeleteTimeSlice(CNTimeSlice originSlice);
 
         /// <summary>
         ///     Delet TimeSlices By taskid
         /// </summary>
         /// <param name="taskid"></param>
         /// <returns></returns>
-        Task<bool> DeleteTimeSliceByTask(int taskid);
+        void DeleteTimeSliceByTask(int taskid);
 
         #endregion
     }

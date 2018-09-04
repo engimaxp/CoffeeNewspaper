@@ -32,16 +32,17 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task DeleteASufTaskPreTaskRelation_BothTasksStillExist()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetSufTaskBindTestTask(1);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
-
+                taskDataStore.AddTask(assesTask);
+                await unitOfWork.Commit();
                 assesTask.SufTaskConnectors.Remove(assesTask.SufTaskConnectors.First());
-                await taskDataStore.UpdateTask(assesTask);
+                taskDataStore.UpdateTask(assesTask);
 
+                await unitOfWork.Commit();
                 Assert.AreEqual(2, dbcontext.Tasks.Count());
                 Assert.AreEqual(0, dbcontext.TaskConnectors.Count());
             });
@@ -49,16 +50,18 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task AddDupplicateSufTaskPreTaskRelationRelation_ReturnFalse()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetSufTaskBindTestTask(1);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
+                taskDataStore.AddTask(assesTask);
 
+                await unitOfWork.Commit();
                 assesTask.SufTaskConnectors.Add(new CNTaskConnector() { PreTaskId = assesTask.TaskId, SufTaskId = assesTask.SufTaskConnectors.First().SufTaskId });
-                var result = await taskDataStore.UpdateTask(assesTask);
+                taskDataStore.UpdateTask(assesTask);
 
+                var result = await unitOfWork.Commit();
                 Assert.IsFalse(result);
                 Assert.AreEqual(2, dbcontext.Tasks.Count());
                 Assert.AreEqual(1, dbcontext.TaskConnectors.Distinct().Count());

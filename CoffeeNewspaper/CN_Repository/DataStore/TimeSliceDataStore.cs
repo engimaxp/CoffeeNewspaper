@@ -16,29 +16,19 @@ namespace CN_Repository
 
         #region Add Methods
 
-        public async Task<CNTimeSlice> AddTimeSlice(CNTimeSlice timeSlice)
+        public CNTimeSlice AddTimeSlice(CNTimeSlice timeSlice)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.TimeSlices.Add(timeSlice);
-                    await mDbContext.SaveChangesAsync();
-                    return timeSlice;
-                },(CNTimeSlice)null);
+            mDbContext.TimeSlices.Add(timeSlice);
+            return timeSlice;
         }
 
         #endregion
 
         #region Update Methods
 
-        public async Task<bool> UpdateTimeSlice(CNTimeSlice lastSlice)
+        public void UpdateTimeSlice(CNTimeSlice lastSlice)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.TimeSlices.Update(lastSlice);
-                    return await mDbContext.SaveChangesAsync() > 0;
-                }, false);
+            mDbContext.TimeSlices.Update(lastSlice);
         }
 
         #endregion
@@ -65,25 +55,14 @@ namespace CN_Repository
 
         #region Delete Methods
 
-        public async Task<bool> DeleteTimeSlice(CNTimeSlice originSlice)
+        public void DeleteTimeSlice(CNTimeSlice originSlice)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.TimeSlices.Remove(originSlice);
-                    return await mDbContext.SaveChangesAsync() > 0;
-                }, false
-            );
+            mDbContext.TimeSlices.Remove(originSlice);
         }
 
-        public async Task<bool> DeleteTimeSliceByTask(int taskid)
+        public void DeleteTimeSliceByTask(int taskid)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.TimeSlices.RemoveRange(mDbContext.TimeSlices.Where(r => r.TaskId == taskid));
-                    return await mDbContext.SaveChangesAsync() > 0;
-                }, false);
+            mDbContext.TimeSlices.RemoveRange(mDbContext.TimeSlices.Where(r => r.TaskId == taskid));
         }
 
         #endregion
