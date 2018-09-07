@@ -84,11 +84,11 @@ namespace CN_Service
                 return await unitOfWork.Commit() ? result : null;
         }
 
-        public async Task<bool> DeleteTask(int taskId, bool force = false)
+        private async Task DeleteTaskWithoutCommit(int taskId, bool force)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (targetTask.IsDeleted) return true;
+                if (targetTask == null) return;
+                if (targetTask.IsDeleted) return;
                 if (targetTask.ChildTasks.FilterDeletedAndOrderBySortTasks().Any() && !force)
                     throw new TaskHasChildTasksException();
                 if (targetTask.SufTaskConnectors.Select(y => y.SufTask).FilterDeletedAndOrderBySortTasks().Any() &&
@@ -97,27 +97,46 @@ namespace CN_Service
                 targetTask.IsDeleted = true;
                 //Delete the tasks children and suffix task
                 foreach (var task in targetTask.ChildTasks.FilterDeletedAndOrderBySortTasks())
-                    await DeleteTask(task.TaskId, force);
+                    await DeleteTaskWithoutCommit(task.TaskId, force);
                 foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask)
-                    .FilterDeletedAndOrderBySortTasks()) await DeleteTask(task.TaskId, force);
+                    .FilterDeletedAndOrderBySortTasks())
+                    await DeleteTaskWithoutCommit(task.TaskId, force);
                 taskDataStore.UpdateTask(targetTask);
-                return await unitOfWork.Commit();
         }
 
-        public async Task<bool> RecoverATask(int taskId)
+        public async Task<bool> DeleteTask(int taskId, bool force = false)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            if (targetTask.IsDeleted) return true;
+            await DeleteTaskWithoutCommit(taskId, force);
+            return await unitOfWork.Commit();
+        }
+
+        private async Task RecoverATaskWithoutCommit(int taskId)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (!targetTask.IsDeleted) return true;
+                if (targetTask == null) return;
+                if (!targetTask.IsDeleted) return;
 
                 //Recover the task itself
                 targetTask.IsDeleted = false;
                 //Recover the tasks children and suffix task
-                foreach (var task in targetTask.ChildTasks) await RecoverATask(task.TaskId);
+                foreach (var task in targetTask.ChildTasks)
+                    await RecoverATaskWithoutCommit(task.TaskId);
                 foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask))
-                    await RecoverATask(task.TaskId);
+                    await RecoverATaskWithoutCommit(task.TaskId);
                 taskDataStore.UpdateTask(targetTask);
-                return await unitOfWork.Commit();
+                
+        }
+
+        public async Task<bool> RecoverATask(int taskId)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            if (!targetTask.IsDeleted) return true;
+            await RecoverATaskWithoutCommit(taskId);
+            return await unitOfWork.Commit();
         }
 
         public async Task<bool> StartATask(int taskId)
@@ -184,21 +203,31 @@ namespace CN_Service
                 return await taskDataStore.GetChildTasksNoTracking(taskId);
         }
 
-        public async Task<bool> RemoveATask(int taskId, bool force = false)
+        private async Task RemoveATaskWithoutCommit(int taskId, bool force)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (!targetTask.IsDeleted) return false;
+                if (targetTask == null) return;
+                if (!targetTask.IsDeleted) return;
                 if (targetTask.ChildTasks.Any() && !force) throw new TaskHasChildTasksException();
                 if (targetTask.SufTaskConnectors.Count > 0 && !force) throw new TaskHasSufTasksException();
 
                 //Remove the tasks children and suffix task
-                foreach (var task in targetTask.ChildTasks) await RemoveATask(task.TaskId, force);
+                foreach (var task in targetTask.ChildTasks)
+                    await RemoveATaskWithoutCommit(task.TaskId, force);
                 foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask))
-                    await RemoveATask(task.TaskId, force);
+                    await RemoveATaskWithoutCommit(task.TaskId, force);
                 taskDataStore.RemoveTask(targetTask);
-                return await unitOfWork.Commit();
         }
+
+        public async Task<bool> RemoveATask(int taskId, bool force = false)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            if (!targetTask.IsDeleted) return false;
+            await RemoveATaskWithoutCommit(taskId, force);
+            return await unitOfWork.Commit();
+        }
+
 
         public async Task<bool> FinishATask(int taskId)
         {
@@ -317,20 +346,27 @@ namespace CN_Service
 
         #region TimeSlices relevent
 
-        public async Task<bool> DeleteAllTimeSlicesOfTask(int taskId)
+        private async Task DeleteAllTimeSlicesOfTaskWithoutCommit(int taskId)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
+                if (targetTask == null) return;
 
                 foreach (var task in targetTask.ChildTasks ?? new List<CNTask>())
-                    await DeleteAllTimeSlicesOfTask(task.TaskId);
+                    await DeleteAllTimeSlicesOfTaskWithoutCommit(task.TaskId);
                 foreach (var task in targetTask.SufTaskConnectors.Select(y => y.SufTask))
-                    await DeleteAllTimeSlicesOfTask(task.TaskId);
+                    await DeleteAllTimeSlicesOfTaskWithoutCommit(task.TaskId);
                 targetTask.StartTime = null;
                 targetTask.EndTime = null;
                 taskDataStore.UpdateTask(targetTask);
                 timeSliceDataStore.DeleteTimeSliceByTask(targetTask.TaskId);
-                return await unitOfWork.Commit();
+        }
+
+        public async Task<bool> DeleteAllTimeSlicesOfTask(int taskId)
+        {
+            var targetTask = await taskDataStore.GetTask(taskId);
+            if (targetTask == null) return false;
+            await DeleteAllTimeSlicesOfTaskWithoutCommit(taskId);
+            return await unitOfWork.Commit();
         }
 
         public async Task<ICollection<CNTimeSlice>> GetTaskTimeSlices(int taskid)
@@ -398,29 +434,44 @@ namespace CN_Service
                 return await unitOfWork.Commit();
         }
 
-        public async Task<bool> EndTimeSlice(int taskId, DateTime endTime)
+        public async Task EndTimeSliceWithoutCommit(int taskId, DateTime endTime)
         {
                 var originDataTask = await taskDataStore.GetTask(taskId);
-                if (originDataTask?.UsedTimeSlices == null || originDataTask.UsedTimeSlices.Count == 0) return false;
+                if (originDataTask?.UsedTimeSlices == null || originDataTask.UsedTimeSlices.Count == 0) return;
                 var originDatas = originDataTask.UsedTimeSlices.ToList();
                 originDatas.Sort();
                 // if the last timeslice is ended then return true
                 var lastSlice = originDatas.Last();
-                if (lastSlice.EndDateTime != null) return true;
+                if (lastSlice.EndDateTime != null) return;
                 // if the last timeslice's starttime is bigger than endtime return false
-                if (lastSlice.StartDateTime > endTime) return false;
+                if (lastSlice.StartDateTime > endTime) return;
                 lastSlice.EndDateTime = endTime;
 
                 //EndTimeSlices of this task's children and suffix task
                 foreach (var task in originDataTask.ChildTasks ?? new List<CNTask>())
-                    await EndTimeSlice(task.TaskId, endTime);
+                    await EndTimeSliceWithoutCommit(task.TaskId, endTime);
                 foreach (var task in originDataTask.SufTaskConnectors.Select(y => y.SufTask))
-                    await EndTimeSlice(task.TaskId, endTime);
+                    await EndTimeSliceWithoutCommit(task.TaskId, endTime);
                 taskDataStore.UpdateEndTaskTime(originDataTask, endTime);
                 timeSliceDataStore.UpdateTimeSlice(lastSlice);
-                return await unitOfWork.Commit();
+        }
+
+        public async Task<bool> EndTimeSlice(int taskId, DateTime endTime)
+        {
+            var originDataTask = await taskDataStore.GetTask(taskId);
+            if (originDataTask?.UsedTimeSlices == null || originDataTask.UsedTimeSlices.Count == 0) return false;
+            var originDatas = originDataTask.UsedTimeSlices.ToList();
+            originDatas.Sort();
+            // if the last timeslice is ended then return true
+            var lastSlice = originDatas.Last();
+            if (lastSlice.EndDateTime != null) return true;
+            // if the last timeslice's starttime is bigger than endtime return false
+            if (lastSlice.StartDateTime > endTime) return false;
+            await EndTimeSliceWithoutCommit(taskId, endTime);
+
+            return await unitOfWork.Commit();
         }
 
         #endregion
-    }
+        }
 }

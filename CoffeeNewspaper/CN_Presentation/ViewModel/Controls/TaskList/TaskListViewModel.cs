@@ -120,6 +120,7 @@ namespace CN_Presentation.ViewModel.Controls
 
         public BubbleSelectViewModel SortSelectModel { get; set; }
 
+        public bool IsFilterListEmpty => FilteredItems.Count == 0;
         #endregion
 
         #region Commands
@@ -376,7 +377,11 @@ namespace CN_Presentation.ViewModel.Controls
         private void RemoveItemAt(int index)
         {
             if (index >= Items.Count || index < 0) return;
-            if (FilteredItems.Contains(Items[index])) FilteredItems.Remove(Items[index]);
+            if (FilteredItems.Contains(Items[index]))
+            {
+                FilteredItems.Remove(Items[index]);
+                OnPropertyChanged(nameof(IsFilterListEmpty));
+            }
             Items.RemoveAt(index);
         }
 

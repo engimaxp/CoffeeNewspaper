@@ -47,6 +47,7 @@ namespace CN_Presentation.Utilities
                         Message = "This task has child tasks",
                         SecondaryMessage = "Do you really want delete it along with its child tasks?",
                     });
+                    result = true;
                 }
                 catch (TaskHasSufTasksException)
                 {
@@ -57,6 +58,7 @@ namespace CN_Presentation.Utilities
                         Message = "This task has suf tasks,",
                         SecondaryMessage = "Do you really want delete it along with its suf tasks?",
                     });
+                    result = true;
                 }
                 catch (Exception exception)
                 {

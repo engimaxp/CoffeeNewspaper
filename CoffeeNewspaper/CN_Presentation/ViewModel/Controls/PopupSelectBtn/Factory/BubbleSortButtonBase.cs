@@ -7,7 +7,7 @@ namespace CN_Presentation.ViewModel.Controls
 {
     public abstract class BubbleSortButtonBase 
     {
-        protected abstract Func<CNTask, CNTask, int> compareFunc { get; set; }
+        protected abstract Func<CNTask, CNTask, int> CompareFunc { get; set; }
         protected abstract FontFamilyType IconFontFamily { get; set; }
         
         protected abstract IconType IconFontText { get; set; }
@@ -26,7 +26,7 @@ namespace CN_Presentation.ViewModel.Controls
                 ClickHandler = async btn =>
                 {
                     btn.IsSelected = true;
-                    callbackAction(btn, compareFunc);
+                    callbackAction(btn, CompareFunc);
                     await Task.Delay(1);
                 },
             };
@@ -35,7 +35,7 @@ namespace CN_Presentation.ViewModel.Controls
 
     public class BubbleSortDefaultButton : BubbleSortButtonBase
     {
-        protected override Func<CNTask, CNTask, int> compareFunc { get; set; } = (x, y) =>
+        protected override Func<CNTask, CNTask, int> CompareFunc { get; set; } = (x, y) =>
         {
             if (x.TaskId > y.TaskId) return 1;
             else if (x.TaskId == y.TaskId) return 0;
@@ -50,7 +50,7 @@ namespace CN_Presentation.ViewModel.Controls
 
     public class BubbleSortByCreateTimeButton : BubbleSortButtonBase
     {
-        protected override Func<CNTask, CNTask, int> compareFunc { get; set; } = (x, y) =>
+        protected override Func<CNTask, CNTask, int> CompareFunc { get; set; } = (x, y) =>
         {
             if (x.CreateTime > y.CreateTime) return 1;
             else if (x.CreateTime == y.CreateTime) return 0;
@@ -64,7 +64,7 @@ namespace CN_Presentation.ViewModel.Controls
     }
     public class BubbleSortCreateTimeReverseButton : BubbleSortButtonBase
     {
-        protected override Func<CNTask, CNTask, int> compareFunc { get; set; } = (x, y) =>
+        protected override Func<CNTask, CNTask, int> CompareFunc { get; set; } = (x, y) =>
         {
             if (x.CreateTime > y.CreateTime) return -1;
             else if (x.CreateTime == y.CreateTime) return 0;
@@ -78,7 +78,7 @@ namespace CN_Presentation.ViewModel.Controls
     }
     public class BubbleSortByRecentlyButton : BubbleSortButtonBase
     {
-        protected override Func<CNTask, CNTask, int> compareFunc { get; set; } = (x, y) =>
+        protected override Func<CNTask, CNTask, int> CompareFunc { get; set; } = (x, y) =>
         {
             if (x.EndTime == null && y.EndTime != null) return 1;
             if (x.EndTime != null && y.EndTime == null) return -1;
@@ -94,7 +94,7 @@ namespace CN_Presentation.ViewModel.Controls
     }
     public class BubbleSortByUrgencyImportanceButton : BubbleSortButtonBase
     {
-        protected override Func<CNTask, CNTask, int> compareFunc { get; set; } = (x, y) =>
+        protected override Func<CNTask, CNTask, int> CompareFunc { get; set; } = (x, y) =>
         {
             var a = x.MapFourQuadrantTaskUrgency();
             var b = y.MapFourQuadrantTaskUrgency();

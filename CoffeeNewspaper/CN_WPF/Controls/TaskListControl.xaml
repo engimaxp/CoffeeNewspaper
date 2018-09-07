@@ -129,6 +129,17 @@
                           Background="{StaticResource ForegroundMainBrush}"
                           VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical">
+                    
+                    <!-- No More Items Hint -->
+                    <TextBlock 
+                        Visibility="{Binding IsFilterListEmpty,Converter={local:BooleanToVisiblityGoneConverter}}"
+                        VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               Foreground="{StaticResource BackgroundLightBrush}"
+                               FontSize="{StaticResource FontSizeRegular}"
+                               Padding="0 10 0 0" Text="No tasks found!"></TextBlock>
+
                     <ItemsControl
                         ItemsSource="{Binding FilteredItems}">
                         <ItemsControl.ItemsPanel>
@@ -143,16 +154,6 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    
-                    <!-- No More Items Hint -->
-                    <TextBlock 
-                        Visibility="Collapsed"
-                        VerticalAlignment="Center"
-                               HorizontalAlignment="Center"
-                               TextAlignment="Center"
-                               Foreground="{StaticResource BackgroundLightBrush}"
-                               FontSize="{StaticResource FontSizeRegular}"
-                               Padding="0 10 0 0" Text="No more tasks!"></TextBlock>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

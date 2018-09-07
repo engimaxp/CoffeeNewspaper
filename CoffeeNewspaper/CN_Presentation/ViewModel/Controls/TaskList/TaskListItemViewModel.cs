@@ -300,7 +300,7 @@ namespace CN_Presentation.ViewModel.Controls
                 {
                     CofirmText = "Confirm",
                     CancelText = "Cancel",
-                    Message = "Are you sure to delete this child task?",
+                    Message = "Are you sure you want to Delete the Task?",
                     SecondaryMessage = "You may restore it later."
                 });
         }
