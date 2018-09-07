@@ -98,7 +98,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
         }
 
         [Test]
-        public async Task AddATimeSlice_TimeSliceIntercept_Fail()
+        public void AddATimeSlice_TimeSliceIntercept_Fail()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var mockTimesliceDataStore = _kernel.Get<ITimeSliceDataStore>();
@@ -547,7 +547,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
              mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(null);
         }
         [Test]
-        public async Task EditATask_TaskContentEmpty_Fail()
+        public void EditATask_TaskContentEmpty_Fail()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
@@ -619,7 +619,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
         }
 
         [Test]
-        public async Task CreateATask_TaskContentNotExists_ThrowException()
+        public void CreateATask_TaskContentNotExists_ThrowException()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
@@ -667,7 +667,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
              mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
-        public async Task DeleteTask_TaskHasChildTasks_ThrowException()
+        public void DeleteTask_TaskHasChildTasks_ThrowException()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
@@ -685,7 +685,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
              mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
-        public async Task DeleteTask_TaskHasSufTasks_ThrowException()
+        public void DeleteTask_TaskHasSufTasks_ThrowException()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
@@ -828,7 +828,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
              mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
-        public async Task RemoveTask_TaskHasChildTasks_ThrowException()
+        public void RemoveTask_TaskHasChildTasks_ThrowException()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
@@ -846,7 +846,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
              mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
         }
         [Test]
-        public async Task RemoveTask_TaskHasSufTasks_ThrowException()
+        public void RemoveTask_TaskHasSufTasks_ThrowException()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
@@ -928,7 +928,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
              mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
-        public async Task StartATask_TaskStatusNotValid_ThrowsException()
+        public void StartATask_TaskStatusNotValid_ThrowsException()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
@@ -999,7 +999,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
              mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
-        public async Task PauseATask_TaskStatusNotValid_ThrowsException()
+        public void PauseATask_TaskStatusNotValid_ThrowsException()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
@@ -1067,7 +1067,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
              mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
-        public async Task PendingATask_TaskStatusNotValid_ThrowsException()
+        public void PendingATask_TaskStatusNotValid_ThrowsException()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();
@@ -1138,7 +1138,7 @@ namespace CoffeeNewspaper_UnitTest.ServiceTest
              mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
         }
         [Test]
-        public async Task FinishATask_TaskStatusNotValid_ThrowsException()
+        public void FinishATask_TaskStatusNotValid_ThrowsException()
         {
             var mockTaskDataStore = _kernel.Get<ITaskDataStore>();
             var targetService = _kernel.Get<ITaskService>();

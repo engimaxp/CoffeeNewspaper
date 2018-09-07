@@ -219,6 +219,9 @@
     <Compile Include="AttachedProperties\TextEntryWidthMatcherProperty.cs" />
     <Compile Include="AttachedProperties\TextBoxNumericalAllowOnlyAttachedProperties.cs" />
     <Compile Include="AttachedProperties\TreeViewDisableDoubleClickAttackedProperties.cs" />
+    <Compile Include="Controls\BubbleSelectControl.xaml.cs">
+      <DependentUpon>BubbleSelectControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\HeadMenuControl.xaml.cs">
       <DependentUpon>HeadMenuControl.xaml</DependentUpon>
     </Compile>
@@ -348,6 +351,10 @@
     <Compile Include="ViewModels\DialogWindowViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
     <Compile Include="ViewModels\WindowViewModel.cs" />
+    <Page Include="Controls\BubbleSelectControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\HeadMenuControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

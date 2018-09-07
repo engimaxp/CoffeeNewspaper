@@ -86,21 +86,16 @@
                     <StackPanel Orientation="Horizontal"
                                 Grid.Column="1">
                         <!-- Sort Icon -->
-                        <Button Style="{StaticResource IconGrowButton}"
-                                Foreground="{StaticResource ForegroundLightDarkBrush}"
-                                Content="{StaticResource FontAwesomeSortAmountDownIcon}" 
-                                Command="{Binding SortCommand}"/>
+                        <local:BubbleSelectControl DataContext="{Binding SortSelectModel}"></local:BubbleSelectControl>
+
                         <!-- Filter Icon -->
-                        <Button Style="{StaticResource IconGrowButton}"
-                                Foreground="{StaticResource ForegroundLightDarkBrush}"
-                                Content="{StaticResource FontAwesomeFilterIcon}"
-                                Command="{Binding FilterCommand}"/>
+                        <local:BubbleSelectControl DataContext="{Binding FilterSelectModel}"></local:BubbleSelectControl>
 
                         <Button Style="{StaticResource IconGrowButton}"
                                 Margin="5 0"
                                 Foreground="{StaticResource ForegroundLightDarkBrush}"
                                 Content="{StaticResource FontAwesomeEllipsisVerticalIcon}"
-                                Command="{Binding MoreCommand}"/>
+                                />
                     </StackPanel>
                 </Grid>
                 <!-- Search Activated Tags -->
@@ -157,7 +152,7 @@
                                TextAlignment="Center"
                                Foreground="{StaticResource BackgroundLightBrush}"
                                FontSize="{StaticResource FontSizeRegular}"
-                               Padding="0 10 0 0">No more tasks!</TextBlock>
+                               Padding="0 10 0 0" Text="No more tasks!"></TextBlock>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

@@ -17,6 +17,8 @@
                     return "6a6a6a";
                 case UserColorType.ForegroundSuperDark:
                     return "000000";
+                case UserColorType.ForegroundLightDark:
+                    return "777777";
                 default: return "ffffff";
             }
         }

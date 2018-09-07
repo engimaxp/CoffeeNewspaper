@@ -754,6 +754,7 @@
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
         <Setter Property="Padding" Value="0 0 10 0"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeXXLarge}"></Setter>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
@@ -772,7 +773,7 @@
                                     <TextBlock 
                                         x:Name="UnCheckedIcon"
                                         Visibility="{TemplateBinding IsChecked,Converter={local:BooleanToVisiblityGoneConverter},ConverterParameter=True}"
-                                        FontSize="{StaticResource FontSizeXXLarge}"
+                                        FontSize="{TemplateBinding FontSize}"
                                         FontFamily="{StaticResource FontAwesomeRegular}"
                                         Text="{StaticResource FontAwesomeSquareIcon}"
                                         Foreground="{StaticResource ForegroundLightBrush}"
@@ -783,7 +784,7 @@
                                     <TextBlock 
                                         x:Name="CheckedIcon"
                                         Visibility="{TemplateBinding IsChecked,Converter={local:BooleanToVisiblityGoneConverter}}"
-                                        FontSize="{StaticResource FontSizeXXLarge}"
+                                        FontSize="{TemplateBinding FontSize}"
                                         FontFamily="{StaticResource FontAwesomeRegular}"
                                         Text="{StaticResource FontAwesomeCheckSquareIcon}"
                                         Foreground="{StaticResource ForegroundLightBrush}"

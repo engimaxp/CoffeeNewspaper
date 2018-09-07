@@ -7,6 +7,7 @@
         WordOrange = 2,
         WordLightBlue=3,
         ForegroundDark = 4,
-        ForegroundSuperDark = 5
+        ForegroundSuperDark = 5,
+        ForegroundLightDark = 6
     }
 }
