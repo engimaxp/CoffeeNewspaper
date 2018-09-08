@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="SonarQube - 1123581321Sn Sonar way" ToolsVersion="15.0">
-  <Include Path="..\.sonarlint\cn_wpfcsharp.ruleset" Action="Default" />
-</RuleSet>
