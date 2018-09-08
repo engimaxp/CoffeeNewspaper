@@ -2,34 +2,29 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\fileextension\filehelper.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\dialogs\formdialogbox.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.IO;
-
-namespace CN_Core
+namespace CN_WPF
 {
-    public static class FileHelper
+    /// &lt;summary&gt;
+    /// FormDialogBox.xaml 的交互逻辑
+    /// &lt;/summary&gt;
+    public partial class FormDialogBox : BaseDialogUserControl
     {
-        /// &lt;summary&gt;
-        /// Delete a file
-        /// &lt;/summary&gt;
-        public static void DumpFile(string filename)
+        public FormDialogBox()
         {
-            if (!string.IsNullOrEmpty(filename) &amp;&amp; File.Exists(filename))
-            {
-                File.Delete(filename);
-            }
+            InitializeComponent();
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[11,9,11,10,0],[12,13,12,74,0],[13,13,13,14,0],[14,17,14,39,0],[15,13,15,14,0],[16,9,16,10,0]]);
+      highlightRanges([[8,9,8,31,0],[9,9,9,10,0],[10,13,10,35,0],[11,9,11,10,0]]);
     </script>
   </body>
 </html>

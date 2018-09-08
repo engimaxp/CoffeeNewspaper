@@ -2,115 +2,350 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\input\datetimeentrycontrol.xaml</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\animation\frameworkelementanimations.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-&lt;UserControl x:Class=&quot;CN_WPF.DateTimeEntryControl&quot;
-             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
-             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
-             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
-             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
-             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
-             xmlns:design=&quot;clr-namespace:CN_Presentation.Input.Design;assembly=CN_Presentation&quot;
-             mc:Ignorable=&quot;d&quot;
-             d:DesignWidth=&quot;232&quot;
-             d:DataContext=&quot;{x:Static design:DateTimeEntryDesignModel.Instance}&quot;&gt;
-    &lt;Grid&gt;
-        &lt;Grid.RowDefinitions&gt;
-            &lt;RowDefinition Height=&quot;Auto&quot;&gt;&lt;/RowDefinition&gt;
-            &lt;RowDefinition Height=&quot;*&quot;&gt;&lt;/RowDefinition&gt;
-        &lt;/Grid.RowDefinitions&gt;
-        &lt;Grid.ColumnDefinitions&gt;
-            &lt;ColumnDefinition Width=&quot;*&quot;&gt;&lt;/ColumnDefinition&gt;
-            &lt;ColumnDefinition Width=&quot;Auto&quot;&gt;&lt;/ColumnDefinition&gt;
-        &lt;/Grid.ColumnDefinitions&gt;
-        &lt;!-- TextInput --&gt;
-        &lt;Border Grid.Row=&quot;0&quot;
-                Grid.Column=&quot;0&quot;
-                Grid.ColumnSpan=&quot;2&quot;
-                CornerRadius=&quot;5&quot;
-                BorderThickness=&quot;1&quot;
-                BorderBrush=&quot;{StaticResource ForegroundLightBrush}&quot;
-                Background=&quot;{StaticResource ForegroundMainBrush}&quot;&gt;
-            &lt;TextBox 
-                x:Name=&quot;DateTimeTextBox&quot;
-                Style=&quot;{StaticResource MemoContent}&quot;
-                     local:FocusAndSelectProperty.Value=&quot;{Binding Editing,UpdateSourceTrigger=PropertyChanged}&quot;
-                     Margin=&quot;0&quot;
-                     Padding=&quot;4 4 20 4&quot;
-                     Tag=&quot;e.g.Next Morning or 1/29 8:00&quot;
-                     Text=&quot;{Binding InputText, UpdateSourceTrigger=PropertyChanged}&quot;
-                     FontSize=&quot;{StaticResource FontSizeRegular}&quot; &gt;
-                &lt;TextBox.InputBindings&gt;
-                    &lt;KeyBinding Command=&quot;{Binding ClearCommand}&quot; Key=&quot;Escape&quot; /&gt;
-                    &lt;KeyBinding Command=&quot;{Binding RecognizeCommand}&quot; Key=&quot;Return&quot; /&gt;
-                &lt;/TextBox.InputBindings&gt;
-            &lt;/TextBox&gt;
-        &lt;/Border&gt;
+using System;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media.Animation;
 
-        &lt;!-- Calendar Control --&gt;
-        &lt;Button Grid.Row=&quot;0&quot;
-                Grid.Column=&quot;1&quot;
-                Padding=&quot;0 0 6 2&quot;
-                FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                Style=&quot;{StaticResource IconDarkerButton}&quot;
-                Content=&quot;{StaticResource FontAwesomeCalendarAltIcon}&quot;
-                Command=&quot;{Binding PopUpCommand}&quot;&gt;&lt;/Button&gt;
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// Helpers to animate framework elements in specific ways
+    /// &lt;/summary&gt;
+    public static class FrameworkElementAnimations
+    {
+        #region Slide In / Out
 
-        &lt;!-- Recognizer Suggest --&gt;
-        &lt;ItemsControl 
-            Visibility=&quot;{Binding DisplaySuggestButtons,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
-            Grid.Row=&quot;1&quot;
-                      Grid.Column=&quot;0&quot;
-                      Grid.ColumnSpan=&quot;2&quot;
-            ItemsSource=&quot;{Binding SuggestButtons}&quot;&gt;
-            &lt;ItemsControl.ItemsPanel&gt;
-                &lt;ItemsPanelTemplate&gt;
-                    &lt;WrapPanel Orientation=&quot;Horizontal&quot; /&gt;
-                &lt;/ItemsPanelTemplate&gt;
-            &lt;/ItemsControl.ItemsPanel&gt;
-            &lt;ItemsControl.ItemTemplate&gt;
-                &lt;DataTemplate&gt;
-                    &lt;Button ToolTip=&quot;{Binding Title}&quot;
-                            Style=&quot;{StaticResource RecognizeSuggestButton}&quot;
-                            Content=&quot;{Binding Title}&quot;
-                            Command=&quot;{Binding ClickCommand}&quot;/&gt;
-                &lt;/DataTemplate&gt;
-            &lt;/ItemsControl.ItemTemplate&gt;
-        &lt;/ItemsControl&gt;
-        
-        &lt;!-- Error Message --&gt;
-        &lt;TextBlock Grid.Column=&quot;0&quot;
-                   Grid.Row=&quot;1&quot;
-                   Grid.ColumnSpan=&quot;2&quot;
-                   Visibility=&quot;{Binding RecgonizeFail,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
-                   Foreground=&quot;{StaticResource WordRedBrush}&quot;
-                   Text=&quot;{Binding FailReason}&quot;&gt;&lt;/TextBlock&gt;
+        /// &lt;summary&gt;
+        /// Slides an element in
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;direction&quot;&gt;The direction of the slide&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same width during animation&lt;/param&gt;
+        /// &lt;param name=&quot;size&quot;&gt;The animation width/height to animate to. If not specified the elements size is used&lt;/param&gt;
+        /// &lt;param name=&quot;firstLoad&quot;&gt;Indicates if this is the first load&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task SlideAndFadeInAsync(this FrameworkElement element, AnimationSlideInDirection direction, bool firstLoad, float seconds = 0.3f, bool keepMargin = true, int size = 0)
+        {
+            // Create the storyboard
+            var sb = new Storyboard();
 
-        &lt;!-- CalendarPopup --&gt;
-        &lt;Popup 
-            x:Name=&quot;CalendarPopup&quot;
-            Grid.Column=&quot;0&quot;
-               Grid.Row=&quot;1&quot;
-               Grid.ColumnSpan=&quot;2&quot;
-               StaysOpen=&quot;False&quot;
-               AllowsTransparency=&quot;True&quot;
-               Placement=&quot;Bottom&quot;
-               IsOpen=&quot;{Binding IsPanelPopup}&quot;
-               PlacementTarget=&quot;{Binding ElementName=DateTimeTextBox}&quot;&gt;
-            &lt;local:CalendarSelectControl
-                DataContext=&quot;{Binding PopUpCalendarSelectViewModel}&quot;&gt;
-            &lt;/local:CalendarSelectControl&gt;
-        &lt;/Popup&gt;
-&lt;/Grid&gt;
-&lt;/UserControl&gt;
+            // Slide in the correct direction
+            switch (direction)
+            {
+                // Add slide from left animation
+                case AnimationSlideInDirection.Left:
+                    sb.AddSlideFromLeft(seconds, size == 0 ? element.ActualWidth : size, keepMargin: keepMargin);
+                    break;
+                // Add slide from right animation
+                case AnimationSlideInDirection.Right:
+                    sb.AddSlideFromRight(seconds, size == 0 ? element.ActualWidth : size, keepMargin: keepMargin);
+                    break;
+                // Add slide from top animation
+                case AnimationSlideInDirection.Top:
+                    sb.AddSlideFromTop(seconds, size == 0 ? element.ActualHeight : size, keepMargin: keepMargin);
+                    break;
+                // Add slide from bottom animation
+                case AnimationSlideInDirection.Bottom:
+                    sb.AddSlideFromBottom(seconds, size == 0 ? element.ActualHeight : size, keepMargin: keepMargin);
+                    break;
+            }
+            // Add fade in animation
+            sb.AddFadeIn(seconds , Math.Abs(seconds) &gt; 1e-5 &amp;&amp; firstLoad);
+
+            // Start animating
+            sb.Begin(element);
+
+            // Make page visible only if we are animating or its the first load
+            if (Math.Abs(seconds) &gt; 1e-5 || firstLoad)
+                element.Visibility = Visibility.Visible;
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        /// &lt;summary&gt;
+        /// Slides an element out
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;direction&quot;&gt;The direction of the slide (this is for the reverse slide out action, so Left would slide out to left)&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same width during animation&lt;/param&gt;
+        /// &lt;param name=&quot;size&quot;&gt;The animation width/height to animate to. If not specified the elements size is used&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task SlideAndFadeOutAsync(this FrameworkElement element, AnimationSlideInDirection direction, float seconds = 0.3f, bool keepMargin = true, int size = 0)
+        {
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Slide in the correct direction
+            switch (direction)
+            {
+                // Add slide to left animation
+                case AnimationSlideInDirection.Left:
+                    sb.AddSlideToLeft(seconds, size == 0 ? element.ActualWidth : size, keepMargin: keepMargin);
+                    break;
+                // Add slide to right animation
+                case AnimationSlideInDirection.Right:
+                    sb.AddSlideToRight(seconds, size == 0 ? element.ActualWidth : size, keepMargin: keepMargin);
+                    break;
+                // Add slide to top animation
+                case AnimationSlideInDirection.Top:
+                    sb.AddSlideToTop(seconds, size == 0 ? element.ActualHeight : size, keepMargin: keepMargin);
+                    break;
+                // Add slide to bottom animation
+                case AnimationSlideInDirection.Bottom:
+                    sb.AddSlideToBottom(seconds, size == 0 ? element.ActualHeight : size, keepMargin: keepMargin);
+                    break;
+            }
+
+            // Add fade in animation
+            sb.AddFadeOut(seconds);
+
+            // Start animating
+            sb.Begin(element);
+
+            // Make page visible only if we are animating
+            if (Math.Abs(seconds) &gt; 1e-5)
+                element.Visibility = Visibility.Visible;
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+
+            // Make element invisible
+            if (Math.Abs(element.Opacity) &lt; 1e-5)
+                element.Visibility = Visibility.Hidden;
+        }
+
+        #endregion
+
+        #region Fade In / Out
+
+        /// &lt;summary&gt;
+        /// Fades an element in
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;param name=&quot;firstLoad&quot;&gt;Indicates if this is the first load&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task FadeInAsync(this FrameworkElement element, bool firstLoad, float seconds = 0.3f)
+        {
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddFadeIn(seconds);
+
+            // Start animating
+            sb.Begin(element);
+
+            // Make page visible only if we are animating or its the first load
+            if (Math.Abs(seconds) &gt; 1e-5 || firstLoad)
+                element.Visibility = Visibility.Visible;
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        /// &lt;summary&gt;
+        /// Fades out an element
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;param name=&quot;firstLoad&quot;&gt;Indicates if this is the first load&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task FadeOutAsync(this FrameworkElement element, float seconds = 0.3f)
+        {
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddFadeOut(seconds);
+
+            // Start animating
+            sb.Begin(element);
+
+            // Make page visible only if we are animating or its the first load
+            if (Math.Abs(seconds) &gt; 1e-5)
+                element.Visibility = Visibility.Visible;
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+
+            // Fully hide the element
+            element.Visibility = Visibility.Collapsed;
+        }
+
+        #endregion
+
+        #region Rotate CW / CCW
+
+        /// &lt;summary&gt;
+        /// Rotate an element CW
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;param name=&quot;firstLoad&quot;&gt;Indicates if this is the first load&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task RotateCWAsync(this FrameworkElement element, bool firstLoad, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddRotateCW(seconds);
+
+            // Start animating
+            sb.Begin(element);
+            
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        /// &lt;summary&gt;
+        /// Rotate an element CCW
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task RotateCCWAsync(this FrameworkElement element, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddRotateCCW(seconds);
+
+            // Start animating
+            sb.Begin(element);
+            
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+
+            // Fully hide the element
+        }
+
+        #endregion
+
+        #region ScaleY Expand / Shrink
+
+        /// &lt;summary&gt;
+        /// Scale an element y direction expand from 0 to 1
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;param name=&quot;firstLoad&quot;&gt;Indicates if this is the first load&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task ScaleYExpand(this FrameworkElement element, bool firstLoad, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Collapsed;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddScaleYExpand(seconds);
+
+            // Start animating
+            sb.Begin(element);
+
+            if (Math.Abs(seconds) &gt; 1e-5 || firstLoad)
+                element.Visibility = Visibility.Visible;
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        /// &lt;summary&gt;
+        /// Scale an element y direction shrink from 0 to 1
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task ScaleYShrink(this FrameworkElement element, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddScaleYShrink(seconds);
+
+            // Start animating
+            sb.Begin(element);
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+
+            // Fully hide the element
+                        element.Visibility = Visibility.Collapsed;
+        }
+
+        #endregion
+        #region ScrollView Container Expand / Shrink
+
+        /// &lt;summary&gt;
+        /// Change a ScrollView Container&#39;s Height from 0 to 1
+        /// Height is determined by its children&#39;s actual height
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;param name=&quot;firstLoad&quot;&gt;Indicates if this is the first load&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task ScrollViewExpand(this FrameworkElement element, bool firstLoad, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddScrollViewExpand(seconds, element);
+
+            // Start animating
+            sb.Begin(element);
+            
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        /// &lt;summary&gt;
+        /// Change a ScrollView Container&#39;s Height from 1 to 0
+        /// Height is determined by its children&#39;s actual height
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element to animate&lt;/param&gt;
+        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static async Task ScrollViewShrink(this FrameworkElement element, float seconds = 0.3f)
+        {
+            element.Visibility = Visibility.Visible;
+            // Create the storyboard
+            var sb = new Storyboard();
+
+            // Add fade in animation
+            sb.AddScrollViewShrink(seconds, element);
+
+            // Start animating
+            sb.Begin(element);
+
+            // Wait for it to finish
+            await Task.Delay((int)(seconds * 1000));
+        }
+
+        #endregion
+    }
+}
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[1,13,1,77,0]]);
+      highlightRanges([[26,9,26,10,0],[28,13,28,39,0],[31,13,31,31,0],[35,21,35,114,0],[36,21,36,27,0],[39,21,39,115,0],[40,21,40,27,0],[43,21,43,114,0],[44,21,44,27,0],[47,21,47,117,0],[48,21,48,27,0],[51,13,51,75,0],[54,13,54,31,0],[57,13,57,55,0],[58,17,58,57,0],[61,13,61,53,0],[62,9,62,10,0],[74,9,74,10,0],[76,13,76,39,0],[79,13,79,31,0],[83,21,83,112,0],[84,21,84,27,0],[87,21,87,113,0],[88,21,88,27,0],[91,21,91,112,0],[92,21,92,27,0],[95,21,95,115,0],[96,21,96,27,0],[100,13,100,36,0],[103,13,103,31,0],[106,13,106,42,0],[107,17,107,57,0],[110,13,110,53,0],[113,13,113,50,0],[114,17,114,56,0],[115,9,115,10,0],[129,9,129,10,0],[131,13,131,39,0],[134,13,134,35,0],[137,13,137,31,0],[140,13,140,55,0],[141,17,141,57,0],[144,13,144,53,0],[145,9,145,10,0],[155,9,155,10,0],[157,13,157,39,0],[160,13,160,36,0],[163,13,163,31,0],[166,13,166,42,0],[167,17,167,57,0],[170,13,170,53,0],[173,13,173,55,0],[174,9,174,10,0],[188,9,188,10,0],[189,13,189,53,0],[191,13,191,39,0],[194,13,194,37,0],[197,13,197,31,0],[200,13,200,53,0],[201,9,201,10,0],[210,9,210,10,0],[211,13,211,53,0],[213,13,213,39,0],[216,13,216,38,0],[219,13,219,31,0],[222,13,222,53,0],[225,9,225,10,0],[239,9,239,10,0],[240,13,240,55,0],[242,13,242,39,0],[245,13,245,41,0],[248,13,248,31,0],[250,13,250,55,0],[251,17,251,57,0],[254,13,254,53,0],[255,9,255,10,0],[264,9,264,10,0],[265,13,265,53,0],[267,13,267,39,0],[270,13,270,41,0],[273,13,273,31,0],[276,13,276,53,0],[279,25,279,67,0],[280,9,280,10,0],[294,9,294,10,0],[295,13,295,53,0],[297,13,297,39,0],[300,13,300,54,0],[303,13,303,31,0],[306,13,306,53,0],[307,9,307,10,0],[317,9,317,10,0],[318,13,318,53,0],[320,13,320,39,0],[323,13,323,54,0],[326,13,326,31,0],[329,13,329,53,0],[330,9,330,10,0]]);
     </script>
   </body>
 </html>

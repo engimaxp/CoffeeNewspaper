@@ -2,41 +2,322 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\headmenucontrol.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\attachedproperties\frameworkelementanimationattachedproperties.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.ComponentModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
-using CN_Presentation.ViewModel.Controls.Design;
+using System.Windows.Data;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// HeaderMenuControl.xaml 的交互逻辑
+    ///     A base class to run any animation method when a boolean is set to true
+    ///     and a reverse animation when set to false
     /// &lt;/summary&gt;
-    public partial class HeadMenuControl : UserControl
+    /// &lt;typeparam name=&quot;Parent&quot;&gt;&lt;/typeparam&gt;
+    public abstract class AnimateBaseProperty&lt;Parent&gt; : BaseAttachedProperty&lt;Parent, bool&gt;
+        where Parent : BaseAttachedProperty&lt;Parent, bool&gt;, new()
     {
-        public HeadMenuControl()
+        public override void OnValueUpdated(DependencyObject sender, object value)
         {
-            InitializeComponent();
-            if (!DesignerProperties.GetIsInDesignMode(this))
+            // Get the framework element
+            if (!(sender is FrameworkElement element))
+                return;
+
+            // Try and get the already loaded reference
+            var alreadyLoadedReference = mAlreadyLoaded.FirstOrDefault(f =&gt; Equals(f.Key.Target, sender));
+
+            // Try and get the first load reference
+
+            // Don&#39;t fire if the value doesn&#39;t change
+            if ((bool) sender.GetValue(ValueProperty) == (bool) value &amp;&amp; alreadyLoadedReference.Key != null)
+                return;
+
+            // On first load...
+            if (alreadyLoadedReference.Key == null)
             {
-                DataContext = ViewModelLocator.HeadMenuViewModel;
+                // Create weak reference
+                var weakReference = new WeakReference(sender);
+
+                // Flag that we are in first load but have not finished it
+                mAlreadyLoaded[weakReference] = false;
+
+                // Start off hidden before we decide how to animate
+                element.Visibility = Visibility.Hidden;
+
+                // Create a single self-unhookable event 
+                // for the elements Loaded event
+                async void onLoaded(object ss, RoutedEventArgs ee)
+                {
+                    // Unhook ourselves
+                    element.Loaded -= onLoaded;
+
+                    // Slight delay after load is needed for some elements to get laid out
+                    // and their width/heights correctly calculated
+                    await Task.Delay(5);
+
+                    // Refresh the first load value in case it changed
+                    // since the 5ms delay
+                    var firstLoadReference = mFirstLoadValue.FirstOrDefault(f =&gt; Equals(f.Key.Target, sender));
+
+                    // Do desired animation
+                    DoAnimation(element, firstLoadReference.Key != null ? firstLoadReference.Value : (bool) value,
+                        true);
+
+                    // Flag that we have finished first load
+                    mAlreadyLoaded[weakReference] = true;
+                }
+
+                // Hook into the Loaded event of the element
+                element.Loaded += onLoaded;
+            }
+            // If we have started a first load but not fired the animation yet, update the property
+            else if (!alreadyLoadedReference.Value)
+            {
+                mFirstLoadValue[new WeakReference(sender)] = (bool) value;
             }
             else
+                // Do desired animation
             {
-                DataContext = HeadMenuDesignModel.Instance;
+                DoAnimation(element, (bool) value, false);
             }
+        }
+
+        /// &lt;summary&gt;
+        ///     The animation method that is fired when the value changes
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;element&quot;&gt;The element&lt;/param&gt;
+        /// &lt;param name=&quot;value&quot;&gt;The new value&lt;/param&gt;
+        protected virtual void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+        }
+
+        #region Protected Properties
+
+        /// &lt;summary&gt;
+        ///     True if this is the very first time the value has been updated
+        ///     Used to make sure we run the logic at least once during first load
+        /// &lt;/summary&gt;
+        private readonly Dictionary&lt;WeakReference, bool&gt; mAlreadyLoaded = new Dictionary&lt;WeakReference, bool&gt;();
+
+        /// &lt;summary&gt;
+        ///     The most recent value used if we get a value changed before we do the first load
+        /// &lt;/summary&gt;
+        private readonly Dictionary&lt;WeakReference, bool&gt; mFirstLoadValue = new Dictionary&lt;WeakReference, bool&gt;();
+
+        #endregion
+    }
+
+    /// &lt;summary&gt;
+    ///     Fades in an image once the source changes
+    /// &lt;/summary&gt;
+    public class FadeInImageOnLoadProperty : AnimateBaseProperty&lt;FadeInImageOnLoadProperty&gt;
+    {
+        public override void OnValueUpdated(DependencyObject sender, object value)
+        {
+            // Make sure we have an image
+            if (!(sender is Image image))
+                return;
+
+            // If we want to animate in...
+            if ((bool) value)
+                // Listen for target change
+                image.TargetUpdated += Image_TargetUpdatedAsync;
+            // Otherwise
+            else
+                // Make sure we unhooked
+                image.TargetUpdated -= Image_TargetUpdatedAsync;
+        }
+
+        private async void Image_TargetUpdatedAsync(object sender, DataTransferEventArgs e)
+        {
+            // Fade in image
+            await (sender as Image).FadeInAsync(false);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a framework element sliding it in from the left on show
+    ///     and sliding out to the left on hide
+    /// &lt;/summary&gt;
+    public class AnimateSlideInFromLeftProperty : AnimateBaseProperty&lt;AnimateSlideInFromLeftProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.SlideAndFadeInAsync(AnimationSlideInDirection.Left, firstLoad, firstLoad ? 0 : 0.3f,
+                    false);
+            else
+                // Animate out
+                await element.SlideAndFadeOutAsync(AnimationSlideInDirection.Left, firstLoad ? 0 : 0.3f, false);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a framework element sliding it in from the right on show
+    ///     and sliding out to the right on hide
+    /// &lt;/summary&gt;
+    public class AnimateSlideInFromRightProperty : AnimateBaseProperty&lt;AnimateSlideInFromRightProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.SlideAndFadeInAsync(AnimationSlideInDirection.Right, firstLoad, firstLoad ? 0 : 0.3f,
+                    false);
+            else
+                // Animate out
+                await element.SlideAndFadeOutAsync(AnimationSlideInDirection.Right, firstLoad ? 0 : 0.3f, false);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a framework element sliding it in from the right on show
+    ///     and sliding out to the right on hide
+    /// &lt;/summary&gt;
+    public class AnimateSlideInFromRightMarginProperty : AnimateBaseProperty&lt;AnimateSlideInFromRightMarginProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.SlideAndFadeInAsync(AnimationSlideInDirection.Right, firstLoad, firstLoad ? 0 : 0.3f,
+                    true);
+            else
+                // Animate out
+                await element.SlideAndFadeOutAsync(AnimationSlideInDirection.Right, firstLoad ? 0 : 0.3f, true);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a framework element sliding up from the bottom on show
+    ///     and sliding out to the bottom on hide
+    /// &lt;/summary&gt;
+    public class AnimateSlideInFromBottomProperty : AnimateBaseProperty&lt;AnimateSlideInFromBottomProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.SlideAndFadeInAsync(AnimationSlideInDirection.Bottom, firstLoad, firstLoad ? 0 : 0.3f,
+                    false);
+            else
+                // Animate out
+                await element.SlideAndFadeOutAsync(AnimationSlideInDirection.Bottom, firstLoad ? 0 : 0.3f, false);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a framework element sliding up from the bottom on load
+    ///     if the value is true
+    /// &lt;/summary&gt;
+    public class AnimateSlideInFromBottomOnLoadProperty : AnimateBaseProperty&lt;AnimateSlideInFromBottomOnLoadProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            // Animate in
+            await element.SlideAndFadeInAsync(AnimationSlideInDirection.Bottom, !value, !value ? 0 : 0.3f, false);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a framework element sliding up from the bottom on show
+    ///     and sliding out to the bottom on hide
+    ///     NOTE: Keeps the margin
+    /// &lt;/summary&gt;
+    public class AnimateSlideInFromBottomMarginProperty : AnimateBaseProperty&lt;AnimateSlideInFromBottomMarginProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.SlideAndFadeInAsync(AnimationSlideInDirection.Bottom, firstLoad, firstLoad ? 0 : 0.3f,
+                    true);
+            else
+                // Animate out
+                await element.SlideAndFadeOutAsync(AnimationSlideInDirection.Bottom, firstLoad ? 0 : 0.3f, true);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a framework element fading in on show
+    ///     and fading out on hide
+    /// &lt;/summary&gt;
+    public class AnimateFadeInProperty : AnimateBaseProperty&lt;AnimateFadeInProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.FadeInAsync(firstLoad, firstLoad ? 0 : 0.3f);
+            else
+                // Animate out
+                await element.FadeOutAsync(firstLoad ? 0 : 0.3f);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a scroll view expand from 0 to 1
+    ///     its a work around to display smooth expand animation like expander control
+    ///     ref https://www.codeproject.com/Articles/248112/Templating-WPF-Expander-Control#animation
+    /// &lt;/summary&gt;
+    public class AnimateScrollViewExpandProperty : AnimateBaseProperty&lt;AnimateScrollViewExpandProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.ScrollViewExpand(firstLoad, firstLoad ? 0 : 0.3f);
+            else
+                // Animate out
+                await element.ScrollViewShrink(firstLoad ? 0 : 0.3f);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a framework element expand from 0 to 1
+    /// &lt;/summary&gt;
+    public class AnimateScaleYExpandProperty : AnimateBaseProperty&lt;AnimateScaleYExpandProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // Animate in
+                await element.ScaleYExpand(firstLoad, firstLoad ? 0 : 0.3f);
+            else
+                // Animate out
+                await element.ScaleYShrink(firstLoad ? 0 : 0.3f);
+        }
+    }
+
+    /// &lt;summary&gt;
+    ///     Animates a framework element Rotate 180 cw or -180 ccw
+    /// &lt;/summary&gt;
+    public class AnimateCWProperty : AnimateBaseProperty&lt;AnimateCWProperty&gt;
+    {
+        protected override async void DoAnimation(FrameworkElement element, bool value, bool firstLoad)
+        {
+            if (value)
+                // ccw out
+                await element.RotateCCWAsync(0);
+            else
+                // cw in
+                await element.RotateCWAsync(firstLoad, 0);
         }
     }
 }
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[12,9,12,33,0],[13,9,13,10,0],[14,13,14,35,0],[15,13,15,61,0],[16,13,16,14,0],[17,17,17,66,0],[18,13,18,14,0],[20,13,20,14,0],[21,17,21,60,0],[22,13,22,14,0],[23,9,23,10,0]]);
+      highlightRanges([[20,9,20,10,0],[22,13,22,55,0],[23,17,23,24,0],[26,13,26,77,0],[26,77,26,105,0],[26,105,26,107,0],[26,13,26,107,0],[31,13,31,109,0],[32,17,32,24,0],[35,13,35,52,0],[36,13,36,14,0],[38,17,38,63,0],[41,17,41,55,0],[44,17,44,56,0],[49,17,49,18,0],[51,21,51,48,0],[55,21,55,41,0],[59,21,59,82,0],[59,82,59,110,0],[59,110,59,112,0],[59,21,59,112,0],[62,21,63,31,0],[66,21,66,58,0],[67,17,67,18,0],[70,17,70,44,0],[71,13,71,14,0],[73,18,73,52,0],[74,13,74,14,0],[75,17,75,75,0],[76,13,76,14,0],[79,13,79,14,0],[80,17,80,59,0],[81,13,81,14,0],[82,9,82,10,0],[90,9,90,10,0],[91,9,91,10,0],[99,9,99,113,0],[104,9,104,114,0],[115,9,115,10,0],[117,13,117,42,0],[118,17,118,24,0],[121,13,121,30,0],[123,17,123,65,0],[127,17,127,65,0],[128,9,128,10,0],[131,9,131,10,0],[133,13,133,56,0],[134,9,134,10,0],[144,9,144,10,0],[145,13,145,23,0],[147,17,148,28,0],[151,17,151,113,0],[152,9,152,10,0],[162,9,162,10,0],[163,13,163,23,0],[165,17,166,28,0],[169,17,169,114,0],[170,9,170,10,0],[180,9,180,10,0],[181,13,181,23,0],[183,17,184,27,0],[187,17,187,113,0],[188,9,188,10,0],[198,9,198,10,0],[199,13,199,23,0],[201,17,202,28,0],[205,17,205,115,0],[206,9,206,10,0],[216,9,216,10,0],[218,13,218,115,0],[219,9,219,10,0],[230,9,230,10,0],[231,13,231,23,0],[233,17,234,27,0],[237,17,237,114,0],[238,9,238,10,0],[248,9,248,10,0],[249,13,249,23,0],[251,17,251,76,0],[254,17,254,66,0],[255,9,255,10,0],[266,9,266,10,0],[267,13,267,23,0],[269,17,269,81,0],[272,17,272,70,0],[273,9,273,10,0],[282,9,282,10,0],[283,13,283,23,0],[285,17,285,77,0],[288,17,288,66,0],[289,9,289,10,0],[298,9,298,10,0],[299,13,299,23,0],[301,17,301,49,0],[304,17,304,59,0],[305,9,305,10,0]]);
     </script>
   </body>
 </html>

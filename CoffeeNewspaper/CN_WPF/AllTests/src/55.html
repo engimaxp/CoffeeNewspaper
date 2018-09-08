@@ -2,67 +2,61 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\dialogwindow.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\applicationpagevalueconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Windows;
+using System;
+using System.Diagnostics;
+using System.Globalization;
+using CN_Presentation;
+using CN_Presentation.ViewModel.Application;
 
 namespace CN_WPF
 {
-    /// &lt;summary&gt;
-    /// DialogWindow.xaml 的交互逻辑
-    /// &lt;/summary&gt;
-    public partial class DialogWindow : Window
-    {
-        #region Private Members
-
-        /// &lt;summary&gt;
-        /// The view model for this window
-        /// &lt;/summary&gt;
-        private DialogWindowViewModel mViewModel;
-
-        #endregion
-
-        #region Public Properties
-
-        /// &lt;summary&gt;
-        /// The view model for this window
-        /// &lt;/summary&gt;
-        public DialogWindowViewModel ViewModel
+        public class ApplicationPageValueConverter : BaseValueConverter&lt;ApplicationPageValueConverter&gt;
         {
-            get =&gt; mViewModel;
-            set
+            public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
             {
-                // Set new value
-                mViewModel = value;
+                switch ((ApplicationPage)value)
+            {
+                case ApplicationPage.WorkSpace:
+                    return new WorkSpacePage(null as WorkSpaceViewModel);
 
-                // Update data context
-                DataContext = mViewModel;
+                case ApplicationPage.MemoList:
+                    return new MemoListPage(null as MemoListViewModel);
+
+                case ApplicationPage.Settings:
+                    return new SettingsPage(null as SettingsViewModel);
+
+                case ApplicationPage.Statistic:
+                    return new StatisticPage(null as StatisticViewModel);
+
+                case ApplicationPage.TagReview:
+                    return new TagReviewPage(null as TagReviewViewModel);
+
+                case ApplicationPage.TasksList:
+                    return new TaskListPage(null as TasksListPageViewModel);
+
+                default:
+                    {
+                        Debugger.Break();
+                        return null;
+                    }
+                }
+            }
+
+            public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            {
+                throw new NotImplementedException();
             }
         }
-
-        #endregion
-
-        #region Constructor
-
-        /// &lt;summary&gt;
-        /// Default constructor
-        /// &lt;/summary&gt;
-        public DialogWindow()
-        {
-            InitializeComponent();
-        }
-
-        #endregion
-    }
 }
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[26,20,26,30,0],[28,13,28,14,0],[30,17,30,36,0],[33,17,33,42,0],[34,13,34,14,0],[44,9,44,30,0],[45,9,45,10,0],[46,13,46,35,0],[47,9,47,10,0]]);
+      highlightRanges([[12,13,12,14,0],[13,17,13,48,0],[16,21,16,74,0],[19,21,19,72,0],[22,21,22,72,0],[25,21,25,74,0],[28,21,28,74,0],[31,21,31,77,0],[34,21,34,22,0],[35,25,35,42,0],[36,25,36,37,0],[39,13,39,14,0],[42,13,42,14,0],[43,17,43,53,0]]);
     </script>
   </body>
 </html>

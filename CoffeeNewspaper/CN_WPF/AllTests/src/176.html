@@ -2,40 +2,150 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\servicetest\servicesetupteardown.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\utilitiestest\timeslicesstatisticstest.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
 using CN_Core;
-using CN_Core.Interfaces.Service;
-using CN_Service;
-using Ninject.MockingKernel.NSubstitute;
 using NUnit.Framework;
 
-namespace CoffeeNewspaper_UnitTest.ServiceTest
+namespace CoffeeNewspaper_UnitTest.UtilitiesTest
 {
-    public class ServiceSetupTearDown
+    [TestFixture]
+    public class TimeSlicesStatisticsTest
     {
-        protected readonly NSubstituteMockingKernel _kernel;
-        public ServiceSetupTearDown()
+        [Test]
+        public void GetTimeSliceDuration()
         {
-            _kernel = new NSubstituteMockingKernel();
-            _kernel.Bind&lt;ITaskService&gt;().To&lt;TaskService&gt;();
-            _kernel.Bind&lt;IMemoService&gt;().To&lt;MemoService&gt;();
+            //arrange
+            var time = Convert.ToDateTime(&quot;2018-4-1 12:00:00&quot;);
+            var timeslice1 = new CNTimeSlice(time.AddHours(-1), time.AddHours(1));
+            //act
+            var result = timeslice1.GetTimeSliceDuration(time);
+            //arrange
+            Assert.AreEqual(time.AddHours(1) - time.AddHours(-1), result);
         }
-        [SetUp]
-        public void SetUp()
+
+        [Test]
+        public void GetTimeSliceDuration_Null_ReturnTimeSpanZero()
         {
-            _kernel.Reset();
+            //arrange
+            var time = Convert.ToDateTime(&quot;2018-4-1 12:00:00&quot;);
+            var timeslice1 = new CNTimeSlice(time.AddHours(-1), time.AddHours(1));
+            //act
+            var result = ((CNTimeSlice) null).GetTimeSliceDuration(time);
+            //arrange
+            Assert.AreEqual(TimeSpan.Zero, result);
+        }
+        [Test]
+        public void GetTimeSliceDuration_EndTimeIsNull()
+        {
+            //arrange
+            var time = Convert.ToDateTime(&quot;2018-4-1 12:00:00&quot;);
+            var timeslice1 = new CNTimeSlice(time.AddHours(-1));
+            //act
+            var result = timeslice1.GetTimeSliceDuration(time);
+            //arrange
+            Assert.AreEqual(time - time.AddHours(-1), result);
+        }
+
+        [Test]
+        public void GetTimeSliceDuration_StartTimeOverNow()
+        {
+            //arrange
+            var time = Convert.ToDateTime(&quot;2018-4-1 12:00:00&quot;);
+            var timeslice1 = new CNTimeSlice(time.AddHours(1));
+            //act
+            var result = timeslice1.GetTimeSliceDuration(time);
+            //arrange
+            Assert.AreEqual(TimeSpan.Zero, result);
+        }
+
+        [Test]
+        public void GetTotalHours()
+        {
+            //arrange
+            var time = Convert.ToDateTime(&quot;2018-4-1 12:00:00&quot;);
+            var timeslice1 = new CNTimeSlice(time.AddHours(-1), time.AddHours(1));
+            var timeslice2 = new CNTimeSlice(time.AddDays(-1).AddHours(-1), time.AddDays(-1).AddHours(1));
+            var timeslice3 = new CNTimeSlice(time.AddDays(-1).AddHours(-3), time.AddDays(-1).AddHours(-2));
+            var testList = new List&lt;CNTimeSlice&gt;() {timeslice1, timeslice2, timeslice3 };
+            //act
+            double result = testList.GetTotalHours();
+            //assert
+            Assert.AreEqual(5, result);
+        }
+        [Test]
+        public void GetTotalDays()
+        {
+            //arrange
+            var time = Convert.ToDateTime(&quot;2018-4-1 12:00:00&quot;);
+            var timeslice1 = new CNTimeSlice(time.AddHours(-1), time.AddHours(1));
+            var timeslice2 = new CNTimeSlice(time.AddDays(-1).AddHours(-1), time.AddDays(-1).AddHours(1));
+            var timeslice3 = new CNTimeSlice(time.AddDays(-1).AddHours(-3), time.AddDays(-1).AddHours(-2));
+            var testList = new List&lt;CNTimeSlice&gt;() { timeslice1, timeslice2, timeslice3 };
+            //act
+            double result = testList.GetTotalDays();
+            //assert
+            Assert.GreaterOrEqual(1e-5,Math.Abs(5.0/24.0-result));
+        }
+        [Test]
+        public void GetWorkDays_SimpleTwoDays()
+        {
+            //arrange
+            var time = Convert.ToDateTime(&quot;2018-4-1 12:00:00&quot;);
+            var timeslice1 = new CNTimeSlice(time.AddHours(-1), time.AddHours(1));
+            var timeslice2 = new CNTimeSlice(time.AddDays(-1).AddHours(-1), time.AddDays(-1).AddHours(1));
+            var timeslice3 = new CNTimeSlice(time.AddDays(-1).AddHours(-3), time.AddDays(-1).AddHours(-2));
+            var testList = new List&lt;CNTimeSlice&gt;() { timeslice1, timeslice2, timeslice3 };
+            //act
+            double result = testList.GetWorkDays();
+            //assert
+            Assert.AreEqual(2, result);
+        }
+        [Test]
+        public void GetWorkDays_NullDays()
+        {
+            //arrange
+            var time = Convert.ToDateTime(&quot;2018-4-1 12:00:00&quot;);
+            var timeslice3 = new CNTimeSlice(time.AddDays(-1).AddHours(-3), time.AddDays(-1).AddHours(-2));
+            var testList = new List&lt;CNTimeSlice&gt;() { null, null, timeslice3 };
+            //act
+            double result = testList.GetWorkDays();
+            //assert
+            Assert.AreEqual(1, result);
+        }
+        [Test]
+        public void GetWorkDays_MutipleDaysWithColide()
+        {
+            //arrange
+            var time = Convert.ToDateTime(&quot;2018-4-1 12:00:00&quot;);
+            var timeslice1 = new CNTimeSlice(time.AddHours(-1), time.AddHours(1));
+            //one day
+            Assert.AreEqual(1,new List&lt;CNTimeSlice&gt;(){timeslice1}.GetWorkDays());
+
+            var timeslice2 = new CNTimeSlice(time.AddDays(-1).AddHours(-1), time.AddDays(-1).AddHours(1));
+            var timeslice3 = new CNTimeSlice(time.AddDays(-1).AddHours(1), time.AddDays(-1).AddHours(2));
+            //two same day
+            Assert.AreEqual(1, new List&lt;CNTimeSlice&gt;() { timeslice2, timeslice3 }.GetWorkDays());
+
+            //one contain two other day
+            var timeslice4 = new CNTimeSlice(time.AddDays(-3).AddHours(1), time.AddDays(-1).AddHours(-2));
+            Assert.AreEqual(3, new List&lt;CNTimeSlice&gt;() { timeslice2, timeslice3, timeslice4 }.GetWorkDays());
+
+            //discrete distribution
+            var timeslice5 = new CNTimeSlice(time.AddDays(-6).AddHours(1), time.AddDays(-5).AddHours(-2));
+            Assert.AreEqual(5, new List&lt;CNTimeSlice&gt;() { timeslice2, timeslice3, timeslice4 , timeslice5 }.GetWorkDays());
         }
     }
 }
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[12,9,12,38,1],[13,9,13,10,1],[14,13,14,54,1],[15,13,15,60,1],[16,13,16,60,1],[17,9,17,10,1],[20,9,20,10,1],[21,13,21,29,1],[22,9,22,10,1]]);
+      highlightRanges([[13,9,13,10,0],[15,13,15,64,0],[16,13,16,83,0],[18,13,18,64,0],[20,13,20,75,0],[21,9,21,10,0],[25,9,25,10,0],[27,13,27,64,0],[28,13,28,83,0],[30,13,30,74,0],[32,13,32,52,0],[33,9,33,10,0],[36,9,36,10,0],[38,13,38,64,0],[39,13,39,65,0],[41,13,41,64,0],[43,13,43,63,0],[44,9,44,10,0],[48,9,48,10,0],[50,13,50,64,0],[51,13,51,64,0],[53,13,53,64,0],[55,13,55,52,0],[56,9,56,10,0],[60,9,60,10,0],[62,13,62,64,0],[63,13,63,83,0],[64,13,64,107,0],[65,13,65,108,0],[66,13,66,90,0],[68,13,68,54,0],[70,13,70,40,0],[71,9,71,10,0],[74,9,74,10,0],[76,13,76,64,0],[77,13,77,83,0],[78,13,78,107,0],[79,13,79,108,0],[80,13,80,91,0],[82,13,82,53,0],[84,13,84,67,0],[85,9,85,10,0],[88,9,88,10,0],[90,13,90,64,0],[91,13,91,83,0],[92,13,92,107,0],[93,13,93,108,0],[94,13,94,91,0],[96,13,96,52,0],[98,13,98,40,0],[99,9,99,10,0],[102,9,102,10,0],[104,13,104,64,0],[105,13,105,108,0],[106,13,106,79,0],[108,13,108,52,0],[110,13,110,40,0],[111,9,111,10,0],[114,9,114,10,0],[116,13,116,64,0],[117,13,117,83,0],[119,13,119,82,0],[121,13,121,107,0],[122,13,122,106,0],[124,13,124,98,0],[127,13,127,107,0],[128,13,128,110,0],[131,13,131,107,0],[132,13,132,123,0],[133,9,133,10,0]]);
     </script>
   </body>
 </html>

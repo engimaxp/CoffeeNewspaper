@@ -2,42 +2,44 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\fontfamilytypetofontfamilyconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\tagpanelcontrol.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-
 using System;
-using System.Globalization;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
-using CN_Presentation;
-using CN_Presentation.Utilities;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// A converter that takes in a &lt;see cref=&quot;FontFamilyType&quot;/&gt; and returns 
-    /// the fontfamily instance for that text element
+    /// TagPanelControl.xaml 的交互逻辑
     /// &lt;/summary&gt;
-    public class FontFamilyTypeToFontFamilyConverter : BaseValueConverter&lt;FontFamilyTypeToFontFamilyConverter&gt;
+    public partial class TagPanelControl : UserControl
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public TagPanelControl()
         {
-            return $&quot;pack://application;,,,/Fonts/#{((FontFamilyType)value).ToFontFamilyNameText()}&quot;;
-        }
-
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
+            InitializeComponent();
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[17,9,17,10,0],[18,13,18,102,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,49,0]]);
+      highlightRanges([[23,9,23,33,0],[24,9,24,10,0],[25,13,25,35,0],[26,9,26,10,0]]);
     </script>
   </body>
 </html>

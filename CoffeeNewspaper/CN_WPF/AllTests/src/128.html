@@ -2,46 +2,132 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\booleantoborderbrushconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\attachedproperties\baseattachedproperty.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
 using System;
-using System.Globalization;
-using System.Windows.Media;
+using System.Windows;
 
 namespace CN_WPF
-{
-    /// &lt;summary&gt;
-    /// A converter that takes in a boolean and returns a borderbrush
-    /// &lt;/summary&gt;
-    public class BooleanToBorderBrushConverter : BaseValueConverter&lt;BooleanToBorderBrushConverter&gt;
+{/// &lt;summary&gt;
+ /// A base attached property to replace the vanilla WPF attached property
+ /// &lt;/summary&gt;
+ /// &lt;typeparam name=&quot;Parent&quot;&gt;The parent class to be the attached property&lt;/typeparam&gt;
+ /// &lt;typeparam name=&quot;Property&quot;&gt;The type of this attached property&lt;/typeparam&gt;
+    public abstract class BaseAttachedProperty&lt;Parent, Property&gt;
+        where Parent : new()
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value != null &amp;&amp; (bool) value)
-            {
-                return (SolidColorBrush)(new BrushConverter().ConvertFrom($&quot;#{parameter}&quot;));
-            }
-            else
-            {
-                return Brushes.Transparent;
-            }
+        #region Public Events
 
+        /// &lt;summary&gt;
+        /// Fired when the value changes
+        /// &lt;/summary&gt;
+        public event Action&lt;DependencyObject, DependencyPropertyChangedEventArgs&gt; ValueChanged = (sender, e) =&gt; { };
+
+        /// &lt;summary&gt;
+        /// Fired when the value changes, even when the value is the same
+        /// &lt;/summary&gt;
+        public event Action&lt;DependencyObject, object&gt; ValueUpdated = (sender, value) =&gt; { };
+
+        #endregion
+
+        #region Public Properties
+
+        /// &lt;summary&gt;
+        /// A singleton instance of our parent class
+        /// &lt;/summary&gt;
+        public static Parent Instance { get; private set; } = new Parent();
+
+        #endregion
+
+        #region Attached Property Definitions
+
+        /// &lt;summary&gt;
+        /// The attached property for this class
+        /// &lt;/summary&gt;
+        public static readonly DependencyProperty ValueProperty = DependencyProperty.RegisterAttached(
+            &quot;Value&quot;,
+            typeof(Property),
+            typeof(BaseAttachedProperty&lt;Parent, Property&gt;),
+            new UIPropertyMetadata(
+                default(Property),
+                new PropertyChangedCallback(OnValuePropertyChanged),
+                new CoerceValueCallback(OnValuePropertyUpdated)
+                ));
+
+        /// &lt;summary&gt;
+        /// The callback event when the &lt;see cref=&quot;ValueProperty&quot;/&gt; is changed
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;d&quot;&gt;The UI element that had it&#39;s property changed&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;The arguments for the event&lt;/param&gt;
+        private static void OnValuePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // Call the parent function
+            (Instance as BaseAttachedProperty&lt;Parent, Property&gt;)?.OnValueChanged(d, e);
+
+            // Call event listeners
+            (Instance as BaseAttachedProperty&lt;Parent, Property&gt;)?.ValueChanged(d, e);
         }
 
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        /// &lt;summary&gt;
+        /// The callback event when the &lt;see cref=&quot;ValueProperty&quot;/&gt; is changed, even if it is the same value
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;d&quot;&gt;The UI element that had it&#39;s property changed&lt;/param&gt;
+        /// &lt;param name=&quot;value&quot;&gt;&lt;/param&gt;
+        private static object OnValuePropertyUpdated(DependencyObject d, object value)
         {
-            throw new NotImplementedException();
+            // Call the parent function
+            (Instance as BaseAttachedProperty&lt;Parent, Property&gt;)?.OnValueUpdated(d, value);
+
+            // Call event listeners
+            (Instance as BaseAttachedProperty&lt;Parent, Property&gt;)?.ValueUpdated(d, value);
+
+            // Return the value
+            return value;
         }
+
+        /// &lt;summary&gt;
+        /// Gets the attached property
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;d&quot;&gt;The element to get the property from&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static Property GetValue(DependencyObject d) =&gt; (Property)d.GetValue(ValueProperty);
+
+        /// &lt;summary&gt;
+        /// Sets the attached property
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;d&quot;&gt;The element to get the property from&lt;/param&gt;
+        /// &lt;param name=&quot;value&quot;&gt;The value to set the property to&lt;/param&gt;
+        public static void SetValue(DependencyObject d, Property value) =&gt; d.SetValue(ValueProperty, value);
+
+        #endregion
+
+        #region Event Methods
+
+        /// &lt;summary&gt;
+        /// The method that is called when any attached property of this type is changed
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;The UI element that this property was changed for&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;The arguments for this event&lt;/param&gt;
+        public virtual void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e) { }
+
+        /// &lt;summary&gt;
+        /// The method that is called when any attached property of this type is changed, even if the value is the same
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;The UI element that this property was changed for&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;The arguments for this event&lt;/param&gt;
+        public virtual void OnValueUpdated(DependencyObject sender, object value) { }
+
+        #endregion
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[13,9,13,10,0],[14,13,14,47,0],[15,13,15,14,0],[16,17,16,93,0],[19,13,19,14,0],[20,17,20,44,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,49,0]]);
+      highlightRanges([[18,9,18,113,0],[18,113,18,114,0],[18,114,18,115,0],[18,115,18,116,0],[18,116,18,117,0],[18,9,18,117,0],[23,9,23,89,0],[23,89,23,90,0],[23,90,23,91,0],[23,91,23,92,0],[23,92,23,93,0],[23,9,23,93,0],[32,41,32,45,0],[32,46,32,58,0],[32,63,32,75,0],[41,9,49,20,0],[57,9,57,10,0],[59,13,59,88,0],[62,13,62,86,0],[63,9,63,10,0],[71,9,71,10,0],[73,13,73,92,0],[76,13,76,90,0],[79,13,79,26,0],[80,9,80,10,0],[87,64,87,99,0],[94,76,94,108,0],[105,107,105,108,0],[105,109,105,110,0],[112,83,112,84,0],[112,85,112,86,0]]);
     </script>
   </body>
 </html>

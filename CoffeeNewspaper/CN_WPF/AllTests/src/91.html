@@ -2,100 +2,103 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\obj\debug\forms\taskdetailformcontrol.g.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\attachedproperties\textentrywidthmatcherproperty.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-#pragma checksum &quot;..\..\..\Forms\TaskDetailFormControl.xaml&quot; &quot;{ff1816ec-aa5e-4d10-87f7-6f4963833460}&quot; &quot;870C96C3375BD8EA067918949B57CA052D458EFF&quot;
-//------------------------------------------------------------------------------
-// &lt;auto-generated&gt;
-//     此代码由工具生成。
-//     运行时版本:4.0.30319.42000
-//
-//     对此文件的更改可能会导致不正确的行为，并且如果
-//     重新生成代码，这些更改将会丢失。
-// &lt;/auto-generated&gt;
-//------------------------------------------------------------------------------
-
-using CN_Presentation.ViewModel.Controls.Design;
-using CN_Presentation.ViewModel.Form.Design;
-using CN_WPF;
 using System;
-using System.Diagnostics;
 using System.Windows;
-using System.Windows.Automation;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Effects;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Media.TextFormatting;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Shell;
 
-
-namespace CN_WPF {
-    
-    
+namespace CN_WPF
+{
     /// &lt;summary&gt;
-    /// TaskDetailFormControl
+    /// Match the label width of all text entry controls inside this panel
     /// &lt;/summary&gt;
-    public partial class TaskDetailFormControl : System.Windows.Controls.UserControl, System.Windows.Markup.IComponentConnector {
-        
-        private bool _contentLoaded;
-        
-        /// &lt;summary&gt;
-        /// InitializeComponent
-        /// &lt;/summary&gt;
-        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
-        public void InitializeComponent() {
-            if (_contentLoaded) {
-                return;
+    public class TextEntryWidthMatcherProperty : BaseAttachedProperty&lt;TextEntryWidthMatcherProperty, bool&gt;
+    {
+        public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            // Get the panel (grid typically)
+            if (!(sender is Panel panel)) return;
+            // Call SetWidths initially (this also helps design time to work)
+            SetWidths(panel);
+
+            // Wait for panel to load
+            void OnLoaded(object s, RoutedEventArgs ee)
+            {
+                // Unhook
+                panel.Loaded -= OnLoaded;
+
+                // Set widths
+                SetWidths(panel);
+
+                // Loop each child
+                foreach (var child in panel.Children)
+                {
+                    // Set it&#39;s margin to the given value
+
+                    // Ignore any non-text entry controls
+                    if (!(child is TextEntryControl)) continue;
+
+                    // Get the label from the text entry or password entry
+                    var label = (child as TextEntryControl).Label;
+
+                    label.SizeChanged += (ss, eee) =&gt;
+                    {
+                        // Update widths
+                        SetWidths(panel);
+                    };
+                }
             }
-            _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri(&quot;/CN_WPF;component/forms/taskdetailformcontrol.xaml&quot;, System.UriKind.Relative);
-            
-            #line 1 &quot;..\..\..\Forms\TaskDetailFormControl.xaml&quot;
-            System.Windows.Application.LoadComponent(this, resourceLocater);
-            
-            #line default
-            #line hidden
+
+            // Hook into the Loaded event
+            panel.Loaded += OnLoaded;
         }
-        
-        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Performance&quot;, &quot;CA1811:AvoidUncalledPrivateCode&quot;)]
-        internal System.Delegate _CreateDelegate(System.Type delegateType, string handler) {
-            return System.Delegate.CreateDelegate(delegateType, this, handler);
-        }
-        
-        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Design&quot;, &quot;CA1033:InterfaceMethodsShouldBeCallableByChildTypes&quot;)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Maintainability&quot;, &quot;CA1502:AvoidExcessiveComplexity&quot;)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Performance&quot;, &quot;CA1800:DoNotCastUnnecessarily&quot;)]
-        void System.Windows.Markup.IComponentConnector.Connect(int connectionId, object target) {
-            this._contentLoaded = true;
+
+        /// &lt;summary&gt;
+        /// Update all child text entry controls so their widths match the largest width of the group
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;panel&quot;&gt;The panel containing the text entry controls&lt;/param&gt;
+        private void SetWidths(Panel panel)
+        {
+            // Keep track of the maximum width
+            var maxSize = 0d;
+
+            // For each child...
+            foreach (var child in panel.Children)
+            {
+                // Ignore any non-text entry controls
+                if (!(child is TextEntryControl))
+                    continue;
+
+                // Get the label from the text entry or password entry
+                var label = (child as TextEntryControl).Label;
+
+                // Find if this value is larger than the other controls
+                maxSize = Math.Max(maxSize, label.RenderSize.Width + label.Margin.Left + label.Margin.Right);
+            }
+
+            // Create a grid length converter
+            var gridLength = (GridLength)new GridLengthConverter().ConvertFromString(maxSize.ToString());
+
+            // For each child...
+            foreach (var child in panel.Children)
+            {
+                if (child is TextEntryControl text)
+                    // Set each controls LabelWidth value to the max size
+                    text.LabelWidth = gridLength;
+            }
+
         }
     }
 }
 
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[52,43,52,44,0],[53,13,53,32,0],[53,33,53,34,0],[54,17,54,24,0],[56,13,56,35,0],[57,13,57,136,0]]);
+      highlightRanges([[13,9,13,10,0],[15,13,15,42,0],[15,43,15,50,0],[17,13,17,30,0],[21,13,21,14,0],[23,17,23,42,0],[26,17,26,34,0],[29,17,29,24,0],[29,26,29,35,0],[29,36,29,38,0],[29,39,29,53,0],[30,17,30,18,0],[34,21,34,54,0],[34,55,34,64,0],[37,21,37,67,0],[39,21,43,23,0],[44,17,44,18,0],[45,13,45,14,0],[48,13,48,38,0],[49,9,49,10,0],[56,9,56,10,0],[58,13,58,30,0],[61,13,61,20,0],[61,22,61,31,0],[61,32,61,34,0],[61,35,61,49,0],[62,13,62,14,0],[64,17,64,50,0],[65,21,65,30,0],[68,17,68,63,0],[71,17,71,110,0],[72,13,72,14,0],[75,13,75,106,0],[78,13,78,20,0],[78,22,78,31,0],[78,32,78,34,0],[78,35,78,49,0],[79,13,79,14,0],[80,17,80,52,0],[82,21,82,50,0],[83,13,83,14,0],[85,9,85,10,0]]);
     </script>
   </body>
 </html>

@@ -2,89 +2,221 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\relationtest\tasktagrelationtest.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\taskdatastore.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
-using CN_Repository;
-using CoffeeNewspaper_UnitTest.DomainTest;
-using NUnit.Framework;
+using CN_Core.Interfaces.Repository;
+using CN_Core.Specification;
+using Microsoft.EntityFrameworkCore;
 
-namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
+namespace CN_Repository
 {
-
-    /// &lt;summary&gt;
-    ///     In-Memory integration data persistent test
-    /// &lt;/summary&gt;
-    [TestFixture]
-    public class TaskTagRelationTest : RepositarySetupAndTearDown
+    public class TaskDataStore : BaseDataStore, ITaskDataStore
     {
-        /// &lt;summary&gt;
-        /// Get a tag-already-bind task
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;bindTagCount&quot;&gt;how many tag is bind to this task&lt;/param&gt;
-        /// &lt;returns&gt;&lt;/returns&gt;
-        private CNTask GetTagBindTestTask(int bindTagCount)
+        public TaskDataStore(CNDbContext dbContext) : base(dbContext)
         {
-            var assesTask = DomainTestHelper.GetARandomTask();
-            Enumerable.Range(0, bindTagCount).ToList().ForEach(x =&gt;
-            {
-                var assesTag = DomainTestHelper.GetARandomTag();
-                assesTask.TaskTaggers.Add(new CNTaskTagger() { Tag = assesTag, Task = assesTask }); 
-            });
-            return assesTask;
         }
-        [Test]
-        public async Task DeleteATaskTagRelation_BothTaskAndTagStillExist()
+
+        #region Delete Methods
+
+        public void RemoveTask(CNTask targetTask)
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //initiate the datastore
-                var assesTask = GetTagBindTestTask(1);
-                var taskDataStore = new TaskDataStore(dbcontext);
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                assesTask.TaskTaggers.Remove(assesTask.TaskTaggers.First());
-                taskDataStore.UpdateTask(assesTask);
-
-                await unitOfWork.Commit();
-                Assert.AreEqual(1,dbcontext.Tags.Count());
-                Assert.AreEqual(1, dbcontext.Tasks.Count());
-                Assert.AreEqual(0,dbcontext.TaskTaggers.Count());
-            });
+            mDbContext.Tasks.Remove(targetTask);
         }
-        [Test]
-        public async Task AddDupplicateTaskTagRelation_ReturnFalse()
+
+        public void RemoveTaskConnector(CNTaskConnector connector)
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //initiate the datastore
-                var assesTask = GetTagBindTestTask(1);
-                var taskDataStore = new TaskDataStore(dbcontext);
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                assesTask.TaskTaggers.Add(new CNTaskTagger(){TagId = assesTask.TaskTaggers.First().TagId,TaskId = assesTask.TaskId});
-                 taskDataStore.UpdateTask(assesTask);
-
-                var result = await unitOfWork.Commit();
-                Assert.IsFalse(result);
-                Assert.AreEqual(1, dbcontext.Tags.Count());
-                Assert.AreEqual(1, dbcontext.Tasks.Count());
-                Assert.AreEqual(1, dbcontext.TaskTaggers.Count());
-            });
+            mDbContext.TaskConnectors.Remove(connector);
         }
+
+        #endregion
+
+        #region Add Methods
+
+        public CNTask AddTask(CNTask targetTask)
+        {
+            mDbContext.Tasks.Add(targetTask);
+            return targetTask;
+        }
+
+        #endregion
+
+        #region Update Methods
+
+        public void UpdateTask(CNTask targetTask)
+        {
+            var existingTask = mDbContext.Tasks
+                .Include(b =&gt; b.TaskTaggers)
+                .FirstOrDefault(b =&gt; b.TaskId == targetTask.TaskId);
+
+            if (existingTask == null)
+            {
+                IoC.Logger.Log($&quot;targetTask id {targetTask.TaskId} not exists&quot;);
+            }
+            else
+            {
+                mDbContext.Entry(existingTask).CurrentValues.SetValues(targetTask);
+                foreach (var taskTagger in targetTask.TaskTaggers)
+                {
+                    var existingTaskTagger = existingTask.TaskTaggers
+                        .FirstOrDefault(p =&gt; p.TaskTaggerId == taskTagger.TaskTaggerId);
+
+                    if (existingTaskTagger == null)
+                    {
+                        existingTask.TaskTaggers.Add(taskTagger);
+                    }
+                    else
+                    {
+                        mDbContext.Entry(existingTaskTagger).CurrentValues.SetValues(taskTagger);
+                    }
+                }
+
+                foreach (var taskTagger in existingTask.TaskTaggers)
+                {
+                    if (targetTask.TaskTaggers.All(p =&gt; p.TaskTaggerId != taskTagger.TaskTaggerId))
+                    {
+                        mDbContext.Remove(taskTagger);
+                    }
+                }
+            }
+        }
+
+        public void UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime)
+        {
+            if (originDataTask == null) return;
+            if (originDataTask.EndTime == null &amp;&amp; targetEndTime == null) return;
+            if (originDataTask.EndTime != null &amp;&amp; originDataTask.EndTime.Equals(targetEndTime)) return;
+            originDataTask.EndTime = targetEndTime;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        public void UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime)
+        {
+            if (originDataTask == null) return;
+            if (originDataTask.StartTime == null &amp;&amp; targetStartTime == null) return;
+            if (originDataTask.StartTime != null &amp;&amp; originDataTask.StartTime.Equals(targetStartTime)) return;
+            originDataTask.StartTime = targetStartTime;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        public void ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime)
+        {
+            //origintask null return
+            if (originDataTask == null) return;
+            //if this condition is fulfilled,than new time is smaller-or-equal compare to old ,do noting and return
+            if (originDataTask.StartTime != null &amp;&amp; originDataTask.EndTime != null &amp;&amp;
+                !(originDataTask.StartTime &gt; targetStartTime) &amp;&amp; !(originDataTask.EndTime &lt; targetEndTime) &amp;&amp;
+                targetEndTime != null) return;
+
+            //flag for update db
+            var needUpdate = false;
+            if (originDataTask.StartTime == null || originDataTask.StartTime &gt; targetStartTime)
+            {
+                originDataTask.StartTime = targetStartTime;
+                needUpdate = true;
+            }
+
+            if (originDataTask.EndTime == null &amp;&amp; targetEndTime != null || //Pause A Task
+                originDataTask.EndTime != null &amp;&amp; targetEndTime == null || //Start A Task
+                originDataTask.EndTime != null &amp;&amp; targetEndTime != null &amp;&amp;
+                originDataTask.EndTime &lt; targetEndTime
+            ) //Update A Task timeslice
+            {
+                originDataTask.EndTime = targetEndTime;
+                needUpdate = true;
+            }
+
+            if (!needUpdate) return;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        #endregion
+
+        #region Select Methods
+
+        public async Task&lt;CNTask&gt; GetTaskNoTracking(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await mDbContext.Tasks.Include(x=&gt;x.ParentTask).Include(x=&gt;x.TaskTaggers).ThenInclude(y=&gt;y.Tag).AsNoTracking()
+                        .FirstOrDefaultAsync(r =&gt; r.TaskId == taskid)
+            );
+        }
+
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetChildTasksNoTracking(int taskId)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await mDbContext.Tasks.Include(x =&gt; x.TaskTaggers).ThenInclude(y =&gt; y.Tag).AsNoTracking()
+                        .Where(r =&gt; r.ParentTaskID == taskId).ToListAsync()
+            );
+        }
+
+        public async Task&lt;int&gt; GetMaxSort(int? parentTaskId)
+        {
+            return await IoC.Task.Run(
+                async () =&gt; 
+                    await (from c in mDbContext.Tasks
+                        where c.ParentTaskID == parentTaskId
+                        select c.Sort).DefaultIfEmpty().MaxAsync()
+            );
+        }
+
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetAllTasksBySpecification(ISpecification&lt;CNTask&gt; spec)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    // fetch a Queryable that includes all expression-based includes
+                    var queryableResultWithIncludes = spec.Includes
+                        .Aggregate(mDbContext.Set&lt;CNTask&gt;().AsQueryable(),
+                            (current, include) =&gt; current.Include(include));
+
+                    // modify the IQueryable to include any string-based include statements
+                    var secondaryResult = spec.IncludeStrings
+                        .Aggregate(queryableResultWithIncludes,
+                            (current, include) =&gt; current.Include(include));
+
+                    // return the result of the query using the specification&#39;s criteria expression
+                    return await secondaryResult
+                        .Where(spec.Criteria).ToListAsync();
+                });
+        }
+
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetAllTask()
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await (from c in mDbContext.Tasks
+                        where !c.IsDeleted
+                        orderby c.Sort
+                        select c).ToListAsync()
+            );
+        }
+
+        public async Task&lt;CNTask&gt; GetTask(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await mDbContext.Tasks
+                        .FirstOrDefaultAsync(r =&gt; r.TaskId == taskid)
+            );
+        }
+
+        #endregion
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[23,9,23,10,1],[24,13,24,63,1],[25,13,26,13,1],[26,13,26,14,1],[26,14,27,17,1],[27,17,27,65,1],[27,65,28,17,1],[28,17,28,100,1],[28,100,29,13,1],[29,13,29,14,1],[29,14,29,16,1],[25,13,29,16,1],[30,13,30,30,1],[31,9,31,10,1],[34,9,34,10,1],[35,13,36,13,1],[36,13,36,14,1],[36,14,38,17,1],[38,17,38,55,1],[38,55,39,17,1],[39,17,39,66,1],[39,66,40,17,1],[40,17,40,50,1],[40,50,42,17,1],[42,17,42,43,1],[42,43,43,17,1],[43,17,43,77,1],[43,77,44,17,1],[44,17,44,53,1],[44,53,46,17,1],[46,17,46,43,1],[46,43,47,17,1],[47,17,47,59,1],[47,59,48,17,1],[48,17,48,61,1],[48,61,49,17,1],[49,17,49,66,1],[49,66,50,13,1],[50,13,50,14,1],[50,14,50,16,1],[35,13,50,16,1],[51,9,51,10,1],[54,9,54,10,1],[55,13,56,13,1],[56,13,56,14,1],[56,14,58,17,1],[58,17,58,55,1],[58,55,59,17,1],[59,17,59,66,1],[59,66,60,17,1],[60,17,60,50,1],[60,50,62,17,1],[62,17,62,43,1],[62,43,63,17,1],[63,17,63,134,1],[63,134,64,18,1],[64,18,64,54,1],[64,54,66,17,1],[66,17,66,56,1],[66,56,67,17,1],[67,17,67,40,1],[67,40,68,17,1],[68,17,68,60,1],[68,60,69,17,1],[69,17,69,61,1],[69,61,70,17,1],[70,17,70,67,1],[70,67,71,13,1],[71,13,71,14,1],[71,14,71,16,1],[55,13,71,16,1],[72,9,72,10,1]]);
+      highlightRanges([[14,55,14,70,1],[15,9,15,10,1],[16,9,16,10,1],[21,9,21,10,1],[22,13,22,49,1],[23,9,23,10,1],[26,9,26,10,1],[27,13,27,57,1],[28,9,28,10,1],[35,9,35,10,1],[36,13,36,46,1],[37,13,37,31,1],[38,9,38,10,1],[45,9,45,10,1],[46,13,48,69,1],[50,13,50,38,1],[51,13,51,14,1],[52,17,52,81,1],[53,13,53,14,1],[55,13,55,14,1],[56,17,56,84,1],[57,17,57,24,1],[57,26,57,40,1],[57,41,57,43,1],[57,44,57,66,1],[58,17,58,18,1],[59,21,60,46,1],[60,46,60,87,1],[60,87,60,89,1],[59,21,60,89,1],[62,21,62,52,1],[63,21,63,22,0],[64,25,64,66,0],[65,21,65,22,0],[67,21,67,22,1],[68,25,68,98,1],[69,21,69,22,1],[70,17,70,18,1],[72,17,72,24,1],[72,26,72,40,1],[72,41,72,43,1],[72,44,72,68,1],[73,17,73,18,1],[74,21,74,57,1],[74,57,74,98,1],[74,98,74,100,1],[74,21,74,100,1],[75,21,75,22,0],[76,25,76,55,0],[77,21,77,22,0],[78,17,78,18,1],[79,13,79,14,1],[80,9,80,10,1],[83,9,83,10,1],[84,13,84,40,1],[84,41,84,48,1],[85,13,85,73,1],[85,74,85,81,1],[86,13,86,96,1],[86,97,86,104,1],[87,13,87,52,1],[88,13,88,53,1],[89,9,89,10,1],[92,9,92,10,1],[93,13,93,40,1],[93,41,93,48,1],[94,13,94,77,1],[94,78,94,85,1],[95,13,95,102,1],[95,103,95,110,1],[96,13,96,56,1],[97,13,97,53,1],[98,9,98,10,1],[101,9,101,10,1],[103,13,103,40,1],[103,41,103,48,1],[105,13,107,39,1],[107,40,107,47,1],[110,13,110,36,1],[111,13,111,96,1],[112,13,112,14,1],[113,17,113,60,1],[114,17,114,35,1],[115,13,115,14,1],[117,13,121,14,1],[122,13,122,14,1],[123,17,123,56,1],[124,17,124,35,1],[125,13,125,14,1],[127,13,127,29,1],[127,30,127,37,1],[128,13,128,53,1],[129,9,129,10,1],[136,9,136,10,0],[137,13,139,21,0],[139,21,140,70,0],[140,70,141,15,0],[137,13,141,15,0],[142,9,142,10,0],[145,9,145,10,0],[146,13,148,21,0],[148,21,149,76,0],[149,76,150,15,0],[146,13,150,15,0],[151,9,151,10,0],[154,9,154,10,1],[155,13,157,21,1],[157,21,159,67,1],[159,67,160,15,1],[155,13,160,15,1],[161,9,161,10,1],[164,9,164,10,0],[165,13,167,17,0],[167,17,167,18,0],[167,18,169,21,0],[169,21,171,51,0],[171,51,171,75,0],[171,75,171,77,0],[169,21,171,77,0],[171,77,174,21,0],[174,21,176,51,0],[176,51,176,75,0],[176,75,176,77,0],[174,21,176,77,0],[176,77,179,21,0],[179,21,180,61,0],[180,61,181,17,0],[181,17,181,18,0],[181,18,181,20,0],[165,13,181,20,0],[182,9,182,10,0],[185,9,185,10,1],[186,13,188,21,1],[188,21,191,48,1],[191,48,192,15,1],[186,13,192,15,1],[193,9,193,10,1],[196,9,196,10,1],[197,13,199,21,1],[199,21,200,70,1],[200,70,201,15,1],[197,13,201,15,1],[202,9,202,10,1]]);
     </script>
   </body>
 </html>

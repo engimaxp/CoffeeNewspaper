@@ -2,31 +2,42 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\input\calendarselectcontrol.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\colortypetocolorconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Windows.Controls;
+
+using System;
+using System.Globalization;
+using System.Windows.Media;
+using CN_Presentation;
+using CN_Presentation.Utilities;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// CalendarSelectControl.xaml 的交互逻辑
+    /// A converter that takes in a &lt;see cref=&quot;UserColorType&quot;/&gt; and returns 
+    /// the color brush for that icon
     /// &lt;/summary&gt;
-    public partial class CalendarSelectControl : UserControl
+    public class ColorTypeToColorConverter : BaseValueConverter&lt;ColorTypeToColorConverter&gt;
     {
-        public CalendarSelectControl()
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            InitializeComponent();
+            return (SolidColorBrush)(new BrushConverter().ConvertFrom($&quot;#{((UserColorType)value).ToColorText()}&quot;));
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[10,9,10,39,0],[11,9,11,10,0],[12,13,12,35,0],[13,9,13,10,0]]);
+      highlightRanges([[17,9,17,10,0],[18,13,18,116,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,49,0]]);
     </script>
   </body>
 </html>

@@ -2,120 +2,122 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_service\serviceimplement\memoservice.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\relationtest\parenttaskchildtaskrelationtest.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
-using CN_Core.Interfaces;
-using CN_Core.Interfaces.Repository;
-using CN_Core.Interfaces.Service;
+using CN_Repository;
+using CoffeeNewspaper_UnitTest.DomainTest;
+using NUnit.Framework;
 
-namespace CN_Service
+namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
 {
-    public class MemoService : IMemoService
+
+    /// &lt;summary&gt;
+    ///     In-Memory integration data persistent test
+    /// &lt;/summary&gt;
+    [TestFixture]
+    public class ParentTaskChildTaskRelationTest : RepositarySetupAndTearDown
     {
-        private readonly IMemoDataStore memoDataStore;
-        private readonly ITaskDataStore taskDataStore;
-        private readonly IUnitOfWork unitOfWork;
-
-        public MemoService(IUnitOfWork UnitOfWork, IMemoDataStore MemoDataStore, ITaskDataStore TaskDataStore)
+        /// &lt;summary&gt;
+        /// Get a childtask-already-bind task
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;bindTaskCount&quot;&gt;how many childtask is bind to this task&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private CNTask GetChildTaskBindTestTask(int bindTaskCount)
         {
-            unitOfWork = UnitOfWork;
-            memoDataStore = MemoDataStore;
-            taskDataStore = TaskDataStore;
+            var assesTask = DomainTestHelper.GetARandomTask();
+            Enumerable.Range(0, bindTaskCount).ToList().ForEach(x =&gt;
+            {
+                var assesChildTask = DomainTestHelper.GetARandomTask();
+                assesTask.ChildTasks.Add(assesChildTask); 
+            });
+            return assesTask;
         }
-
-        public async Task&lt;string&gt; AddAMemoToTask(CNMemo memo, int taskid)
+        [Test]
+        public async Task DeleteAParentChildTaskRelation_BothTaskExist()
         {
-                if (memo == null) return string.Empty;
-                var task = await taskDataStore.GetTask(taskid);
-                if (task == null) return string.Empty;
-                //Add memo To Task
-                memo.TaskMemos.Add(new CNTaskMemo
-                {
-                    Task = task,
-                    Memo = memo
-                });
-                //if MemoId is Null add the Memo
-                if (string.IsNullOrEmpty(memo.MemoId))
-                {
-                    var memo1 = memo;
-                    task.TaskTaggers.Select(x =&gt; x.Tag)
-                        .ToList()
-                        .ForEach(y =&gt; memo1.MemoTaggers.Add(new CNMemoTagger {Memo = memo1, Tag = y}));
-                    memo = memoDataStore.AddMemo(memo);
-                }
-                //else Update it
-                else
-                {
-                    memoDataStore.UpdateMemo(memo);
-                }
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetChildTaskBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                 taskDataStore.AddTask(assesTask);
+                await unitOfWork.Commit();
+                assesTask.ChildTasks.Remove(assesTask.ChildTasks.First());
+                taskDataStore.UpdateTask(assesTask);
 
                 await unitOfWork.Commit();
-                return memo?.MemoId;
+                Assert.AreEqual(2,dbcontext.Tasks.Count());
+                Assert.AreEqual(0,dbcontext.Tasks.First().ChildTasks.Count());
+            });
         }
-
-        public async Task&lt;string&gt; AddAMemoToGlobal(CNMemo memo)
+        [Test]
+        public async Task AddDupplicateTaskTaskRelation_ReturnFalse()
         {
-                if (memo == null) return string.Empty;
-                memo = memoDataStore.AddMemo(memo);
-                return await unitOfWork.Commit() ? memo?.MemoId : null;
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetChildTaskBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                taskDataStore.AddTask(assesTask);
+
+                await unitOfWork.Commit();
+                assesTask.ChildTasks.Add(assesTask.ChildTasks.First());
+                taskDataStore.UpdateTask(assesTask);
+
+                var result = await unitOfWork.Commit();
+                Assert.IsFalse(result);
+
+
+                Assert.AreEqual(2, dbcontext.Tasks.Count());
+                Assert.AreEqual(1, assesTask.ChildTasks.Count());
+            });
         }
-
-        public async Task&lt;bool&gt; UpdateAMemo(CNMemo memo)
+        [Test]
+        public async Task DeleteParentTask_RelatedChildTaskExist_ParentChangeToNull()
         {
-                if (memo == null) return false;
-                memoDataStore.UpdateMemo(memo);
-                return await unitOfWork.Commit();
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetChildTaskBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                taskDataStore.AddTask(assesTask);
+                await unitOfWork.Commit();
+                taskDataStore.RemoveTask(assesTask);
+                var result = await unitOfWork.Commit();
+                Assert.IsTrue(result);
+                Assert.AreEqual(1, dbcontext.Tasks.Count());
+                Assert.IsNull(dbcontext.Tasks.First().ParentTask);
+            });
         }
-
-        public async Task&lt;bool&gt; DeleteAMemo(string memoId)
+        [Test]
+        public async Task DeleteChildTask_RelatedParentTaskExis()
         {
-                var memo = await memoDataStore.GetMemoById(memoId);
-                if (memo == null) return false;
-                memoDataStore.DeleteMemo(memo);
-                return await unitOfWork.Commit();
-        }
-
-        public async Task&lt;bool&gt; RemoveAMemoFromTask(string memoId, int taskId)
-        {
-                //Assert memo exist
-                var memo = await memoDataStore.GetMemoById(memoId);
-                if (memo == null) return false;
-                //Assert memo-task relation exist
-                var tobeRemovedRelations = memo.TaskMemos.Where(x =&gt; x.TaskId == taskId).ToList();
-                if (!tobeRemovedRelations.Any()) return false;
-                //remove and update
-                tobeRemovedRelations.ToList().ForEach(x =&gt; memo.TaskMemos.Remove(x));
-                memoDataStore.UpdateMemo(memo);
-                return await unitOfWork.Commit();
-        }
-
-        public async Task&lt;ICollection&lt;CNMemo&gt;&gt; GetAllGlobalMemos()
-        {
-                return await memoDataStore.GetAllGlobalMemos();
-        }
-
-        public async Task&lt;ICollection&lt;CNMemo&gt;&gt; GetAllTaskMemos(int taskid)
-        {
-                return await memoDataStore.GetAllTaskMemos(taskid);
-        }
-
-        public async Task&lt;CNMemo&gt; GetMemoById(string memoId)
-        {
-                return await memoDataStore.GetMemoById(memoId);
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetChildTaskBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                 taskDataStore.AddTask(assesTask);
+                await unitOfWork.Commit();
+                 taskDataStore.RemoveTask(assesTask.ChildTasks.First());
+                var result = await unitOfWork.Commit();
+                Assert.IsTrue(result);
+                var testresult = await taskDataStore.GetAllTask();
+                Assert.AreEqual(assesTask.TaskId, testresult.First().TaskId);
+            });
         }
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[17,9,17,111,1],[18,9,18,10,1],[19,13,19,37,1],[20,13,20,43,1],[21,13,21,43,1],[22,9,22,10,1],[25,9,25,10,1],[26,17,26,34,1],[26,35,26,55,1],[27,17,27,64,1],[28,17,28,34,1],[28,35,28,55,1],[30,17,34,20,1],[36,17,36,55,1],[37,17,37,18,1],[38,21,38,38,1],[39,21,39,50,1],[39,50,39,55,1],[39,55,41,39,1],[41,39,41,102,1],[41,102,41,104,1],[39,21,41,104,1],[42,21,42,56,1],[43,17,43,18,1],[46,17,46,18,1],[47,21,47,52,1],[48,17,48,18,1],[50,17,50,43,1],[51,17,51,37,1],[52,9,52,10,1],[55,9,55,10,1],[56,17,56,34,1],[56,35,56,55,1],[57,17,57,52,1],[58,17,58,72,1],[59,9,59,10,1],[62,9,62,10,1],[63,17,63,34,1],[63,35,63,48,1],[64,17,64,48,1],[65,17,65,50,1],[66,9,66,10,1],[69,9,69,10,1],[70,17,70,68,1],[71,17,71,34,1],[71,35,71,48,1],[72,17,72,48,1],[73,17,73,50,1],[74,9,74,10,1],[77,9,77,10,1],[79,17,79,68,1],[80,17,80,34,1],[80,35,80,48,1],[82,17,82,70,1],[82,70,82,88,1],[82,88,82,99,1],[82,17,82,99,1],[83,17,83,49,1],[83,50,83,63,1],[85,17,85,60,1],[85,60,85,84,1],[85,84,85,86,1],[85,17,85,86,1],[86,17,86,48,1],[87,17,87,50,1],[88,9,88,10,1],[91,9,91,10,1],[92,17,92,64,1],[93,9,93,10,1],[96,9,96,10,1],[97,17,97,68,1],[98,9,98,10,1],[101,9,101,10,1],[102,17,102,64,1],[103,9,103,10,1]]);
+      highlightRanges([[23,9,23,10,1],[24,13,24,63,1],[25,13,26,13,1],[26,13,26,14,1],[26,14,27,17,1],[27,17,27,72,1],[27,72,28,17,1],[28,17,28,58,1],[28,58,29,13,1],[29,13,29,14,1],[29,14,29,16,1],[25,13,29,16,1],[30,13,30,30,1],[31,9,31,10,1],[34,9,34,10,1],[35,13,36,13,1],[36,13,36,14,1],[36,14,38,17,1],[38,17,38,61,1],[38,61,39,17,1],[39,17,39,66,1],[39,66,40,18,1],[40,18,40,51,1],[40,51,41,17,1],[41,17,41,43,1],[41,43,42,17,1],[42,17,42,75,1],[42,75,43,17,1],[43,17,43,53,1],[43,53,45,17,1],[45,17,45,43,1],[45,43,46,17,1],[46,17,46,60,1],[46,60,47,17,1],[47,17,47,79,1],[47,79,48,13,1],[48,13,48,14,1],[48,14,48,16,1],[35,13,48,16,1],[49,9,49,10,1],[52,9,52,10,1],[53,13,54,13,1],[54,13,54,14,1],[54,14,56,17,1],[56,17,56,61,1],[56,61,57,17,1],[57,17,57,66,1],[57,66,58,17,1],[58,17,58,50,1],[58,50,60,17,1],[60,17,60,43,1],[60,43,61,17,1],[61,17,61,72,1],[61,72,62,17,1],[62,17,62,53,1],[62,53,64,17,1],[64,17,64,56,1],[64,56,65,17,1],[65,17,65,40,1],[65,40,68,17,1],[68,17,68,61,1],[68,61,69,17,1],[69,17,69,66,1],[69,66,70,13,1],[70,13,70,14,1],[70,14,70,16,1],[53,13,70,16,1],[71,9,71,10,1],[74,9,74,10,1],[75,13,76,13,1],[76,13,76,14,1],[76,14,78,17,1],[78,17,78,61,1],[78,61,79,17,1],[79,17,79,66,1],[79,66,80,17,1],[80,17,80,50,1],[80,50,81,17,1],[81,17,81,43,1],[81,43,82,17,1],[82,17,82,53,1],[82,53,83,17,1],[83,17,83,56,1],[83,56,84,17,1],[84,17,84,39,1],[84,39,85,17,1],[85,17,85,61,1],[85,61,86,17,1],[86,17,86,67,1],[86,67,87,13,1],[87,13,87,14,1],[87,14,87,16,1],[75,13,87,16,1],[88,9,88,10,1],[91,9,91,10,1],[92,13,93,13,1],[93,13,93,14,1],[93,14,95,17,1],[95,17,95,61,1],[95,61,96,17,1],[96,17,96,66,1],[96,66,97,18,1],[97,18,97,51,1],[97,51,98,17,1],[98,17,98,43,1],[98,43,99,18,1],[99,18,99,73,1],[99,73,100,17,1],[100,17,100,56,1],[100,56,101,17,1],[101,17,101,39,1],[101,39,102,17,1],[102,17,102,67,1],[102,67,103,17,1],[103,17,103,78,1],[103,78,104,13,1],[104,13,104,14,1],[104,14,104,16,1],[92,13,104,16,1],[105,9,105,10,1]]);
     </script>
   </body>
 </html>

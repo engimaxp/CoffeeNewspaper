@@ -2,131 +2,63 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\scrollviewexpander.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\taskurgencytobackgroundcolorconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using CN_Presentation.ViewModel.Base;
+
+using System;
+using System.Globalization;
+using System.Windows.Media;
+using CN_Presentation;
+using CN_Presentation.Utilities;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    ///     ScrollViewExpander.xaml 的交互逻辑
+    /// A converter that takes in a &lt;see cref=&quot;TaskUrgency&quot;/&gt; and returns 
+    /// the ColorBrush for that Indicator
     /// &lt;/summary&gt;
-    public partial class ScrollViewExpander : UserControl
+    public class TaskUrgencyToBackGroundColorConverter : BaseValueConverter&lt;TaskUrgencyToBackGroundColorConverter&gt;
     {
-        #region Constructor
-
-        public ScrollViewExpander()
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            InitializeComponent();
-        }
-
-        #endregion
-
-        #region Property Changed Method
-
-        private static object ViewModelPropertyChanged(DependencyObject d, object basevalue)
-        {
-            if (!(d is ScrollViewExpander expander)) return basevalue;
-            Task.Run(async () =&gt;
-            {
-                await Application.Current.Dispatcher.InvokeAsync(async () =&gt;
+            UserColorType userColor = UserColorType.WordLightBlue;
+            if (value != null)
+                switch ((TaskUrgency) value)
                 {
-                    if (expander.ToggleExpand &amp;&amp; basevalue is BaseViewModel viewModel)
+                    case TaskUrgency.NotUrgent:
                     {
-                        var control= viewModel.ViewModelToControl();
-                        expander.ExpanderContent.Content = control;
-                        control.Loaded += (sou, ee) =&gt;
-                        {
-                            if (sou is FrameworkElement a)
-                            {
-                                expander.ExpanderContent.Height += 100;
-                                expander.ExpanderContent.Height = a.DesiredSize.Height;
-                            }
-                        };
-                        await expander.ExpandScrollView.ScrollViewExpand(false, 0);
+                        userColor = UserColorType.WordGreen;
+                        break;
                     }
-                });
-            });
-            return basevalue;
-        }
-
-
-        private static object ToggleExpandPropertyChanged(DependencyObject d, object basevalue)
-        {
-            var expander = d as ScrollViewExpander;
-            if (expander?.ContentViewModel == null) return basevalue;
-
-
-            Task.Run(async () =&gt;
-            {
-                await Application.Current.Dispatcher.InvokeAsync(async () =&gt;
-                {
-                    if ((bool) basevalue)
+                    case TaskUrgency.Urgent:
                     {
-                        var control = expander.ContentViewModel.ViewModelToControl();
-                        expander.ExpanderContent.Content = control;
-                        await expander.ExpandScrollView.ScrollViewExpand(false, 0);
+                        userColor = UserColorType.WordOrange;
+                        break;
                     }
-
-                    else
+                    case TaskUrgency.VeryUrgent:
                     {
-                        await expander.ExpandScrollView.ScrollViewShrink(0);
-                        expander.ExpanderContent.Content = null;
+                        userColor = UserColorType.WordRed;
+                        break;
                     }
-                });
-            });
-            return basevalue;
+                }
+
+            return (SolidColorBrush)(new BrushConverter().ConvertFrom($&quot;#{userColor.ToColorText()}&quot;));
         }
 
-        #endregion
-
-        #region Denpendency Property
-
-        /// &lt;summary&gt;
-        ///     The current expander&#39;s ViewModel to show
-        /// &lt;/summary&gt;
-        public BaseViewModel ContentViewModel
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            get =&gt; (BaseViewModel) GetValue(ContentViewModelProperty);
-            set =&gt; SetValue(ContentViewModelProperty, value);
+            throw new NotImplementedException();
         }
-
-        /// &lt;summary&gt;
-        ///     Registers &lt;see cref=&quot;ContentViewModel&quot; /&gt; as a dependency property
-        /// &lt;/summary&gt;
-        public static readonly DependencyProperty ContentViewModelProperty =
-            DependencyProperty.Register(nameof(ContentViewModel), typeof(BaseViewModel), typeof(ScrollViewExpander),
-                new UIPropertyMetadata(default(BaseViewModel),null,ViewModelPropertyChanged));
-
-        /// &lt;summary&gt;
-        ///     The current expander&#39;s showing/hiding the content
-        /// &lt;/summary&gt;
-        public bool ToggleExpand
-        {
-            get =&gt; (bool) GetValue(ToggleExpandProperty);
-            set =&gt; SetValue(ToggleExpandProperty, value);
-        }
-
-        /// &lt;summary&gt;
-        ///     Registers &lt;see cref=&quot;ToggleExpand&quot; /&gt; as a dependency property
-        /// &lt;/summary&gt;
-        public static readonly DependencyProperty ToggleExpandProperty =
-            DependencyProperty.Register(nameof(ToggleExpand), typeof(bool), typeof(ScrollViewExpander),
-                new UIPropertyMetadata(false, null, ToggleExpandPropertyChanged));
-
-        #endregion
     }
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[15,9,15,36,0],[16,9,16,10,0],[17,13,17,35,0],[18,9,18,10,0],[25,9,25,10,0],[26,13,26,53,0],[26,54,26,71,0],[27,13,28,13,0],[28,13,28,14,0],[28,14,29,17,0],[29,17,30,17,0],[30,17,30,18,0],[30,18,31,21,0],[31,21,31,87,0],[31,87,32,21,0],[32,21,32,22,0],[32,22,33,25,0],[33,25,33,69,0],[33,69,34,25,0],[34,25,34,68,0],[34,68,35,25,0],[35,25,36,25,0],[36,25,36,26,0],[36,26,37,29,0],[37,29,37,59,0],[37,59,38,29,0],[38,29,38,30,0],[38,30,39,33,0],[39,33,39,72,0],[39,72,40,33,0],[40,33,40,88,0],[40,88,41,29,0],[41,29,41,30,0],[41,30,42,25,0],[42,25,42,26,0],[42,26,42,27,0],[35,25,42,27,0],[42,27,43,25,0],[43,25,43,84,0],[43,84,44,21,0],[44,21,44,22,0],[44,22,45,17,0],[45,17,45,18,0],[45,18,45,20,0],[29,17,45,20,0],[45,20,46,13,0],[46,13,46,14,0],[46,14,46,16,0],[27,13,46,16,0],[47,13,47,30,0],[48,9,48,10,0],[52,9,52,10,0],[53,13,53,52,0],[54,13,54,52,0],[54,53,54,70,0],[57,13,58,13,0],[58,13,58,14,0],[58,14,59,17,0],[59,17,60,17,0],[60,17,60,18,0],[60,18,61,21,0],[61,21,61,42,0],[61,42,62,21,0],[62,21,62,22,0],[62,22,63,25,0],[63,25,63,86,0],[63,86,64,25,0],[64,25,64,68,0],[64,68,65,25,0],[65,25,65,84,0],[65,84,66,21,0],[66,21,66,22,0],[66,22,69,21,0],[69,21,69,22,0],[69,22,70,25,0],[70,25,70,77,0],[70,77,71,25,0],[71,25,71,65,0],[71,65,72,21,0],[72,21,72,22,0],[72,22,73,17,0],[73,17,73,18,0],[73,18,73,20,0],[59,17,73,20,0],[73,20,74,13,0],[74,13,74,14,0],[74,14,74,16,0],[57,13,74,16,0],[75,13,75,30,0],[76,9,76,10,0],[87,20,87,70,0],[88,20,88,61,0],[94,9,96,95,0],[103,20,103,57,0],[104,20,104,57,0],[110,9,112,83,0]]);
+      highlightRanges([[17,9,17,10,0],[18,13,18,67,0],[19,13,19,31,0],[20,17,20,45,0],[23,21,23,22,0],[24,25,24,61,0],[25,25,25,31,0],[28,21,28,22,0],[29,25,29,62,0],[30,25,30,31,0],[33,21,33,22,0],[34,25,34,59,0],[35,25,35,31,0],[39,13,39,103,0],[40,9,40,10,0],[43,9,43,10,0],[44,13,44,49,0]]);
     </script>
   </body>
 </html>

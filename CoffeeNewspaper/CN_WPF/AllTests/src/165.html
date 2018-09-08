@@ -2,90 +2,44 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\relationtest\taskconnectorrelationtest.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\base\basedatastore.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Linq;
-using System.Threading.Tasks;
-using CN_Core;
-using CN_Repository;
-using CoffeeNewspaper_UnitTest.DomainTest;
-using NUnit.Framework;
-
-namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
+namespace CN_Repository
 {
-
-    /// &lt;summary&gt;
-    ///     In-Memory integration data persistent test
-    /// &lt;/summary&gt;
-    [TestFixture]
-    public class TaskConnectorRelationTest : RepositarySetupAndTearDown
+    public class BaseDataStore
     {
+        #region Protected Members
+
         /// &lt;summary&gt;
-        /// Get a suftask-already-bind task
+        ///     The database context for the client data store
         /// &lt;/summary&gt;
-        /// &lt;param name=&quot;bindTaskCount&quot;&gt;how many suftasks is bind to this task&lt;/param&gt;
-        /// &lt;returns&gt;&lt;/returns&gt;
-        private CNTask GetSufTaskBindTestTask(int bindTaskCount)
-        {
-            var assesTask = DomainTestHelper.GetARandomTask();
-            Enumerable.Range(0, bindTaskCount).ToList().ForEach(x =&gt;
-            {
-                var assesSufTask = DomainTestHelper.GetARandomTask();
-                assesTask.SufTaskConnectors.Add(new CNTaskConnector(){PreTask = assesTask,SufTask = assesSufTask });
-            });
-            return assesTask;
-        }
-        [Test]
-        public async Task DeleteASufTaskPreTaskRelation_BothTasksStillExist()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //initiate the datastore
-                var assesTask = GetSufTaskBindTestTask(1);
-                var taskDataStore = new TaskDataStore(dbcontext);
-                taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                assesTask.SufTaskConnectors.Remove(assesTask.SufTaskConnectors.First());
-                taskDataStore.UpdateTask(assesTask);
+        protected CNDbContext mDbContext;
 
-                await unitOfWork.Commit();
-                Assert.AreEqual(2, dbcontext.Tasks.Count());
-                Assert.AreEqual(0, dbcontext.TaskConnectors.Count());
-            });
-        }
-        [Test]
-        public async Task AddDupplicateSufTaskPreTaskRelationRelation_ReturnFalse()
+        #endregion
+
+        #region Constructor
+
+        /// &lt;summary&gt;
+        ///     Default constructor
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;dbContext&quot;&gt;The database to use&lt;/param&gt;
+        public BaseDataStore(CNDbContext dbContext)
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //initiate the datastore
-                var assesTask = GetSufTaskBindTestTask(1);
-                var taskDataStore = new TaskDataStore(dbcontext);
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                assesTask.SufTaskConnectors.Add(new CNTaskConnector() { PreTaskId = assesTask.TaskId, SufTaskId = assesTask.SufTaskConnectors.First().SufTaskId });
-                taskDataStore.UpdateTask(assesTask);
-
-                var result = await unitOfWork.Commit();
-                Assert.IsFalse(result);
-                Assert.AreEqual(2, dbcontext.Tasks.Count());
-                Assert.AreEqual(1, dbcontext.TaskConnectors.Distinct().Count());
-                Assert.AreEqual(0, dbcontext.Tasks.First().PreTaskConnectors.Distinct(CNTaskConnector.PreTaskIdSufTaskIdComparer).Count());
-                Assert.AreEqual(1, dbcontext.Tasks.Last().PreTaskConnectors.Distinct(CNTaskConnector.PreTaskIdSufTaskIdComparer).Count());
-                Assert.AreEqual(1, dbcontext.Tasks.First().SufTaskConnectors.Distinct(CNTaskConnector.PreTaskIdSufTaskIdComparer).Count());
-                Assert.AreEqual(0, dbcontext.Tasks.Last().SufTaskConnectors.Distinct(CNTaskConnector.PreTaskIdSufTaskIdComparer).Count());
-            });
+            // Set local member
+            mDbContext = dbContext;
         }
+
+        #endregion
     }
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[23,9,23,10,1],[24,13,24,63,1],[25,13,26,13,1],[26,13,26,14,1],[26,14,27,17,1],[27,17,27,70,1],[27,70,28,17,1],[28,17,28,117,1],[28,117,29,13,1],[29,13,29,14,1],[29,14,29,16,1],[25,13,29,16,1],[30,13,30,30,1],[31,9,31,10,1],[34,9,34,10,1],[35,13,36,13,1],[36,13,36,14,1],[36,14,38,17,1],[38,17,38,59,1],[38,59,39,17,1],[39,17,39,66,1],[39,66,40,17,1],[40,17,40,50,1],[40,50,41,17,1],[41,17,41,43,1],[41,43,42,17,1],[42,17,42,89,1],[42,89,43,17,1],[43,17,43,53,1],[43,53,45,17,1],[45,17,45,43,1],[45,43,46,17,1],[46,17,46,61,1],[46,61,47,17,1],[47,17,47,70,1],[47,70,48,13,1],[48,13,48,14,1],[48,14,48,16,1],[35,13,48,16,1],[49,9,49,10,1],[52,9,52,10,1],[53,13,54,13,1],[54,13,54,14,1],[54,14,56,17,1],[56,17,56,59,1],[56,59,57,17,1],[57,17,57,66,1],[57,66,58,17,1],[58,17,58,50,1],[58,50,60,17,1],[60,17,60,43,1],[60,43,61,17,1],[61,17,61,164,1],[61,164,62,17,1],[62,17,62,53,1],[62,53,64,17,1],[64,17,64,56,1],[64,56,65,17,1],[65,17,65,40,1],[65,40,66,17,1],[66,17,66,61,1],[66,61,67,17,1],[67,17,67,81,1],[67,81,68,17,1],[68,17,68,140,1],[68,140,69,17,1],[69,17,69,139,1],[69,139,70,17,1],[70,17,70,140,1],[70,140,71,17,1],[71,17,71,139,1],[71,139,72,13,1],[72,13,72,14,1],[72,14,72,16,1],[53,13,72,16,1],[73,9,73,10,1]]);
+      highlightRanges([[20,9,20,52,1],[21,9,21,10,1],[23,13,23,36,1],[24,9,24,10,1]]);
     </script>
   </body>
 </html>

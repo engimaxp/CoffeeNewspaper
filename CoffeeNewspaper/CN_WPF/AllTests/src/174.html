@@ -2,227 +2,89 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\timeslicedatastoretest.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\relationtest\tasktagrelationtest.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CN_Core;
 using CN_Repository;
 using CoffeeNewspaper_UnitTest.DomainTest;
 using NUnit.Framework;
 
-namespace CoffeeNewspaper_UnitTest.RepositoryTest
+namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
 {
+
     /// &lt;summary&gt;
-    ///     In-TimeSlicery integration data persistent test
+    ///     In-Memory integration data persistent test
     /// &lt;/summary&gt;
     [TestFixture]
-    public class TimeSliceDataStoreTest : RepositarySetupAndTearDown
+    public class TaskTagRelationTest : RepositarySetupAndTearDown
     {
+        /// &lt;summary&gt;
+        /// Get a tag-already-bind task
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;bindTagCount&quot;&gt;how many tag is bind to this task&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private CNTask GetTagBindTestTask(int bindTagCount)
+        {
+            var assesTask = DomainTestHelper.GetARandomTask();
+            Enumerable.Range(0, bindTagCount).ToList().ForEach(x =&gt;
+            {
+                var assesTag = DomainTestHelper.GetARandomTag();
+                assesTask.TaskTaggers.Add(new CNTaskTagger() { Tag = assesTag, Task = assesTask }); 
+            });
+            return assesTask;
+        }
         [Test]
-        public async Task AddTimeSlice_QueryAllTimeSlice_QuerySpecifiedTimeSlice_AllPass()
+        public async Task DeleteATaskTagRelation_BothTaskAndTagStillExist()
         {
             await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
             {
-                //Arrange argument to be tested
-                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
-                var task = DomainTestHelper.GetARandomTask();
-
-                //add this timeslice to task
-                assesTimeSlice.Task = task;
-
                 //initiate the datastore
-                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
-
-                //do testing action
-                var addedTimeSlice = TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
+                var assesTask = GetTagBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                taskDataStore.AddTask(assesTask);
 
                 await unitOfWork.Commit();
-                //query the result from db for assert
-                var TimeSlices = await TimeSliceDataStore.GetTimeSliceByTaskID(addedTimeSlice.TaskId);
+                assesTask.TaskTaggers.Remove(assesTask.TaskTaggers.First());
+                taskDataStore.UpdateTask(assesTask);
 
-                var firstTimeSlice = await TimeSliceDataStore.GetTimeSliceById(TimeSlices.First().TimeSliceId);
-
-                Assert.AreEqual(TimeSlices.First(), firstTimeSlice);
-                Assert.AreEqual(TimeSlices.FirstOrDefault(), assesTimeSlice);
+                await unitOfWork.Commit();
+                Assert.AreEqual(1,dbcontext.Tags.Count());
+                Assert.AreEqual(1, dbcontext.Tasks.Count());
+                Assert.AreEqual(0,dbcontext.TaskTaggers.Count());
             });
         }
-
         [Test]
-        public async Task AddTimeSlice_WithoutTask_Fail()
+        public async Task AddDupplicateTaskTagRelation_ReturnFalse()
         {
             await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
             {
-                //Arrange argument to be tested
-                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
-
                 //initiate the datastore
-                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
+                var assesTask = GetTagBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                taskDataStore.AddTask(assesTask);
 
-                //do testing action
-                 TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
+                await unitOfWork.Commit();
+                assesTask.TaskTaggers.Add(new CNTaskTagger(){TagId = assesTask.TaskTaggers.First().TagId,TaskId = assesTask.TaskId});
+                 taskDataStore.UpdateTask(assesTask);
 
                 var result = await unitOfWork.Commit();
                 Assert.IsFalse(result);
-            });
-        }
-
-        [Test]
-        public async Task DeleteATimeSlice_Success()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
-                //Arrange argument to be tested
-                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
-                var task = DomainTestHelper.GetARandomTask();
-
-                //add this timeslice to task
-                assesTimeSlice.Task = task;
-
-                var addedTimeSlice = TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
-
-                await unitOfWork.Commit();
-
-                 TimeSliceDataStore.DeleteTimeSlice(addedTimeSlice);
-
-                var beforeDeleteResult = await unitOfWork.Commit();
-                Assert.IsTrue(beforeDeleteResult);
-
-                var afterDeleteResult = await TimeSliceDataStore.GetTimeSliceById(addedTimeSlice.TimeSliceId);
-                Assert.IsNull(afterDeleteResult);
-            });
-        }
-
-        [Test]
-        public async Task DeleteATimeSlice_TimeSliceIdNotExist_Fail()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
-                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
-                assesTimeSlice.TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;);
-                TimeSliceDataStore.DeleteTimeSlice(assesTimeSlice);
-                var beforeDeleteResult = await unitOfWork.Commit();
-                Assert.IsFalse(beforeDeleteResult);
-            });
-        }
-
-        [Test]
-        public async Task QuerySpecifiedTimeSliceDoesntExist_ReturnNull()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
-                var firstTimeSlice = await TimeSliceDataStore.GetTimeSliceById(Guid.NewGuid().ToString(&quot;D&quot;));
-
-                Assert.IsNull(firstTimeSlice);
-            });
-        }
-
-        [Test]
-        public async Task UpdateTimeSlice()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
-                //Arrange argument to be tested
-                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
-                var task = DomainTestHelper.GetARandomTask();
-
-                //add this timeslice to task
-                assesTimeSlice.Task = task;
-                var addedTimeSlice = TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
-                await unitOfWork.Commit();
-                //update the added TimeSlice content,make sure its not equal to original TimeSlice
-                addedTimeSlice.EndDateTime = DateTime.Now.AddDays(1);
-
-                //update to database ,make sure what ef return is equal to modified TimeSlice
-                TimeSliceDataStore.UpdateTimeSlice(addedTimeSlice);
-                var updatedResult = await unitOfWork.Commit();
-                Assert.IsTrue(updatedResult);
-                //select from db again ,make sure the TimeSlice is updated
-                var selectedTimeSlice = await TimeSliceDataStore.GetTimeSliceById(addedTimeSlice.TimeSliceId);
-                Assert.AreEqual(selectedTimeSlice, addedTimeSlice);
-            });
-        }
-
-        [Test]
-        public async Task UpdateTimeSlice_TimeSliceIdNotExist_Fail()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
-                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
-                assesTimeSlice.TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;);
-
-                //update the added TimeSlice content,make sure its not equal to original TimeSlice
-                assesTimeSlice.EndDateTime = DateTime.Now.AddDays(1);
-
-                //update to database ,make sure what ef return is equal to modified TimeSlice
-                 TimeSliceDataStore.UpdateTimeSlice(assesTimeSlice);
-                var updatedResult = await unitOfWork.Commit();
-                Assert.False(updatedResult);
-            });
-        }
-
-        [Test]
-        public async Task UpdateTimeSlice_TryDeleteTheTaskId_Fail()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
-                //Arrange argument to be tested
-                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
-                var task = DomainTestHelper.GetARandomTask();
-
-                //add this timeslice to task
-                assesTimeSlice.Task = task;
-                var addedTimeSlice = TimeSliceDataStore.AddTimeSlice(assesTimeSlice);
-                await unitOfWork.Commit();
-                //try delete the task relation
-                addedTimeSlice.Task = null;
-                addedTimeSlice.TaskId = 0;
-
-                //update to database ,make sure what ef return is equal to modified TimeSlice
-                TimeSliceDataStore.UpdateTimeSlice(addedTimeSlice);
-                var updatedResult = await unitOfWork.Commit();
-                Assert.IsFalse(updatedResult);
-            });
-        }
-
-        [Test] 
-        public async Task DeleteTimeSliceByTask_Success()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var TimeSliceDataStore = new TimeSliceDataStore(dbcontext);
-                //Arrange argument to be tested
-                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
-                var task = DomainTestHelper.GetARandomTask();
-                //add this timeslice to task
-                task.UsedTimeSlices.Add(assesTimeSlice);
-                var TaskDataStore = new TaskDataStore(dbcontext);
-                TaskDataStore.AddTask(task);
-                await unitOfWork.Commit();
-                //action
-                TimeSliceDataStore.DeleteTimeSliceByTask(task.TaskId);
-                var result = await unitOfWork.Commit();
-                Assert.IsTrue(result);
-
-                var finalTask = await TaskDataStore.GetTask(task.TaskId);
-                Assert.IsTrue(finalTask.UsedTimeSlices== null|| finalTask.UsedTimeSlices.Count == 0);
+                Assert.AreEqual(1, dbcontext.Tags.Count());
+                Assert.AreEqual(1, dbcontext.Tasks.Count());
+                Assert.AreEqual(1, dbcontext.TaskTaggers.Count());
             });
         }
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[18,9,18,10,1],[19,13,20,13,1],[20,13,20,14,1],[20,14,22,17,1],[22,17,22,77,1],[22,77,23,17,1],[23,17,23,62,1],[23,62,26,17,1],[26,17,26,44,1],[26,44,29,17,1],[29,17,29,76,1],[29,76,32,17,1],[32,17,32,86,1],[32,86,34,17,1],[34,17,34,43,1],[34,43,36,17,1],[36,17,36,103,1],[36,103,38,17,1],[38,17,38,112,1],[38,112,40,17,1],[40,17,40,69,1],[40,69,41,17,1],[41,17,41,78,1],[41,78,42,13,1],[42,13,42,14,1],[42,14,42,16,1],[19,13,42,16,1],[43,9,43,10,1],[47,9,47,10,1],[48,13,49,13,1],[49,13,49,14,1],[49,14,51,17,1],[51,17,51,77,1],[51,77,54,17,1],[54,17,54,76,1],[54,76,57,18,1],[57,18,57,66,1],[57,66,59,17,1],[59,17,59,56,1],[59,56,60,17,1],[60,17,60,40,1],[60,40,61,13,1],[61,13,61,14,1],[61,14,61,16,1],[48,13,61,16,1],[62,9,62,10,1],[66,9,66,10,1],[67,13,68,13,1],[68,13,68,14,1],[68,14,69,17,1],[69,17,69,76,1],[69,76,71,17,1],[71,17,71,77,1],[71,77,72,17,1],[72,17,72,62,1],[72,62,75,17,1],[75,17,75,44,1],[75,44,77,17,1],[77,17,77,86,1],[77,86,79,17,1],[79,17,79,43,1],[79,43,81,18,1],[81,18,81,69,1],[81,69,83,17,1],[83,17,83,68,1],[83,68,84,17,1],[84,17,84,51,1],[84,51,86,17,1],[86,17,86,111,1],[86,111,87,17,1],[87,17,87,50,1],[87,50,88,13,1],[88,13,88,14,1],[88,14,88,16,1],[67,13,88,16,1],[89,9,89,10,1],[93,9,93,10,1],[94,13,95,13,1],[95,13,95,14,1],[95,14,96,17,1],[96,17,96,76,1],[96,76,97,17,1],[97,17,97,77,1],[97,77,98,17,1],[98,17,98,75,1],[98,75,99,17,1],[99,17,99,68,1],[99,68,100,17,1],[100,17,100,68,1],[100,68,101,17,1],[101,17,101,52,1],[101,52,102,13,1],[102,13,102,14,1],[102,14,102,16,1],[94,13,102,16,1],[103,9,103,10,1],[107,9,107,10,1],[108,13,109,13,1],[109,13,109,14,1],[109,14,110,17,1],[110,17,110,76,1],[110,76,111,17,1],[111,17,111,110,1],[111,110,113,17,1],[113,17,113,47,1],[113,47,114,13,1],[114,13,114,14,1],[114,14,114,16,1],[108,13,114,16,1],[115,9,115,10,1],[119,9,119,10,1],[120,13,121,13,1],[121,13,121,14,1],[121,14,122,17,1],[122,17,122,76,1],[122,76,124,17,1],[124,17,124,77,1],[124,77,125,17,1],[125,17,125,62,1],[125,62,128,17,1],[128,17,128,44,1],[128,44,129,17,1],[129,17,129,86,1],[129,86,130,17,1],[130,17,130,43,1],[130,43,132,17,1],[132,17,132,70,1],[132,70,135,17,1],[135,17,135,68,1],[135,68,136,17,1],[136,17,136,63,1],[136,63,137,17,1],[137,17,137,46,1],[137,46,139,17,1],[139,17,139,111,1],[139,111,140,17,1],[140,17,140,68,1],[140,68,141,13,1],[141,13,141,14,1],[141,14,141,16,1],[120,13,141,16,1],[142,9,142,10,1],[146,9,146,10,1],[147,13,148,13,1],[148,13,148,14,1],[148,14,149,17,1],[149,17,149,76,1],[149,76,150,17,1],[150,17,150,77,1],[150,77,151,17,1],[151,17,151,75,1],[151,75,154,17,1],[154,17,154,70,1],[154,70,157,18,1],[157,18,157,69,1],[157,69,158,17,1],[158,17,158,63,1],[158,63,159,17,1],[159,17,159,45,1],[159,45,160,13,1],[160,13,160,14,1],[160,14,160,16,1],[147,13,160,16,1],[161,9,161,10,1],[165,9,165,10,1],[166,13,167,13,1],[167,13,167,14,1],[167,14,168,17,1],[168,17,168,76,1],[168,76,170,17,1],[170,17,170,77,1],[170,77,171,17,1],[171,17,171,62,1],[171,62,174,17,1],[174,17,174,44,1],[174,44,175,17,1],[175,17,175,86,1],[175,86,176,17,1],[176,17,176,43,1],[176,43,178,17,1],[178,17,178,44,1],[178,44,179,17,1],[179,17,179,43,1],[179,43,182,17,1],[182,17,182,68,1],[182,68,183,17,1],[183,17,183,63,1],[183,63,184,17,1],[184,17,184,47,1],[184,47,185,13,1],[185,13,185,14,1],[185,14,185,16,1],[166,13,185,16,1],[186,9,186,10,1],[190,9,190,10,1],[191,13,192,13,1],[192,13,192,14,1],[192,14,193,17,1],[193,17,193,76,1],[193,76,195,17,1],[195,17,195,77,1],[195,77,196,17,1],[196,17,196,62,1],[196,62,198,17,1],[198,17,198,57,1],[198,57,199,17,1],[199,17,199,66,1],[199,66,200,17,1],[200,17,200,45,1],[200,45,201,17,1],[201,17,201,43,1],[201,43,203,17,1],[203,17,203,71,1],[203,71,204,17,1],[204,17,204,56,1],[204,56,205,17,1],[205,17,205,39,1],[205,39,207,17,1],[207,17,207,74,1],[207,74,208,17,1],[208,17,208,102,1],[208,102,209,13,1],[209,13,209,14,1],[209,14,209,16,1],[191,13,209,16,1],[210,9,210,10,1]]);
+      highlightRanges([[23,9,23,10,1],[24,13,24,63,1],[25,13,26,13,1],[26,13,26,14,1],[26,14,27,17,1],[27,17,27,65,1],[27,65,28,17,1],[28,17,28,100,1],[28,100,29,13,1],[29,13,29,14,1],[29,14,29,16,1],[25,13,29,16,1],[30,13,30,30,1],[31,9,31,10,1],[34,9,34,10,1],[35,13,36,13,1],[36,13,36,14,1],[36,14,38,17,1],[38,17,38,55,1],[38,55,39,17,1],[39,17,39,66,1],[39,66,40,17,1],[40,17,40,50,1],[40,50,42,17,1],[42,17,42,43,1],[42,43,43,17,1],[43,17,43,77,1],[43,77,44,17,1],[44,17,44,53,1],[44,53,46,17,1],[46,17,46,43,1],[46,43,47,17,1],[47,17,47,59,1],[47,59,48,17,1],[48,17,48,61,1],[48,61,49,17,1],[49,17,49,66,1],[49,66,50,13,1],[50,13,50,14,1],[50,14,50,16,1],[35,13,50,16,1],[51,9,51,10,1],[54,9,54,10,1],[55,13,56,13,1],[56,13,56,14,1],[56,14,58,17,1],[58,17,58,55,1],[58,55,59,17,1],[59,17,59,66,1],[59,66,60,17,1],[60,17,60,50,1],[60,50,62,17,1],[62,17,62,43,1],[62,43,63,17,1],[63,17,63,134,1],[63,134,64,18,1],[64,18,64,54,1],[64,54,66,17,1],[66,17,66,56,1],[66,56,67,17,1],[67,17,67,40,1],[67,40,68,17,1],[68,17,68,60,1],[68,60,69,17,1],[69,17,69,61,1],[69,61,70,17,1],[70,17,70,67,1],[70,67,71,13,1],[71,13,71,14,1],[71,14,71,16,1],[55,13,71,16,1],[72,9,72,10,1]]);
     </script>
   </body>
 </html>

@@ -2,39 +2,43 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\mutivalueconverter\basemutivalueconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\formcontrolvalueconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
 using System;
+using System.Diagnostics;
 using System.Globalization;
-using System.Windows.Data;
-using System.Windows.Markup;
+using CN_Presentation.ViewModel.Form;
 
 namespace CN_WPF
 {
-    public abstract class BaseMutiValueConverter&lt;T&gt; : MarkupExtension, IMultiValueConverter where T:class,new()
+    public class FormControlValueConverter : BaseValueConverter&lt;FormControlValueConverter&gt;
     {
-        /// &lt;summary&gt;
-        /// A single static instance of this value converter
-        /// &lt;/summary&gt;
-        private static readonly T Converter = new T();
-
-        public override object ProvideValue(IServiceProvider serviceProvider)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Converter ;
+            if (value is TaskDetailFormViewModel formViewModel)
+            {
+                return new TaskDetailFormControl(formViewModel);
+            }
+            else
+            {
+                Debugger.Break();
+                return null;
+            }
         }
 
-        public abstract object Convert(object[] values, Type targetType, object parameter, CultureInfo culture);
-
-        public abstract object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture);
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[13,9,13,55,0],[16,9,16,10,0],[17,13,17,31,0],[18,9,18,10,0]]);
+      highlightRanges([[11,9,11,10,0],[12,13,12,64,0],[13,13,13,14,0],[14,17,14,65,0],[17,13,17,14,0],[18,17,18,34,0],[19,17,19,29,0],[21,9,21,10,0],[24,9,24,10,0],[25,13,25,49,0]]);
     </script>
   </body>
 </html>

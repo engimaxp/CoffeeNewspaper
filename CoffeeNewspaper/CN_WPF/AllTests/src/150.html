@@ -2,29 +2,31 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\pagehost.xaml</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\booleaninvertconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-&lt;UserControl x:Class=&quot;CN_WPF.PageHost&quot;
-             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
-             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
-             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
-             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
-             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
-             mc:Ignorable=&quot;d&quot; 
-             d:DesignHeight=&quot;450&quot; d:DesignWidth=&quot;800&quot;&gt;
-    &lt;Grid&gt;
-        &lt;ContentControl  x:Name=&quot;OldPage&quot; /&gt;
-        &lt;ContentControl x:Name=&quot;NewPage&quot; /&gt;
-    &lt;/Grid&gt;
-&lt;/UserControl&gt;
+using System;
+using System.Globalization;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// A converter that takes in a boolean and inverts it
+    /// &lt;/summary&gt;
+    public class BooleanInvertConverter : BaseValueConverter&lt;BooleanInvertConverter&gt;
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture) =&gt; !(bool)value;
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =&gt; throw new NotImplementedException();
+    }
+}
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[1,13,1,77,0]]);
+      highlightRanges([[11,113,11,125,0],[13,117,13,152,0]]);
     </script>
   </body>
 </html>

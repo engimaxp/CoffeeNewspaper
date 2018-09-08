@@ -2,53 +2,46 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\attachedproperties\monitorlistboxselectproperty.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\booleantoborderbrushconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Windows;
-using System.Windows.Controls;
+using System;
+using System.Globalization;
+using System.Windows.Media;
 
 namespace CN_WPF
 {
-    public class MonitorListBoxSelectProperty : BaseAttachedProperty&lt;MonitorListBoxSelectProperty, bool&gt;
+    /// &lt;summary&gt;
+    /// A converter that takes in a boolean and returns a borderbrush
+    /// &lt;/summary&gt;
+    public class BooleanToBorderBrushConverter : BaseValueConverter&lt;BooleanToBorderBrushConverter&gt;
     {
-        /// &lt;summary&gt;
-        ///     When value changed to true bind the proper event
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
-        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
-        public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(sender is ListBox listBox)) return;
-            if ((bool) e.NewValue)
-                listBox.SelectionChanged += ListBoxSelectChanged;
+            if (value != null &amp;&amp; (bool) value)
+            {
+                return (SolidColorBrush)(new BrushConverter().ConvertFrom($&quot;#{parameter}&quot;));
+            }
             else
-                listBox.SelectionChanged -= ListBoxSelectChanged;
+            {
+                return Brushes.Transparent;
+            }
+
         }
 
-        /// &lt;summary&gt;
-        ///     When mouse leave the hole parent grid,make it use viewmodel&#39;s val to display highlight
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
-        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
-        private static void ListBoxSelectChanged(object sender, RoutedEventArgs e)
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(sender is ListBox listBox)) return;
-            if (listBox.SelectedItem != null)
-            {
-                listBox.UpdateLayout();
-                if (listBox.SelectedItem !=null)
-                    listBox.ScrollIntoView(listBox.SelectedItem);
-            }
+            throw new NotImplementedException();
         }
     }
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[14,9,14,10,0],[15,13,15,46,0],[15,47,15,54,0],[16,13,16,35,0],[17,17,17,66,0],[19,17,19,66,0],[20,9,20,10,0],[28,9,28,10,0],[29,13,29,46,0],[29,47,29,54,0],[30,13,30,46,0],[31,13,31,14,0],[32,17,32,40,0],[33,17,33,49,0],[34,21,34,66,0],[35,13,35,14,0],[36,9,36,10,0]]);
+      highlightRanges([[13,9,13,10,0],[14,13,14,47,0],[15,13,15,14,0],[16,17,16,93,0],[19,13,19,14,0],[20,17,20,44,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,49,0]]);
     </script>
   </body>
 </html>

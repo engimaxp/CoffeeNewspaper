@@ -2,44 +2,38 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\base\basedatastore.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\forms\taskdetailformcontrol.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-namespace CN_Repository
+using System.Windows.Controls;
+using CN_Presentation.ViewModel.Base;
+
+namespace CN_WPF
 {
-    public class BaseDataStore
+    /// &lt;summary&gt;
+    /// TaskDetailFormControl.xaml 的交互逻辑
+    /// &lt;/summary&gt;
+    public partial class TaskDetailFormControl : UserControl
     {
-        #region Protected Members
-
-        /// &lt;summary&gt;
-        ///     The database context for the client data store
-        /// &lt;/summary&gt;
-        protected CNDbContext mDbContext;
-
-        #endregion
-
-        #region Constructor
-
-        /// &lt;summary&gt;
-        ///     Default constructor
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;dbContext&quot;&gt;The database to use&lt;/param&gt;
-        public BaseDataStore(CNDbContext dbContext)
+        public TaskDetailFormControl()
         {
-            // Set local member
-            mDbContext = dbContext;
+            InitializeComponent();
         }
 
-        #endregion
+        public TaskDetailFormControl(BaseViewModel VM)
+        {
+            InitializeComponent();
+            this.DataContext = VM;
+        }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[20,9,20,52,1],[21,9,21,10,1],[23,13,23,36,1],[24,9,24,10,1]]);
+      highlightRanges([[11,9,11,39,0],[12,9,12,10,0],[13,13,13,35,0],[14,9,14,10,0],[16,9,16,55,0],[17,9,17,10,0],[18,13,18,35,0],[19,13,19,35,0],[20,9,20,10,0]]);
     </script>
   </body>
 </html>

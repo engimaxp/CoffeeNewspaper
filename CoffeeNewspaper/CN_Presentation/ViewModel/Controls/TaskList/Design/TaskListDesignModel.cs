@@ -69,8 +69,8 @@ namespace CN_Presentation.ViewModel.Controls.Design
                 new SearchTxtViewModel("Boun")
             };
 
-            IsSearchAutoCompletePanelPopup = true;
-            SearchAutoCompleteOptions = new ObservableCollection<string>(){"newtag"};
+            IsSearchAutoCompletePanelPopup = false;
+            SearchAutoCompleteOptions = new ObservableCollection<string>();
             SelectedSearchAutoComplete = string.Empty;
         }
 

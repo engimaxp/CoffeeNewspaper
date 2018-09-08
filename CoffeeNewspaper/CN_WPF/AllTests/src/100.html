@@ -2,166 +2,141 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\bubbleselectcontrol.xaml</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\pagehost.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-&lt;UserControl x:Class=&quot;CN_WPF.BubbleSelectControl&quot;
-             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
-             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
-             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
-             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
-             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
-             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
-             mc:Ignorable=&quot;d&quot; &gt;
-    &lt;Grid d:DataContext=&quot;{x:Static design:BubbleSelectDesignModel.Instance}&quot;&gt;
-        &lt;Button x:Name=&quot;Button&quot;
-                ToolTip=&quot;{Binding ToolTip}&quot;
-                Command=&quot;{Binding ClickCommand}&quot;
-            Style=&quot;{StaticResource IconGrowButton}&quot;
-                Foreground=&quot;{Binding ForeGroundColor,Converter={local:ColorTypeToColorConverter}}&quot;
-                Content=&quot;{Binding DefaultIconFontText,Converter={local:IconTypeToFontAwesomeConverter}}&quot;
-                FontFamily=&quot;{Binding DefaultIconFontFamily,Converter={local:FontFamilyTypeToFontFamilyConverter}}&quot;
-                /&gt;
-        &lt;Popup DataContext=&quot;{Binding BubbleMenuViewModel}&quot;
-            StaysOpen=&quot;False&quot;
-               IsOpen=&quot;{Binding IsOpen}&quot;
-            AllowsTransparency=&quot;True&quot;
-            Placement=&quot;Bottom&quot;
-            PlacementTarget=&quot;{Binding ElementName=Button}&quot;&gt;
-            &lt;Grid&gt;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Controls;
+using CN_Core;
+using CN_Presentation;
+using CN_Presentation.ViewModel.Application;
+using CN_Presentation.ViewModel.Base;
 
-                &lt;Grid.RowDefinitions&gt;
-                    &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
-                    &lt;RowDefinition Height=&quot;*&quot; /&gt;
-                &lt;/Grid.RowDefinitions&gt;
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    ///     Interaction logic for PageHost.xaml
+    /// &lt;/summary&gt;
+    public partial class PageHost : UserControl
+    {
+        #region Constructor
 
-                &lt;!-- bubble anchor --&gt;
-                &lt;Path Grid.Row=&quot;0&quot; 
-                      Stroke=&quot;{StaticResource ForegroundDarkBrush}&quot;
-                      Panel.ZIndex=&quot;3&quot;
-                      Margin=&quot;10 0 0 -3&quot;
-                      Data=&quot;M 0,10 L 10,0 L 20,10&quot; 
-                      StrokeThickness=&quot;2&quot;
-                      HorizontalAlignment=&quot;Left&quot;
-                      Fill=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
+        /// &lt;summary&gt;
+        ///     Default constructor
+        /// &lt;/summary&gt;
+        public PageHost()
+        {
+            InitializeComponent();
+
+            // If we are in DesignMode, show the current page
+            // as the dependency property does not fire
+            if (DesignerProperties.GetIsInDesignMode(this))
+                NewPage.Content = IoC.Get&lt;ApplicationViewModel&gt;().CurrentPage.ToBasePage();
+        }
+
+        #endregion
+
+        #region Property Changed Events
+
+        /// &lt;summary&gt;
+        ///     Called when the &lt;see cref=&quot;CurrentPage&quot; /&gt; value has changed
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;d&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;value&quot;&gt;&lt;/param&gt;
+        private static object CurrentPagePropertyChanged(DependencyObject d, object value)
+        {
+            // Get current values
+            var currentPage = (ApplicationPage) value;
+            var currentPageViewModel = d.GetValue(CurrentPageViewModelProperty);
+
+            // Get the frames
+            var newPageFrame = (d as PageHost)?.NewPage;
+            var oldPageFrame = (d as PageHost)?.OldPage;
+
+            // If the current page hasn&#39;t changed
+            // just update the view model
+            if (newPageFrame?.Content is BasePage page &amp;&amp;
+                page.ToApplicationPage() == currentPage)
+            {
+                // Just update the view model
+                page.ViewModelObject = currentPageViewModel;
+
+                return value;
+            }
+
+            // Store the current page content as the old page
+            var oldPageContent = newPageFrame?.Content;
+
+            // Remove current page from new page frame
+            if (newPageFrame != null)
+            {
+                newPageFrame.Content = null;
+
+                // Move the previous page into the old page frame
+                if (oldPageFrame != null)
+                {
+                    oldPageFrame.Content = oldPageContent;
 
 
-                &lt;/Path&gt;
-                &lt;!-- bubble rectangle --&gt;
+                    if (oldPageContent is BasePage)
+                        Application.Current.Dispatcher.Invoke(() =&gt; oldPageFrame.Content = null);
 
-                &lt;Border Padding=&quot;5&quot;
-                        Grid.Row=&quot;1&quot;
-                        BorderBrush=&quot;{StaticResource ForegroundDarkBrush}&quot;
-                        BorderThickness=&quot;2&quot;
-                    Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
-                    CornerRadius=&quot;8&quot;&gt;
+                    // Set the new page content
+                    newPageFrame.Content = currentPage.ToBasePage(currentPageViewModel);
+                }
+            }
 
-                    &lt;ItemsControl ItemsSource=&quot;{Binding Buttons}&quot;&gt;
-                        &lt;ItemsControl.ItemTemplate&gt;
-                            &lt;DataTemplate&gt;
-                                &lt;Border Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
-                                        Padding=&quot;5 0 20 0&quot;
-                            CornerRadius=&quot;8&quot;&gt;
-                                    &lt;Border.InputBindings&gt;
-                                        &lt;MouseBinding MouseAction=&quot;LeftClick&quot; Command=&quot;{Binding ClickCommand}&quot;&gt;&lt;/MouseBinding&gt;
-                                    &lt;/Border.InputBindings&gt;
-                                    &lt;Border.Triggers&gt;
-                                        &lt;!-- Hover over blue --&gt;
-                                        &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseEnter&quot;&gt;
-                                            &lt;BeginStoryboard&gt;
-                                                &lt;Storyboard&gt;
-                                                    &lt;ColorAnimation To=&quot;{StaticResource WordBlue}&quot; 
-                                                        Duration=&quot;0:0:0&quot; 
-                                                        Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
-                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundVeryLight}&quot; 
-                                                        Duration=&quot;0:0:0&quot; 
-                                                        Storyboard.TargetProperty=&quot;Foreground.Color&quot; 
-                                                        Storyboard.TargetName=&quot;icon&quot;
-                                                        /&gt;
-                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundVeryLight}&quot; 
-                                                        Duration=&quot;0:0:0&quot; 
-                                                        Storyboard.TargetProperty=&quot;Foreground.Color&quot; 
-                                                        Storyboard.TargetName=&quot;text&quot;
-                                                        /&gt;
-                                                &lt;/Storyboard&gt;
-                                            &lt;/BeginStoryboard&gt;
-                                        &lt;/EventTrigger&gt;
-                                        &lt;!-- Hover out revert --&gt;
-                                        &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseLeave&quot;&gt;
-                                            &lt;BeginStoryboard&gt;
-                                                &lt;Storyboard&gt;
-                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundVeryLight}&quot; 
-                                                        Duration=&quot;0:0:0&quot; 
-                                                        Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
-                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundDark}&quot; 
-                                                        Duration=&quot;0:0:0&quot; 
-                                                        Storyboard.TargetProperty=&quot;Foreground.Color&quot; 
-                                                        Storyboard.TargetName=&quot;icon&quot;
-                                                        /&gt;
-                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundVeryDark}&quot; 
-                                                        Duration=&quot;0:0:0&quot; 
-                                                        Storyboard.TargetProperty=&quot;Foreground.Color&quot; 
-                                                        Storyboard.TargetName=&quot;text&quot;
-                                                        /&gt;
-                                                &lt;/Storyboard&gt;
-                                            &lt;/BeginStoryboard&gt;
-                                        &lt;/EventTrigger&gt;
-                                    &lt;/Border.Triggers&gt;
+            return value;
+        }
 
-                                    &lt;!-- Grid container for text and icon --&gt;
-                                    &lt;Grid&gt;
-                                        &lt;Grid.ColumnDefinitions&gt;
-                                            &lt;!-- Checkbox --&gt;
-                                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                                            &lt;!-- Icon --&gt;
-                                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                                            &lt;!-- Text --&gt;
-                                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
-                                        &lt;/Grid.ColumnDefinitions&gt;
+        #endregion
 
-                                        &lt;CheckBox  Grid.Column=&quot;0&quot;
-                                            Margin=&quot;0&quot;
-                                            Padding=&quot;0&quot;
-                                                   IsChecked=&quot;{Binding IsSelected}&quot;
-                                            FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                                            Style=&quot;{StaticResource FontAweSomeCheckBox}&quot;
-                                                   Visibility=&quot;{Binding IsSelected,Converter={local:BooleanToVisiblityConverter},ConverterParameter=True}&quot;/&gt;
-                                        &lt;!-- Icon --&gt;
-                                        &lt;TextBlock Name=&quot;icon&quot;
-                                                   Grid.Column=&quot;1&quot;
-                                       Padding=&quot;5&quot;
-                                       VerticalAlignment=&quot;Center&quot;
-                                                   FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                                               Text=&quot;{Binding IconFontText,Converter={local:IconTypeToFontAwesomeConverter}}&quot;
-                                               FontFamily=&quot;{Binding IconFontFamily,Converter={local:FontFamilyTypeToFontFamilyConverter}}&quot;
-                                       Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot;
-                                       /&gt;
+        #region Dependency Properties
 
-                                        &lt;!-- Text --&gt;
-                                        &lt;TextBlock Name=&quot;text&quot;
-                                       Grid.Column=&quot;2&quot;
-                                       Foreground=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
-                                       FontFamily=&quot;Microsoft YaHei&quot;
-                                       VerticalAlignment=&quot;Center&quot;
-                                       Text=&quot;{Binding ButtonText}&quot; /&gt;
+        /// &lt;summary&gt;
+        ///     The current page to show in the page host
+        /// &lt;/summary&gt;
+        public ApplicationPage CurrentPage
+        {
+            get =&gt; (ApplicationPage) GetValue(CurrentPageProperty);
+            set =&gt; SetValue(CurrentPageProperty, value);
+        }
 
-                                    &lt;/Grid&gt;
-                                &lt;/Border&gt;
-                            &lt;/DataTemplate&gt;
-                        &lt;/ItemsControl.ItemTemplate&gt;
-                    &lt;/ItemsControl&gt;
-                &lt;/Border&gt;
-            &lt;/Grid&gt;
-        &lt;/Popup&gt;
-    &lt;/Grid&gt;
-&lt;/UserControl&gt;
+        /// &lt;summary&gt;
+        ///     Registers &lt;see cref=&quot;CurrentPage&quot; /&gt; as a dependency property
+        /// &lt;/summary&gt;
+        public static readonly DependencyProperty CurrentPageProperty =
+            DependencyProperty.Register(nameof(CurrentPage), typeof(ApplicationPage), typeof(PageHost),
+                new UIPropertyMetadata(default(ApplicationPage), null, CurrentPagePropertyChanged));
 
+
+        /// &lt;summary&gt;
+        ///     The current page to show in the page host
+        /// &lt;/summary&gt;
+        public BaseViewModel CurrentPageViewModel
+        {
+            get =&gt; (BaseViewModel) GetValue(CurrentPageViewModelProperty);
+            set =&gt; SetValue(CurrentPageViewModelProperty, value);
+        }
+
+        /// &lt;summary&gt;
+        ///     Registers &lt;see cref=&quot;CurrentPageViewModel&quot; /&gt; as a dependency property
+        /// &lt;/summary&gt;
+        public static readonly DependencyProperty CurrentPageViewModelProperty =
+            DependencyProperty.Register(nameof(CurrentPageViewModel),
+                typeof(BaseViewModel), typeof(PageHost),
+                new UIPropertyMetadata());
+
+        #endregion
+    }
+}
     </pre>
     <script type="text/javascript">
-      highlightRanges([[1,13,1,77,0]]);
+      highlightRanges([[21,9,21,26,0],[22,9,22,10,0],[23,13,23,35,0],[27,13,27,60,0],[28,17,28,92,0],[29,9,29,10,0],[41,9,41,10,0],[43,13,43,55,0],[44,13,44,81,0],[47,13,47,57,0],[48,13,48,57,0],[52,13,53,57,0],[54,13,54,14,0],[56,17,56,61,0],[58,17,58,30,0],[62,13,62,56,0],[65,13,65,38,0],[66,13,66,14,0],[67,17,67,45,0],[70,17,70,42,0],[71,17,71,18,0],[72,21,72,59,0],[75,21,75,52,0],[76,25,76,69,0],[76,69,76,96,0],[76,96,76,98,0],[76,25,76,98,0],[79,21,79,89,0],[80,17,80,18,0],[81,13,81,14,0],[83,13,83,26,0],[84,9,84,10,0],[95,20,95,67,0],[96,20,96,56,0],[102,9,104,101,0],[112,20,112,74,0],[113,20,113,65,0],[119,9,122,43,0]]);
     </script>
   </body>
 </html>

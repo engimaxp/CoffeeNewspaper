@@ -2,43 +2,42 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\mutivalueconverter\multiplyconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\fontfamilytypetofontfamilyconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
+
 using System;
 using System.Globalization;
+using System.Windows.Media;
+using CN_Presentation;
+using CN_Presentation.Utilities;
 
 namespace CN_WPF
 {
-    public class MultiplyConverter : BaseMutiValueConverter&lt;MultiplyConverter&gt;
+    /// &lt;summary&gt;
+    /// A converter that takes in a &lt;see cref=&quot;FontFamilyType&quot;/&gt; and returns 
+    /// the fontfamily instance for that text element
+    /// &lt;/summary&gt;
+    public class FontFamilyTypeToFontFamilyConverter : BaseValueConverter&lt;FontFamilyTypeToFontFamilyConverter&gt;
     {
-        
-        public override object Convert(object[] values, Type targetType,
-            object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            double result = 1.0;
-            foreach (var t in values)
-            {
-                if (t is double d)
-                    result *= d;
-            }
-
-            return result;
+            return $&quot;pack://application;,,,/Fonts/#{((FontFamilyType)value).ToFontFamilyNameText()}&quot;;
         }
 
-        public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
     }
-
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[11,9,11,10,0],[12,13,12,33,0],[13,13,13,20,0],[13,22,13,27,0],[13,28,13,30,0],[13,31,13,37,0],[14,13,14,14,0],[15,17,15,35,0],[16,21,16,33,0],[17,13,17,14,0],[19,13,19,27,0],[20,9,20,10,0],[23,9,23,10,0],[24,13,24,49,0]]);
+      highlightRanges([[17,9,17,10,0],[18,13,18,102,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,49,0]]);
     </script>
   </body>
 </html>

@@ -2,141 +2,43 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\pagehost.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\mutivalueconverter\sumconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Controls;
-using CN_Core;
-using CN_Presentation;
-using CN_Presentation.ViewModel.Application;
-using CN_Presentation.ViewModel.Base;
+using System;
+using System.Globalization;
 
 namespace CN_WPF
 {
-    /// &lt;summary&gt;
-    ///     Interaction logic for PageHost.xaml
-    /// &lt;/summary&gt;
-    public partial class PageHost : UserControl
+    public class SumConverter : BaseMutiValueConverter&lt;SumConverter&gt;
     {
-        #region Constructor
-
-        /// &lt;summary&gt;
-        ///     Default constructor
-        /// &lt;/summary&gt;
-        public PageHost()
+        
+        public override object Convert(object[] values, Type targetType,
+            object parameter, CultureInfo culture)
         {
-            InitializeComponent();
-
-            // If we are in DesignMode, show the current page
-            // as the dependency property does not fire
-            if (DesignerProperties.GetIsInDesignMode(this))
-                NewPage.Content = IoC.Get&lt;ApplicationViewModel&gt;().CurrentPage.ToBasePage();
-        }
-
-        #endregion
-
-        #region Property Changed Events
-
-        /// &lt;summary&gt;
-        ///     Called when the &lt;see cref=&quot;CurrentPage&quot; /&gt; value has changed
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;d&quot;&gt;&lt;/param&gt;
-        /// &lt;param name=&quot;value&quot;&gt;&lt;/param&gt;
-        private static object CurrentPagePropertyChanged(DependencyObject d, object value)
-        {
-            // Get current values
-            var currentPage = (ApplicationPage) value;
-            var currentPageViewModel = d.GetValue(CurrentPageViewModelProperty);
-
-            // Get the frames
-            var newPageFrame = (d as PageHost)?.NewPage;
-            var oldPageFrame = (d as PageHost)?.OldPage;
-
-            // If the current page hasn&#39;t changed
-            // just update the view model
-            if (newPageFrame?.Content is BasePage page &amp;&amp;
-                page.ToApplicationPage() == currentPage)
+            double result = 1.0;
+            foreach (var t in values)
             {
-                // Just update the view model
-                page.ViewModelObject = currentPageViewModel;
-
-                return value;
+                if (t is double d)
+                    result += d;
             }
 
-            // Store the current page content as the old page
-            var oldPageContent = newPageFrame?.Content;
-
-            // Remove current page from new page frame
-            if (newPageFrame != null)
-            {
-                newPageFrame.Content = null;
-
-                // Move the previous page into the old page frame
-                if (oldPageFrame != null)
-                {
-                    oldPageFrame.Content = oldPageContent;
-
-
-                    if (oldPageContent is BasePage)
-                        Application.Current.Dispatcher.Invoke(() =&gt; oldPageFrame.Content = null);
-
-                    // Set the new page content
-                    newPageFrame.Content = currentPage.ToBasePage(currentPageViewModel);
-                }
-            }
-
-            return value;
+            return result;
         }
 
-        #endregion
-
-        #region Dependency Properties
-
-        /// &lt;summary&gt;
-        ///     The current page to show in the page host
-        /// &lt;/summary&gt;
-        public ApplicationPage CurrentPage
+        public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
-            get =&gt; (ApplicationPage) GetValue(CurrentPageProperty);
-            set =&gt; SetValue(CurrentPageProperty, value);
+            throw new NotImplementedException();
         }
-
-        /// &lt;summary&gt;
-        ///     Registers &lt;see cref=&quot;CurrentPage&quot; /&gt; as a dependency property
-        /// &lt;/summary&gt;
-        public static readonly DependencyProperty CurrentPageProperty =
-            DependencyProperty.Register(nameof(CurrentPage), typeof(ApplicationPage), typeof(PageHost),
-                new UIPropertyMetadata(default(ApplicationPage), null, CurrentPagePropertyChanged));
-
-
-        /// &lt;summary&gt;
-        ///     The current page to show in the page host
-        /// &lt;/summary&gt;
-        public BaseViewModel CurrentPageViewModel
-        {
-            get =&gt; (BaseViewModel) GetValue(CurrentPageViewModelProperty);
-            set =&gt; SetValue(CurrentPageViewModelProperty, value);
-        }
-
-        /// &lt;summary&gt;
-        ///     Registers &lt;see cref=&quot;CurrentPageViewModel&quot; /&gt; as a dependency property
-        /// &lt;/summary&gt;
-        public static readonly DependencyProperty CurrentPageViewModelProperty =
-            DependencyProperty.Register(nameof(CurrentPageViewModel),
-                typeof(BaseViewModel), typeof(PageHost),
-                new UIPropertyMetadata());
-
-        #endregion
     }
+
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[21,9,21,26,0],[22,9,22,10,0],[23,13,23,35,0],[27,13,27,60,0],[28,17,28,92,0],[29,9,29,10,0],[41,9,41,10,0],[43,13,43,55,0],[44,13,44,81,0],[47,13,47,57,0],[48,13,48,57,0],[52,13,53,57,0],[54,13,54,14,0],[56,17,56,61,0],[58,17,58,30,0],[62,13,62,56,0],[65,13,65,38,0],[66,13,66,14,0],[67,17,67,45,0],[70,17,70,42,0],[71,17,71,18,0],[72,21,72,59,0],[75,21,75,52,0],[76,25,76,69,0],[76,69,76,96,0],[76,96,76,98,0],[76,25,76,98,0],[79,21,79,89,0],[80,17,80,18,0],[81,13,81,14,0],[83,13,83,26,0],[84,9,84,10,0],[95,20,95,67,0],[96,20,96,56,0],[102,9,104,101,0],[112,20,112,74,0],[113,20,113,65,0],[119,9,122,43,0]]);
+      highlightRanges([[11,9,11,10,0],[12,13,12,33,0],[13,13,13,20,0],[13,22,13,27,0],[13,28,13,30,0],[13,31,13,37,0],[14,13,14,14,0],[15,17,15,35,0],[16,21,16,33,0],[17,13,17,14,0],[19,13,19,27,0],[20,9,20,10,0],[23,9,23,10,0],[24,13,24,49,0]]);
     </script>
   </body>
 </html>

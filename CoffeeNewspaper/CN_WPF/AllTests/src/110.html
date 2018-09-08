@@ -2,61 +2,35 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\applicationpagevalueconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\treeviewlineconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
 using System;
-using System.Diagnostics;
-using System.Globalization;
-using CN_Presentation;
-using CN_Presentation.ViewModel.Application;
+using System.Windows.Controls;
 
 namespace CN_WPF
 {
-        public class ApplicationPageValueConverter : BaseValueConverter&lt;ApplicationPageValueConverter&gt;
+    public class TreeViewLineConverter: BaseValueConverter&lt;TreeViewLineConverter&gt;
+    {
+        public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-            {
-                switch ((ApplicationPage)value)
-            {
-                case ApplicationPage.WorkSpace:
-                    return new WorkSpacePage(null as WorkSpaceViewModel);
-
-                case ApplicationPage.MemoList:
-                    return new MemoListPage(null as MemoListViewModel);
-
-                case ApplicationPage.Settings:
-                    return new SettingsPage(null as SettingsViewModel);
-
-                case ApplicationPage.Statistic:
-                    return new StatisticPage(null as StatisticViewModel);
-
-                case ApplicationPage.TagReview:
-                    return new TagReviewPage(null as TagReviewViewModel);
-
-                case ApplicationPage.TasksList:
-                    return new TaskListPage(null as TasksListPageViewModel);
-
-                default:
-                    {
-                        Debugger.Break();
-                        return null;
-                    }
-                }
-            }
-
-            public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            {
-                throw new NotImplementedException();
-            }
+            var item = (TreeViewItem)value;
+            var ic = ItemsControl.ItemsControlFromItemContainer(item);
+            return ic.ItemContainerGenerator.IndexFromContainer(item) == ic.Items.Count - 1;
         }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return false;
+        }
+    }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[12,13,12,14,0],[13,17,13,48,0],[16,21,16,74,0],[19,21,19,72,0],[22,21,22,72,0],[25,21,25,74,0],[28,21,28,74,0],[31,21,31,77,0],[34,21,34,22,0],[35,25,35,42,0],[36,25,36,37,0],[39,13,39,14,0],[42,13,42,14,0],[43,17,43,53,0]]);
+      highlightRanges([[9,9,9,10,0],[10,13,10,44,0],[11,13,11,71,0],[12,13,12,93,0],[13,9,13,10,0],[16,9,16,10,0],[17,13,17,26,0],[18,9,18,10,0]]);
     </script>
   </body>
 </html>

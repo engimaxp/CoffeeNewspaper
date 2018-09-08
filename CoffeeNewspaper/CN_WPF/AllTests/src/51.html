@@ -2,50 +2,57 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\ratingcontrol.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\statusbarcontrol.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Windows;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Threading;
+using CN_Presentation.ViewModel.Controls.Design;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// RatingControl.xaml 的交互逻辑
+    /// StatusBarControl.xaml 的交互逻辑
     /// &lt;/summary&gt;
-    public partial class RatingControl : UserControl
+    public partial class StatusBarControl : UserControl
     {
-        public static readonly DependencyProperty DisplayTxtProperty = DependencyProperty.Register(
-            nameof(DisplayTxt), typeof(bool), typeof(RatingControl), new PropertyMetadata(false,null,DisplayTxtChanged));
-
-        private static object DisplayTxtChanged(DependencyObject d, object basevalue)
-        {
-            var rc = d as RatingControl;
-            if (rc?.NameColumn == null) return basevalue;
-            rc?.NameColumn.SetValue(VisibilityProperty, (bool)basevalue?Visibility.Visible:Visibility.Collapsed);
-            return basevalue;
-        }
-
-        public bool DisplayTxt
-        {
-            get { return (bool) GetValue(DisplayTxtProperty); }
-            set { SetValue(DisplayTxtProperty, value); }
-        }
-
-
-        public RatingControl()
+        public StatusBarControl()
         {
             InitializeComponent();
+            if (!DesignerProperties.GetIsInDesignMode(this))
+            {
+                DataContext = ViewModelLocator.StatusBarViewModel;
+                this.Loaded += (s, e) =&gt;
+                {
+                    //  DispatcherTimer setup
+                    var dispatcherTimer = new DispatcherTimer();
+                    dispatcherTimer.Tick += new EventHandler(DispatcherTimer_Tick);
+                    dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+                    dispatcherTimer.Start();
+                };
+            }
+            else
+            {
+                DataContext = StatusBarDesignModel.Instance;
+            }
+
+        }
+        private void DispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            Task.Run(async () =&gt; await ViewModelLocator.StatusBarViewModel.TimeSpanIncrement());
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[11,9,12,122,0],[15,9,15,10,0],[16,13,16,41,0],[17,13,17,40,0],[17,41,17,58,0],[18,13,18,114,0],[19,13,19,30,0],[20,9,20,10,0],[24,17,24,18,0],[24,19,24,62,0],[24,63,24,64,0],[25,17,25,18,0],[25,19,25,55,0],[25,56,25,57,0],[29,9,29,31,0],[30,9,30,10,0],[31,13,31,35,0],[32,9,32,10,0]]);
+      highlightRanges([[15,9,15,34,0],[16,9,16,10,0],[17,13,17,35,0],[18,13,18,61,0],[19,13,19,14,0],[20,17,20,67,0],[21,17,22,17,0],[22,17,22,18,0],[22,18,24,21,0],[24,21,24,65,0],[24,65,25,21,0],[25,21,25,84,0],[25,84,26,21,0],[26,21,26,70,0],[26,70,27,21,0],[27,21,27,45,0],[27,45,28,17,0],[28,17,28,18,0],[28,18,28,19,0],[21,17,28,19,0],[29,13,29,14,0],[31,13,31,14,0],[32,17,32,61,0],[33,13,33,14,0],[35,9,35,10,0],[37,9,37,10,0],[38,13,38,97,0],[39,9,39,10,0]]);
     </script>
   </body>
 </html>

@@ -2,55 +2,59 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\leftmarginmultiplierconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\taskstatustotextconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
+
 using System;
 using System.Globalization;
-using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Media;
+using CN_Presentation;
+using CN_Presentation.Utilities;
 
 namespace CN_WPF
 {
-    public class LeftMarginMultiplierConverter:BaseValueConverter&lt;LeftMarginMultiplierConverter&gt;
+    /// &lt;summary&gt;
+    /// A converter that takes in a &lt;see cref=&quot;TaskCurrentStatus&quot;/&gt; and returns 
+    /// the text for that Indicator
+    /// &lt;/summary&gt;
+    public class TaskStatusToTextConverter : BaseValueConverter&lt;TaskStatusToTextConverter&gt;
     {
-
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(value is TreeViewItem item))
-                return new Thickness(0);
-            //Default value
-            double Length = 19;
-
-            if (parameter != null)
-                Double.TryParse(parameter.ToString(), out Length);
-            var thickness = Length * item.GetDepth();
-            return new Thickness(thickness, 0, 0, 0);
-        }
-
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class WidthMultiplierConverter : BaseValueConverter&lt;WidthMultiplierConverter&gt;
-    {
-
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (!(value is TreeViewItem item))
-                return 300;
-            //Default value
-            double Length = 19;
-
-            if (parameter != null)
-                Double.TryParse(parameter.ToString(), out Length);
-
-            return Length * item.GetDepth();
+            string code = string.Empty;
+            switch ((TaskCurrentStatus)value)
+            {
+                case TaskCurrentStatus.COMPLETE:
+                {
+                    code = &quot;Complete&quot;;
+                    break;
+                }
+                case TaskCurrentStatus.DELETE:
+                {
+                    code = &quot;Delete&quot;;
+                        break;
+                }
+                case TaskCurrentStatus.STOP:
+                {
+                    code = &quot;Stop&quot;;
+                        break;
+                }
+                case TaskCurrentStatus.UNDERGOING:
+                {
+                    code = &quot;Undergoing&quot;;
+                    break;
+                }
+                case TaskCurrentStatus.PENDING:
+                {
+                    code = &quot;Pending&quot;;
+                    break;
+                }
+            }
+            return code;
         }
 
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -59,9 +63,10 @@ namespace CN_WPF
         }
     }
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[12,9,12,10,0],[13,13,13,47,0],[14,17,14,41,0],[16,13,16,32,0],[18,13,18,35,0],[19,17,19,67,0],[20,13,20,54,0],[21,13,21,54,0],[22,9,22,10,0],[25,9,25,10,0],[26,13,26,49,0],[34,9,34,10,0],[35,13,35,47,0],[36,17,36,28,0],[38,13,38,32,0],[40,13,40,35,0],[41,17,41,67,0],[43,13,43,45,0],[44,9,44,10,0],[47,9,47,10,0],[48,13,48,49,0]]);
+      highlightRanges([[17,9,17,10,0],[18,13,18,40,0],[19,13,19,46,0],[22,17,22,18,0],[23,21,23,39,0],[24,21,24,27,0],[27,17,27,18,0],[28,21,28,37,0],[29,25,29,31,0],[32,17,32,18,0],[33,21,33,35,0],[34,25,34,31,0],[37,17,37,18,0],[38,21,38,41,0],[39,21,39,27,0],[42,17,42,18,0],[43,21,43,38,0],[44,21,44,27,0],[47,13,47,25,0],[48,9,48,10,0],[51,9,51,10,0],[52,13,52,49,0]]);
     </script>
   </body>
 </html>

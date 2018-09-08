@@ -2,219 +2,43 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\taskexpanddetialcontrol.xaml</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\mutivalueconverter\multiplyconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-&lt;UserControl x:Class=&quot;CN_WPF.TaskExpandDetialControl&quot;
-             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
-             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
-             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
-             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
-             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
-             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
-             mc:Ignorable=&quot;d&quot; 
-             d:DesignWidth=&quot;300&quot;
-             d:DataContext=&quot;{x:Static design:TaskExpandDetailDesignModel.Instance}&quot;&gt;
+using System;
+using System.Globalization;
 
-    &lt;!-- Shadow Border--&gt;
-    &lt;Border x:Name=&quot;ExpanderContent&quot;
-                    Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
-                    BorderBrush=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
-                    BorderThickness=&quot;1&quot;
-                    ClipToBounds=&quot;True&quot;
-                    Width=&quot;300&quot;&gt;
-        &lt;Grid&gt;
-            &lt;Border Background=&quot;Transparent&quot;
-                            BorderBrush=&quot;{StaticResource WordVeryLightBlueBrush}&quot;
-                            BorderThickness=&quot;0,10,0,0&quot; Margin=&quot;0,-11,0,0&quot;&gt;
-                &lt;Border.Effect&gt;
-                    &lt;DropShadowEffect Color=&quot;{StaticResource WordVeryLightBlue}&quot;
-                                              ShadowDepth=&quot;0&quot; BlurRadius=&quot;10&quot; /&gt;
-                &lt;/Border.Effect&gt;
-            &lt;/Border&gt;
-            &lt;Border Padding=&quot;10 10 14 10&quot; Background=&quot;Transparent&quot;&gt;
-                &lt;!-- Real Expanded Content --&gt;
-                &lt;StackPanel Orientation=&quot;Vertical&quot;
-                            HorizontalAlignment=&quot;Center&quot;
-                            VerticalAlignment=&quot;Top&quot;&gt;
+namespace CN_WPF
+{
+    public class MultiplyConverter : BaseMutiValueConverter&lt;MultiplyConverter&gt;
+    {
+        
+        public override object Convert(object[] values, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            double result = 1.0;
+            foreach (var t in values)
+            {
+                if (t is double d)
+                    result *= d;
+            }
 
-                    &lt;!-- Fail Reason --&gt;
-                    &lt;Grid Margin=&quot;0 0 0 5&quot;
-                          Visibility=&quot;{Binding DisplayFailReason,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
-                          ToolTip=&quot;Fail Reason&quot;&gt;
-                        &lt;Grid.ColumnDefinitions&gt;
-                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
-                        &lt;/Grid.ColumnDefinitions&gt;
-                        &lt;TextBlock Grid.Column=&quot;0&quot;
-                                   VerticalAlignment=&quot;Center&quot;
-                                   FontSize=&quot;{StaticResource FontSizeLarge}&quot;
-                                   Foreground=&quot;{StaticResource WordRedBrush}&quot;
-                                   FontFamily=&quot;{StaticResource FontAwesomeRegular}&quot;
-                                   Text=&quot;{StaticResource FontAwesomeTimesCircleIcon}&quot; /&gt;
-                        &lt;TextBlock Grid.Column=&quot;1&quot;
-                                   Text=&quot;{Binding FailReason,FallbackValue=&#39;&#39;}&quot;
-                                   Padding=&quot;10 0 0 0&quot;
-                                   FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                                   Foreground=&quot;{StaticResource WordRedBrush}&quot;
-                                   VerticalAlignment=&quot;Center&quot;
-                                   TextWrapping=&quot;Wrap&quot;/&gt;
-                    &lt;/Grid&gt;
+            return result;
+        }
 
-                    &lt;!--Pending Reason--&gt;
-                    &lt;Grid Margin=&quot;0 0 0 5&quot;
-                          Visibility=&quot;{Binding DisplayPendingReason,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
-                          ToolTip=&quot;Pending Reason&quot;&gt;
-                        &lt;Grid.ColumnDefinitions&gt;
-                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
-                        &lt;/Grid.ColumnDefinitions&gt;
-                        &lt;TextBlock Grid.Column=&quot;0&quot;
-                                   Padding=&quot;3 0&quot;
-                                   VerticalAlignment=&quot;Center&quot;
-                                   FontSize=&quot;{StaticResource FontSizeLarge}&quot;
-                                   Foreground=&quot;{StaticResource WordOrangeBrush}&quot;
-                                   FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
-                                   Text=&quot;{StaticResource FontAwesomeHalfHourGlassIcon}&quot; /&gt;
-                        &lt;TextBlock Grid.Column=&quot;1&quot;
-                                   Text=&quot;{Binding PendingReason,FallbackValue=&#39;&#39;}&quot;
-                                   Padding=&quot;10 0 0 0&quot;
-                                   FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                                   Foreground=&quot;{StaticResource WordOrangeBrush}&quot;
-                                   VerticalAlignment=&quot;Center&quot;
-                                   TextWrapping=&quot;Wrap&quot; /&gt;
-                    &lt;/Grid&gt;
-                        
-                    &lt;Border Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
-                        &lt;TextBlock 
-                            Padding=&quot;5 0 5 10&quot;
-                            FontFamily=&quot;Microsoft YaHei&quot;
-                            FontWeight=&quot;Bold&quot;
-                            Foreground=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
-                            Text=&quot;{Binding TaskDetailContent}&quot;
-                            TextWrapping=&quot;Wrap&quot;
-                        &gt;&lt;/TextBlock&gt;
-                    &lt;/Border&gt;
+        public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
-                    &lt;local:TaskTreeViewControl DataContext=&quot;{Binding ChildTasksModel}&quot;/&gt;
-
-                    &lt;!-- Created Time --&gt;
-                    &lt;Grid Margin=&quot;0 10 0 5&quot;&gt;
-                        &lt;Grid.ColumnDefinitions&gt;
-                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
-                        &lt;/Grid.ColumnDefinitions&gt;
-                        &lt;TextBlock Grid.Column=&quot;0&quot;
-                                           ToolTip=&quot;Created Time&quot;
-                                           FontSize=&quot;{StaticResource FontSizeLarge}&quot;
-                                           Foreground=&quot;{StaticResource WordGreenBrush}&quot;
-                                           FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
-                                           Text=&quot;{StaticResource FontAwesomeClockIcon}&quot; /&gt;
-                        &lt;TextBlock Grid.Column=&quot;1&quot;
-                                           Padding=&quot;10 0 0 0&quot;
-                                           FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                                           Foreground=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
-                                           VerticalAlignment=&quot;Center&quot;
-                                           TextTrimming=&quot;CharacterEllipsis&quot;&gt;
-                                    &lt;Run Text=&quot;{Binding CreatedTimeShortForm,Mode=OneWay}&quot;
-                                         FontFamily=&quot;Microsoft YaHei&quot;
-                                         FontWeight=&quot;Bold&quot; /&gt;
-                                    &lt;Run Text=&quot;{Binding CreatedTimeLongForm,Mode=OneWay}&quot; /&gt;
-                        &lt;/TextBlock&gt;
-                    &lt;/Grid&gt;
-
-                    &lt;!-- Importance and Urgency Settings --&gt;
-                    &lt;Grid Margin=&quot;0 5&quot;&gt;
-                        &lt;Grid.ColumnDefinitions&gt;
-                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
-                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                        &lt;/Grid.ColumnDefinitions&gt;
-                        &lt;local:RatingControl
-                            DisplayTxt=&quot;False&quot;
-                                    ToolTip=&quot;Urgency Settings&quot;
-                                    Grid.Column=&quot;0&quot;
-                                    Margin=&quot;-4 0 0 0&quot;
-                                    DataContext=&quot;{Binding UrgencyRating}&quot; /&gt;
-                        &lt;local:RatingControl
-                            DisplayTxt=&quot;False&quot;
-                                    ToolTip=&quot;Importance Settings&quot;
-                                    Grid.Column=&quot;2&quot;
-                                    DataContext=&quot;{Binding PriorityRating}&quot; /&gt;
-                    &lt;/Grid&gt;
-
-                    &lt;!-- Work Time Count --&gt;
-                    &lt;Grid Margin=&quot;0 5&quot;&gt;
-                        &lt;Grid.ColumnDefinitions&gt;
-                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
-                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                        &lt;/Grid.ColumnDefinitions&gt;
-                        &lt;TextBlock Grid.Column=&quot;0&quot;
-                                           VerticalAlignment=&quot;Center&quot;
-                                           FontSize=&quot;{StaticResource FontSizeLarge}&quot;
-                                           Foreground=&quot;{StaticResource WordLightBlueBrush}&quot;
-                                           FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
-                                           Text=&quot;{StaticResource FontAwesomeHalfHourGlassIcon}&quot; /&gt;
-                        &lt;Grid Grid.Column=&quot;1&quot; Margin=&quot;10 0 0 0&quot;&gt;
-                            &lt;StackPanel Orientation=&quot;Vertical&quot;&gt;
-                                &lt;TextBlock TextTrimming=&quot;CharacterEllipsis&quot;&gt;
-                                            &lt;Run Text=&quot;Worked for &quot; /&gt;
-                                            &lt;Run Text=&quot;{Binding WorkedDuration,FallbackValue=&#39;&#39;}&quot;
-                                                 FontWeight=&quot;Bold&quot;
-                                                 Foreground=&quot;{StaticResource WordOrangeBrush}&quot; /&gt;
-                                &lt;/TextBlock&gt;
-                                &lt;TextBlock 
-                                    Visibility=&quot;{Binding DisplayEstimatedTimeLeft,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
-                                    TextTrimming=&quot;CharacterEllipsis&quot;&gt;
-                                            &lt;Run Text=&quot;Estimated &quot; /&gt;
-                                            &lt;Run Text=&quot;{Binding EstimatedTimeLeft,FallbackValue=&#39;&#39;}&quot;
-                                                 FontWeight=&quot;Bold&quot;
-                                                 Foreground=&quot;{StaticResource WordGreenBrush}&quot; /&gt;
-                                            &lt;Run Text=&quot;Left&quot; /&gt;
-                                &lt;/TextBlock&gt;
-                            &lt;/StackPanel&gt;
-                        &lt;/Grid&gt;
-                        &lt;Grid Grid.Column=&quot;2&quot;
-                              Visibility=&quot;{Binding DisplayDeadLineTimeLeft,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
-                                      ToolTip=&quot;Time Left for DeadLine&quot;&gt;
-                            &lt;Grid.ColumnDefinitions&gt;
-                                &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
-                                &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
-                            &lt;/Grid.ColumnDefinitions&gt;
-                            &lt;TextBlock Grid.Column=&quot;0&quot;
-                                               VerticalAlignment=&quot;Center&quot;
-                                               FontSize=&quot;{StaticResource FontSizeLarge}&quot;
-                                               Foreground=&quot;{StaticResource WordLightBlueBrush}&quot;
-                                               FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
-                                               Text=&quot;{StaticResource FontAwesomeStopWatchIcon}&quot; /&gt;
-                            &lt;TextBlock Grid.Column=&quot;1&quot;
-                                               Text=&quot;{Binding DeadLineTimeLeft,FallbackValue=&#39;&#39;}&quot;
-                                               FontWeight=&quot;Bold&quot;
-                                               Padding=&quot;10 0 0 0&quot;
-                                               FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                                               Foreground=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
-                                               VerticalAlignment=&quot;Center&quot;
-                                               TextTrimming=&quot;CharacterEllipsis&quot; /&gt;
-                        &lt;/Grid&gt;
-                    &lt;/Grid&gt;
-
-                    &lt;!-- Tag Button --&gt;
-                    &lt;local:TagPanelControl DataContext=&quot;{Binding TagPanelViewModel}&quot; /&gt;
-
-                &lt;/StackPanel&gt;
-            &lt;/Border&gt;
-
-        &lt;/Grid&gt;
-    &lt;/Border&gt;
-&lt;/UserControl&gt;
-
+}
     </pre>
     <script type="text/javascript">
-      highlightRanges([[1,13,1,77,0]]);
+      highlightRanges([[11,9,11,10,0],[12,13,12,33,0],[13,13,13,20,0],[13,22,13,27,0],[13,28,13,30,0],[13,31,13,37,0],[14,13,14,14,0],[15,17,15,35,0],[16,21,16,33,0],[17,13,17,14,0],[19,13,19,27,0],[20,9,20,10,0],[23,9,23,10,0],[24,13,24,49,0]]);
     </script>
   </body>
 </html>

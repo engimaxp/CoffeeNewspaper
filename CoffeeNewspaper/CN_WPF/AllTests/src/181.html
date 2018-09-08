@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\memodatastoretest.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\domaintest\timeslicetest.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
@@ -11,229 +11,274 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Threading.Tasks;
 using CN_Core;
-using CN_Repository;
-using CoffeeNewspaper_UnitTest.DomainTest;
 using NUnit.Framework;
 
-namespace CoffeeNewspaper_UnitTest.RepositoryTest
+namespace CoffeeNewspaper_UnitTest.DomainTest
 {
-    /// &lt;summary&gt;
-    ///     In-Memory integration data persistent test
-    /// &lt;/summary&gt;
     [TestFixture]
-    public class MemoDataStoreTest : RepositarySetupAndTearDown
+    public class TimeSliceTest
     {
         [Test]
-        public async Task AddMemo_QueryAllMemo_QuerySpecifiedMemo_AllPass()
+        public void CreateATimeSlice()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //Arrange argument to be tested
-                var assesMemo = DomainTestHelper.GetARandomMemo();
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now, DateTime.Now.AddMinutes(1));
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now);
+            Assert.IsNotNull(a);
+            Assert.IsNotNull(b);
+        }
+        [Test]
+        public void CreateATimeSlice_EndTimeGreaterThanStartTime()
+        {
+            Assert.Throws&lt;ArgumentException&gt;(() =&gt; {
+                CNTimeSlice a = new CNTimeSlice(DateTime.Now, DateTime.Now.AddMinutes(-1));});
+        }
+        [Test]
+        public void CloneATimeSlice()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now,DateTime.Now.AddMinutes(1));
+            CNTimeSlice b = a.Clone() as CNTimeSlice;
 
-                //initiate the datastore
-                var MemoDataStore = new MemoDataStore(dbcontext);
+            Assert.IsFalse(ReferenceEquals(a, b));
 
-                //do testing action
-                MemoDataStore.AddMemo(assesMemo);
-                await unitOfWork.Commit();
-                //query the result from db for assert
-                var Memos = await MemoDataStore.GetAllGlobalMemos();
-                Memos.ToList().ForEach(Console.WriteLine);
-
-                var firstMemo = await MemoDataStore.GetMemoById(Memos.First().MemoId);
-
-                Assert.AreEqual(Memos.First(), firstMemo);
-                Assert.AreEqual(Memos.FirstOrDefault(), assesMemo);
-            });
+            Assert.AreEqual(a,b);
         }
 
         [Test]
-        public async Task DeleteAMemo_Success()
+        public void InterceptWithAnother_BothNoEndTime()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var MemoDataStore = new MemoDataStore(dbcontext);
-                var assesMemo = DomainTestHelper.GetARandomMemo();
-                var addedMemo = MemoDataStore.AddMemo(assesMemo);
-
-                await unitOfWork.Commit();
-                MemoDataStore.DeleteMemo(addedMemo);
-
-                var beforeDeleteResult = await unitOfWork.Commit();
-                Assert.IsTrue(beforeDeleteResult);
-
-                var afterDeleteResult = await MemoDataStore.GetMemoById(addedMemo.MemoId);
-                Assert.IsNull(afterDeleteResult);
-            });
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-1));
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
         }
 
         [Test]
-        public async Task DeleteAMemo_MemoIdNotExist_Fail()
+        public void InterceptWithAnother_OneNoEndTime_TimeLineIntercept1()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var MemoDataStore = new MemoDataStore(dbcontext);
-                var assesMemo = DomainTestHelper.GetARandomMemo(true);
-                MemoDataStore.DeleteMemo(assesMemo);
-                var beforeDeleteResult = await unitOfWork.Commit();
-                Assert.IsFalse(beforeDeleteResult);
-            });
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-1),DateTime.Now.AddMinutes(1));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
         }
 
         [Test]
-        public async Task QuerySpecifiedMemoDoesntExist_ReturnNull()
+        public void InterceptWithAnother_OneNoEndTime_TimeLineIntercept2()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var MemoDataStore = new MemoDataStore(dbcontext);
-                var firstMemo = await MemoDataStore.GetMemoById(Guid.NewGuid().ToString(&quot;D&quot;));
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(1), DateTime.Now.AddMinutes(2));
 
-                Assert.IsNull(firstMemo);
-            });
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+        [Test]
+        public void InterceptWithAnother_OneNoEndTime_TimeLineNotIntercept()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-2), DateTime.Now.AddMinutes(-1));
+
+            Assert.IsFalse(a.InterceptWith(b));
+            Assert.IsFalse(b.InterceptWith(a));
+        }
+
+
+        [Test]
+        public void InterceptWithAnother_nullCondition_false()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3), DateTime.Now);
+            Assert.IsFalse(a.InterceptWith(null));
+        }
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineIntercept1()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3),DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-2), DateTime.Now.AddMinutes(-1));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineIntercept2()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3), DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-4), DateTime.Now.AddMinutes(-2));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineIntercept3()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3), DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-2), DateTime.Now.AddMinutes(1));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
         }
 
         [Test]
-        public async Task UpdateMemo()
+        public void InterceptWithAnother_BothEndTime_TimeLineIntercept5()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var MemoDataStore = new MemoDataStore(dbcontext);
-                var assesMemo = DomainTestHelper.GetARandomMemo();
-                var addedMemo = MemoDataStore.AddMemo(assesMemo);
-                await unitOfWork.Commit();
-                //update the added Memo content,make sure its not equal to original Memo
-                addedMemo.Content = &quot;testing update&quot;;
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-2).AddMinutes(-3), currentTime.AddDays(-1).AddMinutes(-2));
+            CNTimeSlice b = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-3), currentTime.AddDays(-1).AddMinutes(-1));
 
-                //update to database ,make sure what ef return is equal to modified Memo
-                 MemoDataStore.UpdateMemo(addedMemo);
-
-                var updatedResult = await unitOfWork.Commit();
-                Assert.IsTrue(updatedResult);
-                //select from db again ,make sure the Memo is updated
-                var selectedMemo = await MemoDataStore.GetMemoById(addedMemo.MemoId);
-                Assert.AreEqual(selectedMemo, addedMemo);
-            });
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
         }
 
         [Test]
-        public async Task UpdateMemo_MemoIdNotExist_Fail()
+        public void InterceptWithAnother_BothEndTime_TimeLineNotIntercept1()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var MemoDataStore = new MemoDataStore(dbcontext);
-                var assesMemo = DomainTestHelper.GetARandomMemo(true);
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3), DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(1), DateTime.Now.AddMinutes(3));
 
-                //update the added Memo content,make sure its not equal to original Memo
-                assesMemo.Content = &quot;testing update&quot;;
-
-                //update to database ,make sure what ef return is equal to modified Memo
-                 MemoDataStore.UpdateMemo(assesMemo);
-
-                var updatedResult = await unitOfWork.Commit();
-                Assert.False(updatedResult);
-            });
+            Assert.IsFalse(a.InterceptWith(b));
+            Assert.IsFalse(b.InterceptWith(a));
         }
 
         [Test]
-        public async Task Clone_SimpleGlobalMemo()
+        public void InterceptWithAnother_BothEndTime_TimeLineNotIntercept2()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var MemoDataStore = new MemoDataStore(dbcontext);
-                var assesMemo = DomainTestHelper.GetARandomMemo();
-                var addedMemo = MemoDataStore.AddMemo(assesMemo);
-                await unitOfWork.Commit();
-                var cloneMemo = MemoDataStore.CloneAMemo(addedMemo.MemoId);
-                await unitOfWork.Commit();
+            var currentTime = DateTime.Now;
+               CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(-1));
 
-                var allMemos = await MemoDataStore.GetAllGlobalMemos();
-                Assert.AreEqual(2,allMemos.Count);
-
-                Assert.IsNotNull(cloneMemo);
-                Assert.AreNotEqual(addedMemo.MemoId,cloneMemo.MemoId);
-            });
+            Assert.IsFalse(a.InterceptWith(b));
+            Assert.IsFalse(b.InterceptWith(a));
         }
 
         [Test]
-        public async Task Clone_OriginalMemoNull_ReturnFalse()
+        public void InterceptWithAnother_BothEndTime_TimeLineNotIntercept3()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var MemoDataStore = new MemoDataStore(dbcontext);
-                var assesMemo = DomainTestHelper.GetARandomMemo();
-                var addedMemo = MemoDataStore.AddMemo(assesMemo);
-                await unitOfWork.Commit();
-                var cloneMemo = MemoDataStore.CloneAMemo(Guid.NewGuid().ToString(&quot;N&quot;));
-                await unitOfWork.Commit();
+            var now = DateTime.Now;
+            var a = new CNTimeSlice(now.AddHours(1), now.AddHours(2));
+            var b = new CNTimeSlice(now.AddHours(3));
+            var c = new CNTimeSlice(now.AddHours(2), now.AddHours(3));
 
-                var allMemos = await MemoDataStore.GetAllGlobalMemos();
-                Assert.AreEqual(1, allMemos.Count);
-
-                Assert.IsNull(cloneMemo);
-            });
+            Assert.IsFalse(a.InterceptWith(b));
+            Assert.IsFalse(b.InterceptWith(a));
+            Assert.IsFalse(a.InterceptWith(c));
+            Assert.IsFalse(c.InterceptWith(a));
+            Assert.IsTrue(c.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(c));
         }
 
         [Test]
-        public async Task GetAllTaskMemos_Success()
+        public void GetDayDuration_SingleDay()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var MemoDataStore = new MemoDataStore(dbcontext);
-
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesMemo = DomainTestHelper.GetARandomMemo();
-                var assesTask = DomainTestHelper.GetARandomTask();
-                assesTask.TaskMemos = new List&lt;CNTaskMemo&gt;(){new CNTaskMemo(){Memo = assesMemo,Task = assesTask}};
-                var addedTask = taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                var allMemos = await MemoDataStore.GetAllTaskMemos(addedTask.TaskId);
-                Assert.AreEqual(1, allMemos.Count);
-                Assert.AreEqual(assesMemo.Content, allMemos.First().Content);
-            });
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.ToShortDateString()).AddMilliseconds(-1));
+            Assert.AreEqual(b,a.GetDayDuration());
+        }
+        [Test]
+        public void GetDayDuration_MutipleDay()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.AddDays(1).ToShortDateString()).AddMilliseconds(-1));
+            Assert.AreEqual(b, a.GetDayDuration());
+        }
+        [Test]
+        public void GetDayDuration_StartTimeBiggerThanDateTimeNow()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(1).AddMinutes(-1), currentTime.AddDays(1).AddMinutes(4));
+            Assert.IsNull(a.GetDayDuration());
         }
 
-        /// &lt;summary&gt;
-        /// Some Memo Contain Relations
-        /// this test will assert those relations are cloned properly
-        /// &lt;/summary&gt;
-        /// &lt;returns&gt;&lt;/returns&gt;
         [Test]
-        public async Task Clone_ComplicatedMemo()
+        public void IsContaining_NoBoundary()
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var MemoDataStore = new MemoDataStore(dbcontext);
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.ToShortDateString()));
+            Assert.IsFalse(b.IsContaining(a));
+        }
+        [Test]
+        public void IsContaining_BWrapA()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.ToShortDateString()));
+            Assert.IsTrue(b.IsContaining(a));
+        }
+        [Test]
+        public void IsContaining_CEqualD()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice c = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice d = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsTrue(c.IsContaining(d));
+            Assert.IsTrue(d.IsContaining(c));
+        }
+        [Test]
+        public void IsContaining_EColideF()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice e = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(1));
+            CNTimeSlice f = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsFalse(e.IsContaining(f));
+            Assert.IsFalse(f.IsContaining(e));
+        }
+        [Test]
+        public void IsContaining_GWithinHWithBoundaries()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice g = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(1));
+            CNTimeSlice h = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsFalse(g.IsContaining(h));
+            Assert.IsTrue(h.IsContaining(g));
+            g = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            h = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsFalse(g.IsContaining(h));
+            Assert.IsTrue(h.IsContaining(g));
+        }
 
-                //arrange initial entity
-                var assesMemo = DomainTestHelper.GetARandomMemo();
-                var task = DomainTestHelper.GetARandomTask();
-                var tags = new[] {DomainTestHelper.GetARandomTag(), DomainTestHelper.GetARandomTag()}.ToList();
+        [Test]
+        public void GetWorkDays()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = a.GetDayDuration();
+            Assert.AreEqual(1,b.GetWorkDays());
+            a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(1).AddMinutes(2));
+            b = a.GetDayDuration();
+            Assert.AreEqual(3, b.GetWorkDays());
+            a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), DateTime.Now.Date);
+            b = a.GetDayDuration();
+            Assert.AreEqual(2, b.GetWorkDays());
+        }
+        [Test]
+        public void GetWorkDays_EndTimeZero()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1));
+            ;
+            Assert.AreEqual(0, a.GetWorkDays());
+        }
 
-                //add relations
-                assesMemo.TaskMemos = new List&lt;CNTaskMemo&gt;(){new CNTaskMemo(){Memo = assesMemo,Task = task}};
-                task.TaskTaggers = tags.Select(x=&gt;new CNTaskTagger(){Tag =x,Task = task}).ToList();
-                assesMemo.MemoTaggers = tags.Select(x =&gt; new CNMemoTagger() { Tag = x, Memo = assesMemo }).ToList();
+        [Test]
+        public void SortTest()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2)); 
+            CNTimeSlice c = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-4), currentTime.AddDays(-1).AddMinutes(2));
 
-                var addedMemo = MemoDataStore.AddMemo(assesMemo);
-                await unitOfWork.Commit();
-                var cloneMemo = MemoDataStore.CloneAMemo(addedMemo.MemoId);
-                await unitOfWork.Commit();
-
-                Assert.AreEqual(addedMemo.TaskMemos.First().TaskId, cloneMemo.TaskMemos.First().TaskId);
-                Assert.AreEqual(addedMemo.MemoTaggers.First().TagId, cloneMemo.MemoTaggers.First().TagId);
-
-            });
+            var result = new List&lt;CNTimeSlice&gt;() {a, b, c};
+            result.Sort();
+            Assert.AreEqual(c, result.First());
+            Assert.AreEqual(a, result.Last());
         }
     }
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[21,9,21,10,1],[22,13,23,13,1],[23,13,23,14,1],[23,14,25,17,1],[25,17,25,67,1],[25,67,28,17,1],[28,17,28,66,1],[28,66,31,17,1],[31,17,31,50,1],[31,50,32,17,1],[32,17,32,43,1],[32,43,34,17,1],[34,17,34,69,1],[34,69,35,17,1],[35,17,35,59,1],[35,59,37,17,1],[37,17,37,87,1],[37,87,39,17,1],[39,17,39,59,1],[39,59,40,17,1],[40,17,40,68,1],[40,68,41,13,1],[41,13,41,14,1],[41,14,41,16,1],[22,13,41,16,1],[42,9,42,10,1],[46,9,46,10,1],[47,13,48,13,1],[48,13,48,14,1],[48,14,49,17,1],[49,17,49,66,1],[49,66,50,17,1],[50,17,50,67,1],[50,67,51,17,1],[51,17,51,66,1],[51,66,53,17,1],[53,17,53,43,1],[53,43,54,17,1],[54,17,54,53,1],[54,53,56,17,1],[56,17,56,68,1],[56,68,57,17,1],[57,17,57,51,1],[57,51,59,17,1],[59,17,59,91,1],[59,91,60,17,1],[60,17,60,50,1],[60,50,61,13,1],[61,13,61,14,1],[61,14,61,16,1],[47,13,61,16,1],[62,9,62,10,1],[66,9,66,10,1],[67,13,68,13,1],[68,13,68,14,1],[68,14,69,17,1],[69,17,69,66,1],[69,66,70,17,1],[70,17,70,71,1],[70,71,71,17,1],[71,17,71,53,1],[71,53,72,17,1],[72,17,72,68,1],[72,68,73,17,1],[73,17,73,52,1],[73,52,74,13,1],[74,13,74,14,1],[74,14,74,16,1],[67,13,74,16,1],[75,9,75,10,1],[79,9,79,10,1],[80,13,81,13,1],[81,13,81,14,1],[81,14,82,17,1],[82,17,82,66,1],[82,66,83,17,1],[83,17,83,95,1],[83,95,85,17,1],[85,17,85,42,1],[85,42,86,13,1],[86,13,86,14,1],[86,14,86,16,1],[80,13,86,16,1],[87,9,87,10,1],[91,9,91,10,1],[92,13,93,13,1],[93,13,93,14,1],[93,14,94,17,1],[94,17,94,66,1],[94,66,95,17,1],[95,17,95,67,1],[95,67,96,17,1],[96,17,96,66,1],[96,66,97,17,1],[97,17,97,43,1],[97,43,99,17,1],[99,17,99,54,1],[99,54,102,18,1],[102,18,102,54,1],[102,54,104,17,1],[104,17,104,63,1],[104,63,105,17,1],[105,17,105,46,1],[105,46,107,17,1],[107,17,107,86,1],[107,86,108,17,1],[108,17,108,58,1],[108,58,109,13,1],[109,13,109,14,1],[109,14,109,16,1],[92,13,109,16,1],[110,9,110,10,1],[114,9,114,10,1],[115,13,116,13,1],[116,13,116,14,1],[116,14,117,17,1],[117,17,117,66,1],[117,66,118,17,1],[118,17,118,71,1],[118,71,121,17,1],[121,17,121,54,1],[121,54,124,18,1],[124,18,124,54,1],[124,54,126,17,1],[126,17,126,63,1],[126,63,127,17,1],[127,17,127,45,1],[127,45,128,13,1],[128,13,128,14,1],[128,14,128,16,1],[115,13,128,16,1],[129,9,129,10,1],[133,9,133,10,1],[134,13,135,13,1],[135,13,135,14,1],[135,14,136,17,1],[136,17,136,66,1],[136,66,137,17,1],[137,17,137,67,1],[137,67,138,17,1],[138,17,138,66,1],[138,66,139,17,1],[139,17,139,43,1],[139,43,140,17,1],[140,17,140,76,1],[140,76,141,17,1],[141,17,141,43,1],[141,43,143,17,1],[143,17,143,72,1],[143,72,144,17,1],[144,17,144,51,1],[144,51,146,17,1],[146,17,146,45,1],[146,45,147,17,1],[147,17,147,71,1],[147,71,148,13,1],[148,13,148,14,1],[148,14,148,16,1],[134,13,148,16,1],[149,9,149,10,1],[153,9,153,10,1],[154,13,155,13,1],[155,13,155,14,1],[155,14,156,17,1],[156,17,156,66,1],[156,66,157,17,1],[157,17,157,67,1],[157,67,158,17,1],[158,17,158,66,1],[158,66,159,17,1],[159,17,159,43,1],[159,43,160,17,1],[160,17,160,88,1],[160,88,161,17,1],[161,17,161,43,1],[161,43,163,17,1],[163,17,163,72,1],[163,72,164,17,1],[164,17,164,52,1],[164,52,166,17,1],[166,17,166,42,1],[166,42,167,13,1],[167,13,167,14,1],[167,14,167,16,1],[154,13,167,16,1],[168,9,168,10,1],[172,9,172,10,1],[173,13,174,13,1],[174,13,174,14,1],[174,14,175,17,1],[175,17,175,66,1],[175,66,177,17,1],[177,17,177,66,1],[177,66,178,17,1],[178,17,178,67,1],[178,67,179,17,1],[179,17,179,67,1],[179,67,180,17,1],[180,17,180,115,1],[180,115,181,17,1],[181,17,181,66,1],[181,66,183,17,1],[183,17,183,43,1],[183,43,184,17,1],[184,17,184,86,1],[184,86,185,17,1],[185,17,185,52,1],[185,52,186,17,1],[186,17,186,78,1],[186,78,187,13,1],[187,13,187,14,1],[187,14,187,16,1],[173,13,187,16,1],[188,9,188,10,1],[197,9,197,10,1],[198,13,199,13,1],[199,13,199,14,1],[199,14,200,17,1],[200,17,200,66,1],[200,66,203,17,1],[203,17,203,67,1],[203,67,204,17,1],[204,17,204,62,1],[204,62,205,17,1],[205,17,205,112,1],[205,112,208,17,1],[208,17,208,110,1],[208,110,209,17,1],[209,17,209,51,1],[209,51,209,89,1],[209,89,209,100,1],[209,17,209,100,1],[209,100,210,17,1],[210,17,210,58,1],[210,58,210,106,1],[210,106,210,117,1],[210,17,210,117,1],[210,117,212,17,1],[212,17,212,66,1],[212,66,213,17,1],[213,17,213,43,1],[213,43,214,17,1],[214,17,214,76,1],[214,76,215,17,1],[215,17,215,43,1],[215,43,217,17,1],[217,17,217,105,1],[217,105,218,17,1],[218,17,218,107,1],[218,107,220,13,1],[220,13,220,14,1],[220,14,220,16,1],[198,13,220,16,1],[221,9,221,10,1]]);
+      highlightRanges([[14,9,14,10,0],[15,13,15,87,0],[16,13,16,59,0],[17,13,17,33,0],[18,13,18,33,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,52,0],[23,52,23,53,0],[23,53,24,17,0],[24,17,24,92,0],[24,92,24,93,0],[24,93,24,95,0],[23,13,24,95,0],[25,9,25,10,0],[28,9,28,10,0],[29,13,29,86,0],[30,13,30,54,0],[32,13,32,51,0],[34,13,34,34,0],[35,9,35,10,0],[39,9,39,10,0],[40,13,40,59,0],[41,13,41,74,0],[42,13,42,47,0],[43,13,43,47,0],[44,9,44,10,0],[48,9,48,10,0],[49,13,49,59,0],[50,13,50,101,0],[52,13,52,47,0],[53,13,53,47,0],[54,9,54,10,0],[58,9,58,10,0],[59,13,59,59,0],[60,13,60,101,0],[62,13,62,47,0],[63,13,63,47,0],[64,9,64,10,0],[67,9,67,10,0],[68,13,68,59,0],[69,13,69,103,0],[71,13,71,48,0],[72,13,72,48,0],[73,9,73,10,0],[78,9,78,10,0],[79,13,79,88,0],[80,13,80,51,0],[81,9,81,10,0],[84,9,84,10,0],[85,13,85,87,0],[86,13,86,103,0],[88,13,88,47,0],[89,13,89,47,0],[90,9,90,10,0],[93,9,93,10,0],[94,13,94,88,0],[95,13,95,103,0],[97,13,97,47,0],[98,13,98,47,0],[99,9,99,10,0],[102,9,102,10,0],[103,13,103,88,0],[104,13,104,102,0],[106,13,106,47,0],[107,13,107,47,0],[108,9,108,10,0],[112,9,112,10,0],[113,13,113,44,0],[114,13,114,125,0],[115,13,115,125,0],[117,13,117,47,0],[118,13,118,47,0],[119,9,119,10,0],[123,9,123,10,0],[124,13,124,88,0],[125,13,125,101,0],[127,13,127,48,0],[128,13,128,48,0],[129,9,129,10,0],[133,9,133,10,0],[134,13,134,44,0],[135,16,135,127,0],[136,13,136,125,0],[138,13,138,48,0],[139,13,139,48,0],[140,9,140,10,0],[144,9,144,10,0],[145,13,145,36,0],[146,13,146,71,0],[147,13,147,54,0],[148,13,148,71,0],[150,13,150,48,0],[151,13,151,48,0],[152,13,152,48,0],[153,13,153,48,0],[154,13,154,47,0],[155,13,155,47,0],[156,9,156,10,0],[160,9,160,10,0],[161,13,161,44,0],[162,13,162,124,0],[163,13,163,183,0],[164,13,164,51,0],[165,9,165,10,0],[168,9,168,10,0],[169,13,169,44,0],[170,13,170,112,0],[171,13,171,194,0],[172,13,172,52,0],[173,9,173,10,0],[176,9,176,10,0],[177,13,177,44,0],[178,13,178,122,0],[179,13,179,47,0],[180,9,180,10,0],[184,9,184,10,0],[185,13,185,44,0],[186,13,186,85,0],[187,13,187,163,0],[188,13,188,47,0],[189,9,189,10,0],[192,9,192,10,0],[193,13,193,44,0],[194,13,194,124,0],[195,13,195,163,0],[196,13,196,46,0],[197,9,197,10,0],[200,9,200,10,0],[201,13,201,44,0],[202,13,202,124,0],[203,13,203,124,0],[204,13,204,46,0],[205,13,205,46,0],[206,9,206,10,0],[209,9,209,10,0],[210,13,210,44,0],[211,13,211,124,0],[212,13,212,124,0],[213,13,213,47,0],[214,13,214,47,0],[215,9,215,10,0],[218,9,218,10,0],[219,13,219,44,0],[220,13,220,124,0],[221,13,221,124,0],[222,13,222,47,0],[223,13,223,46,0],[224,13,224,112,0],[225,13,225,112,0],[226,13,226,47,0],[227,13,227,46,0],[228,9,228,10,0],[232,9,232,10,0],[233,13,233,44,0],[234,13,234,124,0],[235,13,235,48,0],[236,13,236,48,0],[237,13,237,111,0],[238,13,238,36,0],[239,13,239,49,0],[240,13,240,92,0],[241,13,241,36,0],[242,13,242,49,0],[243,9,243,10,0],[246,9,246,10,0],[247,13,247,44,0],[248,13,248,85,0],[249,13,249,14,0],[250,13,250,49,0],[251,9,251,10,0],[255,9,255,10,0],[256,13,256,44,0],[257,13,257,124,0],[258,13,258,124,0],[259,13,259,124,0],[261,13,261,60,0],[262,13,262,27,0],[263,13,263,48,0],[264,13,264,47,0],[265,9,265,10,0]]);
     </script>
   </body>
 </html>

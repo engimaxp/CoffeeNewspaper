@@ -2,76 +2,219 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\logging\implementation\debuglogger.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\taskexpanddetialcontrol.xaml</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Diagnostics;
+&lt;UserControl x:Class=&quot;CN_WPF.TaskExpandDetialControl&quot;
+             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
+             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
+             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
+             mc:Ignorable=&quot;d&quot; 
+             d:DesignWidth=&quot;300&quot;
+             d:DataContext=&quot;{x:Static design:TaskExpandDetailDesignModel.Instance}&quot;&gt;
 
-namespace CN_Core.Logging
-{
-    /// &lt;summary&gt;
-    /// Logs the messages to the Debug log
-    /// &lt;/summary&gt;
-    public class DebugLogger : ILogger
-    {
-        /// &lt;summary&gt;
-        /// Logs the given message to the system Console
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;message&quot;&gt;The message to log&lt;/param&gt;
-        /// &lt;param name=&quot;level&quot;&gt;The level of the message&lt;/param&gt;
-        public void Log(string message, LogLevel level)
-        {
-            // The default category
-            var category = default(string);
+    &lt;!-- Shadow Border--&gt;
+    &lt;Border x:Name=&quot;ExpanderContent&quot;
+                    Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
+                    BorderBrush=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
+                    BorderThickness=&quot;1&quot;
+                    ClipToBounds=&quot;True&quot;
+                    Width=&quot;300&quot;&gt;
+        &lt;Grid&gt;
+            &lt;Border Background=&quot;Transparent&quot;
+                            BorderBrush=&quot;{StaticResource WordVeryLightBlueBrush}&quot;
+                            BorderThickness=&quot;0,10,0,0&quot; Margin=&quot;0,-11,0,0&quot;&gt;
+                &lt;Border.Effect&gt;
+                    &lt;DropShadowEffect Color=&quot;{StaticResource WordVeryLightBlue}&quot;
+                                              ShadowDepth=&quot;0&quot; BlurRadius=&quot;10&quot; /&gt;
+                &lt;/Border.Effect&gt;
+            &lt;/Border&gt;
+            &lt;Border Padding=&quot;10 10 14 10&quot; Background=&quot;Transparent&quot;&gt;
+                &lt;!-- Real Expanded Content --&gt;
+                &lt;StackPanel Orientation=&quot;Vertical&quot;
+                            HorizontalAlignment=&quot;Center&quot;
+                            VerticalAlignment=&quot;Top&quot;&gt;
 
-            // NOTE: The native Debug output has no color
-            //       However if you install the VS extension VSColorOutput
-            //       then this style will color the outputs nicely
-            //
-            //       https://github.com/mike-ward/VSColorOutput
-            //
+                    &lt;!-- Fail Reason --&gt;
+                    &lt;Grid Margin=&quot;0 0 0 5&quot;
+                          Visibility=&quot;{Binding DisplayFailReason,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                          ToolTip=&quot;Fail Reason&quot;&gt;
+                        &lt;Grid.ColumnDefinitions&gt;
+                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                        &lt;/Grid.ColumnDefinitions&gt;
+                        &lt;TextBlock Grid.Column=&quot;0&quot;
+                                   VerticalAlignment=&quot;Center&quot;
+                                   FontSize=&quot;{StaticResource FontSizeLarge}&quot;
+                                   Foreground=&quot;{StaticResource WordRedBrush}&quot;
+                                   FontFamily=&quot;{StaticResource FontAwesomeRegular}&quot;
+                                   Text=&quot;{StaticResource FontAwesomeTimesCircleIcon}&quot; /&gt;
+                        &lt;TextBlock Grid.Column=&quot;1&quot;
+                                   Text=&quot;{Binding FailReason,FallbackValue=&#39;&#39;}&quot;
+                                   Padding=&quot;10 0 0 0&quot;
+                                   FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                                   Foreground=&quot;{StaticResource WordRedBrush}&quot;
+                                   VerticalAlignment=&quot;Center&quot;
+                                   TextWrapping=&quot;Wrap&quot;/&gt;
+                    &lt;/Grid&gt;
 
-            // Color console based on level
-            switch (level)
-            {
-                // Debug
-                case LogLevel.Debug:
-                    category = &quot;information&quot;;
-                    break;
+                    &lt;!--Pending Reason--&gt;
+                    &lt;Grid Margin=&quot;0 0 0 5&quot;
+                          Visibility=&quot;{Binding DisplayPendingReason,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                          ToolTip=&quot;Pending Reason&quot;&gt;
+                        &lt;Grid.ColumnDefinitions&gt;
+                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                        &lt;/Grid.ColumnDefinitions&gt;
+                        &lt;TextBlock Grid.Column=&quot;0&quot;
+                                   Padding=&quot;3 0&quot;
+                                   VerticalAlignment=&quot;Center&quot;
+                                   FontSize=&quot;{StaticResource FontSizeLarge}&quot;
+                                   Foreground=&quot;{StaticResource WordOrangeBrush}&quot;
+                                   FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                   Text=&quot;{StaticResource FontAwesomeHalfHourGlassIcon}&quot; /&gt;
+                        &lt;TextBlock Grid.Column=&quot;1&quot;
+                                   Text=&quot;{Binding PendingReason,FallbackValue=&#39;&#39;}&quot;
+                                   Padding=&quot;10 0 0 0&quot;
+                                   FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                                   Foreground=&quot;{StaticResource WordOrangeBrush}&quot;
+                                   VerticalAlignment=&quot;Center&quot;
+                                   TextWrapping=&quot;Wrap&quot; /&gt;
+                    &lt;/Grid&gt;
+                        
+                    &lt;Border Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
+                        &lt;TextBlock 
+                            Padding=&quot;5 0 5 10&quot;
+                            FontFamily=&quot;Microsoft YaHei&quot;
+                            FontWeight=&quot;Bold&quot;
+                            Foreground=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
+                            Text=&quot;{Binding TaskDetailContent}&quot;
+                            TextWrapping=&quot;Wrap&quot;
+                        &gt;&lt;/TextBlock&gt;
+                    &lt;/Border&gt;
 
-                // Verbose
-                case LogLevel.Verbose:
-                    category = &quot;verbose&quot;;
-                    break;
+                    &lt;local:TaskTreeViewControl DataContext=&quot;{Binding ChildTasksModel}&quot;/&gt;
 
-                // Warning
-                case LogLevel.Warning:
-                    category = &quot;warning&quot;;
-                    break;
+                    &lt;!-- Created Time --&gt;
+                    &lt;Grid Margin=&quot;0 10 0 5&quot;&gt;
+                        &lt;Grid.ColumnDefinitions&gt;
+                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                        &lt;/Grid.ColumnDefinitions&gt;
+                        &lt;TextBlock Grid.Column=&quot;0&quot;
+                                           ToolTip=&quot;Created Time&quot;
+                                           FontSize=&quot;{StaticResource FontSizeLarge}&quot;
+                                           Foreground=&quot;{StaticResource WordGreenBrush}&quot;
+                                           FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                           Text=&quot;{StaticResource FontAwesomeClockIcon}&quot; /&gt;
+                        &lt;TextBlock Grid.Column=&quot;1&quot;
+                                           Padding=&quot;10 0 0 0&quot;
+                                           FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                                           Foreground=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
+                                           VerticalAlignment=&quot;Center&quot;
+                                           TextTrimming=&quot;CharacterEllipsis&quot;&gt;
+                                    &lt;Run Text=&quot;{Binding CreatedTimeShortForm,Mode=OneWay}&quot;
+                                         FontFamily=&quot;Microsoft YaHei&quot;
+                                         FontWeight=&quot;Bold&quot; /&gt;
+                                    &lt;Run Text=&quot;{Binding CreatedTimeLongForm,Mode=OneWay}&quot; /&gt;
+                        &lt;/TextBlock&gt;
+                    &lt;/Grid&gt;
 
-                // Error
-                case LogLevel.Error:
-                    category = &quot;error&quot;;
-                    break;
+                    &lt;!-- Importance and Urgency Settings --&gt;
+                    &lt;Grid Margin=&quot;0 5&quot;&gt;
+                        &lt;Grid.ColumnDefinitions&gt;
+                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                        &lt;/Grid.ColumnDefinitions&gt;
+                        &lt;local:RatingControl
+                            DisplayTxt=&quot;False&quot;
+                                    ToolTip=&quot;Urgency Settings&quot;
+                                    Grid.Column=&quot;0&quot;
+                                    Margin=&quot;-4 0 0 0&quot;
+                                    DataContext=&quot;{Binding UrgencyRating}&quot; /&gt;
+                        &lt;local:RatingControl
+                            DisplayTxt=&quot;False&quot;
+                                    ToolTip=&quot;Importance Settings&quot;
+                                    Grid.Column=&quot;2&quot;
+                                    DataContext=&quot;{Binding PriorityRating}&quot; /&gt;
+                    &lt;/Grid&gt;
 
-                // Success
-                case LogLevel.Success:
-                    category = &quot;-----&quot;;
-                    break;
-            }
+                    &lt;!-- Work Time Count --&gt;
+                    &lt;Grid Margin=&quot;0 5&quot;&gt;
+                        &lt;Grid.ColumnDefinitions&gt;
+                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                        &lt;/Grid.ColumnDefinitions&gt;
+                        &lt;TextBlock Grid.Column=&quot;0&quot;
+                                           VerticalAlignment=&quot;Center&quot;
+                                           FontSize=&quot;{StaticResource FontSizeLarge}&quot;
+                                           Foreground=&quot;{StaticResource WordLightBlueBrush}&quot;
+                                           FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                           Text=&quot;{StaticResource FontAwesomeHalfHourGlassIcon}&quot; /&gt;
+                        &lt;Grid Grid.Column=&quot;1&quot; Margin=&quot;10 0 0 0&quot;&gt;
+                            &lt;StackPanel Orientation=&quot;Vertical&quot;&gt;
+                                &lt;TextBlock TextTrimming=&quot;CharacterEllipsis&quot;&gt;
+                                            &lt;Run Text=&quot;Worked for &quot; /&gt;
+                                            &lt;Run Text=&quot;{Binding WorkedDuration,FallbackValue=&#39;&#39;}&quot;
+                                                 FontWeight=&quot;Bold&quot;
+                                                 Foreground=&quot;{StaticResource WordOrangeBrush}&quot; /&gt;
+                                &lt;/TextBlock&gt;
+                                &lt;TextBlock 
+                                    Visibility=&quot;{Binding DisplayEstimatedTimeLeft,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                                    TextTrimming=&quot;CharacterEllipsis&quot;&gt;
+                                            &lt;Run Text=&quot;Estimated &quot; /&gt;
+                                            &lt;Run Text=&quot;{Binding EstimatedTimeLeft,FallbackValue=&#39;&#39;}&quot;
+                                                 FontWeight=&quot;Bold&quot;
+                                                 Foreground=&quot;{StaticResource WordGreenBrush}&quot; /&gt;
+                                            &lt;Run Text=&quot;Left&quot; /&gt;
+                                &lt;/TextBlock&gt;
+                            &lt;/StackPanel&gt;
+                        &lt;/Grid&gt;
+                        &lt;Grid Grid.Column=&quot;2&quot;
+                              Visibility=&quot;{Binding DisplayDeadLineTimeLeft,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                                      ToolTip=&quot;Time Left for DeadLine&quot;&gt;
+                            &lt;Grid.ColumnDefinitions&gt;
+                                &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                                &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                            &lt;/Grid.ColumnDefinitions&gt;
+                            &lt;TextBlock Grid.Column=&quot;0&quot;
+                                               VerticalAlignment=&quot;Center&quot;
+                                               FontSize=&quot;{StaticResource FontSizeLarge}&quot;
+                                               Foreground=&quot;{StaticResource WordLightBlueBrush}&quot;
+                                               FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                               Text=&quot;{StaticResource FontAwesomeStopWatchIcon}&quot; /&gt;
+                            &lt;TextBlock Grid.Column=&quot;1&quot;
+                                               Text=&quot;{Binding DeadLineTimeLeft,FallbackValue=&#39;&#39;}&quot;
+                                               FontWeight=&quot;Bold&quot;
+                                               Padding=&quot;10 0 0 0&quot;
+                                               FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                                               Foreground=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
+                                               VerticalAlignment=&quot;Center&quot;
+                                               TextTrimming=&quot;CharacterEllipsis&quot; /&gt;
+                        &lt;/Grid&gt;
+                    &lt;/Grid&gt;
 
-            // Write message to console
-            Debug.WriteLine(message, category);
-        }
-    }
-}
+                    &lt;!-- Tag Button --&gt;
+                    &lt;local:TagPanelControl DataContext=&quot;{Binding TagPanelViewModel}&quot; /&gt;
+
+                &lt;/StackPanel&gt;
+            &lt;/Border&gt;
+
+        &lt;/Grid&gt;
+    &lt;/Border&gt;
+&lt;/UserControl&gt;
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[16,9,16,10,1],[18,13,18,44,1],[28,13,28,27,1],[32,21,32,46,1],[33,21,33,27,1],[37,21,37,42,0],[38,21,38,27,0],[42,21,42,42,0],[43,21,43,27,0],[47,21,47,40,0],[48,21,48,27,0],[52,21,52,40,0],[53,21,53,27,0],[57,13,57,48,1],[58,9,58,10,1]]);
+      highlightRanges([[1,13,1,77,0]]);
     </script>
   </body>
 </html>

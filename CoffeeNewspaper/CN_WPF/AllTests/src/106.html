@@ -2,44 +2,166 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\utilities\treeviewitemextensions.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\bubbleselectcontrol.xaml</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Windows.Controls;
-using System.Windows.Media;
+&lt;UserControl x:Class=&quot;CN_WPF.BubbleSelectControl&quot;
+             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
+             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
+             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
+             mc:Ignorable=&quot;d&quot; &gt;
+    &lt;Grid d:DataContext=&quot;{x:Static design:BubbleSelectDesignModel.Instance}&quot;&gt;
+        &lt;Button x:Name=&quot;Button&quot;
+                ToolTip=&quot;{Binding ToolTip}&quot;
+                Command=&quot;{Binding ClickCommand}&quot;
+            Style=&quot;{StaticResource IconGrowButton}&quot;
+                Foreground=&quot;{Binding ForeGroundColor,Converter={local:ColorTypeToColorConverter}}&quot;
+                Content=&quot;{Binding DefaultIconFontText,Converter={local:IconTypeToFontAwesomeConverter}}&quot;
+                FontFamily=&quot;{Binding DefaultIconFontFamily,Converter={local:FontFamilyTypeToFontFamilyConverter}}&quot;
+                /&gt;
+        &lt;Popup DataContext=&quot;{Binding BubbleMenuViewModel}&quot;
+            StaysOpen=&quot;False&quot;
+               IsOpen=&quot;{Binding IsOpen}&quot;
+            AllowsTransparency=&quot;True&quot;
+            Placement=&quot;Bottom&quot;
+            PlacementTarget=&quot;{Binding ElementName=Button}&quot;&gt;
+            &lt;Grid&gt;
 
-namespace CN_WPF
-{
-    public static class TreeViewItemExtensions
-    {
-        public static int GetDepth(this TreeViewItem item)
-        {
-            TreeViewItem parent;
-            while ((parent = GetParent(item)) != null)
-            {
-                return GetDepth(parent) + 1;
-            }
-            return 0;
-        }
+                &lt;Grid.RowDefinitions&gt;
+                    &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+                    &lt;RowDefinition Height=&quot;*&quot; /&gt;
+                &lt;/Grid.RowDefinitions&gt;
 
-        private static TreeViewItem GetParent(TreeViewItem item)
-        {
-            var parent = VisualTreeHelper.GetParent(item);
-            while (!(parent is TreeViewItem || parent is TreeView))
-            {
-                if (parent == null) break;
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-            return parent as TreeViewItem;
-        }
-    }
-}
+                &lt;!-- bubble anchor --&gt;
+                &lt;Path Grid.Row=&quot;0&quot; 
+                      Stroke=&quot;{StaticResource ForegroundDarkBrush}&quot;
+                      Panel.ZIndex=&quot;3&quot;
+                      Margin=&quot;10 0 0 -3&quot;
+                      Data=&quot;M 0,10 L 10,0 L 20,10&quot; 
+                      StrokeThickness=&quot;2&quot;
+                      HorizontalAlignment=&quot;Left&quot;
+                      Fill=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
+
+
+                &lt;/Path&gt;
+                &lt;!-- bubble rectangle --&gt;
+
+                &lt;Border Padding=&quot;5&quot;
+                        Grid.Row=&quot;1&quot;
+                        BorderBrush=&quot;{StaticResource ForegroundDarkBrush}&quot;
+                        BorderThickness=&quot;2&quot;
+                    Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
+                    CornerRadius=&quot;8&quot;&gt;
+
+                    &lt;ItemsControl ItemsSource=&quot;{Binding Buttons}&quot;&gt;
+                        &lt;ItemsControl.ItemTemplate&gt;
+                            &lt;DataTemplate&gt;
+                                &lt;Border Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
+                                        Padding=&quot;5 0 20 0&quot;
+                            CornerRadius=&quot;8&quot;&gt;
+                                    &lt;Border.InputBindings&gt;
+                                        &lt;MouseBinding MouseAction=&quot;LeftClick&quot; Command=&quot;{Binding ClickCommand}&quot;&gt;&lt;/MouseBinding&gt;
+                                    &lt;/Border.InputBindings&gt;
+                                    &lt;Border.Triggers&gt;
+                                        &lt;!-- Hover over blue --&gt;
+                                        &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseEnter&quot;&gt;
+                                            &lt;BeginStoryboard&gt;
+                                                &lt;Storyboard&gt;
+                                                    &lt;ColorAnimation To=&quot;{StaticResource WordBlue}&quot; 
+                                                        Duration=&quot;0:0:0&quot; 
+                                                        Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
+                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundVeryLight}&quot; 
+                                                        Duration=&quot;0:0:0&quot; 
+                                                        Storyboard.TargetProperty=&quot;Foreground.Color&quot; 
+                                                        Storyboard.TargetName=&quot;icon&quot;
+                                                        /&gt;
+                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundVeryLight}&quot; 
+                                                        Duration=&quot;0:0:0&quot; 
+                                                        Storyboard.TargetProperty=&quot;Foreground.Color&quot; 
+                                                        Storyboard.TargetName=&quot;text&quot;
+                                                        /&gt;
+                                                &lt;/Storyboard&gt;
+                                            &lt;/BeginStoryboard&gt;
+                                        &lt;/EventTrigger&gt;
+                                        &lt;!-- Hover out revert --&gt;
+                                        &lt;EventTrigger RoutedEvent=&quot;Mouse.MouseLeave&quot;&gt;
+                                            &lt;BeginStoryboard&gt;
+                                                &lt;Storyboard&gt;
+                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundVeryLight}&quot; 
+                                                        Duration=&quot;0:0:0&quot; 
+                                                        Storyboard.TargetProperty=&quot;Background.Color&quot; /&gt;
+                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundDark}&quot; 
+                                                        Duration=&quot;0:0:0&quot; 
+                                                        Storyboard.TargetProperty=&quot;Foreground.Color&quot; 
+                                                        Storyboard.TargetName=&quot;icon&quot;
+                                                        /&gt;
+                                                    &lt;ColorAnimation To=&quot;{StaticResource ForegroundVeryDark}&quot; 
+                                                        Duration=&quot;0:0:0&quot; 
+                                                        Storyboard.TargetProperty=&quot;Foreground.Color&quot; 
+                                                        Storyboard.TargetName=&quot;text&quot;
+                                                        /&gt;
+                                                &lt;/Storyboard&gt;
+                                            &lt;/BeginStoryboard&gt;
+                                        &lt;/EventTrigger&gt;
+                                    &lt;/Border.Triggers&gt;
+
+                                    &lt;!-- Grid container for text and icon --&gt;
+                                    &lt;Grid&gt;
+                                        &lt;Grid.ColumnDefinitions&gt;
+                                            &lt;!-- Checkbox --&gt;
+                                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                                            &lt;!-- Icon --&gt;
+                                            &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                                            &lt;!-- Text --&gt;
+                                            &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                                        &lt;/Grid.ColumnDefinitions&gt;
+
+                                        &lt;CheckBox  Grid.Column=&quot;0&quot;
+                                            Margin=&quot;0&quot;
+                                            Padding=&quot;0&quot;
+                                                   IsChecked=&quot;{Binding IsSelected}&quot;
+                                            FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                                            Style=&quot;{StaticResource FontAweSomeCheckBox}&quot;
+                                                   Visibility=&quot;{Binding IsSelected,Converter={local:BooleanToVisiblityConverter},ConverterParameter=True}&quot;/&gt;
+                                        &lt;!-- Icon --&gt;
+                                        &lt;TextBlock Name=&quot;icon&quot;
+                                                   Grid.Column=&quot;1&quot;
+                                       Padding=&quot;5&quot;
+                                       VerticalAlignment=&quot;Center&quot;
+                                                   FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                                               Text=&quot;{Binding IconFontText,Converter={local:IconTypeToFontAwesomeConverter}}&quot;
+                                               FontFamily=&quot;{Binding IconFontFamily,Converter={local:FontFamilyTypeToFontFamilyConverter}}&quot;
+                                       Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot;
+                                       /&gt;
+
+                                        &lt;!-- Text --&gt;
+                                        &lt;TextBlock Name=&quot;text&quot;
+                                       Grid.Column=&quot;2&quot;
+                                       Foreground=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
+                                       FontFamily=&quot;Microsoft YaHei&quot;
+                                       VerticalAlignment=&quot;Center&quot;
+                                       Text=&quot;{Binding ButtonText}&quot; /&gt;
+
+                                    &lt;/Grid&gt;
+                                &lt;/Border&gt;
+                            &lt;/DataTemplate&gt;
+                        &lt;/ItemsControl.ItemTemplate&gt;
+                    &lt;/ItemsControl&gt;
+                &lt;/Border&gt;
+            &lt;/Grid&gt;
+        &lt;/Popup&gt;
+    &lt;/Grid&gt;
+&lt;/UserControl&gt;
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[9,9,9,10,0],[11,13,11,55,0],[12,13,12,14,0],[13,17,13,45,0],[15,13,15,22,0],[16,9,16,10,0],[19,9,19,10,0],[20,13,20,59,0],[21,13,21,68,0],[22,13,22,14,0],[23,17,23,36,0],[23,37,23,43,0],[24,17,24,61,0],[25,13,25,14,0],[26,13,26,43,0],[27,9,27,10,0]]);
+      highlightRanges([[1,13,1,77,0]]);
     </script>
   </body>
 </html>

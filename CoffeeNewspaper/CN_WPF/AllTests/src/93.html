@@ -2,39 +2,65 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\mutivalueconverter\basemutivalueconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\mainwindow.xaml</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Globalization;
-using System.Windows.Data;
-using System.Windows.Markup;
+&lt;Window x:Class=&quot;CN_WPF.MainWindow&quot;
+        xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+        xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+        xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
+        xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
+        xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+        mc:Ignorable=&quot;d&quot;
+        Title=&quot;Coffee Newspapaer!&quot;
+        AllowsTransparency=&quot;False&quot;
+        Height=&quot;660&quot;
+        Width=&quot;780&quot;
+        MinWidth=&quot;780&quot;
+        MinHeight=&quot;660&quot;
 
-namespace CN_WPF
-{
-    public abstract class BaseMutiValueConverter&lt;T&gt; : MarkupExtension, IMultiValueConverter where T:class,new()
-    {
-        /// &lt;summary&gt;
-        /// A single static instance of this value converter
-        /// &lt;/summary&gt;
-        private static readonly T Converter = new T();
+        Deactivated=&quot;AppWindow_Deactivated&quot;
+        Activated=&quot;AppWindow_Activated&quot;&gt;
+    &lt;Grid&gt;
+        &lt;Grid.RowDefinitions&gt;
+            &lt;!--Navagation Bar--&gt;
+            &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+            &lt;!--Page Content--&gt;
+            &lt;RowDefinition Height=&quot;*&quot; /&gt;
+            &lt;!--Status Bar--&gt;
+            &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+        &lt;/Grid.RowDefinitions&gt;
 
-        public override object ProvideValue(IServiceProvider serviceProvider)
-        {
-            return Converter ;
-        }
+        &lt;!--Navagation Bar--&gt;
+        &lt;local:HeadMenuControl Grid.Row=&quot;0&quot; /&gt;
 
-        public abstract object Convert(object[] values, Type targetType, object parameter, CultureInfo culture);
 
-        public abstract object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture);
-    }
-}
+        &lt;!--        &lt;Frame Grid.Row=&quot;1&quot; x:Name=&quot;MainFrame&quot; Content=&quot;{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:ApplicationPageValueConverter}}&quot;&gt;&lt;/Frame&gt;--&gt;
+        &lt;!--Page Content--&gt;
+        &lt;local:PageHost Grid.Row=&quot;1&quot;
+                        CurrentPage=&quot;{Binding ApplicationViewModel.CurrentPage,
+                                        Source={x:Static local:ViewModelLocator.Instance}}&quot;
+                        CurrentPageViewModel=&quot;{Binding ApplicationViewModel.CurrentPageViewModel,
+                                        Source={x:Static local:ViewModelLocator.Instance}}&quot; /&gt;
+
+        &lt;!--Status Bar--&gt;
+        &lt;local:StatusBarControl Grid.Row=&quot;2&quot;&gt;&lt;/local:StatusBarControl&gt;
+
+        &lt;!-- Dimmed overlay --&gt;
+        &lt;Border Grid.Row=&quot;0&quot; Grid.RowSpan=&quot;3&quot;
+                Panel.ZIndex=&quot;10&quot;
+                Opacity=&quot;0.3&quot;&gt;
+            &lt;Border Background=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
+                    local:AnimateFadeInProperty.Value=&quot;{Binding DimmableOverlayVisible}&quot; /&gt;
+        &lt;/Border&gt;
+    &lt;/Grid&gt;
+&lt;/Window&gt;
     </pre>
     <script type="text/javascript">
-      highlightRanges([[13,9,13,55,0],[16,9,16,10,0],[17,13,17,31,0],[18,9,18,10,0]]);
+      highlightRanges([[1,13,1,77,0],[15,13,15,110,0],[16,13,16,106,0]]);
     </script>
   </body>
 </html>

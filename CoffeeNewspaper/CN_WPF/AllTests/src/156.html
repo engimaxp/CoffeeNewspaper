@@ -2,48 +2,29 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datacontext\datacontextforioc.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\pagehost.xaml</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Threading.Tasks;
-using CN_Core;
-using Ninject;
-using Ninject.Extensions.NamedScope;
+&lt;UserControl x:Class=&quot;CN_WPF.PageHost&quot;
+             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
+             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
+             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+             mc:Ignorable=&quot;d&quot; 
+             d:DesignHeight=&quot;450&quot; d:DesignWidth=&quot;800&quot;&gt;
+    &lt;Grid&gt;
+        &lt;ContentControl  x:Name=&quot;OldPage&quot; /&gt;
+        &lt;ContentControl x:Name=&quot;NewPage&quot; /&gt;
+    &lt;/Grid&gt;
+&lt;/UserControl&gt;
 
-namespace CN_Repository
-{
-    /// &lt;summary&gt;
-    ///     Extension method to inject CNDBContext to Container
-    /// &lt;/summary&gt;
-    public static class DataContextForIoC
-    {
-        /// &lt;summary&gt;
-        ///     Bind the DbContext
-        ///     shall do this at the beginning of app start
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;Kernel&quot;&gt;&lt;/param&gt;
-        /// &lt;param name=&quot;InMemoryMode&quot;&gt;true if used in unittest&lt;/param&gt;
-        public static void BindCNDBContext(this IKernel Kernel, bool InMemoryMode = false)
-        {
-            if (Kernel == null) return;
-            if (InMemoryMode)
-            {
-                Kernel.Bind&lt;CNDbContext&gt;().ToConstant(CNDbContext.GetMemorySqlDatabase()).InNamedScope(CNConstants.NinjectNamedScopeForService);
-            }
-            else
-            {
-                Kernel.Bind&lt;CNDbContext&gt;().ToMethod(context =&gt; CNDbContext.GetFileSqlDatabase()).InNamedScope(CNConstants.NinjectNamedScopeForService);
-            }
-        }
-        
-    }
-}
     </pre>
     <script type="text/javascript">
-      highlightRanges([[20,9,20,10,0],[21,13,21,32,0],[21,33,21,40,0],[22,13,22,30,0],[23,13,23,14,0],[24,17,24,145,0],[25,13,25,14,0],[27,13,27,14,0],[28,17,28,64,0],[28,64,28,96,0],[28,96,28,152,0],[28,17,28,152,0],[29,13,29,14,0],[30,9,30,10,0]]);
+      highlightRanges([[1,13,1,77,0]]);
     </script>
   </body>
 </html>
