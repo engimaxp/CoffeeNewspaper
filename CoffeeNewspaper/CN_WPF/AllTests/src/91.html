@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\attachedproperties\textentrywidthmatcherproperty.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// Match the label width of all text entry controls inside this panel
+    /// &lt;/summary&gt;
+    public class TextEntryWidthMatcherProperty : BaseAttachedProperty&lt;TextEntryWidthMatcherProperty, bool&gt;
+    {
+        public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            // Get the panel (grid typically)
+            if (!(sender is Panel panel)) return;
+            // Call SetWidths initially (this also helps design time to work)
+            SetWidths(panel);
+
+            // Wait for panel to load
+            void OnLoaded(object s, RoutedEventArgs ee)
+            {
+                // Unhook
+                panel.Loaded -= OnLoaded;
+
+                // Set widths
+                SetWidths(panel);
+
+                // Loop each child
+                foreach (var child in panel.Children)
+                {
+                    // Set it&#39;s margin to the given value
+
+                    // Ignore any non-text entry controls
+                    if (!(child is TextEntryControl)) continue;
+
+                    // Get the label from the text entry or password entry
+                    var label = (child as TextEntryControl).Label;
+
+                    label.SizeChanged += (ss, eee) =&gt;
+                    {
+                        // Update widths
+                        SetWidths(panel);
+                    };
+                }
+            }
+
+            // Hook into the Loaded event
+            panel.Loaded += OnLoaded;
+        }
+
+        /// &lt;summary&gt;
+        /// Update all child text entry controls so their widths match the largest width of the group
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;panel&quot;&gt;The panel containing the text entry controls&lt;/param&gt;
+        private void SetWidths(Panel panel)
+        {
+            // Keep track of the maximum width
+            var maxSize = 0d;
+
+            // For each child...
+            foreach (var child in panel.Children)
+            {
+                // Ignore any non-text entry controls
+                if (!(child is TextEntryControl))
+                    continue;
+
+                // Get the label from the text entry or password entry
+                var label = (child as TextEntryControl).Label;
+
+                // Find if this value is larger than the other controls
+                maxSize = Math.Max(maxSize, label.RenderSize.Width + label.Margin.Left + label.Margin.Right);
+            }
+
+            // Create a grid length converter
+            var gridLength = (GridLength)new GridLengthConverter().ConvertFromString(maxSize.ToString());
+
+            // For each child...
+            foreach (var child in panel.Children)
+            {
+                if (child is TextEntryControl text)
+                    // Set each controls LabelWidth value to the max size
+                    text.LabelWidth = gridLength;
+            }
+
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[15,13,15,42,0],[15,43,15,50,0],[17,13,17,30,0],[21,13,21,14,0],[23,17,23,42,0],[26,17,26,34,0],[29,17,29,24,0],[29,26,29,35,0],[29,36,29,38,0],[29,39,29,53,0],[30,17,30,18,0],[34,21,34,54,0],[34,55,34,64,0],[37,21,37,67,0],[39,21,43,23,0],[44,17,44,18,0],[45,13,45,14,0],[48,13,48,38,0],[49,9,49,10,0],[56,9,56,10,0],[58,13,58,30,0],[61,13,61,20,0],[61,22,61,31,0],[61,32,61,34,0],[61,35,61,49,0],[62,13,62,14,0],[64,17,64,50,0],[65,21,65,30,0],[68,17,68,63,0],[71,17,71,110,0],[72,13,72,14,0],[75,13,75,106,0],[78,13,78,20,0],[78,22,78,31,0],[78,32,78,34,0],[78,35,78,49,0],[79,13,79,14,0],[80,17,80,52,0],[82,21,82,50,0],[83,13,83,14,0],[85,9,85,10,0]]);
+    </script>
+  </body>
+</html>

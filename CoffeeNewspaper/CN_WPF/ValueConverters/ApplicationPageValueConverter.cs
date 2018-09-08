@@ -28,7 +28,7 @@ namespace CN_WPF
                     return new TagReviewPage(null as TagReviewViewModel);
 
                 case ApplicationPage.TasksList:
-                    return new TaskListPage(null as TasksListViewModel);
+                    return new TaskListPage(null as TasksListPageViewModel);
 
                 default:
                     {

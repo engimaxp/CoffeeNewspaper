@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\attachedproperties\mousewheeleventbubbleupattachedproperty.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// Try to hook the child scroll view to parent scroll view
+    /// &lt;/summary&gt;
+    public class MouseWheelEventBubbleUpAttachedProperty:BaseAttachedProperty&lt;MouseWheelEventBubbleUpAttachedProperty,bool&gt;
+    {
+        public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(sender is ScrollViewer scrollViewer)) return;
+            if ((bool) e.NewValue)
+            {
+                scrollViewer.LayoutUpdated += (o, args) =&gt; {
+                    //Hook the event
+                    scrollViewer.FindAndActToAllChild&lt;ScrollViewer&gt;((scrollchildview) =&gt; { scrollchildview.PreviewMouseWheel += (sss, eee) =&gt; PreviewMouseWheel(sss, eee, scrollViewer); });
+                };
+            }
+        }
+
+        private void PreviewMouseWheel(object sender, MouseWheelEventArgs e, ScrollViewer scrollViewer)
+        {
+            if (!e.Handled)
+            {
+                e.Handled = true;
+                var eventArg =
+                    new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+                    {
+                        RoutedEvent = UIElement.MouseWheelEvent,
+                        Source = sender
+                    };
+                scrollViewer.RaiseEvent(eventArg);
+            }
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,56,0],[15,57,15,64,0],[16,13,16,35,0],[17,13,17,14,0],[18,17,18,60,0],[18,60,18,61,0],[18,61,20,21,0],[20,21,20,90,0],[20,90,20,91,0],[20,91,20,92,0],[20,92,20,143,0],[20,143,20,184,0],[20,184,20,185,0],[20,92,20,185,0],[20,185,20,186,0],[20,186,20,187,0],[20,187,20,189,0],[20,21,20,189,0],[20,189,21,17,0],[21,17,21,18,0],[21,18,21,19,0],[18,17,21,19,0],[22,13,22,14,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,28,0],[28,13,28,14,0],[29,17,29,34,0],[30,17,35,23,0],[36,17,36,51,0],[37,13,37,14,0],[38,9,38,10,0]]);
+    </script>
+  </body>
+</html>

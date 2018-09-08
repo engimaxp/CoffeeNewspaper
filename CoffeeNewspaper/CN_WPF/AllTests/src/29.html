@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\utilities\visualtreeextensionclass.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Windows;
+using System.Windows.Media;
+
+namespace CN_WPF
+{
+    public static class VisualTreeExtensionClass
+    {
+        public static void FindAndActToAllChild&lt;T&gt;(this FrameworkElement element,Action&lt;T&gt; doAction) where T : FrameworkElement
+        {
+            int childrenCount = VisualTreeHelper.GetChildrenCount(element);
+            var children = new FrameworkElement[childrenCount];
+
+            for (int i = 0; i &lt; childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(element, i) as FrameworkElement;
+                children[i] = child;
+                if (child is T)
+                    doAction((T)child);
+            }
+
+            for (int i = 0; i &lt; childrenCount; i++)
+                if (children[i] != null)
+                {
+                    FindAndActToAllChild&lt;T&gt;(children[i], doAction);
+                }
+
+        }
+        public static T FindFirstChild&lt;T&gt;(this FrameworkElement element) where T : FrameworkElement
+        {
+            int childrenCount = VisualTreeHelper.GetChildrenCount(element);
+            var children = new FrameworkElement[childrenCount];
+
+            for (int i = 0; i &lt; childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(element, i) as FrameworkElement;
+                children[i] = child;
+                if (child is T)
+                    return (T)child;
+            }
+
+            for (int i = 0; i &lt; childrenCount; i++)
+                if (children[i] != null)
+                {
+                    var subChild = FindFirstChild&lt;T&gt;(children[i]);
+                    if (subChild != null)
+                        return subChild;
+                }
+
+            return null;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,10,0],[11,13,11,76,0],[12,13,12,64,0],[14,18,14,27,0],[14,29,14,46,0],[14,48,14,51,0],[15,13,15,14,0],[16,17,16,87,0],[17,17,17,37,0],[18,17,18,32,0],[19,21,19,40,0],[20,13,20,14,0],[22,18,22,27,0],[22,29,22,46,0],[22,48,22,51,0],[23,17,23,41,0],[24,17,24,18,0],[25,21,25,68,0],[26,17,26,18,0],[28,9,28,10,0],[30,9,30,10,0],[31,13,31,76,0],[32,13,32,64,0],[34,18,34,27,0],[34,29,34,46,0],[34,48,34,51,0],[35,13,35,14,0],[36,17,36,87,0],[37,17,37,37,0],[38,17,38,32,0],[39,21,39,37,0],[40,13,40,14,0],[42,18,42,27,0],[42,29,42,46,0],[42,48,42,51,0],[43,17,43,41,0],[44,17,44,18,0],[45,21,45,67,0],[46,21,46,42,0],[47,25,47,41,0],[48,17,48,18,0],[50,13,50,25,0],[51,9,51,10,0]]);
+    </script>
+  </body>
+</html>

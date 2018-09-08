@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\utilities\timeslicesstatistics.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace CN_Core
+{
+    /// &lt;summary&gt;
+    ///     Helper class to Get TimeSlices Durations
+    /// &lt;/summary&gt;
+    public static class TimeSlicesStatistics
+    {
+        /// &lt;summary&gt;
+        ///     Calculate a single timeslice&#39;s duration
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;timeSlice&quot;&gt;the &lt;see cref=&quot;CNTimeSlice&quot; /&gt; to calculate&lt;/param&gt;
+        /// &lt;param name=&quot;referenceTime&quot;&gt;
+        ///     if the endtime is null,than use referenceTIme as the endTime
+        ///     most cases this value is now
+        /// &lt;/param&gt;
+        /// &lt;returns&gt;the deviations TimeSpan of the StartDateTime and EndDateTime&lt;/returns&gt;
+        public static TimeSpan GetTimeSliceDuration(this CNTimeSlice timeSlice, DateTime referenceTime)
+        {
+            if (timeSlice == null) return TimeSpan.Zero;
+            var endtime = timeSlice.EndDateTime ?? referenceTime;
+            if (endtime &lt;= timeSlice.StartDateTime) return TimeSpan.Zero;
+            return endtime - timeSlice.StartDateTime;
+        }
+
+        /// &lt;summary&gt;
+        ///     Calculate mutiple timeslices&#39;s hour Duration
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;timeSlices&quot;&gt;the timeslicesList to calculate&lt;/param&gt;
+        /// &lt;returns&gt;double value of the total hours&lt;/returns&gt;
+        public static double GetTotalHours(this IEnumerable&lt;CNTimeSlice&gt; timeSlices)
+        {
+            var referenceTime = DateTime.Now;
+            return timeSlices.Sum(timeSlice =&gt; timeSlice.GetTimeSliceDuration(referenceTime).TotalHours);
+        }
+
+        /// &lt;summary&gt;
+        ///     Calculate mutiple timeslices&#39;s day Duration
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;timeSlices&quot;&gt;the timeslicesList to calculate&lt;/param&gt;
+        /// &lt;returns&gt;double value of the total days&lt;/returns&gt;
+        public static double GetTotalDays(this IEnumerable&lt;CNTimeSlice&gt; timeSlices)
+        {
+            var referenceTime = DateTime.Now;
+            return timeSlices.Sum(timeSlice =&gt; timeSlice.GetTimeSliceDuration(referenceTime).TotalDays);
+        }
+
+        /// &lt;summary&gt;
+        ///     Calculate workday count the timeslices has encontered
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;timeSlices&quot;&gt;the timeslicesList to calculate&lt;/param&gt;
+        /// &lt;returns&gt;double value of the total encontered days&lt;/returns&gt;
+        public static int GetWorkDays(this IEnumerable&lt;CNTimeSlice&gt; timeSlices)
+        {
+            //store the maximum day periods
+            var days = new HashSet&lt;CNTimeSlice&gt;(CNTimeSlice.StartDateTimeEndDateTimeComparer);
+            foreach (var timeSlice in timeSlices)
+            {
+                //Get encounted maximum day period
+                var dayDuration = timeSlice?.GetDayDuration();
+                if (dayDuration == null) continue;
+                //if current day period is smaller than one of the existing day period then jump to next
+                if (days.Any(x =&gt; x.IsContaining(dayDuration))) continue;
+                //if bigger than existing day period then replace it
+                var tobeReplaced = days.FirstOrDefault(x =&gt; dayDuration.IsContaining(x));
+                if (tobeReplaced != null)
+                {
+                    days.Remove(tobeReplaced);
+                    days.Add(dayDuration);
+                }
+                //if current day period has no intersections with existing day period list then add it
+                else
+                {
+                    days.Add(dayDuration);
+                }
+            }
+
+            return days.Sum(x =&gt; x.GetWorkDays());
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,9,22,10,1],[23,13,23,35,1],[23,36,23,57,1],[24,13,24,66,1],[25,13,25,52,1],[25,53,25,74,1],[26,13,26,54,1],[27,9,27,10,1],[35,9,35,10,1],[36,13,36,46,1],[37,13,37,48,1],[37,48,37,104,1],[37,104,37,106,1],[37,13,37,106,1],[38,9,38,10,1],[46,9,46,10,1],[47,13,47,46,1],[48,13,48,48,1],[48,48,48,103,1],[48,103,48,105,1],[48,13,48,105,1],[49,9,49,10,1],[57,9,57,10,1],[59,13,59,95,1],[60,13,60,20,1],[60,22,60,35,1],[60,36,60,38,1],[60,39,60,49,1],[61,13,61,14,1],[63,17,63,63,1],[64,17,64,41,1],[64,42,64,51,1],[66,17,66,35,1],[66,35,66,62,1],[66,62,66,64,1],[66,17,66,64,1],[66,65,66,74,1],[68,17,68,61,1],[68,61,68,88,1],[68,88,68,90,1],[68,17,68,90,1],[69,17,69,42,1],[70,17,70,18,1],[71,21,71,47,1],[72,21,72,43,1],[73,17,73,18,1],[76,17,76,18,1],[77,21,77,43,1],[78,17,78,18,1],[79,13,79,14,1],[81,13,81,34,1],[81,34,81,49,1],[81,49,81,51,1],[81,13,81,51,1],[82,9,82,10,1]]);
+    </script>
+  </body>
+</html>

@@ -32,16 +32,18 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task DeleteATaskMemoRelation_BothTaskAndMemoStillExist()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesMemo = GetTaskBindTestMemo(1);
                 var MemoDataStore = new MemoDataStore(dbcontext);
-                await MemoDataStore.AddMemo(assesMemo);
+                MemoDataStore.AddMemo(assesMemo);
 
+                await unitOfWork.Commit();
                 assesMemo.TaskMemos.Remove(assesMemo.TaskMemos.First());
-                await MemoDataStore.UpdateMemo(assesMemo);
+                MemoDataStore.UpdateMemo(assesMemo);
 
+                await unitOfWork.Commit();
                 Assert.AreEqual(1,dbcontext.Memos.Count());
                 Assert.AreEqual(1, dbcontext.Tasks.Count());
                 Assert.AreEqual(0,dbcontext.TaskMemos.Count());
@@ -50,16 +52,18 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task AddDupplicateTaskMemoRelation_ReturnFalse()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesMemo = GetTaskBindTestMemo(1);
                 var MemoDataStore = new MemoDataStore(dbcontext);
-                await MemoDataStore.AddMemo(assesMemo);
+                MemoDataStore.AddMemo(assesMemo);
 
+                await unitOfWork.Commit();
                 assesMemo.TaskMemos.Add(new CNTaskMemo(){MemoId = assesMemo.MemoId,TaskId = assesMemo.TaskMemos.First().TaskId});
-                var result = await MemoDataStore.UpdateMemo(assesMemo);
+                MemoDataStore.UpdateMemo(assesMemo);
 
+                var result = await unitOfWork.Commit();
                 Assert.IsFalse(result);
                 Assert.AreEqual(1, dbcontext.Memos.Count());
                 Assert.AreEqual(1, dbcontext.Tasks.Count());

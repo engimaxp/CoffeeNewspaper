@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\isnaviconselectedconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Globalization;
+using CN_Presentation;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    ///     A converter that takes in a enumtype and returns the nav icon is selected
+    /// &lt;/summary&gt;
+    public class IsNavIconSelectedConverter : BaseValueConverter&lt;IsNavIconSelectedConverter&gt;
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value != null)
+            {
+                var currentPage = (ApplicationPage) Enum.Parse(typeof(ApplicationPage), value.ToString());
+                if (parameter != null)
+                {
+                    var iconPage = (ApplicationPage)Enum.Parse(typeof(ApplicationPage), parameter.ToString());
+                    return currentPage == iconPage;
+                }
+            }
+
+            return false;
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[14,13,14,31,0],[15,13,15,14,0],[16,17,16,107,0],[17,17,17,39,0],[18,17,18,18,0],[19,21,19,111,0],[20,21,20,52,0],[22,13,22,14,0],[24,13,24,26,0],[25,9,25,10,0],[28,9,28,10,0],[29,13,29,49,0]]);
+    </script>
+  </body>
+</html>

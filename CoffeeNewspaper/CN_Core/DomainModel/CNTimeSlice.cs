@@ -46,7 +46,11 @@ namespace CN_Core
 
         public object Clone()
         {
-            return new CNTimeSlice(StartDateTime, EndDateTime);
+            return new CNTimeSlice(StartDateTime, EndDateTime)
+            {
+                TimeSliceId = TimeSliceId,
+                TaskId = TaskId
+            };
         }
 
         #endregion

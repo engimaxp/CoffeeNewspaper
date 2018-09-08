@@ -32,16 +32,18 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task DeleteATaskTagRelation_BothTaskAndTagStillExist()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetTagBindTestTask(1);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
+                taskDataStore.AddTask(assesTask);
 
+                await unitOfWork.Commit();
                 assesTask.TaskTaggers.Remove(assesTask.TaskTaggers.First());
-                await taskDataStore.UpdateTask(assesTask);
+                taskDataStore.UpdateTask(assesTask);
 
+                await unitOfWork.Commit();
                 Assert.AreEqual(1,dbcontext.Tags.Count());
                 Assert.AreEqual(1, dbcontext.Tasks.Count());
                 Assert.AreEqual(0,dbcontext.TaskTaggers.Count());
@@ -50,16 +52,18 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task AddDupplicateTaskTagRelation_ReturnFalse()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetTagBindTestTask(1);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
+                taskDataStore.AddTask(assesTask);
 
+                await unitOfWork.Commit();
                 assesTask.TaskTaggers.Add(new CNTaskTagger(){TagId = assesTask.TaskTaggers.First().TagId,TaskId = assesTask.TaskId});
-                var result = await taskDataStore.UpdateTask(assesTask);
+                 taskDataStore.UpdateTask(assesTask);
 
+                var result = await unitOfWork.Commit();
                 Assert.IsFalse(result);
                 Assert.AreEqual(1, dbcontext.Tags.Count());
                 Assert.AreEqual(1, dbcontext.Tasks.Count());

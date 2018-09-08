@@ -8,27 +8,25 @@ namespace CN_WPF
         public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             if (!(sender is TreeView treeView)) return;
-            if ((bool)e.NewValue)
+            if (!(bool) e.NewValue) return;
+
+            void OnLoaded(object s, RoutedEventArgs ee)
             {
-                RoutedEventHandler onLoaded = null;
-                onLoaded = (s, ee) =>
+                treeView.Loaded -= OnLoaded;
+
+                //Hook the event
+                treeView.PreviewMouseLeftButtonDown += (ss, eee) =>
                 {
-                    treeView.Loaded -= onLoaded;
-
-                    //Hook the event
-                    treeView.PreviewMouseLeftButtonDown += (ss, eee) =>
+                    if (eee.ClickCount > 1)
                     {
-                        if (eee.ClickCount > 1)
-                        {
-                            //here you would probably want to include code that is called by your
-                            //mouse down event handler.
-                            eee.Handled = true;
-                        }
-                    };
-
+                        //here you would probably want to include code that is called by your
+                        //mouse down event handler.
+                        eee.Handled = true;
+                    }
                 };
-                treeView.Loaded += onLoaded;
             }
+
+            treeView.Loaded += OnLoaded;
         }
     }
 }

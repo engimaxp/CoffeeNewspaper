@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\command\helpcommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Drawing;
+using System.Threading.Tasks;
+using CoffeeNewspaper_CLI.ConsoleTables;
+using Colorful;
+
+namespace CoffeeNewspaper_CLI
+{
+    public class HelpCommand : BaseCommand
+    {
+        public HelpCommand(BaseState state) : base(state)
+        {
+            Name = &quot;help&quot;;
+        }
+
+        public override async Task&lt;BaseState&gt; Excute(ArgumentParser input)
+        {
+            await Task.Delay(1);
+            var table = new ConsoleTable(&quot;Command&quot;, &quot;Param&quot;, &quot;Description&quot;);
+
+            if (State is TaskEditState)
+            {
+                //edit
+                table
+                    .AddRow(&quot;edit&quot;, &quot;-c&quot;, &quot;edit content&quot;)
+                    .AddRow(&quot;&quot;, &quot;-d&quot;, &quot;edit deadline&quot;)
+                    .AddRow(&quot;&quot;, &quot;-e&quot;, &quot;edit estimatedDuration&quot;)
+                    .AddRow(&quot;&quot;, &quot;--parent&quot;, &quot;edit parentTask&quot;)
+                    .AddRow(&quot;&quot;, &quot;-p&quot;, &quot;edit priority level 1(least) 2 3 4 5(most)&quot;)
+                    .AddRow(&quot;&quot;, &quot;-u&quot;, &quot;edit urgency level 1(least) 2 3 4 5(most)&quot;);
+                //tag
+                table
+                    .AddRow(&quot;tag&quot;, &quot;--add&quot;, &quot;add tag&quot;)
+                    .AddRow(&quot;&quot;, &quot;--remove&quot;, &quot;remove tag&quot;);
+                //TODO memos
+                table
+                    .AddRow(&quot;memo&quot;, &quot;-l&quot;, &quot;show all global memos&quot;)
+                    .AddRow(&quot;&quot;, &quot;--filter&quot;, &quot;set filters&quot;)
+                    .AddRow(&quot;&quot;, &quot;--add&quot;, &quot;jump to add memo view&quot;)
+                    .AddRow(&quot;&quot;, &quot;--delete&quot;, &quot;delete a memo&quot;)
+                    .AddRow(&quot;&quot;, &quot;--more&quot;, &quot;show memo detail view&quot;);
+                //TODO find
+                table.AddRow(&quot;find&quot;, &quot;&quot;, &quot;find all tasks with content&quot;);
+
+                //TODO pretask
+                table.AddRow(&quot;pre&quot;, &quot;--add&quot;, &quot;add pretask by ids&quot;).AddRow(&quot;&quot;, &quot;--remove&quot;, &quot;remove pretask by ids&quot;);
+                //save
+                table
+                    .AddRow(&quot;save&quot;, &quot;&quot;, &quot;save and exit&quot;);
+            }
+            else
+            {
+                //tasks
+                table
+                    .AddRow(&quot;task&quot;, &quot;-l&quot;, &quot;show all tasks&quot;)
+                    .AddRow(&quot;&quot;, &quot;--add&quot;, &quot;jump to add task view&quot;)
+                    .AddRow(&quot;&quot;, &quot;--delete&quot;, &quot;delete a task (none-force mode)&quot;)
+                    .AddRow(&quot;&quot;, &quot;--forcedelete&quot;, &quot;delete a task (force mode)&quot;)
+                    .AddRow(&quot;&quot;, &quot;--more&quot;, &quot;show tasks detail view&quot;)
+                    .AddRow(&quot;&quot;, &quot;--start&quot;, &quot;start a task&quot;)
+                    .AddRow(&quot;&quot;, &quot;--stop&quot;, &quot;stop a task&quot;)
+                    .AddRow(&quot;&quot;, &quot;--end&quot;, &quot;finish a task&quot;);
+                //divider
+                table.AddRow(&quot;&quot;, &quot;&quot;, &quot;&quot;);
+                //TODO memos
+                table
+                    .AddRow(&quot;memo&quot;, &quot;-l&quot;, &quot;show all global memos&quot;)
+                    .AddRow(&quot;&quot;, &quot;--filter&quot;, &quot;set filters&quot;)
+                    .AddRow(&quot;&quot;, &quot;--add&quot;, &quot;jump to add memo view&quot;)
+                    .AddRow(&quot;&quot;, &quot;--delete&quot;, &quot;delete a memo&quot;)
+                    .AddRow(&quot;&quot;, &quot;--more&quot;, &quot;show memo detail view&quot;);
+
+            }
+
+            table.AddRow(&quot;&quot;, &quot;&quot;, &quot;&quot;);
+            //utils
+            table.AddRow(&quot;help&quot;, &quot;&quot;, &quot;get avalible commands of current state&quot;);
+            table.AddRow(&quot;back&quot;, &quot;&quot;, &quot;back to last view&quot;);
+
+            table.WriteAlternateColorTable(Color.Yellow, Color.LawnGreen);
+            Console.WriteLine();
+            return State;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,47,10,58,0],[11,9,11,10,0],[12,13,12,27,0],[13,9,13,10,0],[16,9,16,10,0],[17,13,17,33,0],[18,13,18,77,0],[20,13,20,40,0],[21,13,21,14,0],[23,17,29,84,0],[31,17,33,59,0],[35,17,40,68,0],[42,17,42,73,0],[45,17,45,116,0],[47,17,48,58,0],[49,13,49,14,0],[51,13,51,14,0],[53,17,61,59,0],[63,17,63,42,0],[65,17,70,68,0],[72,13,72,14,0],[74,13,74,38,0],[76,13,76,80,0],[77,13,77,59,0],[79,13,79,75,0],[80,13,80,33,0],[81,13,81,26,0],[82,9,82,10,0]]);
+    </script>
+  </body>
+</html>

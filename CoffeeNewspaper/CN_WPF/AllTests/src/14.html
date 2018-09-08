@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_service\interfaces\serviceimplementbinder.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using CN_Core;
+using CN_Core.Interfaces.Service;
+using Ninject;
+using Ninject.Extensions.NamedScope;
+
+namespace CN_Service
+{
+    public static class ServiceImplementBinder
+    {
+        /// &lt;summary&gt;
+        /// Bind ioc to actual service
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;Kernel&quot;&gt;&lt;/param&gt;
+        public static void BindServices(this IKernel Kernel)
+        {
+            Kernel.Bind&lt;IMemoService&gt;().To&lt;MemoService&gt;().DefinesNamedScope(CNConstants.NinjectNamedScopeForService);
+
+            Kernel.Bind&lt;ITaskService&gt;().To&lt;TaskService&gt;().DefinesNamedScope(CNConstants.NinjectNamedScopeForService);
+
+            Kernel.Bind&lt;ITagService&gt;().To&lt;TagService&gt;().DefinesNamedScope(CNConstants.NinjectNamedScopeForService);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,118,0],[18,13,18,118,0],[20,13,20,116,0],[21,9,21,10,0]]);
+    </script>
+  </body>
+</html>

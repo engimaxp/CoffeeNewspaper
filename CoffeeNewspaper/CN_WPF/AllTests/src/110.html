@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\treeviewlineconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Windows.Controls;
+
+namespace CN_WPF
+{
+    public class TreeViewLineConverter: BaseValueConverter&lt;TreeViewLineConverter&gt;
+    {
+        public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            var item = (TreeViewItem)value;
+            var ic = ItemsControl.ItemsControlFromItemContainer(item);
+            return ic.ItemContainerGenerator.IndexFromContainer(item) == ic.Items.Count - 1;
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return false;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,44,0],[11,13,11,71,0],[12,13,12,93,0],[13,9,13,10,0],[16,9,16,10,0],[17,13,17,26,0],[18,9,18,10,0]]);
+    </script>
+  </body>
+</html>

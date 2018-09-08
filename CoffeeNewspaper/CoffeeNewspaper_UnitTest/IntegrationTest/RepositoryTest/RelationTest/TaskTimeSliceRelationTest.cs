@@ -32,16 +32,17 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task DeleteATaskTimeSliceRelation_TaskExist_TimeSliceDeleted()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetTimeSliceBindTestTask(1);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
-
+                taskDataStore.AddTask(assesTask);
+                await unitOfWork.Commit();
                 assesTask.UsedTimeSlices.Remove(assesTask.UsedTimeSlices.First());
-                await taskDataStore.UpdateTask(assesTask);
+                taskDataStore.UpdateTask(assesTask);
 
+                await unitOfWork.Commit();
                 Assert.AreEqual(0,dbcontext.TimeSlices.Count());
                 Assert.AreEqual(1, dbcontext.Tasks.Count());
                 Assert.AreEqual(0,dbcontext.Tasks.First().UsedTimeSlices.Count());
@@ -50,15 +51,17 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
         [Test]
         public async Task DeleteTask_RelatedTimeSliceAlsoDeleted()
         {
-            await UseMemoryContextRun(async dbcontext =>
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =>
             {
                 //initiate the datastore
                 var assesTask = GetTimeSliceBindTestTask(3);
                 var taskDataStore = new TaskDataStore(dbcontext);
-                await taskDataStore.AddTask(assesTask);
-                
-                var result = await taskDataStore.RemoveTask(assesTask);
+                taskDataStore.AddTask(assesTask);
 
+                await unitOfWork.Commit();
+                 taskDataStore.RemoveTask(assesTask);
+
+                var result = await unitOfWork.Commit();
                 Assert.IsTrue(result);
                 Assert.AreEqual(0, dbcontext.TimeSlices.Count());
                 Assert.AreEqual(0, dbcontext.Tasks.Count());

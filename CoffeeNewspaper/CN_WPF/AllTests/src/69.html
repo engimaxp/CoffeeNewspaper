@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\basevalueconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Globalization;
+using System.Windows.Data;
+using System.Windows.Markup;
+
+namespace CN_WPF
+{    /// &lt;summary&gt;
+    /// A base value converter that allows direct XAML usage
+    /// &lt;/summary&gt;
+    /// &lt;typeparam name=&quot;T&quot;&gt;The type of this value converter&lt;/typeparam&gt;
+    public abstract class BaseValueConverter&lt;T&gt; : MarkupExtension, IValueConverter
+        where T : class, new()
+    {
+        #region Private Members
+
+        /// &lt;summary&gt;
+        /// A single static instance of this value converter
+        /// &lt;/summary&gt;
+        private static readonly T Converter = new T();
+
+        #endregion
+
+        #region Markup Extension Methods
+
+        /// &lt;summary&gt;
+        /// Provides a static instance of the value converter 
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;serviceProvider&quot;&gt;The service provider&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return Converter ;
+        }
+
+        #endregion
+
+        #region Value Converter Methods
+
+        /// &lt;summary&gt;
+        /// The method to convert one type to another
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;value&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;targetType&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;parameter&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;culture&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public abstract object Convert(object value, Type targetType, object parameter, CultureInfo culture);
+
+        /// &lt;summary&gt;
+        /// The method to convert a value back to it&#39;s source type
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;value&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;targetType&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;parameter&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;culture&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public abstract object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture);
+
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,9,19,55,0],[31,9,31,10,0],[32,13,32,31,0],[33,9,33,10,0]]);
+    </script>
+  </body>
+</html>

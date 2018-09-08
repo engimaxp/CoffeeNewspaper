@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\app.xaml.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using System.Windows;
+using CN_Core;
+using CN_Core.Interfaces;
+using CN_Presentation;
+using CN_Presentation.ViewModel.Controls;
+using CN_Repository;
+using CN_Service;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// App.xaml 的交互逻辑
+    /// &lt;/summary&gt;
+    public partial class App : Application
+    {
+        protected override async void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            ApplicationSetupAsync();
+
+            await IoC.Get&lt;TaskListViewModel&gt;().RefreshTaskItems();
+            Current.MainWindow = new MainWindow();
+            Current.MainWindow.Show();
+        }
+        /// &lt;summary&gt;
+        /// Bind DI Container and other Important thing before window shows up
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private void ApplicationSetupAsync()
+        {
+            IoC.Setup();
+            IoC.Kernel.BindInitialViewModel();
+            IoC.Kernel.BindCNDBContext();
+
+            IoC.Kernel.BindSqliteDataStore();
+            IoC.Kernel.BindServices();
+
+
+            //Bind UI Manager So Could use be used in ViewModel
+            IoC.Kernel.Bind&lt;IUIManager&gt;().ToConstant(new UIManager());
+        }
+    }
+ }
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,9,18,10,0],[19,13,19,31,0],[21,13,21,37,0],[23,13,23,67,0],[24,13,24,51,0],[25,13,25,39,0],[26,9,26,10,0],[32,9,32,10,0],[33,13,33,25,0],[34,13,34,47,0],[35,13,35,42,0],[37,13,37,46,0],[38,13,38,39,0],[42,13,42,71,0],[43,9,43,10,0]]);
+    </script>
+  </body>
+</html>

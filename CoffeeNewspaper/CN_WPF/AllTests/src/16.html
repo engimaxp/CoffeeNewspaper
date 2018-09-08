@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_service\serviceimplement\tagservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces;
+using CN_Core.Interfaces.Repository;
+using CN_Core.Interfaces.Service;
+
+namespace CN_Service
+{
+    public class TagService : ITagService
+    {
+        private readonly ITagDataStore _tagDataStore;
+        private readonly IUnitOfWork unitOfWork;
+
+        public TagService(IUnitOfWork UnitOfWork, ITagDataStore tagDataStore)
+        {
+            unitOfWork = UnitOfWork;
+            _tagDataStore = tagDataStore;
+        }
+
+        public async Task&lt;ICollection&lt;CNTag&gt;&gt; GetAllTaskTags()
+        {
+                return await _tagDataStore.GetAllTagsBySpecification(new TaskBoundedTagsSpecification());
+        }
+
+
+        public async Task&lt;ICollection&lt;CNTag&gt;&gt; GetStartStringTag(string tagSubstring)
+        {
+                return await _tagDataStore.GetAllTagsBySpecification(new TagSpecification(tagSubstring));
+        }
+
+        public async Task&lt;CNTag&gt; GetTagByTitle(string tagTitle)
+        {
+                return await _tagDataStore.GetFirstTagBySpecification(new TagTitleSpecification(tagTitle));
+        }
+        public async Task&lt;ICollection&lt;CNTag&gt;&gt; GetAllTagByTaskId(int taskid)
+        {
+            if(taskid&lt;=0) return new List&lt;CNTag&gt;();
+            return await _tagDataStore.GetAllTagsBySpecification(new TaskTagSpecification(taskid));
+        }
+
+        public async Task&lt;ICollection&lt;CNTag&gt;&gt; GetAllTagByTaskIdAndTagTitle(int taskid, string tagSubstring)
+        {
+            return await _tagDataStore.GetAllTagsBySpecification(new TagAndTaskSpecification(taskid,tagSubstring));
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,78,0],[16,9,16,10,0],[17,13,17,37,0],[18,13,18,42,0],[19,9,19,10,0],[22,9,22,10,0],[23,17,23,106,0],[24,9,24,10,0],[28,9,28,10,0],[29,17,29,106,0],[30,9,30,10,0],[33,9,33,10,0],[34,17,34,108,0],[35,9,35,10,0],[37,9,37,10,0],[38,13,38,26,0],[38,27,38,52,0],[39,13,39,100,0],[40,9,40,10,0],[43,9,43,10,0],[44,13,44,116,0],[45,9,45,10,0]]);
+    </script>
+  </body>
+</html>

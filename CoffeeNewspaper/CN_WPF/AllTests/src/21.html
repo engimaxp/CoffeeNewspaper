@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\booleantovisibilityconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Globalization;
+using System.Windows;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// A converter that takes in a boolean and returns a &lt;see cref=&quot;Visibility&quot;/&gt;
+    /// &lt;/summary&gt;
+    public class BooleanToVisiblityConverter : BaseValueConverter&lt;BooleanToVisiblityConverter&gt;
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (parameter == null)
+                return (bool)value ? Visibility.Hidden : Visibility.Visible;
+            else
+                return (bool)value ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[14,13,14,35,0],[15,17,15,77,0],[17,17,17,77,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,49,0]]);
+    </script>
+  </body>
+</html>

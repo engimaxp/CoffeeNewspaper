@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\relationtest\parenttaskchildtaskrelationtest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Repository;
+using CoffeeNewspaper_UnitTest.DomainTest;
+using NUnit.Framework;
+
+namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
+{
+
+    /// &lt;summary&gt;
+    ///     In-Memory integration data persistent test
+    /// &lt;/summary&gt;
+    [TestFixture]
+    public class ParentTaskChildTaskRelationTest : RepositarySetupAndTearDown
+    {
+        /// &lt;summary&gt;
+        /// Get a childtask-already-bind task
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;bindTaskCount&quot;&gt;how many childtask is bind to this task&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private CNTask GetChildTaskBindTestTask(int bindTaskCount)
+        {
+            var assesTask = DomainTestHelper.GetARandomTask();
+            Enumerable.Range(0, bindTaskCount).ToList().ForEach(x =&gt;
+            {
+                var assesChildTask = DomainTestHelper.GetARandomTask();
+                assesTask.ChildTasks.Add(assesChildTask); 
+            });
+            return assesTask;
+        }
+        [Test]
+        public async Task DeleteAParentChildTaskRelation_BothTaskExist()
+        {
+            await UseMemoryContextRun(async dbcontext =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetChildTaskBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                await taskDataStore.AddTask(assesTask);
+
+                assesTask.ChildTasks.Remove(assesTask.ChildTasks.First());
+                await taskDataStore.UpdateTask(assesTask);
+
+                Assert.AreEqual(2,dbcontext.Tasks.Count());
+                Assert.AreEqual(0,dbcontext.Tasks.First().ChildTasks.Count());
+            });
+        }
+        [Test]
+        public async Task AddDupplicateTaskTaskRelation_ReturnFalse()
+        {
+            await UseMemoryContextRun(async dbcontext =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetChildTaskBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                await taskDataStore.AddTask(assesTask);
+
+                assesTask.ChildTasks.Add(assesTask.ChildTasks.First());
+                var result = await taskDataStore.UpdateTask(assesTask);
+
+                Assert.IsTrue(result);
+
+
+                Assert.AreEqual(2, dbcontext.Tasks.Count());
+                Assert.AreEqual(1, assesTask.ChildTasks.Count());
+            });
+        }
+        [Test]
+        public async Task DeleteParentTask_RelatedChildTaskExist_ParentChangeToNull()
+        {
+            await UseMemoryContextRun(async dbcontext =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetChildTaskBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                await taskDataStore.AddTask(assesTask);
+                
+                var result = await taskDataStore.RemoveTask(assesTask);
+
+                Assert.IsTrue(result);
+                Assert.AreEqual(1, dbcontext.Tasks.Count());
+                Assert.IsNull(dbcontext.Tasks.First().ParentTask);
+            });
+        }
+        [Test]
+        public async Task DeleteChildTask_RelatedParentTaskExis()
+        {
+            await UseMemoryContextRun(async dbcontext =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetChildTaskBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                await taskDataStore.AddTask(assesTask);
+
+                var result = await taskDataStore.RemoveTask(assesTask.ChildTasks.First());
+
+                Assert.IsTrue(result);
+                var testresult = await taskDataStore.GetAllTask();
+                Assert.AreEqual(assesTask.TaskId, testresult.First().TaskId);
+            });
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[23,9,23,10,1],[24,13,24,63,1],[25,13,26,13,1],[26,13,26,14,1],[26,14,27,17,1],[27,17,27,72,1],[27,72,28,17,1],[28,17,28,58,1],[28,58,29,13,1],[29,13,29,14,1],[29,14,29,16,1],[25,13,29,16,1],[30,13,30,30,1],[31,9,31,10,1],[34,9,34,10,1],[35,13,36,13,1],[36,13,36,14,1],[36,14,38,17,1],[38,17,38,61,1],[38,61,39,17,1],[39,17,39,66,1],[39,66,40,17,1],[40,17,40,56,1],[40,56,42,17,1],[42,17,42,75,1],[42,75,43,17,1],[43,17,43,59,1],[43,59,45,17,1],[45,17,45,60,1],[45,60,46,17,1],[46,17,46,79,1],[46,79,47,13,1],[47,13,47,14,1],[47,14,47,16,1],[35,13,47,16,1],[48,9,48,10,1],[51,9,51,10,1],[52,13,53,13,1],[53,13,53,14,1],[53,14,55,17,1],[55,17,55,61,1],[55,61,56,17,1],[56,17,56,66,1],[56,66,57,17,1],[57,17,57,56,1],[57,56,59,17,1],[59,17,59,72,1],[59,72,60,17,1],[60,17,60,72,1],[60,72,62,17,1],[62,17,62,39,1],[62,39,65,17,1],[65,17,65,61,1],[65,61,66,17,1],[66,17,66,66,1],[66,66,67,13,1],[67,13,67,14,1],[67,14,67,16,1],[52,13,67,16,1],[68,9,68,10,1],[71,9,71,10,1],[72,13,73,13,1],[73,13,73,14,1],[73,14,75,17,1],[75,17,75,61,1],[75,61,76,17,1],[76,17,76,66,1],[76,66,77,17,1],[77,17,77,56,1],[77,56,79,17,1],[79,17,79,72,1],[79,72,81,17,1],[81,17,81,39,1],[81,39,82,17,1],[82,17,82,61,1],[82,61,83,17,1],[83,17,83,67,1],[83,67,84,13,1],[84,13,84,14,1],[84,14,84,16,1],[72,13,84,16,1],[85,9,85,10,1],[88,9,88,10,1],[89,13,90,13,1],[90,13,90,14,1],[90,14,92,17,1],[92,17,92,61,1],[92,61,93,17,1],[93,17,93,66,1],[93,66,94,17,1],[94,17,94,56,1],[94,56,96,17,1],[96,17,96,91,1],[96,91,98,17,1],[98,17,98,39,1],[98,39,99,17,1],[99,17,99,67,1],[99,67,100,17,1],[100,17,100,78,1],[100,78,101,13,1],[101,13,101,14,1],[101,14,101,16,1],[89,13,101,16,1],[102,9,102,10,1]]);
+    </script>
+  </body>
+</html>

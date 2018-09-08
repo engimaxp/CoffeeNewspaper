@@ -38,6 +38,11 @@ namespace CN_WPF
                     code = IconType.Play;
                     break;
                 }
+                case TaskCurrentStatus.PENDING:
+                {
+                    code = IconType.HourGlass;
+                    break;
+                }
             }
             return code.ToFontAwesomeText();
         }

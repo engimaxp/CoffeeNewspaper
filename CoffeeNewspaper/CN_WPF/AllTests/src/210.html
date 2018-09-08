@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\utilities\comparerbuilder.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+
+namespace CN_Core.Utilities
+{
+    public class ComparerBuilder&lt;T&gt;:IComparer&lt;T&gt; where T :new()
+    {
+        public static ComparerBuilder&lt;T&gt; Builder(Func&lt;T, T, int&gt; func)
+        {
+            return new ComparerBuilder&lt;T&gt;(func);
+        }
+
+        private readonly Func&lt;T, T, int&gt; _func;
+
+        public ComparerBuilder(Func&lt;T,T,int&gt; func)
+        {
+            _func = func;
+        }
+
+        public int Compare(T x, T y)
+        {
+            if (_func == null)
+                throw new System.NotImplementedException();
+            else return _func(x, y);
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,49,0],[11,9,11,10,0],[15,9,15,51,0],[16,9,16,10,0],[17,13,17,26,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,31,0],[23,17,23,60,0],[24,18,24,37,0],[25,9,25,10,0]]);
+    </script>
+  </body>
+</html>

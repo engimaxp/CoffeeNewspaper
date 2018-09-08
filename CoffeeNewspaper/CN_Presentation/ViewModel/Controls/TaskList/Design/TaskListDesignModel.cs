@@ -41,7 +41,7 @@ namespace CN_Presentation.ViewModel.Controls.Design
                 {
                     Urgency = TaskUrgency.Urgent,
                     IsExpanded = false,
-                    Status = TaskCurrentStatus.COMPLETE,
+                    Status = TaskCurrentStatus.PENDING,
                     TaskTitle =
                         "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree."
                 },new TaskListItemViewModel
@@ -58,55 +58,20 @@ namespace CN_Presentation.ViewModel.Controls.Design
                     Status = TaskCurrentStatus.STOP,
                     TaskTitle =
                         "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree."
-                },new TaskListItemViewModel
-                {
-                    Urgency = TaskUrgency.NotUrgent,
-                    IsExpanded = false,
-                    Status = TaskCurrentStatus.COMPLETE,
-                    TaskTitle =
-                        "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree."
-                },new TaskListItemViewModel
-                {
-                    Urgency = TaskUrgency.Urgent,
-                    IsExpanded = false,
-                    Status = TaskCurrentStatus.COMPLETE,
-                    TaskTitle =
-                        "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree."
-                },new TaskListItemViewModel
-                {
-                    Urgency = TaskUrgency.NotUrgent,
-                    IsExpanded = false,
-                    Status = TaskCurrentStatus.UNDERGOING,
-                    TaskTitle =
-                        "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree."
-                },new TaskListItemViewModel
-                {
-                    Urgency = TaskUrgency.Urgent,
-                    IsExpanded = false,
-                    Status = TaskCurrentStatus.COMPLETE,
-                    TaskTitle =
-                        "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree."
-                },new TaskListItemViewModel
-                {
-                    Urgency = TaskUrgency.VeryUrgent,
-                    IsExpanded = false,
-                    Status = TaskCurrentStatus.DELETE,
-                    TaskTitle =
-                        "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree."
-                },new TaskListItemViewModel
-                {
-                    Urgency = TaskUrgency.NotUrgent,
-                    IsExpanded = false,
-                    Status = TaskCurrentStatus.STOP,
-                    TaskTitle =
-                        "Each control in WPF has a DataContext property. It's meant to be bound to an object that contains the data to be displayed. The DataContext property is inherited along the logical tree."
-                },
+                }
             };
 
-            ActivatedSearchTxts = new ObservableCollection<string>()
+            ActivatedSearchTxts = new ObservableCollection<SearchTxtViewModel>()
             {
-                "Hello","My","您好","Boun"
+                new SearchTxtViewModel("Hello"),
+                new SearchTxtViewModel("My"),
+                new SearchTxtViewModel("您好"),
+                new SearchTxtViewModel("Boun")
             };
+
+            IsSearchAutoCompletePanelPopup = false;
+            SearchAutoCompleteOptions = new ObservableCollection<string>();
+            SelectedSearchAutoComplete = string.Empty;
         }
 
         #endregion

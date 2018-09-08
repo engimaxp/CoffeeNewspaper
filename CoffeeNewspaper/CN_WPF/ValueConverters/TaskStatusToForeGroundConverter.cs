@@ -31,7 +31,8 @@ namespace CN_WPF
                     }
                     case TaskCurrentStatus.STOP:
                     case TaskCurrentStatus.UNDERGOING:
-                    {
+                    case TaskCurrentStatus.PENDING:
+                        {
                         userColor = UserColorType.WordLightBlue;
                         break;
                     }

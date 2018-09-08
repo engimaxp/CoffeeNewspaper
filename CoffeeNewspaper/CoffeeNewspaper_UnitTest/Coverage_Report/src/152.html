@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\domaintest\domaintesthelper.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using CN_Core;
+
+namespace CoffeeNewspaper_UnitTest.DomainTest
+{
+    public static class DomainTestHelper
+    {
+        /// &lt;summary&gt;
+        ///     Get a random task
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static CNTask GetARandomTask(int id = 0)
+        {
+            var timestamp = DateTime.Now.ToString(&quot;s&quot;);
+            return new CNTask
+            {
+                TaskId = id,
+                Content = &quot;Write A Program&quot; + timestamp + Guid.NewGuid().ToString(&quot;N&quot;),
+                CreateTime = DateTime.Now,
+                StartTime = null,
+                EndTime = null,
+                Priority = CNPriority.High,
+                Urgency = CNUrgency.High,
+                Status = CNTaskStatus.TODO,
+                EstimatedDuration = 3600
+            };
+        }
+
+        /// &lt;summary&gt;
+        ///     Get a random memo
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static CNMemo GetARandomMemo(bool generateId = false)
+        {
+            var timestamp = DateTime.Now.ToString(&quot;s&quot;);
+            return new CNMemo
+            {
+                MemoId = generateId? Guid.NewGuid().ToString(&quot;D&quot;) :null,
+                Title = &quot;NewMemo&quot;,
+                Content = &quot;Start with writing tests!&quot; + timestamp + Guid.NewGuid().ToString(&quot;N&quot;)
+            };
+        }
+
+        /// &lt;summary&gt;
+        ///     Get a random tag
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static CNTag GetARandomTag()
+        {
+            var timestamp = DateTime.Now.ToString(&quot;s&quot;);
+            return new CNTag
+            {
+                Title = $&quot;randomtag{timestamp}{Guid.NewGuid():D}&quot;
+            };
+        }
+
+        /// &lt;summary&gt;
+        ///     Get a random timeslice
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;EndTime&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static CNTimeSlice GetARandomTimeSlice(DateTime? EndTime = null)
+        {
+            return new CNTimeSlice(DateTime.Now, null);
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,1],[14,13,14,56,1],[15,13,26,15,1],[27,9,27,10,1],[34,9,34,10,1],[35,13,35,56,1],[36,13,41,15,1],[42,9,42,10,1],[49,9,49,10,1],[50,13,50,56,1],[51,13,54,15,1],[55,9,55,10,1],[63,9,63,10,1],[64,13,64,56,1],[65,9,65,10,1]]);
+    </script>
+  </body>
+</html>

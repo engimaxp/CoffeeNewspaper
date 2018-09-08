@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -14,19 +15,10 @@ namespace CN_WPF
             if (!(sender is ScrollViewer scrollViewer)) return;
             if ((bool) e.NewValue)
             {
-                RoutedEventHandler onLoaded = null;
-                onLoaded = (s, ee) =>
-                {
-                    scrollViewer.Loaded -= onLoaded;
-
+                scrollViewer.LayoutUpdated += (o, args) => {
                     //Hook the event
-                    scrollViewer.FindAndActToAllChild<ScrollViewer>((scrollchildview) =>
-                    {
-                        scrollchildview.PreviewMouseWheel += (sss,eee) => PreviewMouseWheel(sss,eee, scrollViewer);
-                    });
-
+                    scrollViewer.FindAndActToAllChild<ScrollViewer>((scrollchildview) => { scrollchildview.PreviewMouseWheel += (sss, eee) => PreviewMouseWheel(sss, eee, scrollViewer); });
                 };
-                scrollViewer.Loaded += onLoaded;
             }
         }
 

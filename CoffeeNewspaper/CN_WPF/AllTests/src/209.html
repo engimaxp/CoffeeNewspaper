@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\utilities\cntaskextension.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+
+namespace CN_Core.Utilities
+{
+    public static class CNTaskExtension
+    {
+        /// &lt;summary&gt;
+        /// Get Default Selection Filter And Order
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static IOrderedEnumerable&lt;CNTask&gt; FilterDeletedAndOrderBySortTasks(this IEnumerable&lt;CNTask&gt; originEnumerable)
+        {
+            return from c in originEnumerable
+                where !c.IsDeleted
+                orderby c.Sort
+                select c;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,1],[14,13,15,23,1],[15,23,15,35,1],[15,35,16,25,1],[16,25,16,31,1],[16,31,17,26,1],[14,13,17,26,1],[18,9,18,10,1]]);
+    </script>
+  </body>
+</html>

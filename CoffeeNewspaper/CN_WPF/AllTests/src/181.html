@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\domaintest\timeslicetest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using CN_Core;
+using NUnit.Framework;
+
+namespace CoffeeNewspaper_UnitTest.DomainTest
+{
+    [TestFixture]
+    public class TimeSliceTest
+    {
+        [Test]
+        public void CreateATimeSlice()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now, DateTime.Now.AddMinutes(1));
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now);
+            Assert.IsNotNull(a);
+            Assert.IsNotNull(b);
+        }
+        [Test]
+        public void CreateATimeSlice_EndTimeGreaterThanStartTime()
+        {
+            Assert.Throws&lt;ArgumentException&gt;(() =&gt; {
+                CNTimeSlice a = new CNTimeSlice(DateTime.Now, DateTime.Now.AddMinutes(-1));});
+        }
+        [Test]
+        public void CloneATimeSlice()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now,DateTime.Now.AddMinutes(1));
+            CNTimeSlice b = a.Clone() as CNTimeSlice;
+
+            Assert.IsFalse(ReferenceEquals(a, b));
+
+            Assert.AreEqual(a,b);
+        }
+
+        [Test]
+        public void InterceptWithAnother_BothNoEndTime()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-1));
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+
+        [Test]
+        public void InterceptWithAnother_OneNoEndTime_TimeLineIntercept1()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-1),DateTime.Now.AddMinutes(1));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+
+        [Test]
+        public void InterceptWithAnother_OneNoEndTime_TimeLineIntercept2()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(1), DateTime.Now.AddMinutes(2));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+        [Test]
+        public void InterceptWithAnother_OneNoEndTime_TimeLineNotIntercept()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-2), DateTime.Now.AddMinutes(-1));
+
+            Assert.IsFalse(a.InterceptWith(b));
+            Assert.IsFalse(b.InterceptWith(a));
+        }
+
+
+        [Test]
+        public void InterceptWithAnother_nullCondition_false()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3), DateTime.Now);
+            Assert.IsFalse(a.InterceptWith(null));
+        }
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineIntercept1()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3),DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-2), DateTime.Now.AddMinutes(-1));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineIntercept2()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3), DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-4), DateTime.Now.AddMinutes(-2));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineIntercept3()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3), DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(-2), DateTime.Now.AddMinutes(1));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineIntercept5()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-2).AddMinutes(-3), currentTime.AddDays(-1).AddMinutes(-2));
+            CNTimeSlice b = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-3), currentTime.AddDays(-1).AddMinutes(-1));
+
+            Assert.IsTrue(a.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(a));
+        }
+
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineNotIntercept1()
+        {
+            CNTimeSlice a = new CNTimeSlice(DateTime.Now.AddMinutes(-3), DateTime.Now);
+            CNTimeSlice b = new CNTimeSlice(DateTime.Now.AddMinutes(1), DateTime.Now.AddMinutes(3));
+
+            Assert.IsFalse(a.InterceptWith(b));
+            Assert.IsFalse(b.InterceptWith(a));
+        }
+
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineNotIntercept2()
+        {
+            var currentTime = DateTime.Now;
+               CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(-1));
+
+            Assert.IsFalse(a.InterceptWith(b));
+            Assert.IsFalse(b.InterceptWith(a));
+        }
+
+        [Test]
+        public void InterceptWithAnother_BothEndTime_TimeLineNotIntercept3()
+        {
+            var now = DateTime.Now;
+            var a = new CNTimeSlice(now.AddHours(1), now.AddHours(2));
+            var b = new CNTimeSlice(now.AddHours(3));
+            var c = new CNTimeSlice(now.AddHours(2), now.AddHours(3));
+
+            Assert.IsFalse(a.InterceptWith(b));
+            Assert.IsFalse(b.InterceptWith(a));
+            Assert.IsFalse(a.InterceptWith(c));
+            Assert.IsFalse(c.InterceptWith(a));
+            Assert.IsTrue(c.InterceptWith(b));
+            Assert.IsTrue(b.InterceptWith(c));
+        }
+
+        [Test]
+        public void GetDayDuration_SingleDay()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.ToShortDateString()).AddMilliseconds(-1));
+            Assert.AreEqual(b,a.GetDayDuration());
+        }
+        [Test]
+        public void GetDayDuration_MutipleDay()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.AddDays(1).ToShortDateString()).AddMilliseconds(-1));
+            Assert.AreEqual(b, a.GetDayDuration());
+        }
+        [Test]
+        public void GetDayDuration_StartTimeBiggerThanDateTimeNow()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(1).AddMinutes(-1), currentTime.AddDays(1).AddMinutes(4));
+            Assert.IsNull(a.GetDayDuration());
+        }
+
+        [Test]
+        public void IsContaining_NoBoundary()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.ToShortDateString()));
+            Assert.IsFalse(b.IsContaining(a));
+        }
+        [Test]
+        public void IsContaining_BWrapA()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(Convert.ToDateTime(currentTime.AddDays(-1).ToShortDateString()), Convert.ToDateTime(currentTime.ToShortDateString()));
+            Assert.IsTrue(b.IsContaining(a));
+        }
+        [Test]
+        public void IsContaining_CEqualD()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice c = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice d = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsTrue(c.IsContaining(d));
+            Assert.IsTrue(d.IsContaining(c));
+        }
+        [Test]
+        public void IsContaining_EColideF()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice e = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(1));
+            CNTimeSlice f = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsFalse(e.IsContaining(f));
+            Assert.IsFalse(f.IsContaining(e));
+        }
+        [Test]
+        public void IsContaining_GWithinHWithBoundaries()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice g = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(1));
+            CNTimeSlice h = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsFalse(g.IsContaining(h));
+            Assert.IsTrue(h.IsContaining(g));
+            g = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            h = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2));
+            Assert.IsFalse(g.IsContaining(h));
+            Assert.IsTrue(h.IsContaining(g));
+        }
+
+        [Test]
+        public void GetWorkDays()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = a.GetDayDuration();
+            Assert.AreEqual(1,b.GetWorkDays());
+            a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(1).AddMinutes(2));
+            b = a.GetDayDuration();
+            Assert.AreEqual(3, b.GetWorkDays());
+            a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), DateTime.Now.Date);
+            b = a.GetDayDuration();
+            Assert.AreEqual(2, b.GetWorkDays());
+        }
+        [Test]
+        public void GetWorkDays_EndTimeZero()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1));
+            ;
+            Assert.AreEqual(0, a.GetWorkDays());
+        }
+
+        [Test]
+        public void SortTest()
+        {
+            var currentTime = DateTime.Now;
+            CNTimeSlice a = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-1), currentTime.AddDays(-1).AddMinutes(2));
+            CNTimeSlice b = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-2), currentTime.AddDays(-1).AddMinutes(2)); 
+            CNTimeSlice c = new CNTimeSlice(currentTime.AddDays(-1).AddMinutes(-4), currentTime.AddDays(-1).AddMinutes(2));
+
+            var result = new List&lt;CNTimeSlice&gt;() {a, b, c};
+            result.Sort();
+            Assert.AreEqual(c, result.First());
+            Assert.AreEqual(a, result.Last());
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,87,0],[16,13,16,59,0],[17,13,17,33,0],[18,13,18,33,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,52,0],[23,52,23,53,0],[23,53,24,17,0],[24,17,24,92,0],[24,92,24,93,0],[24,93,24,95,0],[23,13,24,95,0],[25,9,25,10,0],[28,9,28,10,0],[29,13,29,86,0],[30,13,30,54,0],[32,13,32,51,0],[34,13,34,34,0],[35,9,35,10,0],[39,9,39,10,0],[40,13,40,59,0],[41,13,41,74,0],[42,13,42,47,0],[43,13,43,47,0],[44,9,44,10,0],[48,9,48,10,0],[49,13,49,59,0],[50,13,50,101,0],[52,13,52,47,0],[53,13,53,47,0],[54,9,54,10,0],[58,9,58,10,0],[59,13,59,59,0],[60,13,60,101,0],[62,13,62,47,0],[63,13,63,47,0],[64,9,64,10,0],[67,9,67,10,0],[68,13,68,59,0],[69,13,69,103,0],[71,13,71,48,0],[72,13,72,48,0],[73,9,73,10,0],[78,9,78,10,0],[79,13,79,88,0],[80,13,80,51,0],[81,9,81,10,0],[84,9,84,10,0],[85,13,85,87,0],[86,13,86,103,0],[88,13,88,47,0],[89,13,89,47,0],[90,9,90,10,0],[93,9,93,10,0],[94,13,94,88,0],[95,13,95,103,0],[97,13,97,47,0],[98,13,98,47,0],[99,9,99,10,0],[102,9,102,10,0],[103,13,103,88,0],[104,13,104,102,0],[106,13,106,47,0],[107,13,107,47,0],[108,9,108,10,0],[112,9,112,10,0],[113,13,113,44,0],[114,13,114,125,0],[115,13,115,125,0],[117,13,117,47,0],[118,13,118,47,0],[119,9,119,10,0],[123,9,123,10,0],[124,13,124,88,0],[125,13,125,101,0],[127,13,127,48,0],[128,13,128,48,0],[129,9,129,10,0],[133,9,133,10,0],[134,13,134,44,0],[135,16,135,127,0],[136,13,136,125,0],[138,13,138,48,0],[139,13,139,48,0],[140,9,140,10,0],[144,9,144,10,0],[145,13,145,36,0],[146,13,146,71,0],[147,13,147,54,0],[148,13,148,71,0],[150,13,150,48,0],[151,13,151,48,0],[152,13,152,48,0],[153,13,153,48,0],[154,13,154,47,0],[155,13,155,47,0],[156,9,156,10,0],[160,9,160,10,0],[161,13,161,44,0],[162,13,162,124,0],[163,13,163,183,0],[164,13,164,51,0],[165,9,165,10,0],[168,9,168,10,0],[169,13,169,44,0],[170,13,170,112,0],[171,13,171,194,0],[172,13,172,52,0],[173,9,173,10,0],[176,9,176,10,0],[177,13,177,44,0],[178,13,178,122,0],[179,13,179,47,0],[180,9,180,10,0],[184,9,184,10,0],[185,13,185,44,0],[186,13,186,85,0],[187,13,187,163,0],[188,13,188,47,0],[189,9,189,10,0],[192,9,192,10,0],[193,13,193,44,0],[194,13,194,124,0],[195,13,195,163,0],[196,13,196,46,0],[197,9,197,10,0],[200,9,200,10,0],[201,13,201,44,0],[202,13,202,124,0],[203,13,203,124,0],[204,13,204,46,0],[205,13,205,46,0],[206,9,206,10,0],[209,9,209,10,0],[210,13,210,44,0],[211,13,211,124,0],[212,13,212,124,0],[213,13,213,47,0],[214,13,214,47,0],[215,9,215,10,0],[218,9,218,10,0],[219,13,219,44,0],[220,13,220,124,0],[221,13,221,124,0],[222,13,222,47,0],[223,13,223,46,0],[224,13,224,112,0],[225,13,225,112,0],[226,13,226,47,0],[227,13,227,46,0],[228,9,228,10,0],[232,9,232,10,0],[233,13,233,44,0],[234,13,234,124,0],[235,13,235,48,0],[236,13,236,48,0],[237,13,237,111,0],[238,13,238,36,0],[239,13,239,49,0],[240,13,240,92,0],[241,13,241,36,0],[242,13,242,49,0],[243,9,243,10,0],[246,9,246,10,0],[247,13,247,44,0],[248,13,248,85,0],[249,13,249,14,0],[250,13,250,49,0],[251,9,251,10,0],[255,9,255,10,0],[256,13,256,44,0],[257,13,257,124,0],[258,13,258,124,0],[259,13,259,124,0],[261,13,261,60,0],[262,13,262,27,0],[263,13,263,48,0],[264,13,264,47,0],[265,9,265,10,0]]);
+    </script>
+  </body>
+</html>

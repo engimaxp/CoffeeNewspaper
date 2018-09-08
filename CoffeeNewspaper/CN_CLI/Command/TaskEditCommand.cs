@@ -89,7 +89,7 @@ namespace CoffeeNewspaper_CLI
                 if (parentTaskId > 0)
                 {
                     var parentTask = await IoC.Get<ITaskService>().GetTaskById(parentTaskId);
-                    await IoC.Get<ITaskService>().SetParentTask(task, parentTask);
+                    await IoC.Get<ITaskService>().SetParentTask(task.TaskId, parentTask.TaskId,-1);
                 }
                 State.Refresh();
             }

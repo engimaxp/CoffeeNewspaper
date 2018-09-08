@@ -39,9 +39,10 @@
                                    x:Name="placeholder"
                                    FontFamily="Microsoft YaHei UI Light"
                                    Padding="{TemplateBinding Padding}"
-                                   VerticalAlignment="Center"
+                                   VerticalAlignment="Top"
+                                   TextWrapping="Wrap"
                                    HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
-                                   Foreground="{StaticResource ForegroundVeryDarkBrush}"
+                                   Foreground="{StaticResource BackgroundLightBrush}"
                                    TextTrimming="CharacterEllipsis"
                                    >
                             <TextBlock.Style>
@@ -158,7 +159,7 @@
 
     <Style TargetType="{x:Type TextBlock}" x:Key="SpinningText" BasedOn="{StaticResource BaseTextBlockStyle}">
 
-        <Setter Property="FontFamily" Value="{StaticResource FontAwesomeRegular}" />
+        <Setter Property="FontFamily" Value="{StaticResource FontAwesomeSolid}" />
         <Setter Property="Text" Value="&#xf110;" />
         <Setter Property="RenderTransformOrigin" Value="0.5, 0.5" />
         <Setter Property="RenderTransform">
@@ -196,10 +197,9 @@
         <Setter Property="FontSize" Value="{StaticResource FontSizeXXLarge}" />
         <Setter Property="Padding" Value="10" />
         <Setter Property="Margin" Value="0 5 0 5" />
-
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundVeryDarkBrush}" />
-
+<Setter Property="BorderThickness" Value="0"></Setter>
         <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="Template">
@@ -209,11 +209,13 @@
                     <Grid>
 
                         <Border x:Name="border" 
-                                BorderBrush="Transparent" 
-                                BorderThickness="0"
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
                                 Background="{TemplateBinding Background}"
                                 SnapsToDevicePixels="True">
-                            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" 
+                                          HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"/>
                         </Border>
 
                         <TextBlock IsHitTestVisible="False"
@@ -221,10 +223,10 @@
                                    x:Name="placeholder"
                                    FontFamily="Microsoft YaHei UI Light"
                                    Padding="{TemplateBinding Padding}"
-                                   VerticalAlignment="Center"
+                                   VerticalAlignment="{TemplateBinding VerticalAlignment}"
                                    HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
                                    Foreground="{StaticResource ForegroundVeryDarkBrush}"
-                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="Wrap"
                                    >
                             <TextBlock.Style>
                                 <Style TargetType="{x:Type TextBlock}">

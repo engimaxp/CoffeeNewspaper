@@ -1,7 +1,9 @@
 ﻿using System.Threading.Tasks;
 using System.Windows;
 using CN_Core;
+using CN_Core.Interfaces;
 using CN_Presentation;
+using CN_Presentation.ViewModel.Controls;
 using CN_Repository;
 using CN_Service;
 
@@ -16,8 +18,9 @@ namespace CN_WPF
         {
             base.OnStartup(e);
 
-            await ApplicationSetupAsync();
-            
+            ApplicationSetupAsync();
+
+            await IoC.Get<TaskListViewModel>().RefreshTaskItems();
             Current.MainWindow = new MainWindow();
             Current.MainWindow.Show();
         }
@@ -25,13 +28,18 @@ namespace CN_WPF
         /// Bind DI Container and other Important thing before window shows up
         /// </summary>
         /// <returns></returns>
-        private async Task ApplicationSetupAsync()
+        private void ApplicationSetupAsync()
         {
             IoC.Setup();
             IoC.Kernel.BindInitialViewModel();
-            await IoC.Kernel.BindCNDBContext();
+            IoC.Kernel.BindCNDBContext();
+
+            IoC.Kernel.BindSqliteDataStore();
             IoC.Kernel.BindServices();
-            await Task.Delay(1);
+
+
+            //Bind UI Manager So Could use be used in ViewModel
+            IoC.Kernel.Bind<IUIManager>().ToConstant(new UIManager());
         }
     }
  }

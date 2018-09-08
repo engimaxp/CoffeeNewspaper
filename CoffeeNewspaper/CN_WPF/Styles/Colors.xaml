@@ -26,19 +26,23 @@
     <Color x:Key="ForegroundDark">#6a6a6a</Color>
     <SolidColorBrush x:Key="ForegroundDarkBrush" Color="{StaticResource ForegroundDark}" />
 
-    <Color x:Key="IconHoverBlue">#00c3ff</Color>
+    <Color x:Key="ForegroundLightDark">#777777</Color>
+    <SolidColorBrush x:Key="ForegroundLightDarkBrush" Color="{StaticResource ForegroundLightDark}" />
+    
+
+    <Color x:Key="IconHoverBlue">#4d97ff</Color>
     <SolidColorBrush x:Key="IconHoverBlueBrush" Color="{StaticResource IconHoverBlue}" />
 
-    <Color x:Key="WordBlue">#3099c5</Color>
+    <Color x:Key="WordBlue">#2681ff</Color>
     <SolidColorBrush x:Key="WordBlueBrush" Color="{StaticResource WordBlue}" />
 
     <Color x:Key="WordTransparentBlue">#003099c5</Color>
     <SolidColorBrush x:Key="WordTransparentBlueBrush" Color="{StaticResource WordTransparentBlue}" />
 
-    <Color x:Key="WordLightBlue">#45b6e5</Color>
+    <Color x:Key="WordLightBlue">#88baff</Color>
     <SolidColorBrush x:Key="WordLightBlueBrush" Color="{StaticResource WordLightBlue}" />
 
-    <Color x:Key="WordVeryLightBlue">#c3e5f3</Color>
+    <Color x:Key="WordVeryLightBlue">#d7e8ff</Color>
     <SolidColorBrush x:Key="WordVeryLightBlueBrush" Color="{StaticResource WordVeryLightBlue}" />
 
     <Color x:Key="WordVeryVeryLightBlue">#ecf6fb</Color>
@@ -52,6 +56,13 @@
 
     <Color x:Key="WordRed">#ff4747</Color>
     <SolidColorBrush x:Key="WordRedBrush" Color="{StaticResource WordRed}" />
+
+
+    <Color x:Key="WordCoffee">#6E4123</Color>
+    <SolidColorBrush x:Key="WordCoffeeBrush" Color="{StaticResource WordCoffee}" />
+
+    <Color x:Key="WordLightRed">#ffdddd</Color>
+    <SolidColorBrush x:Key="WordLightRedBrush" Color="{StaticResource WordLightRed}" />
 
     <Color x:Key="WordGreen">#00c541</Color>
     <SolidColorBrush x:Key="WordGreenBrush" Color="{StaticResource WordGreen}" />

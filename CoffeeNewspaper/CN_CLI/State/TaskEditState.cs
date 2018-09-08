@@ -58,7 +58,7 @@ namespace CoffeeNewspaper_CLI
                 {
                     Console.WriteLine($"{"PreTaskIds:",-20}");
                     var preTasks = task.PreTaskConnectors.Select(x=>x.PreTask);
-                    ConsoleTable tables = ConsoleTable.From(preTasks.Select(x => new { TaskID = x.TaskId, Content = x.Content }));
+                    ConsoleTable tables = ConsoleTable.From(preTasks.Select(x => new { TaskID = x.TaskId, x.Content }));
                     tables.WriteAlternateColorTable(Color.LightGoldenrodYellow, Color.White);
                 }
 
@@ -83,10 +83,10 @@ namespace CoffeeNewspaper_CLI
             }
         }
 
-        private string DisplayDuration(int estimatedDurationMinutes)
+        private string DisplayDuration(long estimatedDurationMinutes)
         {
             var minutes = estimatedDurationMinutes % 60;
-            int remains = (estimatedDurationMinutes - minutes) / 60;
+            var remains = (estimatedDurationMinutes - minutes) / 60;
             var hours = remains % 24;
             remains = (remains - hours) / 24;
             var days = remains % 7;

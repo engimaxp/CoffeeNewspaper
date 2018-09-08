@@ -391,7 +391,8 @@ namespace CN_WPF
         }
 
         #endregion
-        #region ScaleY Expand/Shrink
+
+        #region ScrollView Expand/Shrink
 
         /// <summary>
         /// Adds a Scale y expand animation to the storyboard
@@ -452,6 +453,7 @@ namespace CN_WPF
         }
 
         #endregion
+
         /// <summary>
         /// Adds a marquee scrolling right to left animation to the storyboard
         /// </summary>

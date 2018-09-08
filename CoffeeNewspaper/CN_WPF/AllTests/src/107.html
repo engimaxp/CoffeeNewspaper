@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\ratingcontrol.xaml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+&lt;UserControl x:Class=&quot;CN_WPF.RatingControl&quot;
+             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
+             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
+             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
+             mc:Ignorable=&quot;d&quot;
+             d:DesignWidth=&quot;200&quot;&gt;
+    &lt;Grid &gt;
+        &lt;Grid.ColumnDefinitions&gt;
+            &lt;ColumnDefinition Width=&quot;Auto&quot;&gt;&lt;/ColumnDefinition&gt;
+            &lt;ColumnDefinition Width=&quot;*&quot;&gt;&lt;/ColumnDefinition&gt;
+        &lt;/Grid.ColumnDefinitions&gt;
+        &lt;ItemsControl
+            Grid.Column=&quot;0&quot;
+            local:MonitorHoverProperty.Value=&quot;True&quot;
+            d:DataContext=&quot;{x:Static design:RatingDesignModel.Instance}&quot;
+            ItemsSource=&quot;{Binding IconButtons}&quot;&gt;
+            &lt;ItemsControl.ItemsPanel&gt;
+                &lt;ItemsPanelTemplate&gt;
+                    &lt;StackPanel Orientation=&quot;Horizontal&quot; /&gt;
+                &lt;/ItemsPanelTemplate&gt;
+            &lt;/ItemsControl.ItemsPanel&gt;
+            &lt;ItemsControl.ItemTemplate&gt;
+                &lt;DataTemplate&gt;
+                    &lt;Button
+                            Style=&quot;{StaticResource RatingButton}&quot;
+                            Foreground=&quot;{Binding ColorType,Converter={local:ColorTypeToColorConverter}}&quot;
+                            Content=&quot;{Binding CurrentIconType,Converter={local:IconTypeToFontAwesomeConverter}}&quot;
+                            FontFamily=&quot;{Binding CurrentFontFamilyType,Converter={local:FontFamilyTypeToFontFamilyConverter}}&quot;
+                            FontSize=&quot;{StaticResource FontSizeLarge}&quot;
+                        Command=&quot;{Binding RateClickCommand}&quot;
+                        HorizontalAlignment=&quot;Left&quot;
+                        /&gt;
+                &lt;/DataTemplate&gt;
+            &lt;/ItemsControl.ItemTemplate&gt;
+        &lt;/ItemsControl&gt;
+        &lt;TextBlock
+            Grid.Column=&quot;1&quot; 
+            x:Name=&quot;NameColumn&quot;
+                   Text=&quot;{Binding SelectedValueTxt}&quot;
+                   VerticalAlignment=&quot;Center&quot;
+                   FontSize=&quot;{StaticResource FontSizeLarge}&quot;
+                   HorizontalAlignment=&quot;Right&quot;
+            Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot;&gt;&lt;/TextBlock&gt;
+    &lt;/Grid&gt;
+&lt;/UserControl&gt;
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[1,13,1,77,0]]);
+    </script>
+  </body>
+</html>

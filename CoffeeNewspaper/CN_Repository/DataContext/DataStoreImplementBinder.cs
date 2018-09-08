@@ -1,8 +1,8 @@
-﻿using CN_Core.Interfaces.Repository;
-using CN_Repository;
+﻿using CN_Core.Interfaces;
+using CN_Core.Interfaces.Repository;
 using Ninject;
 
-namespace CN_Service
+namespace CN_Repository
 {
     public static class DataStoreImplementBinder
     {
@@ -15,6 +15,9 @@ namespace CN_Service
             Kernel.Bind<IMemoDataStore>().To<MemoDataStore>();
             Kernel.Bind<ITimeSliceDataStore>().To<TimeSliceDataStore>();
             Kernel.Bind<ITaskDataStore>().To<TaskDataStore>();
+            Kernel.Bind<ITagDataStore>().To<TagDataStore>();
+
+            Kernel.Bind<IUnitOfWork>().To<UnitOfWork>();
         }
     }
 }

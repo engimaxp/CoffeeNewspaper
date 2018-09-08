@@ -45,14 +45,23 @@
     <system:String x:Key="FontAwesomeTrashAltIcon">&#xf2ed;</system:String>
     <system:String x:Key="FontAwesomeFilterIcon">&#xf0b0;</system:String>
     <system:String x:Key="FontAwesomeSortAmountDownIcon">&#xf160;</system:String>
-
+    <system:String x:Key="FontAwesomeCoffeeIcon">&#xf0f4;</system:String>
+    <system:String x:Key="FontAwesomeCalendarAltIcon">&#xf073;</system:String>
+    <system:String x:Key="FontAwesomeThIcon">&#xf00a;</system:String>
+    <system:String x:Key="FontAwesomePlayIcon">&#xf04b;</system:String>
+    <system:String x:Key="FontAwesomePauseIcon">&#xf04c;</system:String>
+    <system:String x:Key="FontAwesomePencilAltIcon">&#xf303;</system:String>
+    <system:String x:Key="FontAwesomeThLargeIcon">&#xf009;</system:String>
+    
+    
     <system:String x:Key="FontAwesomeChevronCircleDownIcon">&#xf13a;</system:String>
     <system:String x:Key="FontAwesomeChevronCircleLeftIcon">&#xf137;</system:String>
     <system:String x:Key="FontAwesomeChevronCircleRightIcon">&#xf138;</system:String>
     <system:String x:Key="FontAwesomeChevronCircleUpIcon">&#xf139;</system:String>
-
-
     
+    
+
+
     <!--Regular-->
     <system:String x:Key="FontAwesomeTimesCircleIcon">&#xf057;</system:String>
     <system:String x:Key="FontAwesomeSquareIcon">&#xf0c8;</system:String>
@@ -60,7 +69,7 @@
     <system:String x:Key="FontAwesomeCaretSquareUpIcon">&#xf151;</system:String>
     <system:String x:Key="FontAwesomeCaretSquareDownIcon">&#xf150;</system:String>
     <system:String x:Key="FontAwesomeCopyIcon">&#xf0c5;</system:String>
-
+    <system:String x:Key="FontAwesomeEditIcon">&#xf044;</system:String>
     <!-- Custom -->
     <system:String x:Key="FontAwesomeAddChildNodeIcon">&#xe70e;</system:String>
 

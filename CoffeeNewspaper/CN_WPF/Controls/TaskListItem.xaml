@@ -9,304 +9,318 @@
              mc:Ignorable="d"
              d:DesignWidth="300">
 
-    <UserControl.Resources>
-        <Style x:Key="ContentStyle" TargetType="{x:Type ContentControl}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ContentControl}">
+    <Grid d:DataContext="{x:Static design:TaskListItemDesignModel.Instance}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <!-- Content -->
+        <Border
+            x:Name="background"
+            Grid.Row="0"
+            Panel.ZIndex="1"
+            BorderThickness="1"
+            BorderBrush="{StaticResource WordVeryVeryLightBlueBrush}"
+            Background="{StaticResource ForegroundVeryLightBrush}">
 
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <!-- Content -->
-                            <Border Grid.Row="0"
-                                    x:Name="background"
-                                    BorderThickness="1"
-                                    BorderBrush="{StaticResource WordVeryVeryLightBlueBrush}"
-                                    Background="{StaticResource ForegroundVeryLightBrush}">
+            <Border.Triggers>
+                <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation To="{StaticResource WordVeryVeryLightBlue}"
+                                            Duration="0:0:0.03" Storyboard.TargetName="container"
+                                            Storyboard.TargetProperty="Background.Color" />
+                            <DoubleAnimation To="1" Duration="0:0:0.03" Storyboard.TargetName="editBorder"
+                                             Storyboard.TargetProperty="Opacity" />
+                            <DoubleAnimation To="1" Duration="0:0:0.03" Storyboard.TargetName="moreBorder"
+                                             Storyboard.TargetProperty="Opacity" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation To="Transparent" Duration="0:0:0.03"
+                                            Storyboard.TargetName="container"
+                                            Storyboard.TargetProperty="Background.Color" />
 
-                                <Border.Triggers>
-                                    <EventTrigger RoutedEvent="MouseEnter">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ColorAnimation To="{StaticResource WordVeryVeryLightBlue}"
-                                                                Duration="0:0:0.3" Storyboard.TargetName="container"
-                                                                Storyboard.TargetProperty="Background.Color" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                    <EventTrigger RoutedEvent="MouseLeave">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ColorAnimation To="Transparent" Duration="0:0:0.3"
-                                                                Storyboard.TargetName="container"
-                                                                Storyboard.TargetProperty="Background.Color" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Border.Triggers>
-                                <Grid x:Name="container" Background="Transparent">
-                                    <Grid.ColumnDefinitions>
-                                        <!-- Task Urgency Indicator Bar -->
-                                        <!-- Task Status -->
-                                        <ColumnDefinition Width="Auto" />
-                                        <!-- Main content -->
-                                        <ColumnDefinition Width="*" />
-                                        <!-- Is Expanded Indicator Bar -->
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <!-- Task Urgency Indicator Bar -->
-                                    <Border Grid.Column="0"
-                                            Width="4"
-                                            Margin="0 10"
-                                            HorizontalAlignment="Left"
-                                            Background="{Binding Urgency, Converter={local:TaskUrgencyToBackGroundColorConverter}}" />
+                            <DoubleAnimation To="0" Duration="0:0:0.03" Storyboard.TargetName="editBorder"
+                                             Storyboard.TargetProperty="Opacity" />
+                            <DoubleAnimation To="0" Duration="0:0:0.03" Storyboard.TargetName="moreBorder"
+                                             Storyboard.TargetProperty="Opacity" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Border.Triggers>
 
-                                    <!-- TaskStatus Indicator padding -->
-                                    <Border Grid.Column="0"
-                                            Padding="8 15">
-                                        <!-- TaskStatus Indicator -->
-                                        <TextBlock
-                                            Text="{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}"
-                                            Padding="0 4 0 0"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center"
-                                            Height="40"
-                                            TextAlignment="Center"
-                                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                            Foreground="{Binding Status,Converter={local:TaskStatusToForeGroundConverter}}"
-                                            FontSize="{StaticResource FontSizeXXLarge}"
-                                            FontFamily="{StaticResource FontAwesomeSolid}" />
-                                    </Border>
+            <Grid x:Name="container" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <!-- Task Urgency Indicator Bar -->
+                    <!-- Task Status -->
+                    <!-- Main content -->
+                    <ColumnDefinition Width="*" />
+                    <!-- More op Indicator Bar -->
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Grid.Column="0"
+                    Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='D0F4DC'}">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding SelectTaskCommand}" />
+                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ExpandTaskCommand}" />
+                    </Border.InputBindings>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                                    <!-- Task Title -->
-                                    <Border Grid.Column="1" Padding="0 0 10 0">
-                                        <StackPanel VerticalAlignment="Center">
-                                            <!-- Name-->
-                                            <TextBlock Text="{Binding TaskTitle}"
-                                                       MaxHeight="50"
-                                                       Padding="0 0 0 2"
-                                                       Foreground="{StaticResource ForegroundVeryDarkBrush}"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       TextWrapping="Wrap" />
-                                        </StackPanel>
-                                    </Border>
+                        <!-- Task Urgency Indicator Bar -->
+                        <Border Grid.Column="0"
+                                Width="4"
+                                Margin="0 10"
+                                HorizontalAlignment="Left"
+                                Background="{Binding Urgency, Converter={local:TaskUrgencyToBackGroundColorConverter}}" />
+                        <!-- TaskStatus Indicator padding -->
+                        <Border Grid.Column="0"
+                                Padding="8 15"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch">
+                            <!-- TaskStatus Indicator -->
+                            <TextBlock
+                                Text="{Binding Status,Converter={local:TaskStatusToFontCodeConverter}}"
+                                Padding="0 4 0 0"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Height="40"
+                                TextAlignment="Center"
+                                Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                Foreground="{Binding Status,Converter={local:TaskStatusToForeGroundConverter}}"
+                                FontSize="{StaticResource FontSizeXXLarge}"
+                                FontFamily="{StaticResource FontAwesomeSolid}" />
+                        </Border>
 
-                                    <!-- Expand Indicator Padding -->
-                                    <Border Grid.Column="2"
-                                            Padding="0 0 15 0"
-                                            Cursor="Hand">
-                                        <!-- Click to Expand TaskDetail -->
-                                        <Border.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick" Command="{Binding ExpandTaskCommand}" />
-                                        </Border.InputBindings>
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center"
-                                            FontSize="{StaticResource FontSizeXLarge}"
-                                            Text="{StaticResource FontAwesomeAngleDownIcon}"
-                                            FontFamily="{StaticResource FontAwesomeSolid}"
-                                            Foreground="{StaticResource WordLightBlueBrush}"
-                                            RenderTransformOrigin="0.5,0.5"
-                                            local:AnimateCWProperty.Value="{Binding IsExpanded}">
-                                            <TextBlock.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform />
-                                                    <SkewTransform />
-                                                    <RotateTransform x:Name="rtAngle" Angle="0" />
-                                                    <TranslateTransform />
-                                                </TransformGroup>
-                                            </TextBlock.RenderTransform>
-                                        </TextBlock>
-                                    </Border>
-                                </Grid>
-                            </Border>
+                        <!-- Task Title -->
+                        <Border Grid.Column="1" Padding="0 0 10 0"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch">
+                            <StackPanel VerticalAlignment="Center">
+                                <!-- Name-->
+                                <TextBlock Text="{Binding TaskTitle}"
+                                           FontFamily="Microsoft YaHei"
+                                           MaxHeight="76"
+                                           Padding="0 0 0 2"
+                                           Foreground="{StaticResource ForegroundVeryDarkBrush}"
+                                           TextTrimming="CharacterEllipsis"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- More Op Bar -->
+                        <Border Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                Panel.ZIndex="5"
+                                Visibility="Collapsed"
+                                Background="{StaticResource BackgroundVeryLightBrush}"
+                                local:AnimateSlideInFromRightProperty.Value="{Binding IsMoreOpDisplayed}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                    <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                    <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
 
-                            <!-- Expandable Content -->
-                            <!-- ScrollView Animation Wrapper -->
-                            <ScrollViewer
-                                x:Name="ExpandScrollView"
-                                Grid.Row="1"
-                                HorizontalScrollBarVisibility="Hidden"
-                                VerticalScrollBarVisibility="Hidden"
-                                HorizontalContentAlignment="Stretch"
-                                VerticalContentAlignment="Bottom"
-                                local:AnimateScrollViewExpandProperty.Value="{Binding IsExpanded}">
-                                <ScrollViewer.Tag>
-                                    <system:Double>1.0</system:Double>
-                                </ScrollViewer.Tag>
-                                <ScrollViewer.Height>
-                                    <MultiBinding Converter="{local:MultiplyConverter}">
-                                        <Binding Path="ActualHeight" ElementName="ExpanderContent" />
-                                        <Binding Path="Tag" RelativeSource="{RelativeSource Self}" />
-                                    </MultiBinding>
-                                </ScrollViewer.Height>
+                                <Button Style="{StaticResource BackGroundIconButtonWithText}"
+                                        Grid.Row="0" 
+                                        Grid.Column="0" 
+                                        Tag="Start"
+                                        Visibility="{Binding IsPaused,Converter={local:BooleanToVisiblityGoneConverter}}"
+                                        Command="{Binding StartCommand}"
+                                        Background="{StaticResource IconHoverBlueBrush}"
+                                        Content="{StaticResource FontAwesomePlayIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
 
-                                <!-- Shadow Border-->
-                                <Border x:Name="ExpanderContent"
-                                        Background="{StaticResource ForegroundVeryLightBrush}"
-                                        BorderBrush="{StaticResource ForegroundVeryLightBrush}"
-                                        BorderThickness="1"
-                                        ClipToBounds="True"
-                                        Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType=ScrollViewer}}">
-                                    <Grid>
-                                        <Border Background="Transparent"
-                                                BorderBrush="{StaticResource WordVeryLightBlueBrush}"
-                                                BorderThickness="0,10,0,0" Margin="0,-11,0,0">
-                                            <Border.Effect>
-                                                <DropShadowEffect Color="{StaticResource WordVeryLightBlue}"
-                                                                  ShadowDepth="0" BlurRadius="10" />
-                                            </Border.Effect>
-                                        </Border>
-                                        <Border Padding="10 10 14 10" Background="Transparent">
-                                            <!-- Real Expanded Content -->
-                                            <StackPanel>
-                                                <local:TaskTreeViewControl></local:TaskTreeViewControl>
-                                               
-                                                <!-- Created Time -->
-                                                <Grid Margin="0 5"
-                                                      >
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0"
-                                                               ToolTip="Created Time"
-                                                               FontSize="{StaticResource FontSizeLarge}"
-                                                               Foreground="{StaticResource WordGreenBrush}"
-                                                               FontFamily="{StaticResource FontAwesomeSolid}"
-                                                               Text="{StaticResource FontAwesomeClockIcon}" />
-                                                    <TextBlock Grid.Column="1"
-                                                               Padding="10 0 0 0"
-                                                               FontSize="{StaticResource FontSizeRegular}"
-                                                               Foreground="{StaticResource ForegroundVeryDarkBrush}"
-                                                               VerticalAlignment="Center"
-                                                               TextTrimming="CharacterEllipsis"
-                                                               ToolTip="(2018-6-18 19:00:00)">
-                                                        <Run Text="Yesterday " 
-                                                             FontWeight="Bold"></Run>
-                                                        <Run Text="(2018-6-18 19:00:00)"></Run>
-                                                    </TextBlock>
-                                                </Grid>
+                                <Button Style="{StaticResource BackGroundIconButtonWithText}"
+                                        Grid.Row="0" 
+                                        Grid.Column="0" 
+                                        Tag="Stop"
+                                        Command="{Binding StopCommand}"
+                                        Visibility="{Binding IsPaused,Converter={local:BooleanToVisiblityGoneConverter},ConverterParameter=True}"
+                                        Background="{StaticResource IconHoverBlueBrush}"
+                                        Content="{StaticResource FontAwesomePauseIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
 
-                                                <!-- Importance and Urgency Settings -->
-                                                <Grid Margin="0 5">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <local:RatingControl 
-                                                        ToolTip="Urgency Settings"
-                                                        Grid.Column="0"
-                                                                         Margin="-4 0 0 0"
-                                                                         DataContext="{x:Static design:RatingDesignModel2.Instance}" />
-                                                    <local:RatingControl
-                                                        ToolTip="Importance Settings"
-                                                        Grid.Column="2"
-                                                                         DataContext="{x:Static design:RatingDesignModel.Instance}" />
-                                                </Grid>
+                                <Button Style="{StaticResource BackGroundIconButtonWithText}"
+                                        Grid.Row="1" 
+                                        Grid.Column="0" 
+                                        Tag="Finish"
+                                        IsEnabled="{Binding IsFinished,Converter={local:BooleanInvertConverter}}"
+                                        Command="{Binding FinishCommand}"
+                                        Background="{StaticResource WordGreenBrush}"
+                                        Content="{StaticResource FontAwesomeCheckIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
 
-                                                <!-- Work Time Count -->
-                                                <Grid Margin="0 5">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0"
-                                                               VerticalAlignment="Center"
-                                                               FontSize="{StaticResource FontSizeLarge}"
-                                                               Foreground="{StaticResource WordLightBlueBrush}"
-                                                               FontFamily="{StaticResource FontAwesomeSolid}"
-                                                               Text="{StaticResource FontAwesomeHalfHourGlassIcon}" />
-                                                    <Grid Grid.Column="1" Margin="10 0 0 0">
-                                                        <StackPanel Orientation="Vertical">
-                                                            <TextBlock TextTrimming="CharacterEllipsis">
-                                                                <Run Text="Worked for " />
-                                                                <Run Text="3 Hours"
-                                                                     FontWeight="Bold"
-                                                                     Foreground="{StaticResource WordOrangeBrush}" />
-                                                            </TextBlock>
-                                                            <TextBlock TextTrimming="CharacterEllipsis">
-                                                                <Run Text="Estimated " />
-                                                                <Run Text="2 hours "
-                                                                     FontWeight="Bold"
-                                                                     Foreground="{StaticResource WordGreenBrush}" />
-                                                                <Run Text="Left" />
-                                                            </TextBlock>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                    <Grid Grid.Column="2"
-                                                          ToolTip="Time Left for DeadLine">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto" />
-                                                            <ColumnDefinition Width="*" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <TextBlock Grid.Column="0"
-                                                                   VerticalAlignment="Center"
-                                                                   FontSize="{StaticResource FontSizeLarge}"
-                                                                   Foreground="{StaticResource WordLightBlueBrush}"
-                                                                   FontFamily="{StaticResource FontAwesomeSolid}"
-                                                                   Text="{StaticResource FontAwesomeStopWatchIcon}" />
-                                                        <TextBlock Grid.Column="1"
-                                                                   Text="2 Days"
-                                                                   FontWeight="Bold"
-                                                                   Padding="10 0 0 0"
-                                                                   FontSize="{StaticResource FontSizeRegular}"
-                                                                   Foreground="{StaticResource ForegroundVeryDarkBrush}"
-                                                                   VerticalAlignment="Center"
-                                                                   TextTrimming="CharacterEllipsis"/>
-                                                    </Grid>
-                                                </Grid>
 
-                                                <!-- Tag Button -->
-                                                <local:TagPanelControl />
-                                                
-                                                <!-- Fail Reason -->
-                                                <Grid Margin="0 10"
-                                                      ToolTip="Fail Reason">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                                        <ColumnDefinition Width="*"></ColumnDefinition>
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0"
-                                                               VerticalAlignment="Center"
-                                                               FontSize="{StaticResource FontSizeLarge}"
-                                                               Foreground="{StaticResource WordRedBrush}"
-                                                               FontFamily="{StaticResource FontAwesomeRegular}"
-                                                               Text="{StaticResource FontAwesomeTimesCircleIcon}" />
-                                                    <TextBlock Grid.Column="1"
-                                                               Text="This one fails becauce of blablablablabla"
-                                                               Padding="10 0 0 0"
-                                                               FontSize="{StaticResource FontSizeRegular}"
-                                                               Foreground="{StaticResource WordRedBrush}"
-                                                               VerticalAlignment="Center"
-                                                               TextTrimming="CharacterEllipsis"/>
-                                                </Grid>
-                                            </StackPanel>
-                                        </Border>
+                                <Button Style="{StaticResource BackGroundIconButton}"
+                                        Grid.Row="0" 
+                                        Grid.Column="1"
+                                        ToolTip="Pending"
+                                        Command="{Binding PendingCommand}"
+                                        IsEnabled="{Binding CanPending}"
+                                        Background="{StaticResource WordOrangeBrush}"
+                                        FontFamily="{StaticResource FontAwesomeSolid}"
+                                        Content="{StaticResource FontAwesomeHalfHourGlassIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
 
-                                    </Grid>
-                                </Border>
-                            </ScrollViewer>
-                        </Grid>
+                                
+                                <Button Style="{StaticResource BackGroundIconButton}"
+                                        Grid.Row="1" 
+                                        Grid.Column="1"
+                                        ToolTip="Fail"
+                                        Command="{Binding FailingCommand}"
+                                        IsEnabled="{Binding CanFail}"
+                                        Background="{StaticResource WordRedBrush}"
+                                        FontFamily="{StaticResource FontAwesomeSolid}"
+                                        Content="{StaticResource FontAwesomeTimesCircleIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
+                                
+                                
+                                <Button Style="{StaticResource BackGroundIconButton}"
+                                        Grid.Row="0" 
+                                        Grid.Column="2"
+                                        ToolTip="Delete"
+                                        Command="{Binding DeleteCommand}"
+                                        Background="{StaticResource WordBlueBrush}"
+                                        FontFamily="{StaticResource FontAwesomeSolid}"
+                                        Content="{StaticResource FontAwesomeTrashAltIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
 
-                        <!-- Hover effect -->
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" TargetName="container"
-                                        Value="{StaticResource ForegroundDarkBrush}" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
+                                <Button Style="{StaticResource BackGroundIconButton}"
+                                        Grid.Row="1" 
+                                        Grid.Column="2"
+                                        Background="{StaticResource ForegroundDarkBrush}"
+                                        FontFamily="{StaticResource FontAwesomeSolid}"
+                                        Content="{StaticResource FontAwesomeThIcon}"
+                                        FontSize="{StaticResource FontSizeLarge}">
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
 
-    <ContentControl d:DataContext="{x:Static design:TaskListItemDesignModel.Instance}"
-                    Style="{StaticResource ContentStyle}" />
+                <!-- More Op Indicator Padding -->
+                <Grid Grid.Column="1"
+                      Background="{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter='D0F4DC'}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Grid.RowSpan="2" 
+                            Background="{StaticResource ForegroundDarkBrush}"
+                            Visibility="{Binding IsMoreOpDisplayed,Converter={local:BooleanToVisiblityGoneConverter}}"></Border>
+                    <Border
+                        x:Name="editBorder"
+                        Grid.Row="0"
+                        Padding="10 5"
+                        Opacity="0"
+                        Panel.ZIndex="2"
+                        Background="{StaticResource ForegroundVeryLightBrush}">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenEditDialogCommand}" />
+                        </Border.InputBindings>
+                        <TextBlock
+                            Margin="4 0 0 0"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSizeRegular}"
+                            Text="{StaticResource FontAwesomeEditIcon}"
+                            FontFamily="{StaticResource FontAwesomeSolid}"
+                            Foreground="{StaticResource ForegroundDarkBrush}" />
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.2"
+                                                        To="{StaticResource ForegroundMain}"
+                                                        Storyboard.TargetName="editBorder"
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.2"
+                                                        From="{StaticResource ForegroundMain}"
+                                                        Storyboard.TargetName="editBorder"
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
+                    <Border
+                        x:Name="moreBorder"
+                        Panel.ZIndex="2"
+                        Grid.Row="1"
+                        Padding="10 5"
+                        Opacity="0"
+                        Background="{StaticResource ForegroundVeryLightBrush}">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" Command="{Binding DisplayMoreOpCommand}" />
+                        </Border.InputBindings>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSizeRegular}"
+                            Text="{StaticResource FontAwesomeEllipsisHIcon}"
+                            FontFamily="{StaticResource FontAwesomeSolid}"
+                            Foreground="{StaticResource ForegroundDarkBrush}" />
+
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.2"
+                                                        To="{StaticResource ForegroundMain}"
+                                                        Storyboard.TargetName="moreBorder"
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.2"
+                                                        From="{StaticResource ForegroundMain}"
+                                                        Storyboard.TargetName="moreBorder"
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Expandable Content -->
+        <!-- ScrollView Animation Wrapper -->
+        <local:ScrollViewExpander
+            Grid.Row="1"
+            ToggleExpand="{Binding IsExpanded}"
+            ContentViewModel="{Binding ExpandDetailViewModel}" />
+    </Grid>
+
 </UserControl>

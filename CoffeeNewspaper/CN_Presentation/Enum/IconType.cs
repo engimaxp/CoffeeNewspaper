@@ -49,6 +49,18 @@
 
         RegularFire = 15,
 
-        Add = 16
+        Add = 16,
+
+        HourGlass = 17,
+        Filter = 18,
+        SortAmount = 19,
+        ThLarge = 20,
+        SortCreateTime = 21,
+
+        SortCreateTimeReverse = 22,
+        Trophy = 23,
+        Clock = 24,
+        EllipsisVertical= 25,
+        TrashAlt = 26
     }
 }

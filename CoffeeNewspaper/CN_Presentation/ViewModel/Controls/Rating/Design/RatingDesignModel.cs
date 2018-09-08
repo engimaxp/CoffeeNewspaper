@@ -1,4 +1,7 @@
-﻿namespace CN_Presentation.ViewModel.Controls.Design
+﻿using System;
+using CN_Core;
+
+namespace CN_Presentation.ViewModel.Controls.Design
 {
     public class RatingDesignModel:RatingViewModel
     {
@@ -17,16 +20,20 @@
         /// <summary>
         /// Default constructor
         /// </summary>
-        public RatingDesignModel()
+        public RatingDesignModel(int selectedValue = 3, RateChangedSubsriber rateChangedEvent = null)
         {
             ColorType = UserColorType.WordOrange;
             RegularIcon = IconType.Star;
             SolidIcon = IconType.Star;
             RegularFontFamilyType = FontFamilyType.FontAwesomeRegular;
             SolidFontFamilyType = FontFamilyType.FontAwesomeSolid;
-            SelectedValue = 3;
-            GenerateChildViewModel(5);
+            SelectedValue = selectedValue;
+            EnumType = typeof(CNPriority);
+            RateChangedEvent = rateChangedEvent;
+            GenerateChildViewModel();
         }
+
+
         #endregion
     }
 
@@ -48,15 +55,17 @@
         /// <summary>
         /// Default constructor
         /// </summary>
-        public RatingDesignModel2()
+        public RatingDesignModel2(int selectedValue = 3, RateChangedSubsriber rateChangedEvent = null)
         {
             ColorType = UserColorType.WordRed;
             RegularIcon = IconType.RegularFire;
             SolidIcon = IconType.SolidFire;
             RegularFontFamilyType = FontFamilyType.CNFont;
             SolidFontFamilyType = FontFamilyType.CNFont;
-            SelectedValue = 1;
-            GenerateChildViewModel(5);
+            SelectedValue = selectedValue;
+            EnumType = typeof(CNUrgency);
+            RateChangedEvent = rateChangedEvent;
+            GenerateChildViewModel();
         }
         #endregion
     }

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\state\basestate.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Threading.Tasks;
+using Console = Colorful.Console;
+namespace CoffeeNewspaper_CLI
+{
+    public class BaseState
+    {
+
+        protected HashSet&lt;BaseCommand&gt; CommandList = new HashSet&lt;BaseCommand&gt;();
+
+        public BaseState LastState { get; private set; }
+
+        public object StateObj { get;set; }
+
+        public virtual void InitialCommandList()
+        {
+            CommandList.Add(new HelpCommand(this));
+            CommandList.Add(new BackCommand(this));
+        }
+
+        public async Task&lt;BaseState&gt; DoCommand(ArgumentParser input)
+        {
+            if (string.IsNullOrEmpty(input.CommandLine)) return this;
+            Console.WriteLine();
+            foreach (var command in CommandList)
+            {
+                if (command.Name.Equals(input.CommandLine, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    return await command.Excute(input);
+                }
+            }
+            Console.WriteLineFormatted(&quot;{0} is Not a valid command&quot;, input.CommandLine, Color.LightGoldenrodYellow, Color.Gray);
+            Console.WriteLine();
+            return this;
+        }
+
+        public void Display(BaseState lastState)
+        {
+            LastState = lastState;
+            Refresh();
+        }
+
+        public virtual void Refresh()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void DisplayCmdLine()
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,81,0],[13,38,13,42,0],[13,43,13,55,0],[15,34,15,38,0],[15,38,15,42,0],[18,9,18,10,0],[19,13,19,52,0],[20,13,20,52,0],[21,9,21,10,0],[24,9,24,10,0],[25,13,25,57,0],[25,58,25,70,0],[26,13,26,33,0],[27,13,27,20,0],[27,22,27,33,0],[27,34,27,36,0],[27,37,27,48,0],[28,13,28,14,0],[29,17,29,103,0],[30,17,30,18,0],[31,21,31,56,0],[33,13,33,14,0],[34,13,34,129,0],[35,13,35,33,0],[36,13,36,25,0],[37,9,37,10,0],[40,9,40,10,0],[41,13,41,35,0],[42,13,42,23,0],[43,9,43,10,0],[46,9,46,10,0],[47,13,47,49,0],[51,9,51,10,0],[52,13,52,49,0]]);
+    </script>
+  </body>
+</html>

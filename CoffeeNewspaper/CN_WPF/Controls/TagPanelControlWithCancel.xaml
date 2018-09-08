@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="CN_WPF.TagPanelControlWithCancel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CN_WPF"
+             xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
+             xmlns:controls="clr-namespace:CN_Presentation.ViewModel.Controls;assembly=CN_Presentation"
+             mc:Ignorable="d"
+             d:DesignWidth="300">
+    <ItemsControl
+        d:DataContext="{x:Static design:TagPanelDesignModel.Instance}">
+        <ItemsControl.Resources>
+            <CollectionViewSource x:Key="TagCollection" Source="{Binding TagItems}" />
+        </ItemsControl.Resources>
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel Orientation="Horizontal" IsItemsHost="True" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type controls:TagItemViewModel}">
+                <Button ToolTip="{Binding TagTitle}"
+                        Style="{StaticResource TagButtonCancel}"
+                        Content="{Binding TagTitle}"
+                        Command="{Binding DeleteCommand}" />
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+        <ItemsControl.ItemsSource>
+            <CompositeCollection>
+                <CollectionContainer Collection="{Binding Source={StaticResource TagCollection}}" />
+                <local:TagAddingControl DataContext="{Binding AddTagEntry}" />
+            </CompositeCollection>
+        </ItemsControl.ItemsSource>
+    </ItemsControl>
+</UserControl>

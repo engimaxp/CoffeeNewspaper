@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\state\startstate.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Drawing;
+using Console = Colorful.Console;
+namespace CoffeeNewspaper_CLI
+{
+    public class StartState: BaseState
+    {
+        public override void InitialCommandList()
+        {
+            base.InitialCommandList();
+            CommandList.Add(new TaskCommand(this));
+        }
+
+        public override void Refresh()
+        {
+            Console.WriteAscii(&quot;COFFEE&quot;, Color.SandyBrown);
+            Console.WriteAscii(&quot;    NEWSPAPER&quot;, Color.PapayaWhip);
+            Console.WriteLine();
+            Console.WriteLine(&quot;Hello my friend:&quot;, Color.YellowGreen);
+            Console.WriteLine();
+            Console.WriteLineFormatted(&quot;  Welcome to use {0}&quot;, &quot;CoffeeNewspaper&quot;, Color.LightGoldenrodYellow, Color.Gray);
+            Console.WriteLine();
+            Console.WriteLine(&quot;  This is a tool to improve your work efficiency!&quot;, Color.Gray);
+            Console.WriteLine();
+            Console.WriteLineFormatted(&quot;  enter {0} to get more information&quot;, &quot;help&quot;, Color.LightGoldenrodYellow, Color.Gray);
+            Console.WriteLine();
+        }
+
+        public override void DisplayCmdLine()
+        {
+            Console.Write(&quot;Drink a Coffee&gt; &quot;,Color.White);
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,39,0],[11,13,11,52,0],[12,9,12,10,0],[15,9,15,10,0],[16,13,16,60,0],[17,13,17,67,0],[18,13,18,33,0],[19,13,19,70,0],[20,13,20,33,0],[21,13,21,123,0],[22,13,22,33,0],[23,13,23,96,0],[24,13,24,33,0],[25,13,25,127,0],[26,13,26,33,0],[27,9,27,10,0],[30,9,30,10,0],[31,13,31,59,0],[32,9,32,10,0]]);
+    </script>
+  </body>
+</html>

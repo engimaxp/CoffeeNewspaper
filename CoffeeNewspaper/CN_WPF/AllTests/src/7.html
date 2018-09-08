@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\command\taskcommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Service;
+using CN_Service;
+using CoffeeNewspaper_CLI.ConsoleTables;
+using Colorful;
+
+namespace CoffeeNewspaper_CLI
+{
+    public class TaskCommand : BaseCommand
+    {
+        public TaskCommand(BaseState state) : base(state)
+        {
+            Name = &quot;task&quot;;
+        }
+
+        public override async Task&lt;BaseState&gt; Excute(ArgumentParser input)
+        {
+            if (input.Defined(&quot;add&quot;))
+            {
+                return new TaskEditState();
+            }
+            if (input.Defined(&quot;l&quot;))
+            {
+                var lst = await IoC.Get&lt;ITaskService&gt;().GetAllTasks();
+                ConsoleTable tables = ConsoleTable.From(lst.Select(x =&gt; new {TaskID = x.TaskId, Content = x.Content}));
+                tables.WriteAlternateColorTable(Color.LightGoldenrodYellow, Color.White);
+                Console.WriteLine();
+                return State;
+            }
+            if (input.Defined(&quot;more&quot;))
+            {
+                var taskid = input.GetSingle&lt;int&gt;(&quot;more&quot;);
+                var atsk = await IoC.Get&lt;ITaskService&gt;().GetTaskById(taskid);
+                var state = new TaskEditState {StateObj =atsk};
+                return state;
+            }
+
+            Console.WriteLine(&quot;wrong parameter&quot;, Color.Red);
+            Console.WriteLine();
+            return State;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,47,14,58,0],[15,9,15,10,0],[16,13,16,27,0],[17,9,17,10,0],[20,9,20,10,0],[21,13,21,38,0],[22,13,22,14,0],[23,17,23,44,0],[25,13,25,36,0],[26,13,26,14,0],[27,17,27,71,0],[28,17,28,73,0],[28,73,28,117,0],[28,117,28,120,0],[28,17,28,120,0],[29,17,29,90,0],[30,17,30,37,0],[31,17,31,30,0],[33,13,33,39,0],[34,13,34,14,0],[35,17,35,59,0],[36,17,36,78,0],[37,17,37,64,0],[38,17,38,30,0],[41,13,41,61,0],[42,13,42,33,0],[43,13,43,26,0],[44,9,44,10,0]]);
+    </script>
+  </body>
+</html>

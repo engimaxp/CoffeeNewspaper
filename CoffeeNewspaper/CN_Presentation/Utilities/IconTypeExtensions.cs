@@ -49,6 +49,26 @@
                     return "\ue617";
                 case IconType.Add:
                     return "\uf067";
+                case IconType.HourGlass:
+                    return "\uf252";
+                case IconType.Filter:
+                    return "\uf0b0";
+                case IconType.SortAmount:
+                    return "\uf160";
+                case IconType.ThLarge:
+                    return "\uf009";
+                case IconType.SortCreateTime:
+                    return "\ue618";
+                case IconType.SortCreateTimeReverse:
+                    return "\ue619";
+                case IconType.Trophy:
+                    return "\uf091";
+                case IconType.Clock:
+                    return "\uf017";
+                case IconType.EllipsisVertical:
+                    return "\uf142";
+                case IconType.TrashAlt:
+                    return "\uf2ed";
                 // If none found, return null
                 default:
                     return null;

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\input\timerangeentrycontrol.xaml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+&lt;UserControl x:Class=&quot;CN_WPF.TimeRangeEntryControl&quot;
+             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
+             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
+             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+             xmlns:design=&quot;clr-namespace:CN_Presentation.Input.Design;assembly=CN_Presentation&quot;
+             mc:Ignorable=&quot;d&quot; d:DesignWidth=&quot;232&quot;
+             d:DataContext=&quot;{x:Static design:TimeRangeEntryDesignModel.Instance}&quot;&gt;
+    &lt;Grid&gt;
+        &lt;Grid.RowDefinitions&gt;
+            &lt;RowDefinition Height=&quot;Auto&quot;&gt;&lt;/RowDefinition&gt;
+            &lt;RowDefinition Height=&quot;*&quot;&gt;&lt;/RowDefinition&gt;
+        &lt;/Grid.RowDefinitions&gt;
+        &lt;Grid.ColumnDefinitions&gt;
+            &lt;ColumnDefinition Width=&quot;*&quot;&gt;&lt;/ColumnDefinition&gt;
+            &lt;ColumnDefinition Width=&quot;Auto&quot;&gt;&lt;/ColumnDefinition&gt;
+        &lt;/Grid.ColumnDefinitions&gt;
+        &lt;!-- TextInput --&gt;
+        &lt;Border Grid.Row=&quot;0&quot;
+                Grid.Column=&quot;0&quot;
+                Grid.ColumnSpan=&quot;2&quot;
+                CornerRadius=&quot;5&quot;
+                BorderThickness=&quot;1&quot;
+                BorderBrush=&quot;{StaticResource ForegroundLightBrush}&quot;
+                Background=&quot;{StaticResource ForegroundMainBrush}&quot;&gt;
+            &lt;TextBox 
+                x:Name=&quot;DateTimeTextBox&quot;
+                Style=&quot;{StaticResource MemoContent}&quot;
+                     local:FocusAndSelectProperty.Value=&quot;{Binding Editing,UpdateSourceTrigger=PropertyChanged}&quot;
+                     Margin=&quot;0&quot;
+                     Padding=&quot;4 4 20 4&quot;
+                     Tag=&quot;e.g.3 hours or Four Days&quot;
+                     Text=&quot;{Binding InputText, UpdateSourceTrigger=PropertyChanged}&quot;
+                     FontSize=&quot;{StaticResource FontSizeRegular}&quot; &gt;
+                &lt;TextBox.InputBindings&gt;
+                    &lt;KeyBinding Command=&quot;{Binding ClearCommand}&quot; Key=&quot;Escape&quot; /&gt;
+                    &lt;KeyBinding Command=&quot;{Binding RecognizeCommand}&quot; Key=&quot;Return&quot; /&gt;
+                &lt;/TextBox.InputBindings&gt;
+            &lt;/TextBox&gt;
+        &lt;/Border&gt;
+
+        &lt;!-- Calendar Control --&gt;
+        &lt;Button Grid.Row=&quot;0&quot;
+                Grid.Column=&quot;1&quot;
+                Padding=&quot;0 0 5 0&quot;
+                FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                Style=&quot;{StaticResource IconDarkerButton}&quot;
+                Content=&quot;{StaticResource FontAwesomeClockIcon}&quot;
+                Command=&quot;{Binding PopUpCommand}&quot;&gt;&lt;/Button&gt;
+
+        &lt;!-- Recognizer Suggest --&gt;
+        &lt;ItemsControl 
+            Visibility=&quot;{Binding DisplaySuggestButtons,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+            Grid.Row=&quot;1&quot;
+                      Grid.Column=&quot;0&quot;
+                      Grid.ColumnSpan=&quot;2&quot;
+            ItemsSource=&quot;{Binding SuggestButtons}&quot;&gt;
+            &lt;ItemsControl.ItemsPanel&gt;
+                &lt;ItemsPanelTemplate&gt;
+                    &lt;WrapPanel Orientation=&quot;Horizontal&quot; /&gt;
+                &lt;/ItemsPanelTemplate&gt;
+            &lt;/ItemsControl.ItemsPanel&gt;
+            &lt;ItemsControl.ItemTemplate&gt;
+                &lt;DataTemplate&gt;
+                    &lt;Button ToolTip=&quot;{Binding Title}&quot;
+                            Style=&quot;{StaticResource RecognizeSuggestButton}&quot;
+                            Content=&quot;{Binding Title}&quot;
+                            Command=&quot;{Binding ClickCommand}&quot;/&gt;
+                &lt;/DataTemplate&gt;
+            &lt;/ItemsControl.ItemTemplate&gt;
+        &lt;/ItemsControl&gt;
+
+        &lt;!-- Error Message --&gt;
+        &lt;TextBlock Grid.Column=&quot;0&quot;
+                   Grid.Row=&quot;1&quot;
+                   Grid.ColumnSpan=&quot;2&quot;
+                   Visibility=&quot;{Binding RecgonizeFail,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                   Foreground=&quot;{StaticResource WordRedBrush}&quot;
+                   Text=&quot;{Binding FailReason}&quot;&gt;&lt;/TextBlock&gt;
+
+        &lt;!-- CalendarPopup --&gt;
+        &lt;Popup 
+            x:Name=&quot;TimeRangePickerPopup&quot;
+            Grid.Column=&quot;0&quot;
+               Grid.Row=&quot;1&quot;
+               Grid.ColumnSpan=&quot;2&quot;
+               StaysOpen=&quot;False&quot;
+               AllowsTransparency=&quot;True&quot;
+               Placement=&quot;Bottom&quot;
+               IsOpen=&quot;{Binding IsPanelPopup}&quot;
+               PlacementTarget=&quot;{Binding ElementName=DateTimeTextBox}&quot;&gt;
+            &lt;local:TimeSpanPicker 
+                DataContext=&quot;{Binding PopUpTimeSpanSelectViewModel}&quot;&gt;
+            &lt;/local:TimeSpanPicker&gt;
+        &lt;/Popup&gt;
+    &lt;/Grid&gt;
+&lt;/UserControl&gt;
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[1,13,1,77,0]]);
+    </script>
+  </body>
+</html>

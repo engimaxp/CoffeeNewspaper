@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace CN_Core
 {
@@ -8,6 +9,7 @@ namespace CN_Core
     ///     The pretask of this <see cref="CNTask" /> is not yet finished
     ///     throw this exception while try to finish a task
     /// </summary>
+    [Serializable]
     public class PreTaskNotEndedException : Exception
     {
         #region Construction
@@ -18,6 +20,11 @@ namespace CN_Core
             _curTask = curTask;
         }
 
+        protected PreTaskNotEndedException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+        
         #endregion
 
         #region Formatting implement

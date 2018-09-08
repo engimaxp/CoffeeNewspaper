@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\mutivalueconverter\widthcalculateconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Globalization;
+using System.Windows.Data;
+using System.Windows.Markup;
+
+namespace CN_WPF
+{
+
+    public class WidthCalculateConverter : BaseMutiValueConverter&lt;WidthCalculateConverter&gt;
+    {
+        public override object Convert(object[] values, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            double result = 0;
+            foreach (var t in values)
+            {
+                if (t is double d)
+                {
+                    if (Math.Abs(result) &lt; 1e-5)
+                    {
+                        result = d;
+                    }
+                    else
+                    {
+                        result -= d;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public override object[] ConvertBack(object value, Type[] targetTypes,
+            object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[14,13,14,31,0],[15,13,15,20,0],[15,22,15,27,0],[15,28,15,30,0],[15,31,15,37,0],[16,13,16,14,0],[17,17,17,35,0],[18,17,18,18,0],[19,21,19,49,0],[20,21,20,22,0],[21,25,21,36,0],[22,21,22,22,0],[24,21,24,22,0],[25,25,25,37,0],[26,21,26,22,0],[27,17,27,18,0],[28,13,28,14,0],[30,13,30,27,0],[31,9,31,10,0],[35,9,35,10,0],[36,13,36,49,0]]);
+    </script>
+  </body>
+</html>

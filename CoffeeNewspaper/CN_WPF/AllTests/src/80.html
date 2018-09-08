@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\taskstatustotextconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+
+using System;
+using System.Globalization;
+using System.Windows.Media;
+using CN_Presentation;
+using CN_Presentation.Utilities;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// A converter that takes in a &lt;see cref=&quot;TaskCurrentStatus&quot;/&gt; and returns 
+    /// the text for that Indicator
+    /// &lt;/summary&gt;
+    public class TaskStatusToTextConverter : BaseValueConverter&lt;TaskStatusToTextConverter&gt;
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string code = string.Empty;
+            switch ((TaskCurrentStatus)value)
+            {
+                case TaskCurrentStatus.COMPLETE:
+                {
+                    code = &quot;Complete&quot;;
+                    break;
+                }
+                case TaskCurrentStatus.DELETE:
+                {
+                    code = &quot;Delete&quot;;
+                        break;
+                }
+                case TaskCurrentStatus.STOP:
+                {
+                    code = &quot;Stop&quot;;
+                        break;
+                }
+                case TaskCurrentStatus.UNDERGOING:
+                {
+                    code = &quot;Undergoing&quot;;
+                    break;
+                }
+                case TaskCurrentStatus.PENDING:
+                {
+                    code = &quot;Pending&quot;;
+                    break;
+                }
+            }
+            return code;
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,10,0],[18,13,18,40,0],[19,13,19,46,0],[22,17,22,18,0],[23,21,23,39,0],[24,21,24,27,0],[27,17,27,18,0],[28,21,28,37,0],[29,25,29,31,0],[32,17,32,18,0],[33,21,33,35,0],[34,25,34,31,0],[37,17,37,18,0],[38,21,38,41,0],[39,21,39,27,0],[42,17,42,18,0],[43,21,43,38,0],[44,21,44,27,0],[47,13,47,25,0],[48,9,48,10,0],[51,9,51,10,0],[52,13,52,49,0]]);
+    </script>
+  </body>
+</html>

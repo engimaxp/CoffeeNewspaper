@@ -46,8 +46,8 @@ namespace CN_Core
             public bool Equals(CNTag x, CNTag y)
             {
                 if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(x, null)) return false;
-                if (ReferenceEquals(y, null)) return false;
+                if (x == null) return false;
+                if (y == null) return false;
                 return string.Equals(x.Title, y.Title);
             }
 
@@ -68,7 +68,7 @@ namespace CN_Core
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj == null) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
             return Equals((CNTag) obj);

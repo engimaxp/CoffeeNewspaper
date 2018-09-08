@@ -17,29 +17,13 @@
         </Grid.ColumnDefinitions>
 
         <!--ShorCut Bar-->
-        <ItemsControl Grid.Column="0"
-                      DataContext="{x:Static design:HeadMenuDesignModel2.Instance}"
-                      ItemsSource="{Binding NavButtonItems}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Button Height="64"
-                            Content="{Binding FontCode,Converter={local:IconTypeToFontAwesomeConverter},ConverterParameter=False}"
-                            Style="{StaticResource SolidIconButton}"
-                            Command="{Binding JumpCommand}"
-                            CommandParameter="{Binding TargetPage}"
-                            local:IsHighlightProperty.Value="False" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <Button Height="64"
+                Content="{StaticResource FontAwesomeAddIcon}"
+                Style="{StaticResource SolidIconButton}"
+                Command="{Binding AddCommand}"/>
 
         <!--Main Function and Settings UserInfo Bar-->
         <ItemsControl Grid.Column="2"
-                      DataContext="{x:Static design:HeadMenuDesignModel.Instance}"
                       ItemsSource="{Binding NavButtonItems}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>

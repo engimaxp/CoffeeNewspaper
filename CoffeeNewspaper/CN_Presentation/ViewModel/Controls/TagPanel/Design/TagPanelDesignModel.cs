@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
+using CN_Presentation.Input.Design;
 
 namespace CN_Presentation.ViewModel.Controls.Design
 {
@@ -21,17 +22,17 @@ namespace CN_Presentation.ViewModel.Controls.Design
         /// </summary>
         public TagPanelDesignModel()
         {
-            TagItems = new List<TagItemViewModel>()
+            TagItems = new ObservableCollection<TagItemViewModel>()
             {
-                new TagItemViewModel()
+                new TagItemViewModel(this)
                 {
                     TagTitle = "Works"
                 },
-                new TagItemViewModel()
+                new TagItemViewModel(this)
                 {
                     TagTitle = "ReUseableQuest"
                 },
-                new TagItemViewModel()
+                new TagItemViewModel(this)
                 {
                     TagTitle = "Garbage"
                 },

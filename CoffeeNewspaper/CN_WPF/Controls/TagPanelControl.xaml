@@ -1,28 +1,27 @@
 ﻿<UserControl x:Class="CN_WPF.TagPanelControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:CN_WPF"
              xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignWidth="300">
-    <Grid>
-        <ItemsControl 
-            DataContext="{x:Static design:TagPanelDesignModel.Instance}"
-            ItemsSource="{Binding TagItems}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Button ToolTip="{Binding TagTitle}"
+    <ItemsControl
+        d:DataContext="{x:Static design:TagPanelDesignModel.Instance}"
+        ItemsSource="{Binding TagItems}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <Button ToolTip="{Binding TagTitle}"
                         Style="{StaticResource TagButton}"
-                            Content="{Binding TagTitle}"/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </Grid>
+                        Content="{Binding TagTitle}"
+                        Command="{Binding JumpCommand}"/>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
 </UserControl>

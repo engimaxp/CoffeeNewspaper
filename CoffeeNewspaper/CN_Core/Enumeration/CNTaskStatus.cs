@@ -21,6 +21,10 @@
         DOING,
 
         /// <summary>
+        ///     this task has some preTasks Undone or this task need other resource currently not available
+        /// </summary>
+        PENDING,
+        /// <summary>
         ///     Task finished
         /// </summary>
         DONE

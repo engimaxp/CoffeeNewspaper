@@ -22,6 +22,12 @@ namespace CN_Core.Interfaces.Service
         Task<bool> DeleteTask(int taskId, bool force = false);
 
         /// <summary>
+        ///     Delete all complete tasks (root level tasks only)
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> ClearAllCompleteTasks();
+
+        /// <summary>
         ///     Remove a Task from db physical delete
         /// </summary>
         /// <param name="taskId"></param>
@@ -91,21 +97,53 @@ namespace CN_Core.Interfaces.Service
         /// <returns></returns>
         Task<CNTask> GetTaskById(int taskId);
 
+        
+        /// <summary>
+        ///     Get task by id as no tracking
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        Task<CNTask> GetTaskByIdNoTracking(int taskId);
+
+        /// <summary>
+        /// Get all child tasks of a parent task
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTask>> GetChildTasksNoTracking(int taskId);
+
+        /// <summary>
+        ///     Get task root parent
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        Task<int> GetTaskRootParentId(int taskId);
+
         /// <summary>
         ///     Set Parent task of this task
         /// </summary>
-        /// <param name="targetTask"></param>
-        /// <param name="parentTask"></param>
+        /// <param name="targetTaskId"></param>
+        /// <param name="parentTaskId"></param>
+        /// <param name="pos">new task will be put after this position,-1 if the task is add to the rear of list</param>
         /// <returns></returns>
-        Task<bool> SetParentTask(CNTask targetTask, CNTask parentTask);
+        Task<bool> SetParentTask(int targetTaskId, int parentTaskId,int pos);
 
         /// <summary>
-        ///     Set pre task of this task
+        ///     Add pre task of this task
         /// </summary>
         /// <param name="targetTask"></param>
         /// <param name="preTask"></param>
         /// <returns></returns>
-        Task<bool> SetPreTask(CNTask targetTask, CNTask preTask);
+        Task<bool> AddPreTask(CNTask targetTask, CNTask preTask);
+
+
+        /// <summary>
+        ///     Remove pre task of this task
+        /// </summary>
+        /// <param name="targetTask"></param>
+        /// <param name="preTask"></param>
+        /// <returns></returns>
+        Task<bool> DelPreTask(CNTask targetTask, CNTask preTask);
         #region TimeSlices relevent
 
         /// <summary>
@@ -145,5 +183,14 @@ namespace CN_Core.Interfaces.Service
         Task<bool> DeleteTimeSlices(CNTimeSlice timeSlice);
 
         #endregion
+
+        /// <summary>
+        ///     Pending a task with reason
+        ///     this task and its suf children tasks cannot start
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <param name="reason"></param>
+        /// <returns></returns>
+        Task<bool> PendingATask(int taskId, string reason);
     }
 }

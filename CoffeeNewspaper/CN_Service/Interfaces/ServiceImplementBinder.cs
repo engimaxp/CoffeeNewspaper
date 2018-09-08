@@ -1,5 +1,7 @@
-﻿using CN_Core.Interfaces.Service;
+﻿using CN_Core;
+using CN_Core.Interfaces.Service;
 using Ninject;
+using Ninject.Extensions.NamedScope;
 
 namespace CN_Service
 {
@@ -11,9 +13,11 @@ namespace CN_Service
         /// <param name="Kernel"></param>
         public static void BindServices(this IKernel Kernel)
         {
-            Kernel.Bind<IMemoService>().To<MemoService>();
+            Kernel.Bind<IMemoService>().To<MemoService>().DefinesNamedScope(CNConstants.NinjectNamedScopeForService);
 
-            Kernel.Bind<ITaskService>().To<TaskService>();
+            Kernel.Bind<ITaskService>().To<TaskService>().DefinesNamedScope(CNConstants.NinjectNamedScopeForService);
+
+            Kernel.Bind<ITagService>().To<TagService>().DefinesNamedScope(CNConstants.NinjectNamedScopeForService);
         }
     }
 }

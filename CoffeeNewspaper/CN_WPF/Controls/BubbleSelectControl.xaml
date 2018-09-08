@@ -1,0 +1,150 @@
+﻿<UserControl x:Class="CN_WPF.BubbleSelectControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CN_WPF"
+             xmlns:design="clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation"
+             mc:Ignorable="d" >
+    <Grid d:DataContext="{x:Static design:BubbleSelectDesignModel.Instance}">
+        <Button x:Name="Button"
+                ToolTip="{Binding ToolTip}"
+                Command="{Binding ClickCommand}"
+            Style="{StaticResource IconGrowButton}"
+                Foreground="{Binding ForeGroundColor,Converter={local:ColorTypeToColorConverter}}"
+                Content="{Binding DefaultIconFontText,Converter={local:IconTypeToFontAwesomeConverter}}"
+                FontFamily="{Binding DefaultIconFontFamily,Converter={local:FontFamilyTypeToFontFamilyConverter}}"
+                />
+        <Popup DataContext="{Binding BubbleMenuViewModel}"
+            StaysOpen="False"
+               IsOpen="{Binding IsOpen}"
+            AllowsTransparency="True"
+            Placement="Bottom"
+            PlacementTarget="{Binding ElementName=Button}">
+            <Grid>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- bubble anchor -->
+                <Path Grid.Row="0" 
+                      Stroke="{StaticResource ForegroundDarkBrush}"
+                      Panel.ZIndex="3"
+                      Margin="10 0 0 -3"
+                      Data="M 0,10 L 10,0 L 20,10" 
+                      StrokeThickness="2"
+                      HorizontalAlignment="Left"
+                      Fill="{StaticResource ForegroundVeryLightBrush}">
+
+
+                </Path>
+                <!-- bubble rectangle -->
+
+                <Border Padding="5"
+                        Grid.Row="1"
+                        BorderBrush="{StaticResource ForegroundDarkBrush}"
+                        BorderThickness="2"
+                    Background="{StaticResource ForegroundVeryLightBrush}"
+                    CornerRadius="8">
+
+                    <ItemsControl ItemsSource="{Binding Buttons}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource ForegroundVeryLightBrush}"
+                                        Padding="5 0 20 0"
+                            CornerRadius="8">
+                                    <Border.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick" Command="{Binding ClickCommand}"></MouseBinding>
+                                    </Border.InputBindings>
+                                    <Border.Triggers>
+                                        <!-- Hover over blue -->
+                                        <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimation To="{StaticResource WordBlue}" 
+                                                        Duration="0:0:0" 
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                                    <ColorAnimation To="{StaticResource ForegroundVeryLight}" 
+                                                        Duration="0:0:0" 
+                                                        Storyboard.TargetProperty="Foreground.Color" 
+                                                        Storyboard.TargetName="icon"
+                                                        />
+                                                    <ColorAnimation To="{StaticResource ForegroundVeryLight}" 
+                                                        Duration="0:0:0" 
+                                                        Storyboard.TargetProperty="Foreground.Color" 
+                                                        Storyboard.TargetName="text"
+                                                        />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                        <!-- Hover out revert -->
+                                        <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimation To="{StaticResource ForegroundVeryLight}" 
+                                                        Duration="0:0:0" 
+                                                        Storyboard.TargetProperty="Background.Color" />
+                                                    <ColorAnimation To="{StaticResource ForegroundDark}" 
+                                                        Duration="0:0:0" 
+                                                        Storyboard.TargetProperty="Foreground.Color" 
+                                                        Storyboard.TargetName="icon"
+                                                        />
+                                                    <ColorAnimation To="{StaticResource ForegroundVeryDark}" 
+                                                        Duration="0:0:0" 
+                                                        Storyboard.TargetProperty="Foreground.Color" 
+                                                        Storyboard.TargetName="text"
+                                                        />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Border.Triggers>
+
+                                    <!-- Grid container for text and icon -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <!-- Checkbox -->
+                                            <ColumnDefinition Width="Auto" />
+                                            <!-- Icon -->
+                                            <ColumnDefinition Width="Auto" />
+                                            <!-- Text -->
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <CheckBox  Grid.Column="0"
+                                            Margin="0"
+                                            Padding="0"
+                                                   IsChecked="{Binding IsSelected}"
+                                            FontSize="{StaticResource FontSizeRegular}"
+                                            Style="{StaticResource FontAweSomeCheckBox}"
+                                                   Visibility="{Binding IsSelected,Converter={local:BooleanToVisiblityConverter},ConverterParameter=True}"/>
+                                        <!-- Icon -->
+                                        <TextBlock Name="icon"
+                                                   Grid.Column="1"
+                                       Padding="5"
+                                       VerticalAlignment="Center"
+                                                   FontSize="{StaticResource FontSizeRegular}"
+                                               Text="{Binding IconFontText,Converter={local:IconTypeToFontAwesomeConverter}}"
+                                               FontFamily="{Binding IconFontFamily,Converter={local:FontFamilyTypeToFontFamilyConverter}}"
+                                       Foreground="{StaticResource ForegroundDarkBrush}"
+                                       />
+
+                                        <!-- Text -->
+                                        <TextBlock Name="text"
+                                       Grid.Column="2"
+                                       Foreground="{StaticResource ForegroundVeryDarkBrush}"
+                                       FontFamily="Microsoft YaHei"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding ButtonText}" />
+
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </Grid>
+        </Popup>
+    </Grid>
+</UserControl>

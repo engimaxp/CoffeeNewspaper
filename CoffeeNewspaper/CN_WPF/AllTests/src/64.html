@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\viewmodels\windowviewmodel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Windows;
+using System.Windows.Input;
+using CN_Presentation.ViewModel.Base;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// The View Model for the custom flat window
+    /// &lt;/summary&gt;
+    public class WindowViewModel : BaseViewModel
+    {
+        #region Private Member
+
+        /// &lt;summary&gt;
+        /// The window this view model controls
+        /// &lt;/summary&gt;
+        private readonly Window mWindow;
+
+        /// &lt;summary&gt;
+        /// The window resizer helper that keeps the window size correct in various states
+        /// &lt;/summary&gt;
+        private readonly WindowResizer mWindowResizer;
+
+        /// &lt;summary&gt;
+        /// The margin around the window to allow for a drop shadow
+        /// &lt;/summary&gt;
+        private Thickness mOuterMarginSize = new Thickness(5);
+
+        /// &lt;summary&gt;
+        /// The radius of the edges of the window
+        /// &lt;/summary&gt;
+        private int mWindowRadius = 10;
+
+        /// &lt;summary&gt;
+        /// The last known dock position
+        /// &lt;/summary&gt;
+        private WindowDockPosition mDockPosition = WindowDockPosition.Undocked;
+
+        #endregion
+
+        #region Public Properties
+
+        /// &lt;summary&gt;
+        /// The smallest width the window can go to
+        /// &lt;/summary&gt;
+        public double WindowMinimumWidth { get; set; } = 800;
+
+        /// &lt;summary&gt;
+        /// The smallest height the window can go to
+        /// &lt;/summary&gt;
+        public double WindowMinimumHeight { get; set; } = 500;
+
+        /// &lt;summary&gt;
+        /// True if the window is currently being moved/dragged
+        /// &lt;/summary&gt;
+        public bool BeingMoved { get; set; }
+
+
+        /// &lt;summary&gt;
+        /// True if the window should be borderless because it is docked or maximized
+        /// &lt;/summary&gt;
+        public bool Borderless =&gt; (mWindow.WindowState == WindowState.Maximized || mDockPosition != WindowDockPosition.Undocked);
+
+        /// &lt;summary&gt;
+        /// The size of the resize border around the window
+        /// &lt;/summary&gt;
+        public int ResizeBorder =&gt;0;
+
+        /// &lt;summary&gt;
+        /// The size of the resize border around the window, taking into account the outer margin
+        /// &lt;/summary&gt;
+        public Thickness ResizeBorderThickness =&gt; new Thickness(OuterMarginSize.Left + ResizeBorder,
+                                                                OuterMarginSize.Top + ResizeBorder,
+                                                                OuterMarginSize.Right + ResizeBorder,
+                                                                OuterMarginSize.Bottom + ResizeBorder);
+
+        /// &lt;summary&gt;
+        /// The padding of the inner content of the main window
+        /// &lt;/summary&gt;
+        public Thickness InnerContentPadding { get; set; } = new Thickness(0);
+
+        /// &lt;summary&gt;
+        /// The margin around the window to allow for a drop shadow
+        /// &lt;/summary&gt;
+        public Thickness OuterMarginSize
+        {
+            // If it is maximized or docked, no border
+            get
+            {
+                var thickness = Borderless ? new Thickness(0) : mOuterMarginSize;
+                return mWindow.WindowState == WindowState.Maximized
+                    ? mWindowResizer.CurrentMonitorMargin
+                    : thickness;
+            }
+            set =&gt; mOuterMarginSize = value;
+        }
+
+        /// &lt;summary&gt;
+        /// The radius of the edges of the window
+        /// &lt;/summary&gt;
+        public int WindowRadius
+        {
+            // If it is maximized or docked, no border
+            get =&gt; Borderless ? 0 : mWindowRadius;
+            set =&gt; mWindowRadius = value;
+        }
+
+        /// &lt;summary&gt;
+        /// The rectangle border around the window when docked
+        /// &lt;/summary&gt;
+        public int FlatBorderThickness =&gt; Borderless &amp;&amp; mWindow.WindowState != WindowState.Maximized ? 1 : 0;
+
+        /// &lt;summary&gt;
+        /// The radius of the edges of the window
+        /// &lt;/summary&gt;
+        public CornerRadius WindowCornerRadius =&gt; new CornerRadius(WindowRadius);
+
+        /// &lt;summary&gt;
+        /// The height of the title bar / caption of the window
+        /// &lt;/summary&gt;
+        public int TitleHeight { get; set; } = 42;
+        /// &lt;summary&gt;
+        /// The height of the title bar / caption of the window
+        /// &lt;/summary&gt;
+        public GridLength TitleHeightGridLength =&gt; new GridLength(TitleHeight + ResizeBorder);
+        
+        /// &lt;summary&gt;
+        /// True if we should have a dimmed overlay on the window
+        /// such as when a popup is visible or the window is not focused
+        /// &lt;/summary&gt;
+        public bool DimmableOverlayVisible { get; set; }
+
+        #endregion
+
+        #region Commands
+
+        /// &lt;summary&gt;
+        /// The command to minimize the window
+        /// &lt;/summary&gt;
+        public ICommand MinimizeCommand { get; set; }
+
+        /// &lt;summary&gt;
+        /// The command to maximize the window
+        /// &lt;/summary&gt;
+        public ICommand MaximizeCommand { get; set; }
+
+        /// &lt;summary&gt;
+        /// The command to close the window
+        /// &lt;/summary&gt;
+        public ICommand CloseCommand { get; set; }
+
+        /// &lt;summary&gt;
+        /// The command to show the system menu of the window
+        /// &lt;/summary&gt;
+        public ICommand MenuCommand { get; set; }
+
+        #endregion
+
+        #region Constructor
+
+        /// &lt;summary&gt;
+        /// Default constructor
+        /// &lt;/summary&gt;
+        public WindowViewModel(Window window)
+        {
+            mWindow = window;
+
+            // Listen out for the window resizing
+            mWindow.StateChanged += (sender, e) =&gt;
+            {
+                // Fire off events for all properties that are affected by a resize
+                WindowResized();
+            };
+
+            // Create commands
+            MinimizeCommand = new RelayCommand(() =&gt; mWindow.WindowState = WindowState.Minimized);
+            MaximizeCommand = new RelayCommand(() =&gt; mWindow.WindowState =(mWindow.WindowState == WindowState.Maximized)?WindowState.Normal:WindowState.Maximized);
+            CloseCommand = new RelayCommand(() =&gt; mWindow.Close());
+            MenuCommand = new RelayCommand(() =&gt; SystemCommands.ShowSystemMenu(mWindow, GetMousePosition()));
+
+            // Fix window resize issue
+            mWindowResizer = new WindowResizer(mWindow);
+
+            // Listen out for dock changes
+            mWindowResizer.WindowDockChanged += (dock) =&gt;
+            {
+                // Store last position
+                mDockPosition = dock;
+
+                // Fire off resize events
+                WindowResized();
+            };
+
+            // On window being moved/dragged
+            mWindowResizer.WindowStartedMove += () =&gt;
+            {
+                // Update being moved flag
+                BeingMoved = true;
+            };
+
+            // Fix dropping an undocked window at top which should be positioned at the
+            // very top of screen
+            mWindowResizer.WindowFinishedMove += () =&gt;
+            {
+                // Update being moved flag
+                BeingMoved = false;
+
+                // Check for moved to top of window and not at an edge
+                if (mDockPosition == WindowDockPosition.Undocked &amp;&amp; mWindow.Top == mWindowResizer.CurrentScreenSize.Top)
+                    // If so, move it to the true top (the border size)
+                    mWindow.Top = -OuterMarginSize.Top;
+            };
+        }
+
+        #endregion
+
+        #region Private Helpers
+
+        /// &lt;summary&gt;
+        /// Gets the current mouse position on the screen
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private System.Windows.Point GetMousePosition()
+        {
+            return mWindowResizer.GetCursorPosition();
+        }
+
+        /// &lt;summary&gt;
+        /// If the window resizes to a special position (docked or maximized)
+        /// this will update all required property change events to set the borders and radius values
+        /// &lt;/summary&gt;
+        private void WindowResized()
+        {
+            // Fire off events for all properties that are affected by a resize
+            OnPropertyChanged(nameof(Borderless));
+            OnPropertyChanged(nameof(FlatBorderThickness));
+            OnPropertyChanged(nameof(ResizeBorderThickness));
+            OnPropertyChanged(nameof(OuterMarginSize));
+            OnPropertyChanged(nameof(WindowRadius));
+            OnPropertyChanged(nameof(WindowCornerRadius));
+        }
+
+
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[27,9,27,63,0],[32,9,32,40,0],[37,9,37,80,0],[46,44,46,48,0],[46,49,46,53,0],[46,58,46,61,0],[51,45,51,49,0],[51,50,51,54,0],[51,59,51,62,0],[56,34,56,38,0],[56,39,56,43,0],[62,35,62,129,0],[67,35,67,36,0],[72,51,75,103,0],[80,48,80,52,0],[80,53,80,57,0],[80,62,80,78,0],[89,13,89,14,0],[90,17,90,82,0],[91,17,93,33,0],[94,13,94,14,0],[95,20,95,44,0],[104,20,104,50,0],[105,20,105,41,0],[111,43,111,109,0],[116,51,116,81,0],[121,34,121,38,0],[121,39,121,43,0],[121,48,121,50,0],[125,52,125,94,0],[131,46,131,50,0],[131,51,131,55,0],[140,43,140,47,0],[140,48,140,52,0],[145,43,145,47,0],[145,48,145,52,0],[150,40,150,44,0],[150,45,150,49,0],[155,39,155,43,0],[155,44,155,48,0],[164,9,164,46,0],[165,9,165,10,0],[166,13,166,30,0],[169,13,170,13,0],[170,13,170,14,0],[170,14,172,17,0],[172,17,172,33,0],[172,33,173,13,0],[173,13,173,14,0],[173,14,173,15,0],[169,13,173,15,0],[176,13,176,54,0],[176,54,176,97,0],[176,97,176,99,0],[176,13,176,99,0],[177,13,177,54,0],[177,54,177,162,0],[177,162,177,164,0],[177,13,177,164,0],[178,13,178,51,0],[178,51,178,66,0],[178,66,178,68,0],[178,13,178,68,0],[179,13,179,50,0],[179,50,179,108,0],[179,108,179,110,0],[179,13,179,110,0],[182,13,182,57,0],[185,13,186,13,0],[186,13,186,14,0],[186,14,188,17,0],[188,17,188,38,0],[188,38,191,17,0],[191,17,191,33,0],[191,33,192,13,0],[192,13,192,14,0],[192,14,192,15,0],[185,13,192,15,0],[195,13,196,13,0],[196,13,196,14,0],[196,14,198,17,0],[198,17,198,35,0],[198,35,199,13,0],[199,13,199,14,0],[199,14,199,15,0],[195,13,199,15,0],[203,13,204,13,0],[204,13,204,14,0],[204,14,206,17,0],[206,17,206,36,0],[206,36,209,17,0],[209,17,209,121,0],[209,121,211,21,0],[211,21,211,56,0],[211,56,212,13,0],[212,13,212,14,0],[212,14,212,15,0],[203,13,212,15,0],[213,9,213,10,0],[224,9,224,10,0],[225,13,225,55,0],[226,9,226,10,0],[233,9,233,10,0],[235,13,235,51,0],[236,13,236,60,0],[237,13,237,62,0],[238,13,238,56,0],[239,13,239,53,0],[240,13,240,59,0],[241,9,241,10,0]]);
+    </script>
+  </body>
+</html>

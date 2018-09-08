@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\cnexceptions\pretasknotendedexception.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+
+namespace CN_Core
+{
+    /// &lt;summary&gt;
+    ///     The pretask of this &lt;see cref=&quot;CNTask&quot; /&gt; is not yet finished
+    ///     throw this exception while try to finish a task
+    /// &lt;/summary&gt;
+    [Serializable]
+    public class PreTaskNotEndedException : Exception
+    {
+        #region Construction
+
+        public PreTaskNotEndedException(List&lt;CNTask&gt; preTaskses, CNTask curTask)
+        {
+            _preTasks = preTaskses ?? new List&lt;CNTask&gt;();
+            _curTask = curTask;
+        }
+
+        protected PreTaskNotEndedException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+        
+        #endregion
+
+        #region Formatting implement
+
+        public override string ToString()
+        {
+            return
+                $&quot;targetTask:{_curTask?.TaskId}:{_curTask?.Content} preTask not ended:{string.Join(&quot;;\r\n&quot;, _preTasks.Select(x =&gt; x.ToString()))}&quot;;
+        }
+
+        #endregion
+
+        #region Private Properties
+
+        /// &lt;summary&gt;
+        ///     The &lt;see cref=&quot;_preTasks&quot; /&gt; of the exception &lt;see cref=&quot;CNTask&quot; /&gt;
+        /// &lt;/summary&gt;
+        private readonly List&lt;CNTask&gt; _preTasks;
+
+        /// &lt;summary&gt;
+        ///     The exception triggered &lt;see cref=&quot;CNTask&quot; /&gt;
+        /// &lt;/summary&gt;
+        private readonly CNTask _curTask;
+
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,81,0],[18,9,18,10,0],[19,13,19,58,0],[20,13,20,32,0],[21,9,21,10,0],[24,15,24,34,0],[25,9,25,10,0],[26,9,26,10,0],[33,9,33,10,0],[34,13,35,131,0],[35,131,35,143,0],[35,143,35,148,0],[34,13,35,148,0],[36,9,36,10,0]]);
+    </script>
+  </body>
+</html>

@@ -21,7 +21,7 @@
             
             <!-- Hover over to show edit button -->
             <Grid.Triggers>
-                <EventTrigger RoutedEvent="MouseEnter">
+                <EventTrigger RoutedEvent="Mouse.MouseEnter">
                     <BeginStoryboard>
                         <Storyboard>
                             <DoubleAnimation To="1" 
@@ -31,7 +31,7 @@
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
-                <EventTrigger RoutedEvent="MouseLeave">
+                <EventTrigger RoutedEvent="Mouse.MouseLeave">
                     <BeginStoryboard>
                         <Storyboard>
                             <DoubleAnimation To="0" 

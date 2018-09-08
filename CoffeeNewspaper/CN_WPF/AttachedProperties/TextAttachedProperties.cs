@@ -1,6 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+using CN_Presentation;
+using CN_Presentation.Utilities;
 
 namespace CN_WPF
 {
@@ -42,30 +45,46 @@ namespace CN_WPF
     /// </summary>
     public class FocusAndSelectProperty : BaseAttachedProperty<FocusAndSelectProperty, bool>
     {
-        public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        public override void OnValueUpdated(DependencyObject sender, object value)
         {
             // If we don't have a control, return
-            if (sender is TextBoxBase control)
+            if (sender is TextBoxBase control && (bool)value)
             {
-                if ((bool)e.NewValue)
+                control.Focus();
+
+                // Select all text
+                control.SelectAll();
+
+                void OnControlOnLoaded(object s, RoutedEventArgs se)
                 {
+                    control.Loaded -= OnControlOnLoaded;
                     // Focus this control
                     control.Focus();
 
                     // Select all text
                     control.SelectAll();
                 }
+
+                control.Loaded += OnControlOnLoaded;
             }
-            if (sender is PasswordBox password)
+            if (sender is PasswordBox password && (bool)value)
             {
-                if ((bool)e.NewValue)
+                password.Focus();
+
+                // Select all text
+                password.SelectAll();
+
+                void OnControlOnLoaded(object s, RoutedEventArgs se)
                 {
+                    password.Loaded -= OnControlOnLoaded;
                     // Focus this control
                     password.Focus();
 
                     // Select all text
                     password.SelectAll();
                 }
+
+                password.Loaded += OnControlOnLoaded;
             }
         }
     }

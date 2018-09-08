@@ -43,7 +43,9 @@ namespace CN_Repository
             var builder = new DbContextOptionsBuilder<CNDbContext>();
             builder.UseSqlite($"Data Source={dbfilename}");
             DbContextOptions<CNDbContext> options = builder.Options;
-            return new CNDbContext(options);
+            var dbcontext = new CNDbContext(options);
+            dbcontext.Database.EnsureCreated();
+            return dbcontext;
         }
         /// <summary>
         /// Get a In-Memory Sqlite Database context
@@ -75,6 +77,7 @@ namespace CN_Repository
             //Add ConsoleLogging
             optionsBuilder
                 .ConfigureWarnings(warnnings=>warnnings.Log(CoreEventId.DetachedLazyLoadingWarning))
+                .ConfigureWarnings(warnnings=>warnnings.Log(CoreEventId.LazyLoadOnDisposedContextWarning))
                 .UseLoggerFactory(MyLoggerFactory)
                 .UseLazyLoadingProxies();
         }
@@ -109,17 +112,16 @@ namespace CN_Repository
             
             modelBuilder.Entity<CNTask>().Property(x => x.TaskId).HasColumnType("INTEGER");
             modelBuilder.Entity<CNTask>().Property(x => x.Content).HasColumnType("VARCHAR");
+            modelBuilder.Entity<CNTask>().Property(x => x.Sort).HasColumnType("INTEGER");
+            modelBuilder.Entity<CNTask>().Property(x => x.PendingReason).HasColumnType("VARCHAR");
             modelBuilder.Entity<CNTask>().Property(x => x.CreateTime).HasColumnType("DATETIME");
             modelBuilder.Entity<CNTask>().Property(x => x.DeadLine).HasColumnType("DATETIME");
             modelBuilder.Entity<CNTask>().Property(x => x.EndTime).HasColumnType("DATETIME");
-            modelBuilder.Entity<CNTask>().Property(x => x.EstimatedDuration).HasColumnType("INTEGER");
+            modelBuilder.Entity<CNTask>().Property(x => x.EstimatedDuration).HasColumnType("BIGINT");
             modelBuilder.Entity<CNTask>().Property(x => x.FailReason).HasColumnType("VARCHAR");
             modelBuilder.Entity<CNTask>().Property(x => x.IsDeleted).HasColumnType("BOOLEAN").HasDefaultValue(false);
             modelBuilder.Entity<CNTask>().Property(x => x.IsFail).HasColumnType("BOOLEAN").HasDefaultValue(false);
             modelBuilder.Entity<CNTask>().Property(x => x.ParentTaskID).HasColumnType("INTEGER");
-//            modelBuilder.Entity<CNTask>().Property(x => x.Priority).HasColumnType("INTEGER");
-//            modelBuilder.Entity<CNTask>().Property(x => x.Urgency).HasColumnType("INTEGER");
-//            modelBuilder.Entity<CNTask>().Property(x => x.Status).HasColumnType("INTEGER");
             modelBuilder.Entity<CNTask>().Property(x => x.StartTime).HasColumnType("DATETIME");
 
             // Set Tasks parentTask foreign key
@@ -139,6 +141,7 @@ namespace CN_Repository
             modelBuilder.Entity<CNMemo>().ToTable(nameof(CNMemo));
             modelBuilder.Entity<CNMemo>().HasKey(a => a.MemoId);
             modelBuilder.Entity<CNMemo>().Property(x => x.MemoId).HasColumnType("VARCHAR");
+            modelBuilder.Entity<CNTask>().Property(x => x.Sort).HasColumnType("INTEGER");
             modelBuilder.Entity<CNMemo>().Property(x => x.Content).HasColumnType("VARCHAR");
             modelBuilder.Entity<CNMemo>().Property(x => x.Title).HasColumnType("VARCHAR");
             modelBuilder.Entity<CNMemo>().Property(x => x.MemoId).ValueGeneratedOnAdd(); 
@@ -259,9 +262,7 @@ namespace CN_Repository
                 .HasIndex(p => new { p.TaskId, p.MemoId })
                 .IsUnique(); 
             #endregion
-
-            // TODO: Set up limits
-            //modelBuilder.Entity<LoginCredentialsDataModel>().Property(a => a.FirstName).HasMaxLength(50);
+            
         }
 
         #endregion

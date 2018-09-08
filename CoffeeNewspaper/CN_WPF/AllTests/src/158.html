@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datacontext\unitofwork.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces;
+
+namespace CN_Repository
+{
+
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly CNDbContext _databaseContext;
+        private bool _disposed = false;
+
+        public UnitOfWork(CNDbContext databaseContext)
+        {
+            _databaseContext = databaseContext;
+        }
+
+        public async Task&lt;bool&gt; Commit()
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+
+            return await IoC.Task.Run(
+                  async () =&gt; await _databaseContext.SaveChangesAsync()&gt;0,false);
+
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                _databaseContext?.Dispose();
+            }
+
+            _disposed = true;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,40,1],[14,9,14,55,1],[15,9,15,10,1],[16,13,16,48,1],[17,9,17,10,1],[20,9,20,10,1],[21,13,21,27,1],[22,13,22,14,0],[23,17,23,76,0],[26,13,27,31,1],[27,31,27,74,1],[27,74,27,82,1],[26,13,27,82,1],[29,9,29,10,1],[32,9,32,10,1],[33,13,33,27,1],[34,13,34,39,1],[35,9,35,10,1],[38,9,38,10,1],[39,13,39,27,1],[39,28,39,35,0],[41,13,41,27,1],[42,13,42,14,1],[43,17,43,45,1],[44,13,44,14,1],[46,13,46,30,1],[47,9,47,10,1]]);
+    </script>
+  </body>
+</html>

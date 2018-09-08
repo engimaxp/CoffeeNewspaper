@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\mutivalueconverter\basemutivalueconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Globalization;
+using System.Windows.Data;
+using System.Windows.Markup;
+
+namespace CN_WPF
+{
+    public abstract class BaseMutiValueConverter&lt;T&gt; : MarkupExtension, IMultiValueConverter where T:class,new()
+    {
+        /// &lt;summary&gt;
+        /// A single static instance of this value converter
+        /// &lt;/summary&gt;
+        private static readonly T Converter = new T();
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return Converter ;
+        }
+
+        public abstract object Convert(object[] values, Type targetType, object parameter, CultureInfo culture);
+
+        public abstract object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture);
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,55,0],[16,9,16,10,0],[17,13,17,31,0],[18,9,18,10,0]]);
+    </script>
+  </body>
+</html>

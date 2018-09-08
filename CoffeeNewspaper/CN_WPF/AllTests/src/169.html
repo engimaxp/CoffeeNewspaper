@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\timeslicedatastore.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Repository;
+using Microsoft.EntityFrameworkCore;
+
+namespace CN_Repository
+{
+    public class TimeSliceDataStore : BaseDataStore, ITimeSliceDataStore
+    {
+        public TimeSliceDataStore(CNDbContext dbContext) : base(dbContext)
+        {
+        }
+
+        #region Add Methods
+
+        public CNTimeSlice AddTimeSlice(CNTimeSlice timeSlice)
+        {
+            mDbContext.TimeSlices.Add(timeSlice);
+            return timeSlice;
+        }
+
+        #endregion
+
+        #region Update Methods
+
+        public void UpdateTimeSlice(CNTimeSlice lastSlice)
+        {
+            mDbContext.TimeSlices.Update(lastSlice);
+        }
+
+        #endregion
+
+        #region Select Methods
+
+        public async Task&lt;CNTimeSlice&gt; GetTimeSliceById(string timeSliceTimeSliceId)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    return await mDbContext.TimeSlices.Include(x=&gt;x.Task).FirstOrDefaultAsync(r =&gt;
+                        string.Equals(r.TimeSliceId, timeSliceTimeSliceId, StringComparison.Ordinal));
+                });
+        }
+
+        public async Task&lt;ICollection&lt;CNTimeSlice&gt;&gt; GetTimeSliceByTaskID(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt; { return await mDbContext.TimeSlices.Where(r =&gt; r.TaskId == taskid).ToListAsync(); });
+        }
+
+        #endregion
+
+        #region Delete Methods
+
+        public void DeleteTimeSlice(CNTimeSlice originSlice)
+        {
+            mDbContext.TimeSlices.Remove(originSlice);
+        }
+
+        public void DeleteTimeSliceByTask(int taskid)
+        {
+            mDbContext.TimeSlices.RemoveRange(mDbContext.TimeSlices.Where(r =&gt; r.TaskId == taskid));
+        }
+
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,60,13,75,1],[14,9,14,10,1],[15,9,15,10,1],[20,9,20,10,1],[21,13,21,50,1],[22,13,22,30,1],[23,9,23,10,1],[30,9,30,10,1],[31,13,31,53,1],[32,9,32,10,1],[39,9,39,10,1],[40,13,42,17,1],[42,17,42,18,1],[42,18,43,21,1],[43,21,44,103,1],[44,103,45,17,1],[45,17,45,18,1],[45,18,45,20,1],[40,13,45,20,1],[46,9,46,10,1],[49,9,49,10,1],[50,13,51,29,1],[51,29,51,30,1],[51,30,51,31,1],[51,31,51,111,1],[51,111,51,112,1],[51,112,51,113,1],[51,113,51,115,1],[50,13,51,115,1],[52,9,52,10,1],[59,9,59,10,1],[60,13,60,55,1],[61,9,61,10,1],[64,9,64,10,1],[65,13,65,101,1],[66,9,66,10,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\domaintest\tasktest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using CN_Core;
+
+namespace CoffeeNewspaper_UnitTest.DomainTest
+{
+    [TestFixture]
+    public class TaskTest
+    {
+        [Test]
+        public void TaskCompare_SameUrgent_SameImportance_OrderByDeadLine()
+        {
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.Normal;
+            task3.Urgency = CNUrgency.Normal;
+            task1.Priority = CNPriority.Normal;
+            task2.Priority = CNPriority.Normal;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
+
+            var list = new List&lt;CNTask&gt;() { task1,task2,task3};
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task2,list.First());
+            Assert.AreEqual(task1, list.Last());
+        }
+
+        [Test]
+        public void TaskCompare_SameUrgent_OrderByImportance()
+        {
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.Normal;
+            task3.Urgency = CNUrgency.Normal;
+            task1.Priority = CNPriority.High;
+            task2.Priority = CNPriority.Low;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
+
+            var list = new List&lt;CNTask&gt;() { task1, task2, task3 };
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task1, list.First());
+            Assert.AreEqual(task2, list.Last());
+        }
+        [Test]
+        public void TaskCompare_OrderByUrgent()
+        {
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.High;
+            task3.Urgency = CNUrgency.Low;
+            task1.Priority = CNPriority.High;
+            task2.Priority = CNPriority.Low;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
+
+            var list = new List&lt;CNTask&gt;() { task1, task2, task3 };
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task2, list.First());
+            Assert.AreEqual(task3, list.Last());
+        }
+
+        [Test]
+        public void TaskCompare_OrderByMixed()
+        {
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.Normal;
+            task3.Urgency = CNUrgency.Low;
+            task1.Priority = CNPriority.High;
+            task2.Priority = CNPriority.Normal;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
+
+            var list = new List&lt;CNTask&gt;() { task1, task2, task3 };
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task1, list.First());
+            Assert.AreEqual(task3, list.Last());
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,59,0],[16,13,16,59,0],[17,13,17,59,0],[18,13,18,46,0],[19,13,19,46,0],[20,13,20,46,0],[21,13,21,48,0],[22,13,22,48,0],[23,13,23,48,0],[24,13,24,54,0],[25,13,25,54,0],[26,13,26,54,0],[28,13,28,64,0],[29,13,29,25,0],[30,13,30,28,0],[31,13,31,49,0],[32,13,32,49,0],[33,9,33,10,0],[37,9,37,10,0],[38,13,38,59,0],[39,13,39,59,0],[40,13,40,59,0],[41,13,41,46,0],[42,13,42,46,0],[43,13,43,46,0],[44,13,44,46,0],[45,13,45,45,0],[46,13,46,48,0],[47,13,47,54,0],[48,13,48,54,0],[49,13,49,54,0],[51,13,51,67,0],[52,13,52,25,0],[53,13,53,28,0],[54,13,54,50,0],[55,13,55,49,0],[56,9,56,10,0],[59,9,59,10,0],[60,13,60,59,0],[61,13,61,59,0],[62,13,62,59,0],[63,13,63,46,0],[64,13,64,44,0],[65,13,65,43,0],[66,13,66,46,0],[67,13,67,45,0],[68,13,68,48,0],[69,13,69,54,0],[70,13,70,54,0],[71,13,71,54,0],[73,13,73,67,0],[74,13,74,25,0],[75,13,75,28,0],[76,13,76,50,0],[77,13,77,49,0],[78,9,78,10,0],[82,9,82,10,0],[83,13,83,59,0],[84,13,84,59,0],[85,13,85,59,0],[86,13,86,46,0],[87,13,87,46,0],[88,13,88,43,0],[89,13,89,46,0],[90,13,90,48,0],[91,13,91,48,0],[92,13,92,54,0],[93,13,93,54,0],[94,13,94,54,0],[96,13,96,67,0],[97,13,97,25,0],[98,13,98,28,0],[99,13,99,50,0],[100,13,100,49,0],[101,9,101,10,0]]);
+    </script>
+  </body>
+</html>

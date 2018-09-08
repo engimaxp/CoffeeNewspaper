@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\relationtest\tasktimeslicerelationtest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Repository;
+using CoffeeNewspaper_UnitTest.DomainTest;
+using NUnit.Framework;
+
+namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
+{
+
+    /// &lt;summary&gt;
+    ///     In-Memory integration data persistent test
+    /// &lt;/summary&gt;
+    [TestFixture]
+    public class TaskTimeSliceRelationTest : RepositarySetupAndTearDown
+    {
+        /// &lt;summary&gt;
+        /// Get a timeslice-already-bind task
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;bindTimeSliceCount&quot;&gt;how many timeslice is bind to this task&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private CNTask GetTimeSliceBindTestTask(int bindTimeSliceCount)
+        {
+            var assesTask = DomainTestHelper.GetARandomTask();
+            Enumerable.Range(0, bindTimeSliceCount).ToList().ForEach(x =&gt;
+            {
+                var assesTimeSlice = DomainTestHelper.GetARandomTimeSlice();
+                assesTask.UsedTimeSlices.Add(assesTimeSlice); 
+            });
+            return assesTask;
+        }
+        [Test]
+        public async Task DeleteATaskTimeSliceRelation_TaskExist_TimeSliceDeleted()
+        {
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetTimeSliceBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                taskDataStore.AddTask(assesTask);
+                await unitOfWork.Commit();
+                assesTask.UsedTimeSlices.Remove(assesTask.UsedTimeSlices.First());
+                taskDataStore.UpdateTask(assesTask);
+
+                await unitOfWork.Commit();
+                Assert.AreEqual(0,dbcontext.TimeSlices.Count());
+                Assert.AreEqual(1, dbcontext.Tasks.Count());
+                Assert.AreEqual(0,dbcontext.Tasks.First().UsedTimeSlices.Count());
+            });
+        }
+        [Test]
+        public async Task DeleteTask_RelatedTimeSliceAlsoDeleted()
+        {
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetTimeSliceBindTestTask(3);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                taskDataStore.AddTask(assesTask);
+
+                await unitOfWork.Commit();
+                 taskDataStore.RemoveTask(assesTask);
+
+                var result = await unitOfWork.Commit();
+                Assert.IsTrue(result);
+                Assert.AreEqual(0, dbcontext.TimeSlices.Count());
+                Assert.AreEqual(0, dbcontext.Tasks.Count());
+            });
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[23,9,23,10,1],[24,13,24,63,1],[25,13,26,13,1],[26,13,26,14,1],[26,14,27,17,1],[27,17,27,77,1],[27,77,28,17,1],[28,17,28,62,1],[28,62,29,13,1],[29,13,29,14,1],[29,14,29,16,1],[25,13,29,16,1],[30,13,30,30,1],[31,9,31,10,1],[34,9,34,10,1],[35,13,36,13,1],[36,13,36,14,1],[36,14,38,17,1],[38,17,38,61,1],[38,61,39,17,1],[39,17,39,66,1],[39,66,40,17,1],[40,17,40,50,1],[40,50,41,17,1],[41,17,41,43,1],[41,43,42,17,1],[42,17,42,83,1],[42,83,43,17,1],[43,17,43,53,1],[43,53,45,17,1],[45,17,45,43,1],[45,43,46,17,1],[46,17,46,65,1],[46,65,47,17,1],[47,17,47,61,1],[47,61,48,17,1],[48,17,48,83,1],[48,83,49,13,1],[49,13,49,14,1],[49,14,49,16,1],[35,13,49,16,1],[50,9,50,10,1],[53,9,53,10,1],[54,13,55,13,1],[55,13,55,14,1],[55,14,57,17,1],[57,17,57,61,1],[57,61,58,17,1],[58,17,58,66,1],[58,66,59,17,1],[59,17,59,50,1],[59,50,61,17,1],[61,17,61,43,1],[61,43,62,18,1],[62,18,62,54,1],[62,54,64,17,1],[64,17,64,56,1],[64,56,65,17,1],[65,17,65,39,1],[65,39,66,17,1],[66,17,66,66,1],[66,66,67,17,1],[67,17,67,61,1],[67,61,68,13,1],[68,13,68,14,1],[68,14,68,16,1],[54,13,68,16,1],[69,9,69,10,1]]);
+    </script>
+  </body>
+</html>

@@ -21,22 +21,21 @@ namespace CN_WPF
             {
                 grid.MouseLeave += MouseLeaveGrid;
                 // Wait for panel to load
-                RoutedEventHandler onLoaded = null;
-                onLoaded = (s, ee) =>
+                void OnLoaded(object s, RoutedEventArgs ee)
                 {
                     // Unhook
-                    grid.Loaded -= onLoaded;
+                    grid.Loaded -= OnLoaded;
 
                     // Loop each child
                     for (int i = 0; i < grid.Items.Count; i++)
                     {
-                        UIElement uiElement =
-                            (UIElement)grid.ItemContainerGenerator.ContainerFromIndex(i);
+                        UIElement uiElement = (UIElement) grid.ItemContainerGenerator.ContainerFromIndex(i);
                         uiElement.MouseEnter += MouseEnterButton;
                     }
-                };
+                }
+
                 // Hook into the Loaded event
-                grid.Loaded += onLoaded;
+                grid.Loaded += OnLoaded;
 
             }
         }
@@ -49,7 +48,7 @@ namespace CN_WPF
         private void MouseEnterButton(object sender, MouseEventArgs mouseEventArgs)
         {
             if (!(((ContentPresenter) sender).DataContext is RatingIconButtonViewModel currentHovered)) return;
-            currentHovered.parentModel.SetChildrensSolidStatus(currentHovered.CurrentPosition);
+            currentHovered.ParentModel.SetChildrensSolidStatus(currentHovered.CurrentPosition);
         }
 
         /// <summary>

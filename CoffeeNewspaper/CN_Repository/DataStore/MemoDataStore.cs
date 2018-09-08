@@ -16,28 +16,18 @@ namespace CN_Repository
 
         #region Delete Methods
 
-        public async Task<bool> DeleteMemo(CNMemo memo)
+        public void DeleteMemo(CNMemo memo)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.Memos.Remove(memo);
-                    return await mDbContext.SaveChangesAsync() > 0;
-                }, false);
+            mDbContext.Memos.Remove(memo);
         }
 
         #endregion
 
         #region Update Methods
 
-        public async Task<bool> UpdateMemo(CNMemo memo)
+        public void UpdateMemo(CNMemo memo)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.Memos.Update(memo);
-                    return await mDbContext.SaveChangesAsync() > 0;
-                }, false);
+            mDbContext.Memos.Update(memo);
         }
 
         #endregion
@@ -82,46 +72,32 @@ namespace CN_Repository
 
         #region Add Methods
 
-        public async Task<CNMemo> AddMemo(CNMemo memo)
+        public CNMemo AddMemo(CNMemo memo)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    mDbContext.Memos.Add(memo);
-                    await mDbContext.SaveChangesAsync();
-                    return memo;
-                },(CNMemo)null);
+            mDbContext.Memos.Add(memo);
+            return memo;
         }
 
-        public async Task<CNMemo> CloneAMemo(string memoid)
+        public CNMemo CloneAMemo(string memoid)
         {
-            return await IoC.Task.Run(
-                async () =>
-                {
-                    var originalEntity = mDbContext.Memos.AsNoTracking()
-                        .Include(r => r.MemoTaggers)
-                        .Include(x => x.TaskMemos)
-                        .FirstOrDefault(e => string.Equals(e.MemoId, memoid, StringComparison.Ordinal));
-                    if (originalEntity != null)
-                    {
-                        originalEntity.MemoId = null;
-                        foreach (var originalEntityMemoTagger in originalEntity.MemoTaggers)
-                        {
-                            originalEntityMemoTagger.MemoId = null;
-                            originalEntityMemoTagger.MemoTaggerId = null;
-                        }
-                        foreach (var originalEntityTaskMemo in originalEntity.TaskMemos)
-                        {
-                            originalEntityTaskMemo.MemoId = null;
-                            originalEntityTaskMemo.TaskMemoId = null;
-                        }
-                        mDbContext.Memos.Add(originalEntity);
-                        await mDbContext.SaveChangesAsync();
-                        return originalEntity;
-                    }
-
-                    return null;
-                }, (CNMemo)null);
+            var originalEntity = mDbContext.Memos.AsNoTracking()
+                .Include(r => r.MemoTaggers)
+                .Include(x => x.TaskMemos)
+                .FirstOrDefault(e => string.Equals(e.MemoId, memoid, StringComparison.Ordinal));
+            if (originalEntity == null) return null;
+            originalEntity.MemoId = null;
+            foreach (var originalEntityMemoTagger in originalEntity.MemoTaggers)
+            {
+                originalEntityMemoTagger.MemoId = null;
+                originalEntityMemoTagger.MemoTaggerId = null;
+            }
+            foreach (var originalEntityTaskMemo in originalEntity.TaskMemos)
+            {
+                originalEntityTaskMemo.MemoId = null;
+                originalEntityTaskMemo.TaskMemoId = null;
+            }
+            mDbContext.Memos.Add(originalEntity);
+            return originalEntity;
         }
 
         #endregion

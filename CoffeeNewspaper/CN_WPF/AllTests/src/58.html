@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\dialogs\basedialogusercontrol.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Dialog;
+
+namespace CN_WPF
+{
+    /// &lt;summary&gt;
+    /// The base class for any content that is being used inside of a &lt;see cref=&quot;DialogWindow&quot;/&gt;
+    /// &lt;/summary&gt;
+    public class BaseDialogUserControl : UserControl
+    {
+        #region Private Members
+
+        /// &lt;summary&gt;
+        /// The dialog window we will be contained within
+        /// &lt;/summary&gt;
+        private readonly DialogWindow mDialogWindow;
+
+        #endregion
+
+        #region Public Commands
+
+        /// &lt;summary&gt;
+        /// Closes this dialog
+        /// &lt;/summary&gt;
+        public ICommand CloseCommand { get; private set; }
+
+        #endregion
+
+        #region Public Properties
+
+        /// &lt;summary&gt;
+        /// The minimum width of this dialog
+        /// &lt;/summary&gt;
+        public int WindowMinimumWidth { get; set; } = 250;
+
+        /// &lt;summary&gt;
+        /// The minimum height of this dialog
+        /// &lt;/summary&gt;
+        public int WindowMinimumHeight { get; set; } = 100;
+
+        /// &lt;summary&gt;
+        /// The height of the title bar
+        /// &lt;/summary&gt;
+        public int TitleHeight { get; set; } = 30;
+
+        /// &lt;summary&gt;
+        /// The title for this dialog
+        /// &lt;/summary&gt;
+        public string Title { get; set; }
+
+        #endregion
+
+        #region Constructor
+
+        /// &lt;summary&gt;
+        /// Default constructor
+        /// &lt;/summary&gt;
+        public BaseDialogUserControl()
+        {
+            if (!DesignerProperties.GetIsInDesignMode(this))
+            {
+                // Create a new dialog window
+                mDialogWindow = new DialogWindow();
+                mDialogWindow.ViewModel = new DialogWindowViewModel(mDialogWindow);
+
+                // Create close command
+                CloseCommand = new RelayCommand(() =&gt; mDialogWindow.Close());
+            }
+        }
+
+        #endregion
+
+        #region Public Dialog Show Methods
+
+        /// &lt;summary&gt;
+        /// Displays a single message box to the user
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;viewModel&quot;&gt;The view model&lt;/param&gt;
+        /// &lt;typeparam name=&quot;T&quot;&gt;The view model type for this control&lt;/typeparam&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public Task ShowDialog&lt;T&gt;(T viewModel)
+            where T : BaseDialogViewModel
+        {
+            // Create a task to await the dialog closing
+            var tcs = new TaskCompletionSource&lt;bool&gt;();
+
+            // Run on UI thread
+            Application.Current.Dispatcher.Invoke(() =&gt;
+            {
+                try
+                {
+                    // Match controls expected sizes to the dialog windows view model
+                    mDialogWindow.ViewModel.WindowMinimumWidth = WindowMinimumWidth;
+                    mDialogWindow.ViewModel.WindowMinimumHeight = WindowMinimumHeight;
+                    mDialogWindow.ViewModel.TitleHeight = TitleHeight;
+                    mDialogWindow.ViewModel.Title = string.IsNullOrEmpty(viewModel.Title) ? Title : viewModel.Title;
+
+                    // Set this control to the dialog window content
+                    mDialogWindow.ViewModel.Content = this;
+
+                    // Set close command function
+                    viewModel.CloseWindowEvent += () =&gt; {
+                        CloseCommand.Execute(null); 
+                    };
+
+                    // Setup this controls data context binding to the view model
+                    DataContext = viewModel;
+
+                    // Show in the center of the parent
+                    mDialogWindow.Owner = Application.Current.MainWindow;
+                    mDialogWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+                    // Show dialog
+                    mDialogWindow.ShowDialog();
+                }
+                finally
+                {
+                    // Let caller know we finished
+                    tcs.TrySetResult(true);
+                }
+            });
+
+            return tcs.Task;
+        }
+
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[30,40,30,44,0],[30,45,30,57,0],[39,41,39,45,0],[39,46,39,50,0],[39,55,39,58,0],[44,42,44,46,0],[44,47,44,51,0],[44,56,44,59,0],[49,34,49,38,0],[49,39,49,43,0],[49,48,49,50,0],[54,31,54,35,0],[54,36,54,40,0],[63,9,63,39,0],[64,9,64,10,0],[65,13,65,61,0],[66,13,66,14,0],[68,17,68,52,0],[69,17,69,84,0],[72,17,72,55,0],[72,55,72,76,0],[72,76,72,78,0],[72,17,72,78,0],[73,13,73,14,0],[74,9,74,10,0],[88,9,88,10,0],[90,13,90,56,0],[93,13,94,13,0],[94,13,94,14,0],[94,14,96,17,0],[96,17,96,18,0],[96,18,98,21,0],[98,21,98,85,0],[98,85,99,21,0],[99,21,99,87,0],[99,87,100,21,0],[100,21,100,71,0],[100,71,101,21,0],[101,21,101,117,0],[101,117,104,21,0],[104,21,104,60,0],[104,60,107,21,0],[107,21,107,57,0],[107,57,107,58,0],[107,58,108,25,0],[108,25,108,52,0],[108,52,109,21,0],[109,21,109,22,0],[109,22,109,23,0],[107,21,109,23,0],[109,23,112,21,0],[112,21,112,45,0],[112,45,115,21,0],[115,21,115,74,0],[115,74,116,21,0],[116,21,116,93,0],[116,93,119,21,0],[119,21,119,48,0],[119,48,120,17,0],[120,17,120,18,0],[120,18,122,17,0],[122,17,122,18,0],[122,18,124,21,0],[124,21,124,44,0],[124,44,125,17,0],[125,17,125,18,0],[125,18,126,13,0],[126,13,126,14,0],[126,14,126,16,0],[93,13,126,16,0],[128,13,128,29,0],[129,9,129,10,0]]);
+    </script>
+  </body>
+</html>

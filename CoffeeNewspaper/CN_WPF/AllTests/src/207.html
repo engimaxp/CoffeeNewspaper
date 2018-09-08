@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\utilities\stringextension.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace CN_Core
+{
+    public static class StringExtension
+    {
+        public static string GetFirstLineOrWords(this string content,int cutNums)
+        {
+            if (string.IsNullOrEmpty(content)) return &quot;Task Title&quot;;
+            content = content.TrimStart(new[] { &#39;\r&#39;, &#39;\n&#39;, &#39; &#39;, &#39;\t&#39; });
+            content = content.TrimEnd(new[] { &#39; &#39;, &#39;\t&#39; });
+            int endIndex = content.IndexOf(&quot;\r\n&quot;, StringComparison.CurrentCulture);
+
+            var result = endIndex &gt;= 0 ? content.Substring(0, endIndex) : content;
+            return result.Length &gt; cutNums ? result.Substring(0, cutNums) : result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,10,0],[11,13,11,47,0],[11,48,11,68,0],[12,13,12,74,0],[13,13,13,60,0],[14,13,14,85,0],[16,13,16,83,0],[17,13,17,84,0],[18,9,18,10,0]]);
+    </script>
+  </body>
+</html>

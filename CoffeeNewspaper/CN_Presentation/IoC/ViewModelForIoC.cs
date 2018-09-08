@@ -2,6 +2,7 @@
 using CN_Presentation.ViewModel.Application;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Controls;
+using CN_Presentation.ViewModel.Controls.StatusBar;
 using Ninject;
 
 namespace CN_Presentation
@@ -26,6 +27,7 @@ namespace CN_Presentation
         /// </summary>
         public static void BindInitialViewModel(this IKernel Kernel)
         {
+            Kernel.BindViewModel(new TaskListViewModel());
             Kernel.BindViewModel(new HeadMenuViewModel
             {
                 NavButtonItems = new List<HeadMenuButtonViewModel>
@@ -62,7 +64,8 @@ namespace CN_Presentation
                     },
                 }
             });
-            Kernel.BindViewModel(new TasksListViewModel());
+            Kernel.BindViewModel(new StatusBarViewModel());
+            Kernel.BindViewModel(new TasksListPageViewModel());
             Kernel.BindViewModel(new WorkSpaceViewModel());
             Kernel.BindViewModel(new MemoListViewModel());
             Kernel.BindViewModel(new StatisticViewModel());

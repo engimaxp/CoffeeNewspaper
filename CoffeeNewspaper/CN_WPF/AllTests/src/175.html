@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\servicetest\taskservicetest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces;
+using CN_Core.Interfaces.Repository;
+using CN_Core.Interfaces.Service;
+using CoffeeNewspaper_UnitTest.DomainTest;
+using Ninject;
+using NSubstitute;
+using NUnit.Framework;
+
+namespace CoffeeNewspaper_UnitTest.ServiceTest
+{
+    [TestFixture]
+    public class TaskServiceTest : ServiceSetupTearDown
+    {
+        [Test]
+        public async Task AddATimeSlice_AddaBiggerSlice_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            var addedTimeslice =
+                new CNTimeSlice(now.AddHours(3));
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(1), now.AddHours(2)),
+                    new CNTimeSlice(now.AddHours(2), now.AddHours(3).AddMilliseconds(-1))
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+
+            //Act
+            await targetService.AddATimeSlice(assesTask.TaskId, addedTimeslice);
+
+            //Assert
+            mockTaskDataStore.Received()
+                .ExpandTaskTime(Arg.Is&lt;CNTask&gt;(
+                    x =&gt; x.TaskId == assesTask.TaskId), now.AddHours(1), null);
+            mockTimesliceDataStore.Received()
+                .AddTimeSlice(Arg.Is&lt;CNTimeSlice&gt;(x =&gt;
+                    x.Equals(addedTimeslice) &amp;&amp; x.Task.TaskId == assesTask.TaskId));
+        }
+
+        [Test]
+        public async Task AddATimeSlice_AddaSmallerSlice_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            var addedTimeslice = new CNTimeSlice(now.AddHours(2), now.AddHours(3).AddMilliseconds(-1));
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(1), now.AddHours(2)),
+                    new CNTimeSlice(now.AddHours(3))
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+
+            //Act
+            await targetService.AddATimeSlice(assesTask.TaskId, addedTimeslice);
+
+            //Assert
+            mockTaskDataStore.Received()
+                .ExpandTaskTime(Arg.Is&lt;CNTask&gt;(
+                    x =&gt; x.TaskId == assesTask.TaskId), now.AddHours(1), null);
+            mockTimesliceDataStore.Received()
+                .AddTimeSlice(Arg.Is&lt;CNTimeSlice&gt;(x =&gt;
+                    x.Equals(addedTimeslice) &amp;&amp; x.Task.TaskId == assesTask.TaskId));
+        }
+
+        [Test]
+        public async Task AddATimeSlice_TaskNotExist_Fail()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+
+            //Assess
+            mockTaskDataStore.GetTask(1).Returns(Task.FromResult((CNTask) null));
+
+            //Act
+            var result = await targetService.AddATimeSlice(1, DomainTestHelper.GetARandomTimeSlice());
+
+            //Assert
+            Assert.IsNull(result);
+            mockTimesliceDataStore.DidNotReceive().AddTimeSlice(Arg.Any&lt;CNTimeSlice&gt;());
+        }
+
+        [Test]
+        public void AddATimeSlice_TimeSliceIntercept_Fail()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(1), now.AddHours(2)),
+                    new CNTimeSlice(now.AddHours(3))
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+
+            //Act
+            Assert.ThrowsAsync&lt;TimeSliceInterveneException&gt;(async () =&gt;
+                await targetService.AddATimeSlice(assesTask.TaskId, new CNTimeSlice(now.AddHours(4))));
+
+            //Assert
+             mockTimesliceDataStore.DidNotReceive().AddTimeSlice(Arg.Any&lt;CNTimeSlice&gt;());
+        }
+
+        [Test]
+        public async Task GetTaskTimeSlices_TaskNull_ReturnNewEmptyList()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult((CNTask)null));
+
+            //Act
+            var result = await targetService.GetTaskTimeSlices(assesTask.TaskId);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0,result.Count);
+            await mockTimesliceDataStore.DidNotReceiveWithAnyArgs().GetTimeSliceByTaskID(0);
+        }
+        [Test]
+        public async Task GetTaskTimeSlices_Traverse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+
+            //Act
+            await targetService.GetTaskTimeSlices(assesTask.TaskId);
+
+            //Assert
+            await mockTimesliceDataStore.Received().GetTimeSliceByTaskID(assesTask.TaskId);
+        }
+        [Test]
+        public async Task DeleteAllTimeSlicesOfTask_TaskIsNull_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult((CNTask)null));
+            
+            //Act
+            await targetService.DeleteAllTimeSlicesOfTask(assesTask.TaskId);
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs()
+                .UpdateTask(assesTask);
+             mockTimesliceDataStore.DidNotReceiveWithAnyArgs().DeleteTimeSliceByTask(0);
+        }
+        [Test]
+        public async Task DeleteAllTimeSlicesOfTask_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            var assesChildTask = DomainTestHelper.GetARandomTask(2);
+            var assesSufTask = DomainTestHelper.GetARandomTask(3);
+            assesTask.ChildTasks.Add(assesChildTask);
+            assesTask.SufTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = assesTask,
+                PreTaskId = assesTask.TaskId,
+                SufTask = assesSufTask,
+                SufTaskId = assesSufTask.TaskId
+            });
+            assesTask.StartTime = now.AddDays(-1);
+            assesTask.EndTime = now.AddDays(1);
+
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+
+            //Act
+            await targetService.DeleteAllTimeSlicesOfTask(assesTask.TaskId);
+
+            //Assert
+             mockTaskDataStore.Received()
+                .UpdateTask(Arg.Is&lt;CNTask&gt;(x=&gt;x.StartTime == null &amp;&amp; x.EndTime == null));
+             mockTimesliceDataStore.Received().DeleteTimeSliceByTask(assesTask.TaskId);
+        }
+        [Test]
+        public async Task DeleteTimeSlices_ContainOnlyOneSlice_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            assesTask.StartTime = now.AddHours(1);
+
+            assesTask.EndTime = now.AddHours(2);
+            var addedTimeslice =
+                new CNTimeSlice(now.AddHours(1), now.AddHours(2))
+                {
+                    Task = assesTask,
+                    TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;)
+                };
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    addedTimeslice
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+            mockTimesliceDataStore.GetTimeSliceById(addedTimeslice.TimeSliceId)
+                .Returns(Task.FromResult(addedTimeslice));
+            //Act
+            await targetService.DeleteTimeSlices(addedTimeslice);
+
+            //Assert
+             mockTaskDataStore.Received()
+                .UpdateStartTaskTime(Arg.Is&lt;CNTask&gt;(x =&gt; x.TaskId == assesTask.TaskId), null);
+             mockTaskDataStore.Received()
+                .UpdateStartTaskTime(Arg.Is&lt;CNTask&gt;(x =&gt; x.TaskId == assesTask.TaskId), null);
+             mockTimesliceDataStore.Received().DeleteTimeSlice(addedTimeslice);
+        }
+
+        [Test]
+        public async Task DeleteTimeSlices_EndOfTwoSlice_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            assesTask.StartTime = now.AddHours(1);
+
+            assesTask.EndTime = now.AddHours(3).AddMilliseconds(-1);
+            var addedTimeslice =
+                new CNTimeSlice(now.AddHours(2), now.AddHours(3).AddMilliseconds(-1))
+                {
+                    Task = assesTask,
+                    TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;)
+                };
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(1), now.AddHours(2)),
+                    addedTimeslice
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+            mockTimesliceDataStore.GetTimeSliceById(addedTimeslice.TimeSliceId)
+                .Returns(Task.FromResult(addedTimeslice));
+            //Act
+            await targetService.DeleteTimeSlices(addedTimeslice);
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateStartTaskTime(assesTask, null);
+             mockTaskDataStore.Received()
+                .UpdateEndTaskTime(Arg.Is&lt;CNTask&gt;(x =&gt; x.TaskId == assesTask.TaskId), now.AddHours(2));
+             mockTimesliceDataStore.Received().DeleteTimeSlice(addedTimeslice);
+        }
+        
+        [Test]
+        public async Task DeleteTimeSlices_SliceDontExist_Fail()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            assesTask.StartTime = now.AddHours(1);
+
+            assesTask.EndTime = now.AddHours(3).AddMilliseconds(-1);
+            var addedTimeslice =
+                new CNTimeSlice(now.AddHours(2), now.AddHours(3).AddMilliseconds(-1))
+                {
+                    Task = assesTask,
+                    TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;)
+                };
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(1), now.AddHours(2)),
+                    addedTimeslice
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+            mockTimesliceDataStore.GetTimeSliceById(addedTimeslice.TimeSliceId)
+                .Returns(Task.FromResult((CNTimeSlice) null));
+            //Act
+            var result = await targetService.DeleteTimeSlices(addedTimeslice);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateStartTaskTime(assesTask, null);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateEndTaskTime(assesTask, null);
+             mockTimesliceDataStore.DidNotReceiveWithAnyArgs().DeleteTimeSlice(addedTimeslice);
+        }
+
+        [Test]
+        public async Task DeleteTimeSlices_StartOfTwoSlice_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            assesTask.StartTime = now.AddHours(1);
+
+            assesTask.EndTime = now.AddHours(3).AddMilliseconds(-1);
+            var addedTimeslice =
+                new CNTimeSlice(now.AddHours(1), now.AddHours(2))
+                {
+                    Task = assesTask,
+                    TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;)
+                };
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(2), now.AddHours(3).AddMilliseconds(-1)),
+                    addedTimeslice
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+            mockTimesliceDataStore.GetTimeSliceById(addedTimeslice.TimeSliceId)
+                .Returns(Task.FromResult(addedTimeslice));
+            //Act
+            await targetService.DeleteTimeSlices(addedTimeslice);
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateEndTaskTime(assesTask, null);
+             mockTaskDataStore.Received()
+                .UpdateStartTaskTime(Arg.Is&lt;CNTask&gt;(x =&gt; x.TaskId == assesTask.TaskId), now.AddHours(2));
+             mockTimesliceDataStore.Received().DeleteTimeSlice(addedTimeslice);
+        }
+        
+        [Test]
+        public async Task EndTimeSlice_EndOfTwoSlice_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            var assesChildTask = DomainTestHelper.GetARandomTask(2);
+            var assesSufTask = DomainTestHelper.GetARandomTask(3);
+            assesTask.ChildTasks.Add(assesChildTask);
+            assesTask.SufTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = assesTask,
+                PreTaskId = assesTask.TaskId,
+                SufTask = assesSufTask,
+                SufTaskId = assesSufTask.TaskId
+            });
+            assesTask.StartTime = now.AddHours(1);
+
+            assesTask.EndTime = now.AddHours(3).AddMilliseconds(-1);
+            var addedTimeslice =
+                new CNTimeSlice(now.AddHours(2)) {Task = assesTask, TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;)};
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(1), now.AddHours(2)),
+                    addedTimeslice
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+            mockTimesliceDataStore.GetTimeSliceById(addedTimeslice.TimeSliceId)
+                .Returns(Task.FromResult(addedTimeslice));
+            //Act
+            await targetService.EndTimeSlice(assesTask.TaskId, now.AddHours(4));
+
+            //Assert
+             mockTaskDataStore.Received()
+                .UpdateEndTaskTime(Arg.Is&lt;CNTask&gt;(x =&gt; x.TaskId == assesTask.TaskId), now.AddHours(4));
+            addedTimeslice.EndDateTime = now.AddHours(4);
+             mockTimesliceDataStore.Received().UpdateTimeSlice(addedTimeslice);
+        }
+
+        [Test]
+        public async Task EndTimeSlice_LastSliceStartTimeBiggerThanSetEndTime_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            var assesChildTask = DomainTestHelper.GetARandomTask(2);
+            var assesSufTask = DomainTestHelper.GetARandomTask(3);
+            assesTask.ChildTasks.Add(assesChildTask);
+            assesTask.SufTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = assesTask,
+                PreTaskId = assesTask.TaskId,
+                SufTask = assesSufTask,
+                SufTaskId = assesSufTask.TaskId
+            });
+            assesTask.StartTime = now.AddHours(1);
+
+            assesTask.EndTime = now.AddHours(3).AddMilliseconds(-1);
+            var addedTimeslice =
+                new CNTimeSlice(now.AddHours(2)) { Task = assesTask, TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;) };
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(1), now.AddHours(2)),
+                    addedTimeslice
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+            mockTimesliceDataStore.GetTimeSliceById(addedTimeslice.TimeSliceId)
+                .Returns(Task.FromResult(addedTimeslice));
+            //Act
+            await targetService.EndTimeSlice(assesTask.TaskId, now.AddHours(1));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs()
+                .UpdateEndTaskTime(assesTask, now.AddHours(4));
+            addedTimeslice.EndDateTime = now.AddHours(4);
+             mockTimesliceDataStore.DidNotReceiveWithAnyArgs().UpdateTimeSlice(addedTimeslice);
+        }
+
+        [Test]
+        public async Task EndTimeSlice_LastSliceEndTimeIsAlreadySet_DoNotingAndReturnTrue()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            var assesChildTask = DomainTestHelper.GetARandomTask(2);
+            var assesSufTask = DomainTestHelper.GetARandomTask(3);
+            assesTask.ChildTasks.Add(assesChildTask);
+            assesTask.SufTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = assesTask,
+                PreTaskId = assesTask.TaskId,
+                SufTask = assesSufTask,
+                SufTaskId = assesSufTask.TaskId
+            });
+            assesTask.StartTime = now.AddHours(1);
+
+            assesTask.EndTime = now.AddHours(3).AddMilliseconds(-1);
+            var addedTimeslice =
+                new CNTimeSlice(now.AddHours(2),now.AddHours(5)) { Task = assesTask, TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;) };
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(1), now.AddHours(2)),
+                    addedTimeslice
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+            mockTimesliceDataStore.GetTimeSliceById(addedTimeslice.TimeSliceId)
+                .Returns(Task.FromResult(addedTimeslice));
+            //Act
+            await targetService.EndTimeSlice(assesTask.TaskId, now.AddHours(4));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs()
+                .UpdateEndTaskTime(assesTask, now.AddHours(4));
+            addedTimeslice.EndDateTime = now.AddHours(4);
+             mockTimesliceDataStore.DidNotReceiveWithAnyArgs().UpdateTimeSlice(addedTimeslice);
+        }
+        [Test]
+        public async Task DeleteTask_EndOfTwoSlice_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var mockTimesliceDataStore = _kernel.Get&lt;ITimeSliceDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var now = DateTime.Now;
+
+            //Assess
+            var assesTask = DomainTestHelper.GetARandomTask(1);
+            assesTask.StartTime = now.AddHours(1);
+
+            assesTask.EndTime = now.AddHours(3).AddMilliseconds(-1);
+            var addedTimeslice =
+                new CNTimeSlice(now.AddHours(2)) { Task = assesTask, TimeSliceId = Guid.NewGuid().ToString(&quot;D&quot;) };
+            assesTask.UsedTimeSlices =
+                new[]
+                {
+                    new CNTimeSlice(now.AddHours(1), now.AddHours(2)),
+                    addedTimeslice
+                }.ToList();
+            mockTaskDataStore.GetTask(assesTask.TaskId).Returns(Task.FromResult(assesTask));
+            mockTimesliceDataStore.GetTimeSliceById(addedTimeslice.TimeSliceId)
+                .Returns(Task.FromResult(addedTimeslice));
+            //Act
+            await targetService.EndTimeSlice(assesTask.TaskId, now.AddHours(4));
+
+            //Assert
+             mockTaskDataStore.Received()
+                .UpdateEndTaskTime(Arg.Is&lt;CNTask&gt;(x =&gt; x.TaskId == assesTask.TaskId), now.AddHours(4));
+            addedTimeslice.EndDateTime = now.AddHours(4);
+             mockTimesliceDataStore.Received().UpdateTimeSlice(addedTimeslice);
+        }
+
+        [Test]
+        public async Task EditATask_TaskNull_Fail()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            
+
+            //Act
+            var result = await targetService.EditATask(null);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(null);
+        }
+        [Test]
+        public void EditATask_TaskContentEmpty_Fail()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var task = DomainTestHelper.GetARandomTask(1);
+            task.Content = String.Empty;
+
+            //Act
+            Assert.ThrowsAsync&lt;ArgumentException&gt;(async()=&gt;await targetService.EditATask(task));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(null);
+        }
+        [Test]
+        public async Task EditATask_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var unitOfWork = _kernel.Get&lt;IUnitOfWork&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+
+            //Assess
+            unitOfWork.Commit().Returns(Task.FromResult(true));
+
+            //Act
+            var result = await targetService.EditATask(mockTask);
+
+            //Assert
+            Assert.IsTrue(result);
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x=&gt;x.Content.Equals(mockTask.Content)));
+        }
+        [Test]
+        public async Task GetAllTasks_Traverse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+
+            //Assess
+            //Act
+            await targetService.GetAllTasks();
+
+            //Assert
+            await mockTaskDataStore.Received().GetAllTask();
+        }
+        [Test]
+        public async Task GetTaskById_Traverse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+
+            //Assess
+            //Act
+            await targetService.GetTaskById(1);
+
+            //Assert
+            await mockTaskDataStore.Received().GetTask(1);
+        }
+        [Test]
+        public async Task CreateATask_Traverse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask();
+            //Assess
+            //Act
+            await targetService.CreateATask(mockTask);
+
+            //Assert
+             mockTaskDataStore.Received().AddTask(Arg.Is&lt;CNTask&gt;(x=&gt;x.Content.Equals(mockTask.Content)));
+        }
+
+        [Test]
+        public void CreateATask_TaskContentNotExists_ThrowException()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask();
+            mockTask.Content = string.Empty;
+            //Assess
+            //Act
+
+            Assert.ThrowsAsync&lt;ArgumentException&gt;(async()=&gt;await targetService.CreateATask(mockTask));
+
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().AddTask(mockTask);
+        }
+
+        [Test]
+        public async Task DeleteTask_TaskIsNull_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult((CNTask)null));
+
+            //Act
+            var result = await targetService.DeleteTask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+        [Test]
+        public async Task DeleteTask_TaskIsDeleted_ReturnTrue()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.IsDeleted = true;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            var result = await targetService.DeleteTask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsTrue(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+        [Test]
+        public void DeleteTask_TaskHasChildTasks_ThrowException()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockChildTask = DomainTestHelper.GetARandomTask(2);
+            mockTask.ChildTasks.Add(mockChildTask);
+            mockTask.IsDeleted = false;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            Assert.ThrowsAsync&lt;TaskHasChildTasksException&gt;(async ()=&gt; await targetService.DeleteTask(mockTask.TaskId)); 
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+        [Test]
+        public void DeleteTask_TaskHasSufTasks_ThrowException()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockSufTask = DomainTestHelper.GetARandomTask(3);
+            mockTask.SufTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = mockTask,
+                SufTask = mockSufTask
+            });
+            mockTask.IsDeleted = false;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            Assert.ThrowsAsync&lt;TaskHasSufTasksException&gt;(async () =&gt; await targetService.DeleteTask(mockTask.TaskId));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+
+        [Test]
+        public async Task DeleteTask_TaskHasSufTasksHasChildTasksForceDelete_ReturnTrue()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockChildTask = DomainTestHelper.GetARandomTask(2);
+            mockTask.ChildTasks.Add(mockChildTask);
+            var mockSufTask = DomainTestHelper.GetARandomTask(3);
+            mockTask.SufTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = mockTask,
+                SufTask = mockSufTask
+            });
+            mockTask.IsDeleted = false;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            await targetService.DeleteTask(mockTask.TaskId,true);
+            
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; (x.TaskId == mockTask.TaskId) &amp;&amp; x.IsDeleted));
+        }
+
+
+
+        [Test]
+        public async Task RecoverATask_TaskIsNull_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult((CNTask)null));
+
+            //Act
+            var result = await targetService.RecoverATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+        [Test]
+        public async Task RecoverATask_TaskIsRecoverAd_ReturnTrue()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.IsDeleted = false;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            var result = await targetService.RecoverATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsTrue(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+        [Test]
+        public async Task RecoverATask_TaskHasSufTasksHasChildTasksForceRecoverA_ReturnTrue()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockChildTask = DomainTestHelper.GetARandomTask(2);
+            mockTask.ChildTasks.Add(mockChildTask);
+            var mockSufTask = DomainTestHelper.GetARandomTask(3);
+            mockTask.SufTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = mockTask,
+                SufTask = mockSufTask
+            });
+            mockTask.IsDeleted = true;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            await targetService.RecoverATask(mockTask.TaskId);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; (x.TaskId == mockTask.TaskId) &amp;&amp; !x.IsDeleted));
+        }
+
+
+
+        [Test]
+        public async Task RemoveTask_TaskIsNull_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult((CNTask)null));
+
+            //Act
+            var result = await targetService.RemoveATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+        [Test]
+        public async Task RemoveTask_TaskIsRemoved_ReturnTrue()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.IsDeleted = false;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            var result = await targetService.RemoveATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+        [Test]
+        public void RemoveTask_TaskHasChildTasks_ThrowException()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockChildTask = DomainTestHelper.GetARandomTask(2);
+            mockTask.ChildTasks.Add(mockChildTask);
+            mockTask.IsDeleted = true;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            Assert.ThrowsAsync&lt;TaskHasChildTasksException&gt;(async () =&gt; await targetService.RemoveATask(mockTask.TaskId));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+        [Test]
+        public void RemoveTask_TaskHasSufTasks_ThrowException()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockSufTask = DomainTestHelper.GetARandomTask(3);
+            mockTask.IsDeleted = true;
+            mockTask.SufTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = mockTask,
+                SufTask = mockSufTask
+            });
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            Assert.ThrowsAsync&lt;TaskHasSufTasksException&gt;(async () =&gt; await targetService.RemoveATask(mockTask.TaskId));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().RemoveTask(mockTask);
+        }
+
+        [Test]
+        public async Task RemoveTask_TaskHasSufTasksHasChildTasksForceRemove_ReturnTrue()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockChildTask = DomainTestHelper.GetARandomTask(2);
+            mockTask.ChildTasks.Add(mockChildTask);
+            mockTask.IsDeleted = true;
+            var mockSufTask = DomainTestHelper.GetARandomTask(3);
+            mockTask.SufTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = mockTask,
+                SufTask = mockSufTask
+            });
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            await targetService.RemoveATask(mockTask.TaskId, true);
+
+            //Assert
+             mockTaskDataStore.Received().RemoveTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.TaskId == mockTask.TaskId));
+        }
+
+        [Test]
+        public async Task StartATask_TaskNotExist_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult((CNTask)null));
+
+            //Act
+            var result = await targetService.StartATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+
+        [Test]
+        public async Task StartATask_TaskIsDeleted_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.IsDeleted = true;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            var result = await targetService.StartATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+        [Test]
+        public void StartATask_TaskStatusNotValid_ThrowsException()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.DOING;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            Assert.ThrowsAsync&lt;TaskStatusException&gt;(async () =&gt; await targetService.StartATask(mockTask.TaskId));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+        [Test]
+        public async Task StartATask_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var unitOfWork = _kernel.Get&lt;IUnitOfWork&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.TODO;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+            unitOfWork.Commit().Returns(Task.FromResult(true));
+            //Act
+            var result = await targetService.StartATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsTrue(result);
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.Status == CNTaskStatus.DOING &amp;&amp; x.TaskId == mockTask.TaskId));
+        }
+
+
+
+        [Test]
+        public async Task PauseATask_TaskNotExist_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult((CNTask)null));
+
+            //Act
+            var result = await targetService.PauseATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+
+        [Test]
+        public async Task PauseATask_TaskIsDeleted_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.IsDeleted = true;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            var result = await targetService.PauseATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+        [Test]
+        public void PauseATask_TaskStatusNotValid_ThrowsException()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.PENDING;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            Assert.ThrowsAsync&lt;TaskStatusException&gt;(async () =&gt; await targetService.PauseATask(mockTask.TaskId));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+        [Test]
+        public async Task PauseATask_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.DOING;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            await targetService.PauseATask(mockTask.TaskId);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.Status == CNTaskStatus.TODO &amp;&amp; x.TaskId == mockTask.TaskId));
+        }
+
+
+        [Test]
+        public async Task PendingATask_TaskNotExist_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult((CNTask)null));
+
+            //Act
+            var result = await targetService.PendingATask(mockTask.TaskId,null);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+
+        [Test]
+        public async Task PendingATask_TaskIsDeleted_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.IsDeleted = true;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            var result = await targetService.PendingATask(mockTask.TaskId, null);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+        [Test]
+        public void PendingATask_TaskStatusNotValid_ThrowsException()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.DONE;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            Assert.ThrowsAsync&lt;TaskStatusException&gt;(async () =&gt; await targetService.PendingATask(mockTask.TaskId, null));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+        [Test]
+        public async Task PendingATask_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.DOING;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            await targetService.PendingATask(mockTask.TaskId, &quot;pending reason&quot;);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; 
+                x.Status == CNTaskStatus.PENDING 
+                &amp;&amp; &quot;pending reason&quot;.Equals(x.PendingReason)
+                &amp;&amp; x.TaskId == mockTask.TaskId));
+        }
+
+
+        [Test]
+        public async Task FinishATask_TaskNotExist_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult((CNTask)null));
+
+            //Act
+            var result = await targetService.FinishATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+
+        [Test]
+        public async Task FinishATask_TaskIsDeleted_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.IsDeleted = true;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            var result = await targetService.FinishATask(mockTask.TaskId);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+        [Test]
+        public void FinishATask_TaskStatusNotValid_ThrowsException()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.DONE;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            Assert.ThrowsAsync&lt;TaskStatusException&gt;(async () =&gt; await targetService.FinishATask(mockTask.TaskId));
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+        [Test]
+        public async Task FinishATask_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.DOING;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            await targetService.FinishATask(mockTask.TaskId);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.Status == CNTaskStatus.DONE &amp;&amp; x.TaskId == mockTask.TaskId));
+        }
+
+
+        [Test]
+        public async Task FailATask_TaskNotExist_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult((CNTask)null));
+
+            //Act
+            var result = await targetService.FailATask(mockTask.TaskId,null);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+
+
+        [Test]
+        public async Task FailATask_TaskAlreadyFail_UpdateReason()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.IsFail = true;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            await targetService.FailATask(mockTask.TaskId, &quot;reason&quot;);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x=&gt;x.FailReason.Equals(&quot;reason&quot;) &amp;&amp; x.TaskId == mockTask.TaskId));
+        }
+        [Test]
+        public async Task FailATask_TaskNotAlreadyFail_UpdateBothFields()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.IsFail = false;
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            await targetService.FailATask(mockTask.TaskId, &quot;reason&quot;);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.FailReason.Equals(&quot;reason&quot;) &amp;&amp; x.IsFail &amp;&amp; x.TaskId == mockTask.TaskId));
+        }
+
+
+        [Test]
+        public async Task SetParentTask_TaskIsNull_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockParentTask = DomainTestHelper.GetARandomTask(2);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            await targetService.SetParentTask(0, mockParentTask.TaskId,-1);
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+        [Test]
+        public async Task SetParentTask_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockParentTask = DomainTestHelper.GetARandomTask(2);
+            //Assess
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            mockTaskDataStore.GetTask(mockParentTask.TaskId).Returns(Task.FromResult(mockParentTask));
+            //Act
+            await targetService.SetParentTask(mockTask.TaskId, mockParentTask.TaskId,-1);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.ParentTaskID == mockParentTask.TaskId &amp;&amp; x.TaskId == mockTask.TaskId));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNull_WithNoPos()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(4);
+            var mockSort = 10;
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
+            //Assess
+            mockTaskDataStore.GetAllTask().Returns(new List&lt;CNTask&gt;() { mockTask1, mockTask2, mockTask3 });
+            mockTaskDataStore.GetMaxSort(0).Returns(Task.FromResult(mockSort));
+
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+            //Act
+            await targetService.SetParentTask(mockTask.TaskId, 0, -1);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.ParentTaskID == 0
+                                                                              &amp;&amp; x.TaskId == mockTask.TaskId
+                                                                              &amp;&amp; x.Sort == mockSort+1));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNull_WithLastPos()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            var targetTask = DomainTestHelper.GetARandomTask(4);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
+            //Assess
+            mockTaskDataStore.GetAllTask().Returns(new List&lt;CNTask&gt;(){mockTask1,mockTask2,mockTask3});
+
+            mockTaskDataStore.GetTask(targetTask.TaskId).Returns(Task.FromResult(targetTask));
+            //Act
+            await targetService.SetParentTask(targetTask.TaskId, 0, 2);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.ParentTaskID == 0
+                                                                              &amp;&amp; x.TaskId == targetTask.TaskId
+                                                                              &amp;&amp; x.Sort == mockTask3.Sort + 1));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNull_WithMiddlePos()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            var targetTask = DomainTestHelper.GetARandomTask(4);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
+            //Assess
+            mockTaskDataStore.GetAllTask().Returns(new List&lt;CNTask&gt;() { mockTask1, mockTask2, mockTask3 });
+
+            mockTaskDataStore.GetTask(targetTask.TaskId).Returns(Task.FromResult(targetTask));
+            //Act
+            await targetService.SetParentTask(targetTask.TaskId, 0, 1);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.ParentTaskID == 0
+                                                                              &amp;&amp; x.TaskId == targetTask.TaskId
+                                                                              &amp;&amp; x.Sort == mockTask2.Sort + 1));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.TaskId == mockTask3.TaskId
+                                                                              &amp;&amp; x.Sort == mockTask2.Sort + 2));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNotNull_WithNoPos()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockParent = DomainTestHelper.GetARandomTask(10);
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockSort = 10;
+            //Assess
+            mockTaskDataStore.GetMaxSort(mockParent.TaskId).Returns(Task.FromResult(mockSort));
+
+            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+            mockTaskDataStore.GetTask(mockParent.TaskId).Returns(Task.FromResult(mockParent));
+            //Act
+            await targetService.SetParentTask(mockTask.TaskId, mockParent.TaskId, -1);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.ParentTaskID == mockParent.TaskId
+                                                                              &amp;&amp; x.TaskId == mockTask.TaskId
+                                                                              &amp;&amp; x.Sort == mockSort + 1));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNotNull_WithLastPos()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockParent = DomainTestHelper.GetARandomTask(10);
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            var targetTask = DomainTestHelper.GetARandomTask(4);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
+            mockParent.ChildTasks.Add(mockTask1);
+            mockParent.ChildTasks.Add(mockTask2);
+            mockParent.ChildTasks.Add(mockTask3);
+            //Assess
+            mockTaskDataStore.GetTask(targetTask.TaskId).Returns(Task.FromResult(targetTask));
+            mockTaskDataStore.GetTask(mockParent.TaskId).Returns(Task.FromResult(mockParent));
+
+            //Act
+            await targetService.SetParentTask(targetTask.TaskId, mockParent.TaskId, 5);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.ParentTaskID == mockParent.TaskId
+                                                                              &amp;&amp; x.TaskId == targetTask.TaskId
+                                                                              &amp;&amp; x.Sort == mockTask3.Sort + 1));
+        }
+
+        [Test]
+        public async Task SetParentTask_SetParentTaskNotNull_WithMiddlePos()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockParent = DomainTestHelper.GetARandomTask(10);
+            var mockTask1 = DomainTestHelper.GetARandomTask(1);
+            var mockTask2 = DomainTestHelper.GetARandomTask(2);
+            var mockTask3 = DomainTestHelper.GetARandomTask(3);
+            var targetTask = DomainTestHelper.GetARandomTask(4);
+            mockTask1.Sort = 1;
+            mockTask2.Sort = 2;
+            mockTask3.Sort = 3;
+            mockParent.ChildTasks.Add(mockTask1);
+            mockParent.ChildTasks.Add(mockTask2);
+            mockParent.ChildTasks.Add(mockTask3);
+            //Assess
+            mockTaskDataStore.GetTask(targetTask.TaskId).Returns(Task.FromResult(targetTask));
+            mockTaskDataStore.GetTask(mockParent.TaskId).Returns(Task.FromResult(mockParent));
+
+            //Act
+            await targetService.SetParentTask(targetTask.TaskId, mockParent.TaskId, 1);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.ParentTaskID == mockParent.TaskId
+                                                                              &amp;&amp; x.TaskId == targetTask.TaskId
+                                                                              &amp;&amp; x.Sort == mockTask2.Sort + 1));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt; x.TaskId == mockTask3.TaskId
+                                                                              &amp;&amp; x.Sort == mockTask2.Sort + 2));
+        }
+        [Test]
+        public async Task AddPreTask_TargetTaskIsNull_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.DONE;
+            //Assess
+
+            //Act
+            var result = await targetService.AddPreTask(null, null);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+
+
+        [Test]
+        public async Task AddPreTask_PreTaskExists_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockPreTask = DomainTestHelper.GetARandomTask(2);
+            mockTask.PreTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = mockPreTask,
+                PreTaskId = mockPreTask.TaskId,
+                SufTask = mockTask,
+                SufTaskId = mockTask.TaskId
+            });
+            //Assess
+
+            //Act
+            var result = await targetService.AddPreTask(mockTask, mockPreTask);
+
+            //Assert
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+
+
+        [Test]
+        public async Task AddPreTask_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.TODO;
+            var mockPreTask = DomainTestHelper.GetARandomTask(2);
+            mockPreTask.Status = CNTaskStatus.TODO;
+            mockPreTask.Status = CNTaskStatus.TODO;
+            //Assess
+
+            //Act
+            await targetService.AddPreTask(mockTask, mockPreTask);
+
+            //Assert
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x=&gt;
+                x.TaskId == mockTask.TaskId
+                &amp;&amp; x.PreTaskConnectors!=null
+                &amp;&amp; x.PreTaskConnectors.Count&gt;0
+                &amp;&amp; x.PreTaskConnectors.Any(y=&gt;y.PreTask.TaskId == mockPreTask.TaskId)));
+        }
+
+
+        [Test]
+        public async Task DelPreTask_TargetTaskIsNull_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.DONE;
+            //Assess
+            //Act
+            var result = await targetService.DelPreTask(null, null);
+
+            //Assert
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+
+
+        [Test]
+        public async Task DelPreTask_Success()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            mockTask.Status = CNTaskStatus.PENDING;
+            mockTask.PendingReason = CNConstants.PENDINGREASON_PreTaskNotComplete;
+            var mockPreTask = DomainTestHelper.GetARandomTask(2);
+            var mockPreTaskDone = DomainTestHelper.GetARandomTask(3);
+            mockPreTaskDone.Status = CNTaskStatus.DONE;
+            mockPreTask.Status = CNTaskStatus.TODO;
+            mockTask.PreTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = mockPreTask,
+                PreTaskId = mockPreTask.TaskId,
+                SufTask = mockTask,
+                SufTaskId = mockTask.TaskId
+            });
+            mockTask.PreTaskConnectors.Add(new CNTaskConnector()
+            {
+                PreTask = mockPreTaskDone,
+                PreTaskId = mockPreTaskDone.TaskId,
+                SufTask = mockTask,
+                SufTaskId = mockTask.TaskId
+            });
+            //Assess
+            mockTaskDataStore.RemoveTaskConnector(Arg.Is&lt;CNTaskConnector&gt;(x =&gt;
+                x.PreTaskId == mockPreTask.TaskId &amp;&amp; x.SufTaskId == mockTask.TaskId));
+
+            //Act
+            await targetService.DelPreTask(mockTask, mockPreTask);
+
+            //Assert
+             mockTaskDataStore.Received().RemoveTaskConnector(Arg.Is&lt;CNTaskConnector&gt;(x =&gt;
+                x.PreTaskId == mockPreTask.TaskId &amp;&amp; x.SufTaskId == mockTask.TaskId));
+             mockTaskDataStore.Received().UpdateTask(Arg.Is&lt;CNTask&gt;(x =&gt;
+                x.TaskId == mockTask.TaskId
+                &amp;&amp; x.PreTaskConnectors != null
+                &amp;&amp; x.PreTaskConnectors.Count &gt; 0
+                &amp;&amp; x.PreTaskConnectors.Any(y =&gt; y.PreTask.TaskId == mockPreTask.TaskId)));
+        }
+
+
+        [Test]
+        public async Task DelPreTask_PreTaskNotExist_ReturnFalse()
+        {
+            var mockTaskDataStore = _kernel.Get&lt;ITaskDataStore&gt;();
+            var targetService = _kernel.Get&lt;ITaskService&gt;();
+            var mockTask = DomainTestHelper.GetARandomTask(1);
+            var mockPreTask = DomainTestHelper.GetARandomTask(2);
+            mockPreTask.Status = CNTaskStatus.TODO;
+            //Assess
+            //            mockTaskDataStore.GetTask(mockTask.TaskId).Returns(Task.FromResult(mockTask));
+
+            //Act
+            var result = await targetService.DelPreTask(mockTask, mockPreTask);
+
+            //Assert
+
+            Assert.IsFalse(result);
+             mockTaskDataStore.DidNotReceiveWithAnyArgs().UpdateTask(mockTask);
+        }
+
+
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,9,21,10,0],[22,13,22,67,0],[23,13,23,77,0],[24,13,24,61,0],[25,13,25,36,0],[28,13,28,64,0],[29,13,30,50,0],[31,13,36,28,0],[37,13,37,93,0],[40,13,40,81,0],[43,13,45,80,0],[46,13,48,85,0],[49,9,49,10,0],[53,9,53,10,0],[54,13,54,67,0],[55,13,55,77,0],[56,13,56,61,0],[57,13,57,36,0],[60,13,60,64,0],[61,13,61,104,0],[62,13,67,28,0],[68,13,68,93,0],[71,13,71,81,0],[74,13,76,80,0],[77,13,79,85,0],[80,9,80,10,0],[84,9,84,10,0],[85,13,85,67,0],[86,13,86,77,0],[87,13,87,61,0],[90,13,90,82,0],[93,13,93,103,0],[96,13,96,35,0],[97,13,97,89,0],[98,9,98,10,0],[102,9,102,10,0],[103,13,103,67,0],[104,13,104,77,0],[105,13,105,61,0],[106,13,106,36,0],[109,13,109,64,0],[110,13,115,28,0],[116,13,116,93,0],[119,13,120,17,0],[120,17,120,102,0],[120,102,120,104,0],[119,13,120,104,0],[123,14,123,90,0],[124,9,124,10,0],[128,9,128,10,0],[129,13,129,67,0],[130,13,130,77,0],[131,13,131,61,0],[134,13,134,64,0],[136,13,136,96,0],[139,13,139,82,0],[142,13,142,38,0],[143,13,143,45,0],[144,13,144,93,0],[145,9,145,10,0],[148,9,148,10,0],[149,13,149,67,0],[150,13,150,77,0],[151,13,151,61,0],[154,13,154,64,0],[156,13,156,93,0],[159,13,159,69,0],[162,13,162,92,0],[163,9,163,10,0],[166,9,166,10,0],[167,13,167,67,0],[168,13,168,77,0],[169,13,169,61,0],[170,13,170,36,0],[173,13,173,64,0],[175,13,175,96,0],[178,13,178,77,0],[181,14,182,40,0],[183,14,183,89,0],[184,9,184,10,0],[187,9,187,10,0],[188,13,188,67,0],[189,13,189,77,0],[190,13,190,61,0],[191,13,191,36,0],[194,13,194,64,0],[195,13,195,69,0],[196,13,196,67,0],[197,13,197,54,0],[198,13,204,16,0],[205,13,205,51,0],[206,13,206,48,0],[208,13,208,93,0],[211,13,211,77,0],[214,14,215,90,0],[216,14,216,88,0],[217,9,217,10,0],[220,9,220,10,0],[221,13,221,67,0],[222,13,222,77,0],[223,13,223,61,0],[224,13,224,36,0],[227,13,227,64,0],[228,13,228,51,0],[230,13,230,49,0],[231,13,236,19,0],[237,13,241,28,0],[242,13,242,93,0],[243,13,244,59,0],[246,13,246,66,0],[249,14,250,95,0],[251,14,252,95,0],[253,14,253,80,0],[254,9,254,10,0],[258,9,258,10,0],[259,13,259,67,0],[260,13,260,77,0],[261,13,261,61,0],[262,13,262,36,0],[265,13,265,64,0],[266,13,266,51,0],[268,13,268,69,0],[269,13,274,19,0],[275,13,280,28,0],[281,13,281,93,0],[282,13,283,59,0],[285,13,285,66,0],[288,14,288,96,0],[289,14,290,104,0],[291,14,291,80,0],[292,9,292,10,0],[296,9,296,10,0],[297,13,297,67,0],[298,13,298,77,0],[299,13,299,61,0],[300,13,300,36,0],[303,13,303,64,0],[304,13,304,51,0],[306,13,306,69,0],[307,13,312,19,0],[313,13,318,28,0],[319,13,319,93,0],[320,13,321,63,0],[323,13,323,79,0],[326,13,326,36,0],[327,14,327,96,0],[328,14,328,94,0],[329,14,329,96,0],[330,9,330,10,0],[334,9,334,10,0],[335,13,335,67,0],[336,13,336,77,0],[337,13,337,61,0],[338,13,338,36,0],[341,13,341,64,0],[342,13,342,51,0],[344,13,344,69,0],[345,13,350,19,0],[351,13,356,28,0],[357,13,357,93,0],[358,13,359,59,0],[361,13,361,66,0],[364,14,364,94,0],[365,14,366,106,0],[367,14,367,80,0],[368,9,368,10,0],[372,9,372,10,0],[373,13,373,67,0],[374,13,374,77,0],[375,13,375,61,0],[376,13,376,36,0],[379,13,379,64,0],[380,13,380,69,0],[381,13,381,67,0],[382,13,382,54,0],[383,13,389,16,0],[390,13,390,51,0],[392,13,392,69,0],[393,13,394,113,0],[395,13,400,28,0],[401,13,401,93,0],[402,13,403,59,0],[405,13,405,81,0],[408,14,409,104,0],[410,13,410,58,0],[411,14,411,80,0],[412,9,412,10,0],[416,9,416,10,0],[417,13,417,67,0],[418,13,418,77,0],[419,13,419,61,0],[420,13,420,36,0],[423,13,423,64,0],[424,13,424,69,0],[425,13,425,67,0],[426,13,426,54,0],[427,13,433,16,0],[434,13,434,51,0],[436,13,436,69,0],[437,13,438,115,0],[439,13,444,28,0],[445,13,445,93,0],[446,13,447,59,0],[449,13,449,81,0],[452,14,453,64,0],[454,13,454,58,0],[455,14,455,96,0],[456,9,456,10,0],[460,9,460,10,0],[461,13,461,67,0],[462,13,462,77,0],[463,13,463,61,0],[464,13,464,36,0],[467,13,467,64,0],[468,13,468,69,0],[469,13,469,67,0],[470,13,470,54,0],[471,13,477,16,0],[478,13,478,51,0],[480,13,480,69,0],[481,13,482,131,0],[483,13,488,28,0],[489,13,489,93,0],[490,13,491,59,0],[493,13,493,81,0],[496,14,497,64,0],[498,13,498,58,0],[499,14,499,96,0],[500,9,500,10,0],[503,9,503,10,0],[504,13,504,67,0],[505,13,505,77,0],[506,13,506,61,0],[507,13,507,36,0],[510,13,510,64,0],[511,13,511,51,0],[513,13,513,69,0],[514,13,515,115,0],[516,13,521,28,0],[522,13,522,93,0],[523,13,524,59,0],[526,13,526,81,0],[529,14,530,104,0],[531,13,531,58,0],[532,14,532,80,0],[533,9,533,10,0],[537,9,537,10,0],[538,13,538,67,0],[539,13,539,61,0],[543,13,543,62,0],[546,13,546,36,0],[547,14,547,76,0],[548,9,548,10,0],[551,9,551,10,0],[552,13,552,67,0],[553,13,553,61,0],[554,13,554,59,0],[555,13,555,41,0],[558,13,558,60,0],[558,60,558,95,0],[558,95,558,97,0],[558,13,558,97,0],[561,14,561,76,0],[562,9,562,10,0],[565,9,565,10,0],[566,13,566,67,0],[567,13,567,61,0],[568,13,568,57,0],[569,13,569,63,0],[572,13,572,64,0],[575,13,575,66,0],[578,13,578,35,0],[579,14,579,109,0],[580,9,580,10,0],[583,9,583,10,0],[584,13,584,67,0],[585,13,585,61,0],[589,13,589,47,0],[592,13,592,61,0],[593,9,593,10,0],[596,9,596,10,0],[597,13,597,67,0],[598,13,598,61,0],[602,13,602,48,0],[605,13,605,59,0],[606,9,606,10,0],[609,9,609,10,0],[610,13,610,67,0],[611,13,611,61,0],[612,13,612,62,0],[615,13,615,55,0],[618,14,618,106,0],[619,9,619,10,0],[623,9,623,10,0],[624,13,624,67,0],[625,13,625,61,0],[626,13,626,62,0],[627,13,627,45,0],[631,13,631,60,0],[631,60,631,101,0],[631,101,631,103,0],[631,13,631,103,0],[633,14,633,77,0],[634,9,634,10,0],[638,9,638,10,0],[639,13,639,67,0],[640,13,640,61,0],[641,13,641,63,0],[643,13,643,95,0],[646,13,646,74,0],[649,13,649,36,0],[650,14,650,80,0],[651,9,651,10,0],[654,9,654,10,0],[655,13,655,67,0],[656,13,656,61,0],[657,13,657,63,0],[658,13,658,39,0],[660,13,660,91,0],[663,13,663,74,0],[666,13,666,35,0],[667,14,667,80,0],[668,9,668,10,0],[671,9,671,10,0],[672,13,672,67,0],[673,13,673,61,0],[674,13,674,63,0],[675,13,675,68,0],[676,13,676,52,0],[677,13,677,40,0],[679,13,679,91,0],[682,13,682,71,0],[682,71,682,118,0],[682,118,682,120,0],[682,13,682,120,0],[685,14,685,80,0],[686,9,686,10,0],[689,9,689,10,0],[690,13,690,67,0],[691,13,691,61,0],[692,13,692,63,0],[693,13,693,66,0],[694,13,698,16,0],[699,13,699,40,0],[701,13,701,91,0],[704,13,704,70,0],[704,70,704,117,0],[704,117,704,119,0],[704,13,704,119,0],[707,14,707,80,0],[708,9,708,10,0],[712,9,712,10,0],[713,13,713,67,0],[714,13,714,61,0],[715,13,715,63,0],[716,13,716,68,0],[717,13,717,52,0],[718,13,718,66,0],[719,13,723,16,0],[724,13,724,40,0],[726,13,726,91,0],[729,13,729,66,0],[732,14,732,121,0],[733,9,733,10,0],[739,9,739,10,0],[740,13,740,67,0],[741,13,741,61,0],[742,13,742,63,0],[744,13,744,95,0],[747,13,747,76,0],[750,13,750,36,0],[751,14,751,80,0],[752,9,752,10,0],[755,9,755,10,0],[756,13,756,67,0],[757,13,757,61,0],[758,13,758,63,0],[759,13,759,40,0],[761,13,761,91,0],[764,13,764,76,0],[767,13,767,35,0],[768,14,768,80,0],[769,9,769,10,0],[772,9,772,10,0],[773,13,773,67,0],[774,13,774,61,0],[775,13,775,63,0],[776,13,776,68,0],[777,13,777,52,0],[778,13,778,66,0],[779,13,783,16,0],[784,13,784,39,0],[786,13,786,91,0],[789,13,789,63,0],[792,14,792,122,0],[793,9,793,10,0],[799,9,799,10,0],[800,13,800,67,0],[801,13,801,61,0],[802,13,802,63,0],[804,13,804,95,0],[807,13,807,75,0],[810,13,810,36,0],[811,14,811,80,0],[812,9,812,10,0],[815,9,815,10,0],[816,13,816,67,0],[817,13,817,61,0],[818,13,818,63,0],[819,13,819,40,0],[821,13,821,91,0],[824,13,824,75,0],[827,13,827,36,0],[828,14,828,80,0],[829,9,829,10,0],[832,9,832,10,0],[833,13,833,67,0],[834,13,834,61,0],[835,13,835,63,0],[836,13,836,68,0],[837,13,837,52,0],[838,13,838,39,0],[840,13,840,91,0],[843,13,843,72,0],[843,72,843,120,0],[843,120,843,122,0],[843,13,843,122,0],[846,14,846,80,0],[847,9,847,10,0],[850,9,850,10,0],[851,13,851,67,0],[852,13,852,61,0],[853,13,853,63,0],[854,13,854,66,0],[855,13,855,39,0],[856,13,860,16,0],[862,13,862,91,0],[865,13,865,70,0],[865,70,865,118,0],[865,118,865,120,0],[865,13,865,120,0],[868,14,868,80,0],[869,9,869,10,0],[873,9,873,10,0],[874,13,874,67,0],[875,13,875,61,0],[876,13,876,63,0],[877,13,877,68,0],[878,13,878,52,0],[879,13,879,39,0],[880,13,880,66,0],[881,13,885,16,0],[887,13,887,91,0],[890,13,890,68,0],[893,14,893,104,0],[894,9,894,10,0],[898,9,898,10,0],[899,13,899,67,0],[900,13,900,61,0],[901,13,901,63,0],[903,13,903,95,0],[906,13,906,74,0],[909,13,909,36,0],[910,14,910,80,0],[911,9,911,10,0],[915,9,915,10,0],[916,13,916,67,0],[917,13,917,61,0],[918,13,918,63,0],[919,13,919,39,0],[921,13,921,91,0],[924,13,924,74,0],[927,13,927,36,0],[928,14,928,80,0],[929,9,929,10,0],[932,9,932,10,0],[933,13,933,67,0],[934,13,934,61,0],[935,13,935,63,0],[936,13,936,50,0],[938,13,938,91,0],[941,13,941,65,0],[941,65,941,112,0],[941,112,941,114,0],[941,13,941,114,0],[944,14,944,80,0],[945,9,945,10,0],[948,9,948,10,0],[949,13,949,67,0],[950,13,950,61,0],[951,13,951,57,0],[952,13,952,63,0],[953,13,953,49,0],[955,13,955,91,0],[956,13,956,64,0],[958,13,958,74,0],[961,13,961,35,0],[962,14,962,138,0],[963,9,963,10,0],[969,9,969,10,0],[970,13,970,67,0],[971,13,971,61,0],[972,13,972,63,0],[974,13,974,95,0],[977,13,977,74,0],[980,13,980,36,0],[981,14,981,80,0],[982,9,982,10,0],[986,9,986,10,0],[987,13,987,67,0],[988,13,988,61,0],[989,13,989,63,0],[990,13,990,39,0],[992,13,992,91,0],[995,13,995,74,0],[998,13,998,36,0],[999,14,999,80,0],[1000,9,1000,10,0],[1003,9,1003,10,0],[1004,13,1004,67,0],[1005,13,1005,61,0],[1006,13,1006,63,0],[1007,13,1007,52,0],[1009,13,1009,91,0],[1012,13,1012,65,0],[1012,65,1012,112,0],[1012,112,1012,114,0],[1012,13,1012,114,0],[1015,14,1015,80,0],[1016,9,1016,10,0],[1019,9,1019,10,0],[1020,13,1020,67,0],[1021,13,1021,61,0],[1022,13,1022,63,0],[1023,13,1023,50,0],[1025,13,1025,91,0],[1028,13,1028,61,0],[1031,14,1031,137,0],[1032,9,1032,10,0],[1037,9,1037,10,0],[1038,13,1038,67,0],[1039,13,1039,61,0],[1040,13,1040,63,0],[1042,13,1042,95,0],[1045,13,1045,81,0],[1048,13,1048,36,0],[1049,14,1049,80,0],[1050,9,1050,10,0],[1054,9,1054,10,0],[1055,13,1055,67,0],[1056,13,1056,61,0],[1057,13,1057,63,0],[1058,13,1058,39,0],[1060,13,1060,91,0],[1063,13,1063,82,0],[1066,13,1066,36,0],[1067,14,1067,80,0],[1068,9,1068,10,0],[1071,9,1071,10,0],[1072,13,1072,67,0],[1073,13,1073,61,0],[1074,13,1074,63,0],[1075,13,1075,49,0],[1077,13,1077,91,0],[1080,13,1080,65,0],[1080,65,1080,120,0],[1080,120,1080,122,0],[1080,13,1080,122,0],[1083,14,1083,80,0],[1084,9,1084,10,0],[1087,9,1087,10,0],[1088,13,1088,67,0],[1089,13,1089,61,0],[1090,13,1090,63,0],[1091,13,1091,50,0],[1093,13,1093,91,0],[1096,13,1096,81,0],[1099,14,1102,50,0],[1103,9,1103,10,0],[1108,9,1108,10,0],[1109,13,1109,67,0],[1110,13,1110,61,0],[1111,13,1111,63,0],[1113,13,1113,95,0],[1116,13,1116,75,0],[1119,13,1119,36,0],[1120,14,1120,80,0],[1121,9,1121,10,0],[1125,9,1125,10,0],[1126,13,1126,67,0],[1127,13,1127,61,0],[1128,13,1128,63,0],[1129,13,1129,39,0],[1131,13,1131,91,0],[1134,13,1134,75,0],[1137,13,1137,36,0],[1138,14,1138,80,0],[1139,9,1139,10,0],[1142,9,1142,10,0],[1143,13,1143,67,0],[1144,13,1144,61,0],[1145,13,1145,63,0],[1146,13,1146,49,0],[1148,13,1148,91,0],[1151,13,1151,65,0],[1151,65,1151,113,0],[1151,113,1151,115,0],[1151,13,1151,115,0],[1154,14,1154,80,0],[1155,9,1155,10,0],[1158,9,1158,10,0],[1159,13,1159,67,0],[1160,13,1160,61,0],[1161,13,1161,63,0],[1162,13,1162,50,0],[1164,13,1164,91,0],[1167,13,1167,62,0],[1170,14,1170,137,0],[1171,9,1171,10,0],[1176,9,1176,10,0],[1177,13,1177,67,0],[1178,13,1178,61,0],[1179,13,1179,63,0],[1181,13,1181,95,0],[1184,13,1184,78,0],[1187,13,1187,36,0],[1188,14,1188,80,0],[1189,9,1189,10,0],[1194,9,1194,10,0],[1195,13,1195,67,0],[1196,13,1196,61,0],[1197,13,1197,63,0],[1198,13,1198,36,0],[1200,13,1200,91,0],[1203,13,1203,70,0],[1206,14,1206,135,0],[1207,9,1207,10,0],[1210,9,1210,10,0],[1211,13,1211,67,0],[1212,13,1212,61,0],[1213,13,1213,63,0],[1214,13,1214,37,0],[1216,13,1216,91,0],[1219,13,1219,70,0],[1222,14,1222,149,0],[1223,9,1223,10,0],[1228,9,1228,10,0],[1229,13,1229,67,0],[1230,13,1230,61,0],[1231,13,1231,63,0],[1232,13,1232,69,0],[1234,13,1234,91,0],[1237,13,1237,76,0],[1240,14,1240,80,0],[1241,9,1241,10,0],[1244,9,1244,10,0],[1245,13,1245,67,0],[1246,13,1246,61,0],[1247,13,1247,63,0],[1248,13,1248,69,0],[1250,13,1250,91,0],[1252,13,1252,103,0],[1254,13,1254,90,0],[1257,14,1257,147,0],[1258,9,1258,10,0],[1262,9,1262,10,0],[1263,13,1263,67,0],[1264,13,1264,61,0],[1265,13,1265,63,0],[1266,13,1266,31,0],[1267,13,1267,64,0],[1268,13,1268,64,0],[1269,13,1269,64,0],[1270,13,1270,32,0],[1271,13,1271,32,0],[1272,13,1272,32,0],[1274,13,1274,108,0],[1275,13,1275,80,0],[1277,13,1277,91,0],[1279,13,1279,71,0],[1282,14,1284,105,0],[1285,9,1285,10,0],[1289,9,1289,10,0],[1290,13,1290,67,0],[1291,13,1291,61,0],[1292,13,1292,64,0],[1293,13,1293,64,0],[1294,13,1294,64,0],[1295,13,1295,65,0],[1296,13,1296,32,0],[1297,13,1297,32,0],[1298,13,1298,32,0],[1300,13,1300,103,0],[1302,13,1302,95,0],[1304,13,1304,72,0],[1307,14,1309,113,0],[1310,9,1310,10,0],[1314,9,1314,10,0],[1315,13,1315,67,0],[1316,13,1316,61,0],[1317,13,1317,64,0],[1318,13,1318,64,0],[1319,13,1319,64,0],[1320,13,1320,65,0],[1321,13,1321,32,0],[1322,13,1322,32,0],[1323,13,1323,32,0],[1325,13,1325,108,0],[1327,13,1327,95,0],[1329,13,1329,72,0],[1332,14,1334,113,0],[1335,14,1336,113,0],[1337,9,1337,10,0],[1341,9,1341,10,0],[1342,13,1342,67,0],[1343,13,1343,61,0],[1344,13,1344,66,0],[1345,13,1345,63,0],[1346,13,1346,31,0],[1348,13,1348,96,0],[1350,13,1350,91,0],[1351,13,1351,95,0],[1353,13,1353,87,0],[1356,14,1358,107,0],[1359,9,1359,10,0],[1363,9,1363,10,0],[1364,13,1364,67,0],[1365,13,1365,61,0],[1366,13,1366,66,0],[1367,13,1367,64,0],[1368,13,1368,64,0],[1369,13,1369,64,0],[1370,13,1370,65,0],[1371,13,1371,32,0],[1372,13,1372,32,0],[1373,13,1373,32,0],[1374,13,1374,50,0],[1375,13,1375,50,0],[1376,13,1376,50,0],[1378,13,1378,95,0],[1379,13,1379,95,0],[1382,13,1382,88,0],[1385,14,1387,113,0],[1388,9,1388,10,0],[1392,9,1392,10,0],[1393,13,1393,67,0],[1394,13,1394,61,0],[1395,13,1395,66,0],[1396,13,1396,64,0],[1397,13,1397,64,0],[1398,13,1398,64,0],[1399,13,1399,65,0],[1400,13,1400,32,0],[1401,13,1401,32,0],[1402,13,1402,32,0],[1403,13,1403,50,0],[1404,13,1404,50,0],[1405,13,1405,50,0],[1407,13,1407,95,0],[1408,13,1408,95,0],[1411,13,1411,88,0],[1414,14,1416,113,0],[1417,14,1418,113,0],[1419,9,1419,10,0],[1422,9,1422,10,0],[1423,13,1423,67,0],[1424,13,1424,61,0],[1425,13,1425,63,0],[1426,13,1426,49,0],[1430,13,1430,69,0],[1433,13,1433,36,0],[1434,14,1434,80,0],[1435,9,1435,10,0],[1440,9,1440,10,0],[1441,13,1441,67,0],[1442,13,1442,61,0],[1443,13,1443,63,0],[1444,13,1444,66,0],[1445,13,1451,16,0],[1455,13,1455,80,0],[1458,13,1458,36,0],[1459,14,1459,80,0],[1460,9,1460,10,0],[1465,9,1465,10,0],[1466,13,1466,67,0],[1467,13,1467,61,0],[1468,13,1468,63,0],[1469,13,1469,49,0],[1470,13,1470,66,0],[1471,13,1471,52,0],[1472,13,1472,52,0],[1476,13,1476,67,0],[1479,14,1483,89,0],[1484,9,1484,10,0],[1489,9,1489,10,0],[1490,13,1490,67,0],[1491,13,1491,61,0],[1492,13,1492,63,0],[1493,13,1493,49,0],[1496,13,1496,69,0],[1499,14,1499,80,0],[1500,9,1500,10,0],[1505,9,1505,10,0],[1506,13,1506,67,0],[1507,13,1507,61,0],[1508,13,1508,63,0],[1509,13,1509,52,0],[1510,13,1510,83,0],[1511,13,1511,66,0],[1512,13,1512,70,0],[1513,13,1513,56,0],[1514,13,1514,52,0],[1515,13,1521,16,0],[1522,13,1528,16,0],[1530,13,1531,87,0],[1534,13,1534,67,0],[1537,14,1538,87,0],[1539,14,1543,91,0],[1544,9,1544,10,0],[1549,9,1549,10,0],[1550,13,1550,67,0],[1551,13,1551,61,0],[1552,13,1552,63,0],[1553,13,1553,66,0],[1554,13,1554,52,0],[1559,13,1559,80,0],[1563,13,1563,36,0],[1564,14,1564,80,0],[1565,9,1565,10,0]]);
+    </script>
+  </body>
+</html>

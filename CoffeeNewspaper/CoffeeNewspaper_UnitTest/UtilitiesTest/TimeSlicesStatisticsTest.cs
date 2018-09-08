@@ -21,6 +21,17 @@ namespace CoffeeNewspaper_UnitTest.UtilitiesTest
         }
 
         [Test]
+        public void GetTimeSliceDuration_Null_ReturnTimeSpanZero()
+        {
+            //arrange
+            var time = Convert.ToDateTime("2018-4-1 12:00:00");
+            var timeslice1 = new CNTimeSlice(time.AddHours(-1), time.AddHours(1));
+            //act
+            var result = ((CNTimeSlice) null).GetTimeSliceDuration(time);
+            //arrange
+            Assert.AreEqual(TimeSpan.Zero, result);
+        }
+        [Test]
         public void GetTimeSliceDuration_EndTimeIsNull()
         {
             //arrange
@@ -85,6 +96,18 @@ namespace CoffeeNewspaper_UnitTest.UtilitiesTest
             double result = testList.GetWorkDays();
             //assert
             Assert.AreEqual(2, result);
+        }
+        [Test]
+        public void GetWorkDays_NullDays()
+        {
+            //arrange
+            var time = Convert.ToDateTime("2018-4-1 12:00:00");
+            var timeslice3 = new CNTimeSlice(time.AddDays(-1).AddHours(-3), time.AddDays(-1).AddHours(-2));
+            var testList = new List<CNTimeSlice>() { null, null, timeslice3 };
+            //act
+            double result = testList.GetWorkDays();
+            //assert
+            Assert.AreEqual(1, result);
         }
         [Test]
         public void GetWorkDays_MutipleDaysWithColide()

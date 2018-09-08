@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\utilities\mytreeviewhelper.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+
+namespace CN_WPF
+{
+    public static class MyTreeViewHelper
+    {
+        //
+        // The TreeViewItem that the mouse is currently directly over (or null).
+        //
+        private static TreeViewItem _currentItem = null;
+
+        //
+        // IsMouseDirectlyOverItem:  A DependencyProperty that will be true only on the 
+        // TreeViewItem that the mouse is directly over.  I.e., this won&#39;t be set on that 
+        // parent item.
+        //
+        // This is the only public member, and is read-only.
+        //
+
+        // The property key (since this is a read-only DP)
+        private static readonly DependencyPropertyKey IsMouseDirectlyOverItemKey =
+            DependencyProperty.RegisterAttachedReadOnly(&quot;IsMouseDirectlyOverItem&quot;,
+                                                typeof(bool),
+                                                typeof(MyTreeViewHelper),
+                                                new FrameworkPropertyMetadata(null, new CoerceValueCallback(CalculateIsMouseDirectlyOverItem)));
+
+        // The DP itself
+        public static readonly DependencyProperty IsMouseDirectlyOverItemProperty =
+            IsMouseDirectlyOverItemKey.DependencyProperty;
+
+        // A strongly-typed getter for the property.
+        public static bool GetIsMouseDirectlyOverItem(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(IsMouseDirectlyOverItemProperty);
+        }
+
+        // A coercion method for the property
+        private static object CalculateIsMouseDirectlyOverItem(DependencyObject item, object value)
+        {
+            // This method is called when the IsMouseDirectlyOver property is being calculated
+            // for a TreeViewItem.  
+
+            if (Equals(item, _currentItem))
+                return true;
+            else
+                return false;
+        }
+
+        //
+        // UpdateOverItem:  A private RoutedEvent used to find the nearest encapsulating
+        // TreeViewItem to the mouse&#39;s current position.
+        //
+
+        private static readonly RoutedEvent UpdateOverItemEvent = EventManager.RegisterRoutedEvent(
+            &quot;UpdateOverItem&quot;, RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(MyTreeViewHelper));
+
+        //
+        // Class constructor
+        //
+
+        static MyTreeViewHelper()
+        {
+            // Get all Mouse enter/leave events for TreeViewItem.
+            EventManager.RegisterClassHandler(typeof(TreeViewItem), UIElement.MouseEnterEvent, new MouseEventHandler(OnMouseTransition), true);
+            EventManager.RegisterClassHandler(typeof(TreeViewItem), UIElement.MouseLeaveEvent, new MouseEventHandler(OnMouseTransition), true);
+
+            // Listen for the UpdateOverItemEvent on all TreeViewItem&#39;s.
+            EventManager.RegisterClassHandler(typeof(TreeViewItem), UpdateOverItemEvent, new RoutedEventHandler(OnUpdateOverItem));
+        }
+
+
+        //
+        // OnUpdateOverItem:  This method is a listener for the UpdateOverItemEvent.  When it is received,
+        // it means that the sender is the closest TreeViewItem to the mouse (closest in the sense of the tree,
+        // not geographically).
+
+        static void OnUpdateOverItem(object sender, RoutedEventArgs args)
+        {
+            // Mark this object as the tree view item over which the mouse
+            // is currently positioned.
+            _currentItem = sender as TreeViewItem;
+
+            // Tell that item to re-calculate the IsMouseDirectlyOverItem property
+            _currentItem?.InvalidateProperty(IsMouseDirectlyOverItemProperty);
+
+            // Prevent this event from notifying other tree view items higher in the tree.
+            args.Handled = true;
+        }
+
+        //
+        // OnMouseTransition:  This method is a listener for both the MouseEnter event and
+        // the MouseLeave event on TreeViewItems.  It updates the _currentItem, and updates
+        // the IsMouseDirectlyOverItem property on the previous TreeViewItem and the new
+        // TreeViewItem.
+
+        static void OnMouseTransition(object sender, MouseEventArgs args)
+        {
+            lock (IsMouseDirectlyOverItemProperty)
+            {
+                if (_currentItem != null)
+                {
+                    // Tell the item that previously had the mouse that it no longer does.
+                    DependencyObject oldItem = _currentItem;
+                    _currentItem = null;
+                    oldItem.InvalidateProperty(IsMouseDirectlyOverItemProperty);
+                }
+
+                // Get the element that is currently under the mouse.
+                IInputElement currentPosition = Mouse.DirectlyOver;
+
+                // See if the mouse is still over something (any element, not just a tree view item).
+                if (currentPosition != null)
+                {
+                    // Yes, the mouse is over something.
+                    // Raise an event from that point.  If a TreeViewItem is anywhere above this point
+                    // in the tree, it will receive this event and update _currentItem.
+
+                    RoutedEventArgs newItemArgs = new RoutedEventArgs(UpdateOverItemEvent);
+                    currentPosition.RaiseEvent(newItemArgs);
+
+                }
+            }
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,57,0],[23,9,27,145,0],[30,9,31,59,0],[35,9,35,10,0],[36,13,36,72,0],[37,9,37,10,0],[41,9,41,10,0],[45,13,45,44,0],[46,17,46,29,0],[48,17,48,30,0],[49,9,49,10,0],[56,9,57,109,0],[64,9,64,10,0],[66,13,66,144,0],[67,13,67,144,0],[70,13,70,132,0],[71,9,71,10,0],[80,9,80,10,0],[83,13,83,51,0],[86,13,86,79,0],[89,13,89,33,0],[90,9,90,10,0],[99,9,99,10,0],[100,13,100,51,0],[101,13,101,14,0],[102,17,102,42,0],[103,17,103,18,0],[105,21,105,61,0],[106,21,106,41,0],[107,21,107,81,0],[108,17,108,18,0],[111,17,111,68,0],[114,17,114,45,0],[115,17,115,18,0],[120,21,120,92,0],[121,21,121,61,0],[123,17,123,18,0],[124,13,124,14,0],[125,9,125,10,0]]);
+    </script>
+  </body>
+</html>

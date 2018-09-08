@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\command\basecommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Threading.Tasks;
+
+namespace CoffeeNewspaper_CLI
+{
+    public class BaseCommand
+    {
+        protected BaseState State { get; }
+
+        public BaseCommand(BaseState state)
+        {
+            State = state;
+        }
+
+        protected bool Equals(BaseCommand other)
+        {
+            return string.Equals(Name, other.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((BaseCommand) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Name != null ? Name.GetHashCode() : 0);
+        }
+
+        public string Name { get;protected set; }
+
+        public virtual async Task&lt;BaseState&gt; Excute(ArgumentParser input)
+        {
+            await Task.Delay(1);
+            throw new NotImplementedException();
+        }
+
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,37,8,41,0],[10,9,10,44,0],[11,9,11,10,0],[12,13,12,27,0],[13,9,13,10,0],[16,9,16,10,0],[17,13,17,52,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,44,0],[22,45,22,58,0],[23,13,23,44,0],[23,45,23,57,0],[24,13,24,49,0],[24,50,24,63,0],[25,13,25,46,0],[26,9,26,10,0],[29,9,29,10,0],[30,13,30,60,0],[31,9,31,10,0],[33,30,33,34,0],[33,34,33,48,0],[36,9,36,10,0],[37,13,37,33,0],[38,13,38,49,0]]);
+    </script>
+  </body>
+</html>

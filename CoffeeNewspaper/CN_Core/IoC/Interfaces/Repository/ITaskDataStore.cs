@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CN_Core.Specification;
 
 namespace CN_Core.Interfaces.Repository
 {
@@ -13,8 +14,14 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="targetTask"></param>
         /// <returns></returns>
-        Task<bool> RemoveTask(CNTask targetTask);
+        void RemoveTask(CNTask targetTask);
 
+        /// <summary>
+        ///  Remove a PreSufTaskConnector from datasource
+        /// </summary>
+        /// <param name="connector"></param>
+        /// <returns></returns>
+        void RemoveTaskConnector(CNTaskConnector connector);
         #endregion
 
         #region Add Methods
@@ -24,7 +31,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="targetTask"></param>
         /// <returns></returns>
-        Task<CNTask> AddTask(CNTask targetTask);
+        CNTask AddTask(CNTask targetTask);
 
         #endregion
 
@@ -42,7 +49,34 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="taskid"></param>
         /// <returns></returns>
         Task<CNTask> GetTask(int taskid);
+        
+        /// <summary>
+        ///     Get Task by id (No tracking) used as clone object
+        /// </summary>
+        /// <param name="taskid"></param>
+        /// <returns></returns>
+        Task<CNTask> GetTaskNoTracking(int taskid);
 
+        /// <summary>
+        ///  Get all child tasks of a parent task
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTask>> GetChildTasksNoTracking(int taskId);
+
+        /// <summary>
+        /// Get Max Sort
+        /// </summary>
+        /// <param name="parentTaskId"></param>
+        /// <returns></returns>
+        Task<int> GetMaxSort(int? parentTaskId);
+
+        /// <summary>
+        /// Get Tasks by specification
+        /// </summary>
+        /// <param name="spec"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTask>> GetAllTasksBySpecification(ISpecification<CNTask> spec);
         #endregion
 
         #region Update Methods
@@ -52,7 +86,7 @@ namespace CN_Core.Interfaces.Repository
         /// </summary>
         /// <param name="targetTask"></param>
         /// <returns></returns>
-        Task<bool> UpdateTask(CNTask targetTask);
+        void UpdateTask(CNTask targetTask);
 
         /// <summary>
         ///     Update EndTaskTime
@@ -60,7 +94,7 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="originDataTask">taskToBeUpdated</param>
         /// <param name="targetEndTime">EndTime</param>
         /// <returns></returns>
-        Task UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime);
+        void UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime);
 
         /// <summary>
         ///     Update StartTaskTime
@@ -68,7 +102,7 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="originDataTask">taskToBeUpdated</param>
         /// <param name="targetStartTime">StartTime</param>
         /// <returns></returns>
-        Task UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime);
+        void UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime);
 
         /// <summary>
         ///     ExpandTaskTime,Both StartTime and EndTime
@@ -79,7 +113,7 @@ namespace CN_Core.Interfaces.Repository
         /// <param name="targetStartTime"></param>
         /// <param name="targetEndTime"></param>
         /// <returns></returns>
-        Task ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime);
+        void ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime);
 
         #endregion
     }

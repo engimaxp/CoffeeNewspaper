@@ -222,7 +222,6 @@ namespace CN_WPF
             await Task.Delay((int)(seconds * 1000));
 
             // Fully hide the element
-//            element.Visibility = Visibility.Collapsed;
         }
 
         #endregion
@@ -328,34 +327,6 @@ namespace CN_WPF
 
             // Wait for it to finish
             await Task.Delay((int)(seconds * 1000));
-        }
-
-        #endregion
-        #region Marquee
-
-        /// <summary>
-        /// Animates a marquee style element
-        /// The structure should be:
-        /// [Border ClipToBounds="True"]
-        ///   [Border local:AnimateMarqueeProperty.Value="True"]
-        ///      [Content HorizontalAlignment="Left"]
-        ///   [/Border]
-        /// [/Border]
-        /// </summary>
-        /// <param name="element">The element to animate</param>
-        /// <param name="seconds">The time the animation will take</param>
-        /// <returns></returns>
-        public static void MarqueeAsync(this FrameworkElement element, float seconds = 3f)
-        {
-            // Create the storyboard
-//            var sb = new Storyboard();
-//
-//            // Run until element is unloaded
-//            var unloaded = false;
-//
-//            // Monitor for element unloading
-//            element.Unloaded += (s, e) => unloaded = true;
-            
         }
 
         #endregion

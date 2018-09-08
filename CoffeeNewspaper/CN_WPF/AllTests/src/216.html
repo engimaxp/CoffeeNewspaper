@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\logging\implementation\consolelogger.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+
+namespace CN_Core.Logging
+{
+    /// &lt;summary&gt;
+    /// Logs the messages to the Console
+    /// &lt;/summary&gt;
+    public class ConsoleLogger : ILogger
+    {
+        /// &lt;summary&gt;
+        /// Logs the given message to the system Console
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;message&quot;&gt;The message to log&lt;/param&gt;
+        /// &lt;param name=&quot;level&quot;&gt;The level of the message&lt;/param&gt;
+        public void Log(string message, LogLevel level)
+        {
+            // Save old color
+            var consoleOldColor = Console.ForegroundColor;
+
+            // Default log color value 
+            var consoleColor = ConsoleColor.White;
+
+            // Color console based on level
+            switch (level)
+            {
+                // Debug is blue
+                case LogLevel.Debug:
+                    consoleColor = ConsoleColor.Blue;
+                    break;
+                // Verbose is gray
+                case LogLevel.Verbose:
+                    consoleColor = ConsoleColor.Gray;
+                    break;
+
+                // Warning is yellow
+                case LogLevel.Warning:
+                    consoleColor = ConsoleColor.DarkYellow;
+                    break;
+
+                // Error is red
+                case LogLevel.Error:
+                    consoleColor = ConsoleColor.Red;
+                    break;
+
+                // Success is green
+                case LogLevel.Success:
+                    consoleColor = ConsoleColor.Green;
+                    break;
+            }
+
+            // Set the desired console color
+            Console.ForegroundColor = consoleColor;
+
+            // Write message to console
+            Console.WriteLine(message);
+
+            // Reset color
+            Console.ForegroundColor = consoleOldColor;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,10,0],[18,13,18,59,0],[21,13,21,51,0],[24,13,24,27,0],[28,21,28,54,0],[29,21,29,27,0],[32,21,32,54,0],[33,21,33,27,0],[37,21,37,60,0],[38,21,38,27,0],[42,21,42,53,0],[43,21,43,27,0],[47,21,47,55,0],[48,21,48,27,0],[52,13,52,52,0],[55,13,55,40,0],[58,13,58,55,0],[59,9,59,10,0]]);
+    </script>
+  </body>
+</html>
