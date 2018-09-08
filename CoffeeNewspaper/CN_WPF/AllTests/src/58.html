@@ -2,122 +2,262 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\relationtest\parenttaskchildtaskrelationtest.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\viewmodels\windowviewmodel.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Linq;
-using System.Threading.Tasks;
-using CN_Core;
-using CN_Repository;
-using CoffeeNewspaper_UnitTest.DomainTest;
-using NUnit.Framework;
+using System.Windows;
+using System.Windows.Input;
+using CN_Presentation.ViewModel.Base;
 
-namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
+namespace CN_WPF
 {
-
     /// &lt;summary&gt;
-    ///     In-Memory integration data persistent test
+    /// The View Model for the custom flat window
     /// &lt;/summary&gt;
-    [TestFixture]
-    public class ParentTaskChildTaskRelationTest : RepositarySetupAndTearDown
+    public class WindowViewModel : BaseViewModel
     {
+        #region Private Member
+
         /// &lt;summary&gt;
-        /// Get a childtask-already-bind task
+        /// The window this view model controls
         /// &lt;/summary&gt;
-        /// &lt;param name=&quot;bindTaskCount&quot;&gt;how many childtask is bind to this task&lt;/param&gt;
+        private readonly Window mWindow;
+
+        /// &lt;summary&gt;
+        /// The window resizer helper that keeps the window size correct in various states
+        /// &lt;/summary&gt;
+        private readonly WindowResizer mWindowResizer;
+
+        /// &lt;summary&gt;
+        /// The margin around the window to allow for a drop shadow
+        /// &lt;/summary&gt;
+        private Thickness mOuterMarginSize = new Thickness(5);
+
+        /// &lt;summary&gt;
+        /// The radius of the edges of the window
+        /// &lt;/summary&gt;
+        private int mWindowRadius = 10;
+
+        /// &lt;summary&gt;
+        /// The last known dock position
+        /// &lt;/summary&gt;
+        private WindowDockPosition mDockPosition = WindowDockPosition.Undocked;
+
+        #endregion
+
+        #region Public Properties
+
+        /// &lt;summary&gt;
+        /// The smallest width the window can go to
+        /// &lt;/summary&gt;
+        public double WindowMinimumWidth { get; set; } = 800;
+
+        /// &lt;summary&gt;
+        /// The smallest height the window can go to
+        /// &lt;/summary&gt;
+        public double WindowMinimumHeight { get; set; } = 500;
+
+        /// &lt;summary&gt;
+        /// True if the window is currently being moved/dragged
+        /// &lt;/summary&gt;
+        public bool BeingMoved { get; set; }
+
+
+        /// &lt;summary&gt;
+        /// True if the window should be borderless because it is docked or maximized
+        /// &lt;/summary&gt;
+        public bool Borderless =&gt; (mWindow.WindowState == WindowState.Maximized || mDockPosition != WindowDockPosition.Undocked);
+
+        /// &lt;summary&gt;
+        /// The size of the resize border around the window
+        /// &lt;/summary&gt;
+        public int ResizeBorder =&gt;0;
+
+        /// &lt;summary&gt;
+        /// The size of the resize border around the window, taking into account the outer margin
+        /// &lt;/summary&gt;
+        public Thickness ResizeBorderThickness =&gt; new Thickness(OuterMarginSize.Left + ResizeBorder,
+                                                                OuterMarginSize.Top + ResizeBorder,
+                                                                OuterMarginSize.Right + ResizeBorder,
+                                                                OuterMarginSize.Bottom + ResizeBorder);
+
+        /// &lt;summary&gt;
+        /// The padding of the inner content of the main window
+        /// &lt;/summary&gt;
+        public Thickness InnerContentPadding { get; set; } = new Thickness(0);
+
+        /// &lt;summary&gt;
+        /// The margin around the window to allow for a drop shadow
+        /// &lt;/summary&gt;
+        public Thickness OuterMarginSize
+        {
+            // If it is maximized or docked, no border
+            get
+            {
+                var thickness = Borderless ? new Thickness(0) : mOuterMarginSize;
+                return mWindow.WindowState == WindowState.Maximized
+                    ? mWindowResizer.CurrentMonitorMargin
+                    : thickness;
+            }
+            set =&gt; mOuterMarginSize = value;
+        }
+
+        /// &lt;summary&gt;
+        /// The radius of the edges of the window
+        /// &lt;/summary&gt;
+        public int WindowRadius
+        {
+            // If it is maximized or docked, no border
+            get =&gt; Borderless ? 0 : mWindowRadius;
+            set =&gt; mWindowRadius = value;
+        }
+
+        /// &lt;summary&gt;
+        /// The rectangle border around the window when docked
+        /// &lt;/summary&gt;
+        public int FlatBorderThickness =&gt; Borderless &amp;&amp; mWindow.WindowState != WindowState.Maximized ? 1 : 0;
+
+        /// &lt;summary&gt;
+        /// The radius of the edges of the window
+        /// &lt;/summary&gt;
+        public CornerRadius WindowCornerRadius =&gt; new CornerRadius(WindowRadius);
+
+        /// &lt;summary&gt;
+        /// The height of the title bar / caption of the window
+        /// &lt;/summary&gt;
+        public int TitleHeight { get; set; } = 42;
+        /// &lt;summary&gt;
+        /// The height of the title bar / caption of the window
+        /// &lt;/summary&gt;
+        public GridLength TitleHeightGridLength =&gt; new GridLength(TitleHeight + ResizeBorder);
+        
+        /// &lt;summary&gt;
+        /// True if we should have a dimmed overlay on the window
+        /// such as when a popup is visible or the window is not focused
+        /// &lt;/summary&gt;
+        public bool DimmableOverlayVisible { get; set; }
+
+        #endregion
+
+        #region Commands
+
+        /// &lt;summary&gt;
+        /// The command to minimize the window
+        /// &lt;/summary&gt;
+        public ICommand MinimizeCommand { get; set; }
+
+        /// &lt;summary&gt;
+        /// The command to maximize the window
+        /// &lt;/summary&gt;
+        public ICommand MaximizeCommand { get; set; }
+
+        /// &lt;summary&gt;
+        /// The command to close the window
+        /// &lt;/summary&gt;
+        public ICommand CloseCommand { get; set; }
+
+        /// &lt;summary&gt;
+        /// The command to show the system menu of the window
+        /// &lt;/summary&gt;
+        public ICommand MenuCommand { get; set; }
+
+        #endregion
+
+        #region Constructor
+
+        /// &lt;summary&gt;
+        /// Default constructor
+        /// &lt;/summary&gt;
+        public WindowViewModel(Window window)
+        {
+            mWindow = window;
+
+            // Listen out for the window resizing
+            mWindow.StateChanged += (sender, e) =&gt;
+            {
+                // Fire off events for all properties that are affected by a resize
+                WindowResized();
+            };
+
+            // Create commands
+            MinimizeCommand = new RelayCommand(() =&gt; mWindow.WindowState = WindowState.Minimized);
+            MaximizeCommand = new RelayCommand(() =&gt; mWindow.WindowState =(mWindow.WindowState == WindowState.Maximized)?WindowState.Normal:WindowState.Maximized);
+            CloseCommand = new RelayCommand(() =&gt; mWindow.Close());
+            MenuCommand = new RelayCommand(() =&gt; SystemCommands.ShowSystemMenu(mWindow, GetMousePosition()));
+
+            // Fix window resize issue
+            mWindowResizer = new WindowResizer(mWindow);
+
+            // Listen out for dock changes
+            mWindowResizer.WindowDockChanged += (dock) =&gt;
+            {
+                // Store last position
+                mDockPosition = dock;
+
+                // Fire off resize events
+                WindowResized();
+            };
+
+            // On window being moved/dragged
+            mWindowResizer.WindowStartedMove += () =&gt;
+            {
+                // Update being moved flag
+                BeingMoved = true;
+            };
+
+            // Fix dropping an undocked window at top which should be positioned at the
+            // very top of screen
+            mWindowResizer.WindowFinishedMove += () =&gt;
+            {
+                // Update being moved flag
+                BeingMoved = false;
+
+                // Check for moved to top of window and not at an edge
+                if (mDockPosition == WindowDockPosition.Undocked &amp;&amp; mWindow.Top == mWindowResizer.CurrentScreenSize.Top)
+                    // If so, move it to the true top (the border size)
+                    mWindow.Top = -OuterMarginSize.Top;
+            };
+        }
+
+        #endregion
+
+        #region Private Helpers
+
+        /// &lt;summary&gt;
+        /// Gets the current mouse position on the screen
+        /// &lt;/summary&gt;
         /// &lt;returns&gt;&lt;/returns&gt;
-        private CNTask GetChildTaskBindTestTask(int bindTaskCount)
+        private System.Windows.Point GetMousePosition()
         {
-            var assesTask = DomainTestHelper.GetARandomTask();
-            Enumerable.Range(0, bindTaskCount).ToList().ForEach(x =&gt;
-            {
-                var assesChildTask = DomainTestHelper.GetARandomTask();
-                assesTask.ChildTasks.Add(assesChildTask); 
-            });
-            return assesTask;
+            return mWindowResizer.GetCursorPosition();
         }
-        [Test]
-        public async Task DeleteAParentChildTaskRelation_BothTaskExist()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //initiate the datastore
-                var assesTask = GetChildTaskBindTestTask(1);
-                var taskDataStore = new TaskDataStore(dbcontext);
-                 taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                assesTask.ChildTasks.Remove(assesTask.ChildTasks.First());
-                taskDataStore.UpdateTask(assesTask);
 
-                await unitOfWork.Commit();
-                Assert.AreEqual(2,dbcontext.Tasks.Count());
-                Assert.AreEqual(0,dbcontext.Tasks.First().ChildTasks.Count());
-            });
+        /// &lt;summary&gt;
+        /// If the window resizes to a special position (docked or maximized)
+        /// this will update all required property change events to set the borders and radius values
+        /// &lt;/summary&gt;
+        private void WindowResized()
+        {
+            // Fire off events for all properties that are affected by a resize
+            OnPropertyChanged(nameof(Borderless));
+            OnPropertyChanged(nameof(FlatBorderThickness));
+            OnPropertyChanged(nameof(ResizeBorderThickness));
+            OnPropertyChanged(nameof(OuterMarginSize));
+            OnPropertyChanged(nameof(WindowRadius));
+            OnPropertyChanged(nameof(WindowCornerRadius));
         }
-        [Test]
-        public async Task AddDupplicateTaskTaskRelation_ReturnFalse()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //initiate the datastore
-                var assesTask = GetChildTaskBindTestTask(1);
-                var taskDataStore = new TaskDataStore(dbcontext);
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                assesTask.ChildTasks.Add(assesTask.ChildTasks.First());
-                taskDataStore.UpdateTask(assesTask);
-
-                var result = await unitOfWork.Commit();
-                Assert.IsFalse(result);
 
 
-                Assert.AreEqual(2, dbcontext.Tasks.Count());
-                Assert.AreEqual(1, assesTask.ChildTasks.Count());
-            });
-        }
-        [Test]
-        public async Task DeleteParentTask_RelatedChildTaskExist_ParentChangeToNull()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //initiate the datastore
-                var assesTask = GetChildTaskBindTestTask(1);
-                var taskDataStore = new TaskDataStore(dbcontext);
-                taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                taskDataStore.RemoveTask(assesTask);
-                var result = await unitOfWork.Commit();
-                Assert.IsTrue(result);
-                Assert.AreEqual(1, dbcontext.Tasks.Count());
-                Assert.IsNull(dbcontext.Tasks.First().ParentTask);
-            });
-        }
-        [Test]
-        public async Task DeleteChildTask_RelatedParentTaskExis()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //initiate the datastore
-                var assesTask = GetChildTaskBindTestTask(1);
-                var taskDataStore = new TaskDataStore(dbcontext);
-                 taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                 taskDataStore.RemoveTask(assesTask.ChildTasks.First());
-                var result = await unitOfWork.Commit();
-                Assert.IsTrue(result);
-                var testresult = await taskDataStore.GetAllTask();
-                Assert.AreEqual(assesTask.TaskId, testresult.First().TaskId);
-            });
-        }
+        #endregion
     }
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[23,9,23,10,1],[24,13,24,63,1],[25,13,26,13,1],[26,13,26,14,1],[26,14,27,17,1],[27,17,27,72,1],[27,72,28,17,1],[28,17,28,58,1],[28,58,29,13,1],[29,13,29,14,1],[29,14,29,16,1],[25,13,29,16,1],[30,13,30,30,1],[31,9,31,10,1],[34,9,34,10,1],[35,13,36,13,1],[36,13,36,14,1],[36,14,38,17,1],[38,17,38,61,1],[38,61,39,17,1],[39,17,39,66,1],[39,66,40,18,1],[40,18,40,51,1],[40,51,41,17,1],[41,17,41,43,1],[41,43,42,17,1],[42,17,42,75,1],[42,75,43,17,1],[43,17,43,53,1],[43,53,45,17,1],[45,17,45,43,1],[45,43,46,17,1],[46,17,46,60,1],[46,60,47,17,1],[47,17,47,79,1],[47,79,48,13,1],[48,13,48,14,1],[48,14,48,16,1],[35,13,48,16,1],[49,9,49,10,1],[52,9,52,10,1],[53,13,54,13,1],[54,13,54,14,1],[54,14,56,17,1],[56,17,56,61,1],[56,61,57,17,1],[57,17,57,66,1],[57,66,58,17,1],[58,17,58,50,1],[58,50,60,17,1],[60,17,60,43,1],[60,43,61,17,1],[61,17,61,72,1],[61,72,62,17,1],[62,17,62,53,1],[62,53,64,17,1],[64,17,64,56,1],[64,56,65,17,1],[65,17,65,40,1],[65,40,68,17,1],[68,17,68,61,1],[68,61,69,17,1],[69,17,69,66,1],[69,66,70,13,1],[70,13,70,14,1],[70,14,70,16,1],[53,13,70,16,1],[71,9,71,10,1],[74,9,74,10,1],[75,13,76,13,1],[76,13,76,14,1],[76,14,78,17,1],[78,17,78,61,1],[78,61,79,17,1],[79,17,79,66,1],[79,66,80,17,1],[80,17,80,50,1],[80,50,81,17,1],[81,17,81,43,1],[81,43,82,17,1],[82,17,82,53,1],[82,53,83,17,1],[83,17,83,56,1],[83,56,84,17,1],[84,17,84,39,1],[84,39,85,17,1],[85,17,85,61,1],[85,61,86,17,1],[86,17,86,67,1],[86,67,87,13,1],[87,13,87,14,1],[87,14,87,16,1],[75,13,87,16,1],[88,9,88,10,1],[91,9,91,10,1],[92,13,93,13,1],[93,13,93,14,1],[93,14,95,17,1],[95,17,95,61,1],[95,61,96,17,1],[96,17,96,66,1],[96,66,97,18,1],[97,18,97,51,1],[97,51,98,17,1],[98,17,98,43,1],[98,43,99,18,1],[99,18,99,73,1],[99,73,100,17,1],[100,17,100,56,1],[100,56,101,17,1],[101,17,101,39,1],[101,39,102,17,1],[102,17,102,67,1],[102,67,103,17,1],[103,17,103,78,1],[103,78,104,13,1],[104,13,104,14,1],[104,14,104,16,1],[92,13,104,16,1],[105,9,105,10,1]]);
+      highlightRanges([[27,9,27,63,0],[32,9,32,40,0],[37,9,37,80,0],[46,44,46,48,0],[46,49,46,53,0],[46,58,46,61,0],[51,45,51,49,0],[51,50,51,54,0],[51,59,51,62,0],[56,34,56,38,0],[56,39,56,43,0],[62,35,62,129,0],[67,35,67,36,0],[72,51,75,103,0],[80,48,80,52,0],[80,53,80,57,0],[80,62,80,78,0],[89,13,89,14,0],[90,17,90,82,0],[91,17,93,33,0],[94,13,94,14,0],[95,20,95,44,0],[104,20,104,50,0],[105,20,105,41,0],[111,43,111,109,0],[116,51,116,81,0],[121,34,121,38,0],[121,39,121,43,0],[121,48,121,50,0],[125,52,125,94,0],[131,46,131,50,0],[131,51,131,55,0],[140,43,140,47,0],[140,48,140,52,0],[145,43,145,47,0],[145,48,145,52,0],[150,40,150,44,0],[150,45,150,49,0],[155,39,155,43,0],[155,44,155,48,0],[164,9,164,46,0],[165,9,165,10,0],[166,13,166,30,0],[169,13,170,13,0],[170,13,170,14,0],[170,14,172,17,0],[172,17,172,33,0],[172,33,173,13,0],[173,13,173,14,0],[173,14,173,15,0],[169,13,173,15,0],[176,13,176,54,0],[176,54,176,97,0],[176,97,176,99,0],[176,13,176,99,0],[177,13,177,54,0],[177,54,177,162,0],[177,162,177,164,0],[177,13,177,164,0],[178,13,178,51,0],[178,51,178,66,0],[178,66,178,68,0],[178,13,178,68,0],[179,13,179,50,0],[179,50,179,108,0],[179,108,179,110,0],[179,13,179,110,0],[182,13,182,57,0],[185,13,186,13,0],[186,13,186,14,0],[186,14,188,17,0],[188,17,188,38,0],[188,38,191,17,0],[191,17,191,33,0],[191,33,192,13,0],[192,13,192,14,0],[192,14,192,15,0],[185,13,192,15,0],[195,13,196,13,0],[196,13,196,14,0],[196,14,198,17,0],[198,17,198,35,0],[198,35,199,13,0],[199,13,199,14,0],[199,14,199,15,0],[195,13,199,15,0],[203,13,204,13,0],[204,13,204,14,0],[204,14,206,17,0],[206,17,206,36,0],[206,36,209,17,0],[209,17,209,121,0],[209,121,211,21,0],[211,21,211,56,0],[211,56,212,13,0],[212,13,212,14,0],[212,14,212,15,0],[203,13,212,15,0],[213,9,213,10,0],[224,9,224,10,0],[225,13,225,55,0],[226,9,226,10,0],[233,9,233,10,0],[235,13,235,51,0],[236,13,236,60,0],[237,13,237,62,0],[238,13,238,56,0],[239,13,239,53,0],[240,13,240,59,0],[241,9,241,10,0]]);
     </script>
   </body>
 </html>

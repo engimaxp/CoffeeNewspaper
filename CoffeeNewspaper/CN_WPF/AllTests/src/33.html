@@ -2,196 +2,74 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\task\taskmanager.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\input\textentrycontrol.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
 using System;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using CN_Core.Interfaces;
-using CN_Core.Logging;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Controls;
 
-namespace CN_Core
+namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// Handles anything to do with Tasks
+    /// Interaction logic for TextEntryControl.xaml
     /// &lt;/summary&gt;
-    public class TaskManager : ITaskManager
+    public partial class TextEntryControl : UserControl
     {
-        #region Task Methods
+        #region Dependency Properties
 
-        public async Task Run(Func&lt;Task&gt; function, [CallerMemberName]string origin = &quot;&quot;, [CallerFilePath]string filePath = &quot;&quot;, [CallerLineNumber]int lineNumber = 0)
+        /// &lt;summary&gt;
+        /// The label width of the control
+        /// &lt;/summary&gt;
+        public GridLength LabelWidth
         {
-            try
-            {
-                // Try and run the task
-                await Task.Run(function);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                LogError(ex, origin, filePath, lineNumber);
-
-                // Throw it as normal
-                throw;
-            }
+            get =&gt; (GridLength)GetValue(LabelWidthProperty);
+            set =&gt; SetValue(LabelWidthProperty, value);
         }
 
-        public async Task&lt;TResult&gt; Run&lt;TResult&gt;(Func&lt;Task&lt;TResult&gt;&gt; function, TResult exceptionDefaultResult, string origin = &quot;&quot;, string filePath = &quot;&quot;,
-            int lineNumber = 0)
+        // Using a DependencyProperty as the backing store for LabelWidth.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty LabelWidthProperty =
+            DependencyProperty.Register(&quot;LabelWidth&quot;, typeof(GridLength), typeof(TextEntryControl), new PropertyMetadata(GridLength.Auto, LabelWidthChangedCallback));
+
+        #endregion
+
+        #region Constructor
+
+        /// &lt;summary&gt;
+        /// Default constructor
+        /// &lt;/summary&gt;
+        public TextEntryControl()
         {
-            try
-            {
-                // Try and run the task
-                return await Task.Run(function);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                LogError(ex, origin, filePath, lineNumber);
-
-                // Throw it as normal
-                return exceptionDefaultResult;
-            }
-        }
-
-        public async Task&lt;TResult&gt; Run&lt;TResult&gt;(Func&lt;Task&lt;TResult&gt;&gt; function, CancellationToken cancellationToken, [CallerMemberName]string origin = &quot;&quot;, [CallerFilePath]string filePath = &quot;&quot;, [CallerLineNumber]int lineNumber = 0)
-        {
-            try
-            {
-                // Try and run the task
-                return await Task.Run(function, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                LogError(ex, origin, filePath, lineNumber);
-
-                // Throw it as normal
-                throw;
-            }
-        }
-
-        public async Task&lt;TResult&gt; Run&lt;TResult&gt;(Func&lt;Task&lt;TResult&gt;&gt; function, [CallerMemberName]string origin = &quot;&quot;, [CallerFilePath]string filePath = &quot;&quot;, [CallerLineNumber]int lineNumber = 0)
-        {
-            try
-            {
-                // Try and run the task
-                return await Task.Run(function);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                LogError(ex, origin, filePath, lineNumber);
-
-                // Throw it as normal
-                throw;
-            }
-        }
-
-        public async Task&lt;TResult&gt; Run&lt;TResult&gt;(Func&lt;TResult&gt; function, CancellationToken cancellationToken, [CallerMemberName]string origin = &quot;&quot;, [CallerFilePath]string filePath = &quot;&quot;, [CallerLineNumber]int lineNumber = 0)
-        {
-            try
-            {
-                // Try and run the task
-                return await Task.Run(function, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                LogError(ex, origin, filePath, lineNumber);
-
-                // Throw it as normal
-                throw;
-            }
-        }
-
-        public async Task&lt;TResult&gt; Run&lt;TResult&gt;(Func&lt;TResult&gt; function, [CallerMemberName]string origin = &quot;&quot;, [CallerFilePath]string filePath = &quot;&quot;, [CallerLineNumber]int lineNumber = 0)
-        {
-            try
-            {
-                // Try and run the task
-                return await Task.Run(function);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                LogError(ex, origin, filePath, lineNumber);
-
-                // Throw it as normal
-                throw;
-            }
-        }
-
-        public async Task Run(Func&lt;Task&gt; function, CancellationToken cancellationToken, [CallerMemberName]string origin = &quot;&quot;, [CallerFilePath]string filePath = &quot;&quot;, [CallerLineNumber]int lineNumber = 0)
-        {
-            try
-            {
-                // Try and run the task
-                await Task.Run(function, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                LogError(ex, origin, filePath, lineNumber);
-
-                // Throw it as normal
-                throw;
-            }
-        }
-
-        public async Task Run(Action action, CancellationToken cancellationToken, [CallerMemberName]string origin = &quot;&quot;, [CallerFilePath]string filePath = &quot;&quot;, [CallerLineNumber]int lineNumber = 0)
-        {
-            try
-            {
-                // Try and run the task
-                await Task.Run(action, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                LogError(ex, origin, filePath, lineNumber);
-
-                // Throw it as normal
-                throw;
-            }
-        }
-
-        public async Task Run(Action action, [CallerMemberName]string origin = &quot;&quot;, [CallerFilePath]string filePath = &quot;&quot;, [CallerLineNumber]int lineNumber = 0)
-        {
-            try
-            {
-                // Try and run the task
-                await Task.Run(action);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                LogError(ex, origin, filePath, lineNumber);
-
-                // Throw it as normal
-                throw;
-            }
+            InitializeComponent();
         }
 
         #endregion
 
-        #region Private Helper Methods
+        #region Dependency Callbacks
 
         /// &lt;summary&gt;
-        /// Logs the given error to the log factory
+        /// Called when the label width has changed
         /// &lt;/summary&gt;
-        /// &lt;param name=&quot;ex&quot;&gt;The exception to log&lt;/param&gt;
-        /// &lt;param name=&quot;origin&quot;&gt;The method/function this message was logged in&lt;/param&gt;
-        /// &lt;param name=&quot;filePath&quot;&gt;The code filename that this message was logged from&lt;/param&gt;
-        /// &lt;param name=&quot;lineNumber&quot;&gt;The line of code in the filename this message was logged from&lt;/param&gt;
-        private void LogError(Exception ex, string origin, string filePath, int lineNumber)
+        /// &lt;param name=&quot;d&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        public static void LabelWidthChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            IoC.Logger.Log($&quot;An unexpected error occurred running a IoC.Task.Run. {ex.Message}&quot;, LogLevel.Debug, origin, filePath, lineNumber);
+            try
+            {
+                // Set the column definition width to the new value
+                ((TextEntryControl) d).LabelColumnDefinition.Width = (GridLength)e.NewValue;
+            }
+            catch (Exception)
+            {
+                // Make developer aware of potential issue
+                Debugger.Break();
+
+                ((TextEntryControl) d).LabelColumnDefinition.Width = GridLength.Auto;
+            }
         }
 
         #endregion
@@ -200,7 +78,7 @@ namespace CN_Core
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[18,9,18,10,0],[20,13,20,14,0],[22,17,22,42,0],[23,13,23,14,0],[24,13,24,33,0],[25,13,25,14,0],[27,17,27,60,0],[30,17,30,23,0],[32,9,32,10,0],[36,9,36,10,1],[38,13,38,14,1],[40,17,40,49,1],[42,13,42,33,1],[43,13,43,14,1],[45,17,45,60,1],[48,17,48,47,1],[50,9,50,10,1],[53,9,53,10,0],[55,13,55,14,0],[57,17,57,68,0],[59,13,59,33,0],[60,13,60,14,0],[62,17,62,60,0],[65,17,65,23,0],[67,9,67,10,0],[70,9,70,10,1],[72,13,72,14,1],[74,17,74,49,1],[76,13,76,33,0],[77,13,77,14,0],[79,17,79,60,0],[82,17,82,23,0],[84,9,84,10,1],[87,9,87,10,0],[89,13,89,14,0],[91,17,91,68,0],[93,13,93,33,0],[94,13,94,14,0],[96,17,96,60,0],[99,17,99,23,0],[101,9,101,10,0],[104,9,104,10,0],[106,13,106,14,0],[108,17,108,49,0],[110,13,110,33,0],[111,13,111,14,0],[113,17,113,60,0],[116,17,116,23,0],[118,9,118,10,0],[121,9,121,10,0],[123,13,123,14,0],[125,17,125,61,0],[126,13,126,14,0],[127,13,127,33,0],[128,13,128,14,0],[130,17,130,60,0],[133,17,133,23,0],[135,9,135,10,0],[138,9,138,10,0],[140,13,140,14,0],[142,17,142,59,0],[143,13,143,14,0],[144,13,144,33,0],[145,13,145,14,0],[147,17,147,60,0],[150,17,150,23,0],[152,9,152,10,0],[155,9,155,10,0],[157,13,157,14,0],[159,17,159,40,0],[160,13,160,14,0],[161,13,161,33,0],[162,13,162,14,0],[164,17,164,60,0],[167,17,167,23,0],[169,9,169,10,0],[183,9,183,10,1],[184,13,184,144,1],[185,9,185,10,1]]);
+      highlightRanges([[20,20,20,60,0],[21,20,21,55,0],[25,9,26,167,0],[35,9,35,34,0],[36,9,36,10,0],[37,13,37,35,0],[38,9,38,10,0],[50,9,50,10,0],[52,13,52,14,0],[54,17,54,93,0],[55,13,55,14,0],[56,13,56,30,0],[57,13,57,14,0],[59,17,59,34,0],[61,17,61,86,0],[62,13,62,14,0],[63,9,63,10,0]]);
     </script>
   </body>
 </html>

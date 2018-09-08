@@ -2,68 +2,100 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\program.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\obj\debug\pages\workspacepage.g.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
+#pragma checksum &quot;..\..\..\Pages\WorkSpacePage.xaml&quot; &quot;{ff1816ec-aa5e-4d10-87f7-6f4963833460}&quot; &quot;20676C2E81EA211031FB389835C2AF48FA5018D9&quot;
+//------------------------------------------------------------------------------
+// &lt;auto-generated&gt;
+//     此代码由工具生成。
+//     运行时版本:4.0.30319.42000
+//
+//     对此文件的更改可能会导致不正确的行为，并且如果
+//     重新生成代码，这些更改将会丢失。
+// &lt;/auto-generated&gt;
+//------------------------------------------------------------------------------
+
+using CN_Presentation.ViewModel.Application;
+using CN_Presentation.ViewModel.Controls.Design;
+using CN_WPF;
 using System;
-using System.Threading.Tasks;
-using CN_Core;
-using CN_Repository;
-using CN_Service;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Ink;
+using System.Windows.Input;
+using System.Windows.Markup;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
+using System.Windows.Media.TextFormatting;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Windows.Shell;
 
-namespace CoffeeNewspaper_CLI
-{
-    class Program
-    {
+
+namespace CN_WPF {
+    
+    
+    /// &lt;summary&gt;
+    /// WorkSpacePage
+    /// &lt;/summary&gt;
+    public partial class WorkSpacePage : CN_WPF.BasePage&lt;CN_Presentation.ViewModel.Application.WorkSpaceViewModel&gt;, System.Windows.Markup.IComponentConnector {
+        
+        private bool _contentLoaded;
+        
         /// &lt;summary&gt;
-        ///     Application entry point
+        /// InitializeComponent
         /// &lt;/summary&gt;
-        /// &lt;param name=&quot;args&quot;&gt;Command line arguments&lt;/param&gt;
-        private static void Main(string[] args)
-        {
-            //Ioc Setup
-            IoC.Setup();
-            IoC.Kernel.BindCNDBContext();
-            IoC.Kernel.BindSqliteDataStore();
-            IoC.Kernel.BindServices();
-
-            // enable ctrl+c
-            Console.CancelKeyPress += (o, e) =&gt;
-            {
-                Environment.Exit(1);
-            };
-            BaseState currentStatue = new StartState();
-            currentStatue.Display(null);
-            while (true)
-            {
-                currentStatue.InitialCommandList();
-                currentStatue.DisplayCmdLine();
-                string input = Console.ReadLine();
-                if (&quot;exit&quot;.Equals(input))
-                {
-                    break;
-                }
-                ArgumentParser parser = new ArgumentParser(input);
-                var statue = currentStatue;
-                var task = Task.Run(async () =&gt; await statue.DoCommand(parser));
-                task.Wait();
-                var nextState =task.Result;
-                if (nextState != currentStatue)
-                {
-                    nextState.Display(currentStatue);
-                    currentStatue = nextState;
-                }
+        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
+        public void InitializeComponent() {
+            if (_contentLoaded) {
+                return;
             }
+            _contentLoaded = true;
+            System.Uri resourceLocater = new System.Uri(&quot;/CN_WPF;component/pages/workspacepage.xaml&quot;, System.UriKind.Relative);
+            
+            #line 1 &quot;..\..\..\Pages\WorkSpacePage.xaml&quot;
+            System.Windows.Application.LoadComponent(this, resourceLocater);
+            
+            #line default
+            #line hidden
+        }
+        
+        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Performance&quot;, &quot;CA1811:AvoidUncalledPrivateCode&quot;)]
+        internal System.Delegate _CreateDelegate(System.Type delegateType, string handler) {
+            return System.Delegate.CreateDelegate(delegateType, this, handler);
+        }
+        
+        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Design&quot;, &quot;CA1033:InterfaceMethodsShouldBeCallableByChildTypes&quot;)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Maintainability&quot;, &quot;CA1502:AvoidExcessiveComplexity&quot;)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Performance&quot;, &quot;CA1800:DoNotCastUnnecessarily&quot;)]
+        void System.Windows.Markup.IComponentConnector.Connect(int connectionId, object target) {
+            this._contentLoaded = true;
         }
     }
 }
 
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[16,9,16,10,0],[18,13,18,25,0],[19,13,19,42,0],[20,13,20,46,0],[21,13,21,39,0],[24,13,25,13,0],[25,13,25,14,0],[25,14,26,17,0],[26,17,26,37,0],[26,37,27,13,0],[27,13,27,14,0],[27,14,27,15,0],[24,13,27,15,0],[28,13,28,56,0],[29,13,29,41,0],[30,13,30,25,0],[31,13,31,14,0],[32,17,32,52,0],[33,17,33,48,0],[34,17,34,51,0],[35,17,35,42,0],[36,17,36,18,0],[37,21,37,27,0],[39,17,39,67,0],[40,17,40,44,0],[41,17,41,49,0],[41,49,41,79,0],[41,79,41,81,0],[41,17,41,81,0],[42,17,42,29,0],[43,17,43,44,0],[44,17,44,48,0],[45,17,45,18,0],[46,21,46,54,0],[47,21,47,47,0],[48,17,48,18,0],[49,13,49,14,0],[50,9,50,10,0]]);
+      highlightRanges([[52,43,52,44,0],[53,13,53,32,0],[53,33,53,34,0],[54,17,54,24,0],[56,13,56,35,0],[57,13,57,128,0]]);
     </script>
   </body>
 </html>

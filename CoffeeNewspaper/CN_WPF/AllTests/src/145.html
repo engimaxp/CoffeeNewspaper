@@ -2,31 +2,45 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\input\calendarselectcontrol.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\scrollviewexpander.xaml</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Windows.Controls;
+&lt;UserControl x:Class=&quot;CN_WPF.ScrollViewExpander&quot;
+             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
+             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
+             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+             xmlns:system=&quot;clr-namespace:System;assembly=mscorlib&quot;
+             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
+             mc:Ignorable=&quot;d&quot; 
+             d:DesignWidth=&quot;300&quot;&gt;
+    &lt;ScrollViewer
+            x:Name=&quot;ExpandScrollView&quot;
+            HorizontalScrollBarVisibility=&quot;Hidden&quot;
+            VerticalScrollBarVisibility=&quot;Hidden&quot;
+            HorizontalContentAlignment=&quot;Stretch&quot;
+            VerticalContentAlignment=&quot;Bottom&quot;&gt;
+        &lt;ScrollViewer.Tag&gt;
+            &lt;system:Double&gt;1.0&lt;/system:Double&gt;
+        &lt;/ScrollViewer.Tag&gt;
+        &lt;ScrollViewer.Height&gt;
+            &lt;MultiBinding Converter=&quot;{local:MultiplyConverter}&quot;&gt;
+                &lt;Binding Path=&quot;ActualHeight&quot; ElementName=&quot;ExpanderContent&quot; UpdateSourceTrigger=&quot;PropertyChanged&quot;/&gt;
+                &lt;Binding Path=&quot;Tag&quot; RelativeSource=&quot;{RelativeSource Self}&quot; /&gt;
+            &lt;/MultiBinding&gt;
+        &lt;/ScrollViewer.Height&gt;
+        &lt;ContentControl x:Name=&quot;ExpanderContent&quot;&gt;&lt;/ContentControl&gt;
 
-namespace CN_WPF
-{
-    /// &lt;summary&gt;
-    /// CalendarSelectControl.xaml 的交互逻辑
-    /// &lt;/summary&gt;
-    public partial class CalendarSelectControl : UserControl
-    {
-        public CalendarSelectControl()
-        {
-            InitializeComponent();
-        }
-    }
-}
+    &lt;/ScrollViewer&gt;
+&lt;/UserControl&gt;
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[10,9,10,39,0],[11,9,11,10,0],[12,13,12,35,0],[13,9,13,10,0]]);
+      highlightRanges([[1,13,1,77,0]]);
     </script>
   </body>
 </html>

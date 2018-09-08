@@ -2,42 +2,65 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\fontfamilytypetofontfamilyconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\mainwindow.xaml</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
+&lt;Window x:Class=&quot;CN_WPF.MainWindow&quot;
+        xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+        xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+        xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
+        xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
+        xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+        mc:Ignorable=&quot;d&quot;
+        Title=&quot;Coffee Newspapaer!&quot;
+        AllowsTransparency=&quot;False&quot;
+        Height=&quot;660&quot;
+        Width=&quot;780&quot;
+        MinWidth=&quot;780&quot;
+        MinHeight=&quot;660&quot;
 
-using System;
-using System.Globalization;
-using System.Windows.Media;
-using CN_Presentation;
-using CN_Presentation.Utilities;
+        Deactivated=&quot;AppWindow_Deactivated&quot;
+        Activated=&quot;AppWindow_Activated&quot;&gt;
+    &lt;Grid&gt;
+        &lt;Grid.RowDefinitions&gt;
+            &lt;!--Navagation Bar--&gt;
+            &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+            &lt;!--Page Content--&gt;
+            &lt;RowDefinition Height=&quot;*&quot; /&gt;
+            &lt;!--Status Bar--&gt;
+            &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+        &lt;/Grid.RowDefinitions&gt;
 
-namespace CN_WPF
-{
-    /// &lt;summary&gt;
-    /// A converter that takes in a &lt;see cref=&quot;FontFamilyType&quot;/&gt; and returns 
-    /// the fontfamily instance for that text element
-    /// &lt;/summary&gt;
-    public class FontFamilyTypeToFontFamilyConverter : BaseValueConverter&lt;FontFamilyTypeToFontFamilyConverter&gt;
-    {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return $&quot;pack://application;,,,/Fonts/#{((FontFamilyType)value).ToFontFamilyNameText()}&quot;;
-        }
+        &lt;!--Navagation Bar--&gt;
+        &lt;local:HeadMenuControl Grid.Row=&quot;0&quot; /&gt;
 
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-}
 
+        &lt;!--        &lt;Frame Grid.Row=&quot;1&quot; x:Name=&quot;MainFrame&quot; Content=&quot;{Binding ApplicationViewModel.CurrentPage,Source={x:Static local:ViewModelLocator.Instance},Converter={local:ApplicationPageValueConverter}}&quot;&gt;&lt;/Frame&gt;--&gt;
+        &lt;!--Page Content--&gt;
+        &lt;local:PageHost Grid.Row=&quot;1&quot;
+                        CurrentPage=&quot;{Binding ApplicationViewModel.CurrentPage,
+                                        Source={x:Static local:ViewModelLocator.Instance}}&quot;
+                        CurrentPageViewModel=&quot;{Binding ApplicationViewModel.CurrentPageViewModel,
+                                        Source={x:Static local:ViewModelLocator.Instance}}&quot; /&gt;
+
+        &lt;!--Status Bar--&gt;
+        &lt;local:StatusBarControl Grid.Row=&quot;2&quot;&gt;&lt;/local:StatusBarControl&gt;
+
+        &lt;!-- Dimmed overlay --&gt;
+        &lt;Border Grid.Row=&quot;0&quot; Grid.RowSpan=&quot;3&quot;
+                Panel.ZIndex=&quot;10&quot;
+                Opacity=&quot;0.3&quot;&gt;
+            &lt;Border Background=&quot;{StaticResource ForegroundVeryDarkBrush}&quot;
+                    local:AnimateFadeInProperty.Value=&quot;{Binding DimmableOverlayVisible}&quot; /&gt;
+        &lt;/Border&gt;
+    &lt;/Grid&gt;
+&lt;/Window&gt;
     </pre>
     <script type="text/javascript">
-      highlightRanges([[17,9,17,10,0],[18,13,18,102,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,49,0]]);
+      highlightRanges([[1,13,1,77,0],[15,13,15,110,0],[16,13,16,106,0]]);
     </script>
   </body>
 </html>

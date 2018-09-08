@@ -2,218 +2,48 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\input\calendarselectcontrol.xaml</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datacontext\datacontextforioc.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-&lt;UserControl x:Class=&quot;CN_WPF.CalendarSelectControl&quot;
-             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
-             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
-             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
-             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
-             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
-             xmlns:design=&quot;clr-namespace:CN_Presentation.Input.Design;assembly=CN_Presentation&quot;
-             mc:Ignorable=&quot;d&quot;
-             DataContext=&quot;{x:Static design:CalendarSelectControlDesignModel.Instance}&quot;&gt;
-    &lt;Grid&gt;
-        &lt;Grid.RowDefinitions&gt;
-            &lt;RowDefinition Height=&quot;*&quot; /&gt;
-            &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
-            &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
-        &lt;/Grid.RowDefinitions&gt;
-        &lt;Grid.ColumnDefinitions&gt;
-            &lt;ColumnDefinition Width=&quot;1*&quot; /&gt;
-            &lt;ColumnDefinition Width=&quot;1*&quot; /&gt;
-        &lt;/Grid.ColumnDefinitions&gt;
+using System.Threading.Tasks;
+using CN_Core;
+using Ninject;
+using Ninject.Extensions.NamedScope;
 
-        &lt;!--Left Calendar--&gt;
-        &lt;Border Grid.Row=&quot;0&quot;
-                Grid.Column=&quot;0&quot;
-                Grid.RowSpan=&quot;2&quot;
-                BorderBrush=&quot;{StaticResource WordBlueBrush}&quot;
-                BorderThickness=&quot;1&quot;
-                Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
-            &lt;Calendar
-                DisplayDate=&quot;{Binding DisplayDate,Mode=TwoWay}&quot;
-                x:Name=&quot;Calendar&quot;
-                IsTodayHighlighted=&quot;True&quot;
-                SelectionMode=&quot;SingleDate&quot;
-                FirstDayOfWeek=&quot;Monday&quot;
-                SelectedDate=&quot;{Binding SelectedDate,Mode=TwoWay}&quot;
-                Style=&quot;{StaticResource CalendarStyle}&quot;
-                CalendarItemStyle=&quot;{StaticResource CalendarItemStyle}&quot;
-                CalendarDayButtonStyle=&quot;{StaticResource CalendarDayButtonStyle}&quot;
-                CalendarButtonStyle=&quot;{StaticResource CalendarButtonStyle}&quot; /&gt;
-        &lt;/Border&gt;
-
-        &lt;!--Time Quick Selector--&gt;
-        &lt;Border Grid.Row=&quot;0&quot;
-                Grid.Column=&quot;1&quot;
-                Width=&quot;{Binding Path=ActualWidth, ElementName=Calendar}&quot;
-                Background=&quot;{StaticResource WordVeryVeryLightBlueBrush}&quot;&gt;
-            &lt;ItemsControl ItemsSource=&quot;{Binding TimeQSBtns}&quot;&gt;
-                &lt;ItemsControl.ItemsPanel&gt;
-                    &lt;ItemsPanelTemplate&gt;
-                        &lt;Grid&gt;
-                            &lt;Grid.RowDefinitions&gt;
-                                &lt;RowDefinition /&gt;
-                                &lt;RowDefinition /&gt;
-                                &lt;RowDefinition /&gt;
-                                &lt;RowDefinition /&gt;
-                                &lt;RowDefinition /&gt;
-                                &lt;RowDefinition /&gt;
-                            &lt;/Grid.RowDefinitions&gt;
-                            &lt;Grid.ColumnDefinitions&gt;
-                                &lt;ColumnDefinition /&gt;
-                                &lt;ColumnDefinition /&gt;
-                                &lt;ColumnDefinition /&gt;
-                                &lt;ColumnDefinition /&gt;
-                            &lt;/Grid.ColumnDefinitions&gt;
-                        &lt;/Grid&gt;
-                    &lt;/ItemsPanelTemplate&gt;
-                &lt;/ItemsControl.ItemsPanel&gt;
-                &lt;ItemsControl.ItemTemplate&gt;
-                    &lt;DataTemplate&gt;
-                        &lt;Button
-                            FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                            BorderThickness=&quot;1&quot;
-                            BorderBrush=&quot;{StaticResource WordBlueBrush}&quot;
-                            Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
-                            Foreground=&quot;{StaticResource WordBlueBrush}&quot;
-                            Content=&quot;{Binding Text}&quot; 
-                            Template=&quot;{DynamicResource TimeQuickSelectBtn}&quot;
-                            Command=&quot;{Binding ClickCommand}&quot;&gt;
-                            &lt;Button.Resources&gt;
-                                &lt;ControlTemplate x:Key=&quot;TimeQuickSelectBtn&quot; TargetType=&quot;{x:Type ButtonBase}&quot;&gt;
-                                    &lt;Border x:Name=&quot;border&quot;
-                            BorderBrush=&quot;{TemplateBinding BorderBrush}&quot;
-                            BorderThickness=&quot;{TemplateBinding BorderThickness}&quot;
-                            Background=&quot;{TemplateBinding Background}&quot;
-                            SnapsToDevicePixels=&quot;True&quot;&gt;
-                                        &lt;TextBlock x:Name=&quot;contentPresenter&quot;
-                                   Text=&quot;{TemplateBinding Content}&quot;
-                                   Focusable=&quot;False&quot;
-                                   FontFamily=&quot;{TemplateBinding FontFamily}&quot;
-                                   FontSize=&quot;{TemplateBinding FontSize}&quot;
-                                   HorizontalAlignment=&quot;{TemplateBinding HorizontalContentAlignment}&quot;
-                                   Margin=&quot;{TemplateBinding Padding}&quot;
-                                   SnapsToDevicePixels=&quot;{TemplateBinding SnapsToDevicePixels}&quot;
-                                   VerticalAlignment=&quot;{TemplateBinding VerticalContentAlignment}&quot; /&gt;
-                                    &lt;/Border&gt;
-                                    &lt;ControlTemplate.Triggers&gt;
-                                        &lt;Trigger Property=&quot;Button.IsDefaulted&quot; Value=&quot;True&quot;&gt;
-                                            &lt;Setter Property=&quot;BorderBrush&quot; TargetName=&quot;border&quot;
-                                    Value=&quot;{DynamicResource {x:Static SystemColors.HighlightBrushKey}}&quot; /&gt;
-                                        &lt;/Trigger&gt;
-                                        &lt;Trigger Property=&quot;IsMouseOver&quot; Value=&quot;True&quot;&gt;
-                                            &lt;Setter Property=&quot;Background&quot; TargetName=&quot;border&quot; Value=&quot;{StaticResource WordBlueBrush}&quot; /&gt;
-                                            &lt;Setter Property=&quot;Foreground&quot; TargetName=&quot;contentPresenter&quot;
-                                    Value=&quot;{StaticResource ForegroundVeryLightBrush}&quot; /&gt;
-                                        &lt;/Trigger&gt;
-                                        &lt;Trigger Property=&quot;IsPressed&quot; Value=&quot;True&quot;&gt;
-                                            &lt;Setter Property=&quot;Background&quot; TargetName=&quot;border&quot; Value=&quot;{StaticResource WordBlueBrush}&quot; /&gt;
-                                            &lt;Setter Property=&quot;Foreground&quot; TargetName=&quot;contentPresenter&quot;
-                                    Value=&quot;{StaticResource ForegroundVeryLightBrush}&quot; /&gt;
-                                        &lt;/Trigger&gt;
-                                        &lt;Trigger Property=&quot;ToggleButton.IsChecked&quot; Value=&quot;True&quot;&gt;
-                                            &lt;Setter Property=&quot;Background&quot; TargetName=&quot;border&quot; Value=&quot;{StaticResource WordBlueBrush}&quot; /&gt;
-                                            &lt;Setter Property=&quot;Foreground&quot; TargetName=&quot;contentPresenter&quot;
-                                    Value=&quot;{StaticResource ForegroundVeryLightBrush}&quot; /&gt;
-                                        &lt;/Trigger&gt;
-                                    &lt;/ControlTemplate.Triggers&gt;
-                                &lt;/ControlTemplate&gt;
-                            &lt;/Button.Resources&gt;
-                        &lt;/Button&gt;
-                    &lt;/DataTemplate&gt;
-                &lt;/ItemsControl.ItemTemplate&gt;
-                &lt;ItemsControl.ItemContainerStyle&gt;
-                    &lt;Style&gt;
-                        &lt;Setter Property=&quot;Grid.Column&quot; Value=&quot;{Binding ColNum}&quot; /&gt;
-                        &lt;Setter Property=&quot;Grid.Row&quot; Value=&quot;{Binding RowNum}&quot; /&gt;
-                    &lt;/Style&gt;
-                &lt;/ItemsControl.ItemContainerStyle&gt;
-            &lt;/ItemsControl&gt;
-        &lt;/Border&gt;
-
-        &lt;!--Text Ediable Time Displayer--&gt;
-        &lt;Border Grid.Row=&quot;1&quot;
-                Grid.Column=&quot;1&quot;
-                BorderBrush=&quot;{StaticResource WordBlueBrush}&quot;
-                BorderThickness=&quot;1&quot;
-                Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
-            &lt;StackPanel Orientation=&quot;Horizontal&quot;
-                        HorizontalAlignment=&quot;Right&quot;
-                        VerticalAlignment=&quot;Center&quot;&gt;
-                &lt;!--Date hint--&gt;
-                &lt;TextBlock Text=&quot;{Binding Date}&quot;
-                           FontFamily=&quot;Microsoft Yahei&quot;
-                           FontWeight=&quot;Bold&quot;
-                           Margin=&quot;0 0 10 0&quot;
-                           Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot;
-                           FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                           VerticalAlignment=&quot;Center&quot;&gt;&lt;/TextBlock&gt;
-                &lt;!--Time hint--&gt;
-                &lt;TextBox Text=&quot;{Binding SelectedTimeHourTxt,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}&quot;
-                         FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                         FontFamily=&quot;Microsoft Yahei&quot;
-                         FontWeight=&quot;Bold&quot;
-                         Padding=&quot;0&quot;
-                         Margin=&quot;0 2 0 0&quot;
-                         Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot;
-                         VerticalAlignment=&quot;Center&quot;
-                         local:TextBoxNumericalAllowOnlyAttachedProperties.Value=&quot;True&quot;&gt;
-                    &lt;TextBox.InputBindings&gt;
-                        &lt;KeyBinding Key=&quot;Up&quot; Command=&quot;{Binding HourCtlArrowUp}&quot;&gt;&lt;/KeyBinding&gt;
-                        &lt;KeyBinding Key=&quot;Down&quot; Command=&quot;{Binding HourCtlArrowDown}&quot;&gt;&lt;/KeyBinding&gt;
-                    &lt;/TextBox.InputBindings&gt;
-                &lt;/TextBox&gt;
-                &lt;TextBlock Text=&quot;:&quot;
-                           FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                           FontFamily=&quot;Microsoft Yahei&quot;
-                           FontWeight=&quot;Bold&quot;
-                           VerticalAlignment=&quot;Center&quot;
-                           Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot;
-                           &gt;&lt;/TextBlock&gt;
-                &lt;TextBox Text=&quot;{Binding SelectedTimeMinuteTxt,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}&quot;
-                         FontSize=&quot;{StaticResource FontSizeRegular}&quot;
-                         FontFamily=&quot;Microsoft Yahei&quot;
-                         FontWeight=&quot;Bold&quot;
-                         Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot;
-                         Padding=&quot;0&quot;
-                         Margin=&quot;0 2 2 0&quot;
-                         VerticalAlignment=&quot;Center&quot;
-                         local:TextBoxNumericalAllowOnlyAttachedProperties.Value=&quot;True&quot;&gt;
-                    &lt;TextBox.InputBindings&gt;
-                        &lt;KeyBinding Key=&quot;Up&quot; Command=&quot;{Binding MinuteCtlArrowUp}&quot;&gt;&lt;/KeyBinding&gt;
-                        &lt;KeyBinding Key=&quot;Down&quot; Command=&quot;{Binding MinuteCtlArrowDown}&quot;&gt;&lt;/KeyBinding&gt;
-                    &lt;/TextBox.InputBindings&gt;
-                &lt;/TextBox&gt;
-            &lt;/StackPanel&gt;
-        &lt;/Border&gt;
-
-        &lt;!--Go to today btn--&gt;
-        &lt;Button
-            Grid.Row=&quot;2&quot;
-            Grid.Column=&quot;0&quot;
-            Content=&quot;Go to Today&quot;
-            Command=&quot;{Binding GoToTodayCommand}&quot;
-            Style=&quot;{StaticResource InputClearButton}&quot;&gt;
-        &lt;/Button&gt;
-
-        &lt;!--Confirm btn--&gt;
-        &lt;Button Grid.Row=&quot;2&quot;
-                Grid.Column=&quot;1&quot;
-                Content=&quot;Confirm&quot;
-                Command=&quot;{Binding ConfirmCommand}&quot;
-                Style=&quot;{StaticResource InputConfirmButton}&quot;&gt;
-        &lt;/Button&gt;
-    &lt;/Grid&gt;
-&lt;/UserControl&gt;
+namespace CN_Repository
+{
+    /// &lt;summary&gt;
+    ///     Extension method to inject CNDBContext to Container
+    /// &lt;/summary&gt;
+    public static class DataContextForIoC
+    {
+        /// &lt;summary&gt;
+        ///     Bind the DbContext
+        ///     shall do this at the beginning of app start
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;Kernel&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;InMemoryMode&quot;&gt;true if used in unittest&lt;/param&gt;
+        public static void BindCNDBContext(this IKernel Kernel, bool InMemoryMode = false)
+        {
+            if (Kernel == null) return;
+            if (InMemoryMode)
+            {
+                Kernel.Bind&lt;CNDbContext&gt;().ToConstant(CNDbContext.GetMemorySqlDatabase()).InNamedScope(CNConstants.NinjectNamedScopeForService);
+            }
+            else
+            {
+                Kernel.Bind&lt;CNDbContext&gt;().ToMethod(context =&gt; CNDbContext.GetFileSqlDatabase()).InNamedScope(CNConstants.NinjectNamedScopeForService);
+            }
+        }
+        
+    }
+}
     </pre>
     <script type="text/javascript">
-      highlightRanges([[1,13,1,77,0]]);
+      highlightRanges([[20,9,20,10,0],[21,13,21,32,0],[21,33,21,40,0],[22,13,22,30,0],[23,13,23,14,0],[24,17,24,145,0],[25,13,25,14,0],[27,13,27,14,0],[28,17,28,64,0],[28,64,28,96,0],[28,96,28,152,0],[28,17,28,152,0],[29,13,29,14,0],[30,9,30,10,0]]);
     </script>
   </body>
 </html>

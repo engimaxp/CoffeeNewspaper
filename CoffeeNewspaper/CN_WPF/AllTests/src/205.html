@@ -2,45 +2,91 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\scrollviewexpander.xaml</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\ioc\ioc.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-&lt;UserControl x:Class=&quot;CN_WPF.ScrollViewExpander&quot;
-             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
-             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
-             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
-             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot; 
-             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
-             xmlns:system=&quot;clr-namespace:System;assembly=mscorlib&quot;
-             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
-             mc:Ignorable=&quot;d&quot; 
-             d:DesignWidth=&quot;300&quot;&gt;
-    &lt;ScrollViewer
-            x:Name=&quot;ExpandScrollView&quot;
-            HorizontalScrollBarVisibility=&quot;Hidden&quot;
-            VerticalScrollBarVisibility=&quot;Hidden&quot;
-            HorizontalContentAlignment=&quot;Stretch&quot;
-            VerticalContentAlignment=&quot;Bottom&quot;&gt;
-        &lt;ScrollViewer.Tag&gt;
-            &lt;system:Double&gt;1.0&lt;/system:Double&gt;
-        &lt;/ScrollViewer.Tag&gt;
-        &lt;ScrollViewer.Height&gt;
-            &lt;MultiBinding Converter=&quot;{local:MultiplyConverter}&quot;&gt;
-                &lt;Binding Path=&quot;ActualHeight&quot; ElementName=&quot;ExpanderContent&quot; UpdateSourceTrigger=&quot;PropertyChanged&quot;/&gt;
-                &lt;Binding Path=&quot;Tag&quot; RelativeSource=&quot;{RelativeSource Self}&quot; /&gt;
-            &lt;/MultiBinding&gt;
-        &lt;/ScrollViewer.Height&gt;
-        &lt;ContentControl x:Name=&quot;ExpanderContent&quot;&gt;&lt;/ContentControl&gt;
+using CN_Core.Interfaces;
+using CN_Core.Logging;
+using Ninject;
 
-    &lt;/ScrollViewer&gt;
-&lt;/UserControl&gt;
+namespace CN_Core
+{
+    /// &lt;summary&gt;
+    ///     The IoC container for our application
+    /// &lt;/summary&gt;
+    public static class IoC
+    {
+        #region Public Properties
 
+        /// &lt;summary&gt;
+        ///     The kernel for our IoC container
+        /// &lt;/summary&gt;
+        public static IKernel Kernel { get; } = new StandardKernel();
+
+        /// &lt;summary&gt;
+        ///     A shortcut to access the &lt;see cref=&quot;ILogFactory&quot; /&gt;
+        /// &lt;/summary&gt;
+        public static ILogFactory Logger =&gt; Get&lt;ILogFactory&gt;();
+
+        /// &lt;summary&gt;
+        ///     A shortcut to access the &lt;see cref=&quot;IFileManager&quot; /&gt;
+        /// &lt;/summary&gt;
+        public static IFileManager File =&gt; Get&lt;IFileManager&gt;();
+
+        /// &lt;summary&gt;
+        ///     A shortcut to access the &lt;see cref=&quot;ITaskManager&quot; /&gt;
+        /// &lt;/summary&gt;
+        public static ITaskManager Task =&gt; Get&lt;ITaskManager&gt;();
+
+        #endregion
+
+        /// &lt;summary&gt;
+        ///     Get&#39;s a service from the IoC, of the specified type
+        /// &lt;/summary&gt;
+        /// &lt;typeparam name=&quot;T&quot;&gt;The type to get&lt;/typeparam&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static T Get&lt;T&gt;()
+        {
+            return Kernel.Get&lt;T&gt;();
+        }
+
+        #region Construction
+
+        /// &lt;summary&gt;
+        ///     Sets up the IoC container, binds all information required and is ready for use
+        ///     NOTE: Must be called as soon as your application starts up to ensure all
+        ///     services can be found
+        /// &lt;/summary&gt;
+        public static void Setup()
+        {
+            // Bind all required view models
+            if (!IsSetuped)
+            {
+                BindInfrastructure();
+            }
+        }
+
+        private static bool IsSetuped { get; set; }
+        /// &lt;summary&gt;
+        ///     Binds all singleton view models
+        /// &lt;/summary&gt;
+        private static void BindInfrastructure()
+        {
+            Kernel.Bind&lt;ILogFactory&gt;().ToConstant(new BaseLogFactory());
+            Kernel.Bind&lt;ITaskManager&gt;().ToConstant(new TaskManager());
+            Kernel.Bind&lt;IFileManager&gt;().ToConstant(new FileManager());
+            IsSetuped = true;
+        }
+
+        #endregion
+    }
+}
     </pre>
     <script type="text/javascript">
-      highlightRanges([[1,13,1,77,0]]);
+      highlightRanges([[17,40,17,44,1],[17,49,17,69,1],[22,45,22,63,1],[27,44,27,63,0],[32,44,32,63,1],[42,9,42,10,1],[43,13,43,36,1],[44,9,44,10,1],[54,9,54,10,1],[56,13,56,28,1],[57,13,57,14,1],[58,17,58,38,1],[59,13,59,14,1],[60,9,60,10,1],[62,41,62,45,1],[62,46,62,50,1],[67,9,67,10,1],[68,13,68,73,1],[69,13,69,71,1],[70,13,70,71,1],[71,13,71,30,1],[72,9,72,10,1]]);
     </script>
   </body>
 </html>

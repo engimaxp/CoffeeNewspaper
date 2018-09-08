@@ -2,63 +2,60 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\taskurgencytobackgroundcolorconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\domainmodel\cntasktagger.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-
 using System;
-using System.Globalization;
-using System.Windows.Media;
-using CN_Presentation;
-using CN_Presentation.Utilities;
+using System.Collections.Generic;
 
-namespace CN_WPF
+namespace CN_Core
 {
     /// &lt;summary&gt;
-    /// A converter that takes in a &lt;see cref=&quot;TaskUrgency&quot;/&gt; and returns 
-    /// the ColorBrush for that Indicator
+    ///     Relation between tag and task is many-to-one
     /// &lt;/summary&gt;
-    public class TaskUrgencyToBackGroundColorConverter : BaseValueConverter&lt;TaskUrgencyToBackGroundColorConverter&gt;
+    public class CNTaskTagger
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            UserColorType userColor = UserColorType.WordLightBlue;
-            if (value != null)
-                switch ((TaskUrgency) value)
-                {
-                    case TaskUrgency.NotUrgent:
-                    {
-                        userColor = UserColorType.WordGreen;
-                        break;
-                    }
-                    case TaskUrgency.Urgent:
-                    {
-                        userColor = UserColorType.WordOrange;
-                        break;
-                    }
-                    case TaskUrgency.VeryUrgent:
-                    {
-                        userColor = UserColorType.WordRed;
-                        break;
-                    }
-                }
+        
+        #region Constructor
 
-            return (SolidColorBrush)(new BrushConverter().ConvertFrom($&quot;#{userColor.ToColorText()}&quot;));
+        public CNTaskTagger()
+        {
+            
+        }
+        #endregion
+
+        #region Formatting Implement
+
+        public override string ToString()
+        {
+            return $&quot;{nameof(TagId)}: {TagId}, {nameof(TaskId)}: {TaskId}&quot;;
         }
 
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
+        
+
+        #region Public Properties
+
+        /// &lt;summary&gt;
+        ///     Id of this relation
+        /// &lt;/summary&gt;
+        public string TaskTaggerId { get; set; }
+
+        public string TagId { get; set; }
+        public virtual CNTag Tag { get; set; }
+        public int TaskId { get; set; }
+        public virtual CNTask Task { get; set; }
+
+        #endregion
+        
     }
 }
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[17,9,17,10,0],[18,13,18,67,0],[19,13,19,31,0],[20,17,20,45,0],[23,21,23,22,0],[24,25,24,61,0],[25,25,25,31,0],[28,21,28,22,0],[29,25,29,62,0],[30,25,30,31,0],[33,21,33,22,0],[34,25,34,59,0],[35,25,35,31,0],[39,13,39,103,0],[40,9,40,10,0],[43,9,43,10,0],[44,13,44,49,0]]);
+      highlightRanges([[14,9,14,30,1],[15,9,15,10,1],[17,9,17,10,1],[23,9,23,10,0],[24,13,24,76,0],[25,9,25,10,0],[35,38,35,42,1],[35,43,35,47,1],[37,31,37,35,1],[37,36,37,40,1],[38,36,38,40,1],[38,41,38,45,1],[39,29,39,33,1],[39,34,39,38,1],[40,38,40,42,0],[40,43,40,47,1]]);
     </script>
   </body>
 </html>

@@ -2,47 +2,35 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\cnexceptions\timesliceinterveneexception.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\pages\settingspage.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Runtime.Serialization;
+using CN_Presentation.ViewModel.Application;
 
-namespace CN_Core
+namespace CN_WPF
 {
     /// &lt;summary&gt;
-    ///     This &lt;see cref=&quot;CNTimeSlice&quot; /&gt; Intervene with another 
+    /// SettingsPage.xaml 的交互逻辑
     /// &lt;/summary&gt;
-    [Serializable]
-    public class TimeSliceInterveneException : Exception
+    public partial class SettingsPage : BasePage&lt;SettingsViewModel&gt;
     {
-        #region Construction
-
-        public TimeSliceInterveneException()
+        public SettingsPage()
         {
+            InitializeComponent();
         }
-
-        public TimeSliceInterveneException(string message) : base(message)
+        public SettingsPage(SettingsViewModel specificViewModel) : base(specificViewModel)
         {
+            InitializeComponent();
         }
-
-        public TimeSliceInterveneException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        protected TimeSliceInterveneException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
-
-        #endregion
     }
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[14,9,14,45,1],[15,9,15,10,1],[16,9,16,10,1],[18,62,18,75,0],[19,9,19,10,0],[20,9,20,10,0],[22,88,22,117,0],[23,9,23,10,0],[24,9,24,10,0],[26,99,26,118,0],[27,9,27,10,0],[28,9,28,10,0]]);
+      highlightRanges([[10,9,10,30,0],[11,9,11,10,0],[12,13,12,35,0],[13,9,13,10,0],[14,68,14,91,0],[15,9,15,10,0],[16,13,16,35,0],[17,9,17,10,0]]);
     </script>
   </body>
 </html>

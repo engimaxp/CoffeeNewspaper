@@ -113,6 +113,17 @@ namespace CN_Service
             return await unitOfWork.Commit();
         }
 
+        public async Task<bool> ClearAllCompleteTasks()
+        {
+            var tasks = await taskDataStore.GetAllTasksBySpecification(new UndeletedCompleteTopLevelTaskSpecification());
+            if (tasks.Count == 0) return true;
+            foreach (var cnTask in tasks)
+            {
+                await DeleteTaskWithoutCommit(cnTask.TaskId,true);
+            }
+            return await unitOfWork.Commit();
+        }
+
         private async Task RecoverATaskWithoutCommit(int taskId)
         {
                 var targetTask = await taskDataStore.GetTask(taskId);

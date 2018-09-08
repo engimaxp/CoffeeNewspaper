@@ -2,64 +2,99 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datacontext\unitofwork.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\command\helpcommand.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
+using System.Drawing;
 using System.Threading.Tasks;
-using CN_Core;
-using CN_Core.Interfaces;
+using CoffeeNewspaper_CLI.ConsoleTables;
+using Colorful;
 
-namespace CN_Repository
+namespace CoffeeNewspaper_CLI
 {
-
-    public class UnitOfWork : IUnitOfWork
+    public class HelpCommand : BaseCommand
     {
-        private readonly CNDbContext _databaseContext;
-        private bool _disposed = false;
-
-        public UnitOfWork(CNDbContext databaseContext)
+        public HelpCommand(BaseState state) : base(state)
         {
-            _databaseContext = databaseContext;
+            Name = &quot;help&quot;;
         }
 
-        public async Task&lt;bool&gt; Commit()
+        public override async Task&lt;BaseState&gt; Excute(ArgumentParser input)
         {
-            if (_disposed)
+            await Task.Delay(1);
+            var table = new ConsoleTable(&quot;Command&quot;, &quot;Param&quot;, &quot;Description&quot;);
+
+            if (State is TaskEditState)
             {
-                throw new ObjectDisposedException(this.GetType().FullName);
+                //edit
+                table
+                    .AddRow(&quot;edit&quot;, &quot;-c&quot;, &quot;edit content&quot;)
+                    .AddRow(&quot;&quot;, &quot;-d&quot;, &quot;edit deadline&quot;)
+                    .AddRow(&quot;&quot;, &quot;-e&quot;, &quot;edit estimatedDuration&quot;)
+                    .AddRow(&quot;&quot;, &quot;--parent&quot;, &quot;edit parentTask&quot;)
+                    .AddRow(&quot;&quot;, &quot;-p&quot;, &quot;edit priority level 1(least) 2 3 4 5(most)&quot;)
+                    .AddRow(&quot;&quot;, &quot;-u&quot;, &quot;edit urgency level 1(least) 2 3 4 5(most)&quot;);
+                //tag
+                table
+                    .AddRow(&quot;tag&quot;, &quot;--add&quot;, &quot;add tag&quot;)
+                    .AddRow(&quot;&quot;, &quot;--remove&quot;, &quot;remove tag&quot;);
+                //TODO memos
+                table
+                    .AddRow(&quot;memo&quot;, &quot;-l&quot;, &quot;show all global memos&quot;)
+                    .AddRow(&quot;&quot;, &quot;--filter&quot;, &quot;set filters&quot;)
+                    .AddRow(&quot;&quot;, &quot;--add&quot;, &quot;jump to add memo view&quot;)
+                    .AddRow(&quot;&quot;, &quot;--delete&quot;, &quot;delete a memo&quot;)
+                    .AddRow(&quot;&quot;, &quot;--more&quot;, &quot;show memo detail view&quot;);
+                //TODO find
+                table.AddRow(&quot;find&quot;, &quot;&quot;, &quot;find all tasks with content&quot;);
+
+                //TODO pretask
+                table.AddRow(&quot;pre&quot;, &quot;--add&quot;, &quot;add pretask by ids&quot;).AddRow(&quot;&quot;, &quot;--remove&quot;, &quot;remove pretask by ids&quot;);
+                //save
+                table
+                    .AddRow(&quot;save&quot;, &quot;&quot;, &quot;save and exit&quot;);
+            }
+            else
+            {
+                //tasks
+                table
+                    .AddRow(&quot;task&quot;, &quot;-l&quot;, &quot;show all tasks&quot;)
+                    .AddRow(&quot;&quot;, &quot;--add&quot;, &quot;jump to add task view&quot;)
+                    .AddRow(&quot;&quot;, &quot;--delete&quot;, &quot;delete a task (none-force mode)&quot;)
+                    .AddRow(&quot;&quot;, &quot;--forcedelete&quot;, &quot;delete a task (force mode)&quot;)
+                    .AddRow(&quot;&quot;, &quot;--more&quot;, &quot;show tasks detail view&quot;)
+                    .AddRow(&quot;&quot;, &quot;--start&quot;, &quot;start a task&quot;)
+                    .AddRow(&quot;&quot;, &quot;--stop&quot;, &quot;stop a task&quot;)
+                    .AddRow(&quot;&quot;, &quot;--end&quot;, &quot;finish a task&quot;);
+                //divider
+                table.AddRow(&quot;&quot;, &quot;&quot;, &quot;&quot;);
+                //TODO memos
+                table
+                    .AddRow(&quot;memo&quot;, &quot;-l&quot;, &quot;show all global memos&quot;)
+                    .AddRow(&quot;&quot;, &quot;--filter&quot;, &quot;set filters&quot;)
+                    .AddRow(&quot;&quot;, &quot;--add&quot;, &quot;jump to add memo view&quot;)
+                    .AddRow(&quot;&quot;, &quot;--delete&quot;, &quot;delete a memo&quot;)
+                    .AddRow(&quot;&quot;, &quot;--more&quot;, &quot;show memo detail view&quot;);
+
             }
 
-            return await IoC.Task.Run(
-                  async () =&gt; await _databaseContext.SaveChangesAsync()&gt;0,false);
+            table.AddRow(&quot;&quot;, &quot;&quot;, &quot;&quot;);
+            //utils
+            table.AddRow(&quot;help&quot;, &quot;&quot;, &quot;get avalible commands of current state&quot;);
+            table.AddRow(&quot;back&quot;, &quot;&quot;, &quot;back to last view&quot;);
 
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-
-            if (disposing)
-            {
-                _databaseContext?.Dispose();
-            }
-
-            _disposed = true;
+            table.WriteAlternateColorTable(Color.Yellow, Color.LawnGreen);
+            Console.WriteLine();
+            return State;
         }
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[12,9,12,40,1],[14,9,14,55,1],[15,9,15,10,1],[16,13,16,48,1],[17,9,17,10,1],[20,9,20,10,1],[21,13,21,27,1],[22,13,22,14,0],[23,17,23,76,0],[26,13,27,31,1],[27,31,27,74,1],[27,74,27,82,1],[26,13,27,82,1],[29,9,29,10,1],[32,9,32,10,1],[33,13,33,27,1],[34,13,34,39,1],[35,9,35,10,1],[38,9,38,10,1],[39,13,39,27,1],[39,28,39,35,0],[41,13,41,27,1],[42,13,42,14,1],[43,17,43,45,1],[44,13,44,14,1],[46,13,46,30,1],[47,9,47,10,1]]);
+      highlightRanges([[10,47,10,58,0],[11,9,11,10,0],[12,13,12,27,0],[13,9,13,10,0],[16,9,16,10,0],[17,13,17,33,0],[18,13,18,77,0],[20,13,20,40,0],[21,13,21,14,0],[23,17,29,84,0],[31,17,33,59,0],[35,17,40,68,0],[42,17,42,73,0],[45,17,45,116,0],[47,17,48,58,0],[49,13,49,14,0],[51,13,51,14,0],[53,17,61,59,0],[63,17,63,42,0],[65,17,70,68,0],[72,13,72,14,0],[74,13,74,38,0],[76,13,76,80,0],[77,13,77,59,0],[79,13,79,75,0],[80,13,80,33,0],[81,13,81,26,0],[82,9,82,10,0]]);
     </script>
   </body>
 </html>

@@ -2,149 +2,176 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\dialogs\basedialogusercontrol.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\tasklistcontrol.xaml</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.ComponentModel;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using CN_Presentation.ViewModel.Base;
-using CN_Presentation.ViewModel.Dialog;
+&lt;UserControl x:Class=&quot;CN_WPF.TaskListControl&quot;
+             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
+             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
+             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
+             mc:Ignorable=&quot;d&quot;
+             d:DesignHeight=&quot;450&quot; 
+             Width=&quot;300&quot;&gt;
+    &lt;Border Padding=&quot;1 5 0 0&quot; 
+            Background=&quot;{StaticResource WordVeryVeryLightBlueBrush}&quot;&gt;
+        &lt;Grid d:DataContext=&quot;{x:Static design:TaskListDesignModel.Instance}&quot;&gt;
+            &lt;Grid.RowDefinitions&gt;
+                &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+                &lt;RowDefinition Height=&quot;*&quot; /&gt;
+            &lt;/Grid.RowDefinitions&gt;
+            &lt;!-- search bar\filter bar\sort bar --&gt;
+            &lt;Grid Grid.Row=&quot;0&quot;&gt;
+                &lt;Grid.RowDefinitions&gt;
+                    &lt;RowDefinition Height=&quot;40&quot; /&gt;
+                    &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+                &lt;/Grid.RowDefinitions&gt;
+                &lt;!-- Search Icon --&gt;
+                &lt;Grid Grid.Row=&quot;0&quot;&gt;
+                    &lt;Grid.ColumnDefinitions&gt;
+                        &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                        &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                    &lt;/Grid.ColumnDefinitions&gt;
+                    &lt;Border 
+                        Grid.Column=&quot;0&quot;
+                            Margin=&quot;5&quot;
+                            BorderBrush=&quot;{StaticResource ForegroundLightDarkBrush}&quot;
+                            BorderThickness=&quot;2&quot;
+                            CornerRadius=&quot;10&quot;
+                            Background=&quot;{StaticResource ForegroundVeryLightBrush}&quot;&gt;
+                        &lt;Grid&gt;
+                            &lt;Grid.ColumnDefinitions&gt;
+                                &lt;ColumnDefinition Width=&quot;Auto&quot;&gt;&lt;/ColumnDefinition&gt;
+                                &lt;ColumnDefinition Width=&quot;*&quot;&gt;&lt;/ColumnDefinition&gt;
+                            &lt;/Grid.ColumnDefinitions&gt;
 
-namespace CN_WPF
-{
-    /// &lt;summary&gt;
-    /// The base class for any content that is being used inside of a &lt;see cref=&quot;DialogWindow&quot;/&gt;
-    /// &lt;/summary&gt;
-    public class BaseDialogUserControl : UserControl
-    {
-        #region Private Members
+                            &lt;TextBlock
+                                Foreground=&quot;{StaticResource ForegroundLightDarkBrush}&quot;
+                                VerticalAlignment=&quot;Center&quot;
+                                HorizontalAlignment=&quot;Left&quot;
+                                Grid.Column=&quot;0&quot;
+                                Margin=&quot;5 1 5 0&quot;
+                                FontSize=&quot;{StaticResource FontSizeLarge}&quot;
+                                FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                Text=&quot;{StaticResource FontAwesomeSearchIcon}&quot;
+                                Width=&quot;{Binding ActualHeight, RelativeSource={RelativeSource Self}}&quot;
+                            /&gt;
+                            &lt;TextBox 
+                                x:Name=&quot;SearchBox&quot;
+                                Grid.Column=&quot;1&quot;
+                                Style=&quot;{StaticResource SearchBox}&quot;
+                                Padding=&quot;0&quot;
+                                     Margin=&quot;0 0 10 0&quot; 
+                                     Text=&quot;{Binding SearchInput,UpdateSourceTrigger=PropertyChanged}&quot; 
+                                     FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                                     VerticalAlignment=&quot;Center&quot;&gt;
+                                &lt;TextBox.InputBindings&gt;
+                                    &lt;KeyBinding Key=&quot;Return&quot; Command=&quot;{Binding SearchCommand}&quot;&gt;&lt;/KeyBinding&gt;
+                                    &lt;KeyBinding Key=&quot;Up&quot; Command=&quot;{Binding AutoCompleteBoxUpCommand}&quot;&gt;&lt;/KeyBinding&gt;
+                                    &lt;KeyBinding Key=&quot;Down&quot; Command=&quot;{Binding AutoCompleteBoxDownCommand}&quot;&gt;&lt;/KeyBinding&gt;
+                                &lt;/TextBox.InputBindings&gt;
+                            &lt;/TextBox&gt;
+                        &lt;/Grid&gt;
+                    &lt;/Border&gt;
+                    &lt;Popup 
+                        x:Name=&quot;SearchTagAutoCompletePopup&quot;
+                        Grid.Column=&quot;0&quot;
+                        Grid.ColumnSpan=&quot;2&quot;
+                        Width=&quot;{Binding ElementName=SearchBox,Path=ActualWidth}&quot;
+                        StaysOpen=&quot;True&quot;
+                        AllowsTransparency=&quot;True&quot;
+                        Placement=&quot;Bottom&quot;
+                        IsOpen=&quot;{Binding IsSearchAutoCompletePanelPopup}&quot;
+                        PlacementTarget=&quot;{Binding ElementName=SearchBox}&quot;&gt;
+                        &lt;ListBox ItemsSource=&quot;{Binding SearchAutoCompleteOptions}&quot;
+                                 local:MonitorListBoxSelectProperty.Value=&quot;True&quot;
+                                 SelectedItem=&quot;{Binding SelectedSearchAutoComplete,Mode=TwoWay}&quot;
+                                 ItemContainerStyle=&quot;{StaticResource TimePickerListBoxItemStyle}&quot; /&gt;
+                    &lt;/Popup&gt;
+                    &lt;StackPanel Orientation=&quot;Horizontal&quot;
+                                Grid.Column=&quot;1&quot;&gt;
+                        &lt;!-- Sort Icon --&gt;
+                        &lt;local:BubbleSelectControl DataContext=&quot;{Binding SortSelectModel}&quot;&gt;&lt;/local:BubbleSelectControl&gt;
 
-        /// &lt;summary&gt;
-        /// The dialog window we will be contained within
-        /// &lt;/summary&gt;
-        private readonly DialogWindow mDialogWindow;
+                        &lt;!-- Filter Icon --&gt;
+                        &lt;local:BubbleSelectControl DataContext=&quot;{Binding FilterSelectModel}&quot;&gt;&lt;/local:BubbleSelectControl&gt;
 
-        #endregion
+                        &lt;!-- More Icon --&gt;
+                        &lt;local:BubbleSelectControl
+                            Margin=&quot;5 0&quot;
+                            DataContext=&quot;{Binding MoreSelectModel}&quot;&gt;&lt;/local:BubbleSelectControl&gt;
 
-        #region Public Commands
+                    &lt;/StackPanel&gt;
+                &lt;/Grid&gt;
+                &lt;!-- Search Activated Tags --&gt;
 
-        /// &lt;summary&gt;
-        /// Closes this dialog
-        /// &lt;/summary&gt;
-        public ICommand CloseCommand { get; private set; }
+                &lt;ItemsControl 
+                    Margin=&quot;5 -5 5 10&quot;
+                    Grid.Row=&quot;1&quot;
+                    ItemsSource=&quot;{Binding ActivatedSearchTxts}&quot;&gt;
+                    &lt;ItemsControl.ItemsPanel&gt;
+                        &lt;ItemsPanelTemplate&gt;
+                            &lt;WrapPanel Orientation=&quot;Horizontal&quot; /&gt;
+                        &lt;/ItemsPanelTemplate&gt;
+                    &lt;/ItemsControl.ItemsPanel&gt;
+                    &lt;ItemsControl.ItemTemplate&gt;
+                        &lt;DataTemplate&gt;
+                            &lt;Button
+                                Foreground=&quot;{StaticResource ForegroundLightBrush}&quot;
+                                Style=&quot;{StaticResource SearchCancelButton}&quot; 
+                                Content=&quot;{Binding Text}&quot;
+                                Command=&quot;{Binding DeleteSearchCommand}&quot;/&gt;
+                        &lt;/DataTemplate&gt;
+                    &lt;/ItemsControl.ItemTemplate&gt;
+                &lt;/ItemsControl&gt;
+            &lt;/Grid&gt;
+            &lt;!-- task list container --&gt;
+            &lt;ScrollViewer 
+                x:Name=&quot;ScrollViewer&quot;
+                Grid.Row=&quot;1&quot;
+                local:MouseWheelEventBubbleUpAttachedProperty.Value=&quot;True&quot;
+                          CanContentScroll=&quot;False&quot;
+                          Background=&quot;{StaticResource ForegroundMainBrush}&quot;
+                          VerticalScrollBarVisibility=&quot;Auto&quot;&gt;
+                &lt;StackPanel Orientation=&quot;Vertical&quot;&gt;
+                    
+                    &lt;!-- No More Items Hint --&gt;
+                    &lt;TextBlock 
+                        Visibility=&quot;{Binding IsFilterListEmpty,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                        VerticalAlignment=&quot;Center&quot;
+                               HorizontalAlignment=&quot;Center&quot;
+                               TextAlignment=&quot;Center&quot;
+                               Foreground=&quot;{StaticResource BackgroundLightBrush}&quot;
+                               FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                               Padding=&quot;0 10 0 0&quot; Text=&quot;No tasks found!&quot;&gt;&lt;/TextBlock&gt;
 
-        #endregion
-
-        #region Public Properties
-
-        /// &lt;summary&gt;
-        /// The minimum width of this dialog
-        /// &lt;/summary&gt;
-        public int WindowMinimumWidth { get; set; } = 250;
-
-        /// &lt;summary&gt;
-        /// The minimum height of this dialog
-        /// &lt;/summary&gt;
-        public int WindowMinimumHeight { get; set; } = 100;
-
-        /// &lt;summary&gt;
-        /// The height of the title bar
-        /// &lt;/summary&gt;
-        public int TitleHeight { get; set; } = 30;
-
-        /// &lt;summary&gt;
-        /// The title for this dialog
-        /// &lt;/summary&gt;
-        public string Title { get; set; }
-
-        #endregion
-
-        #region Constructor
-
-        /// &lt;summary&gt;
-        /// Default constructor
-        /// &lt;/summary&gt;
-        public BaseDialogUserControl()
-        {
-            if (!DesignerProperties.GetIsInDesignMode(this))
-            {
-                // Create a new dialog window
-                mDialogWindow = new DialogWindow();
-                mDialogWindow.ViewModel = new DialogWindowViewModel(mDialogWindow);
-
-                // Create close command
-                CloseCommand = new RelayCommand(() =&gt; mDialogWindow.Close());
-            }
-        }
-
-        #endregion
-
-        #region Public Dialog Show Methods
-
-        /// &lt;summary&gt;
-        /// Displays a single message box to the user
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;viewModel&quot;&gt;The view model&lt;/param&gt;
-        /// &lt;typeparam name=&quot;T&quot;&gt;The view model type for this control&lt;/typeparam&gt;
-        /// &lt;returns&gt;&lt;/returns&gt;
-        public Task ShowDialog&lt;T&gt;(T viewModel)
-            where T : BaseDialogViewModel
-        {
-            // Create a task to await the dialog closing
-            var tcs = new TaskCompletionSource&lt;bool&gt;();
-
-            // Run on UI thread
-            Application.Current.Dispatcher.Invoke(() =&gt;
-            {
-                try
-                {
-                    // Match controls expected sizes to the dialog windows view model
-                    mDialogWindow.ViewModel.WindowMinimumWidth = WindowMinimumWidth;
-                    mDialogWindow.ViewModel.WindowMinimumHeight = WindowMinimumHeight;
-                    mDialogWindow.ViewModel.TitleHeight = TitleHeight;
-                    mDialogWindow.ViewModel.Title = string.IsNullOrEmpty(viewModel.Title) ? Title : viewModel.Title;
-
-                    // Set this control to the dialog window content
-                    mDialogWindow.ViewModel.Content = this;
-
-                    // Set close command function
-                    viewModel.CloseWindowEvent += () =&gt; {
-                        CloseCommand.Execute(null); 
-                    };
-
-                    // Setup this controls data context binding to the view model
-                    DataContext = viewModel;
-
-                    // Show in the center of the parent
-                    mDialogWindow.Owner = Application.Current.MainWindow;
-                    mDialogWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-
-                    // Show dialog
-                    mDialogWindow.ShowDialog();
-                }
-                finally
-                {
-                    // Let caller know we finished
-                    tcs.TrySetResult(true);
-                }
-            });
-
-            return tcs.Task;
-        }
-
-        #endregion
-    }
-}
-
+                    &lt;ItemsControl
+                        ItemsSource=&quot;{Binding FilteredItems}&quot;&gt;
+                        &lt;ItemsControl.ItemsPanel&gt;
+                            &lt;ItemsPanelTemplate&gt;
+                                &lt;VirtualizingStackPanel IsItemsHost=&quot;True&quot; VirtualizingStackPanel.IsVirtualizing=&quot;True&quot;
+                                                        VirtualizingStackPanel.VirtualizationMode=&quot;Recycling&quot; /&gt;
+                            &lt;/ItemsPanelTemplate&gt;
+                        &lt;/ItemsControl.ItemsPanel&gt;
+                        &lt;ItemsControl.ItemTemplate&gt;
+                            &lt;DataTemplate&gt;
+                                &lt;local:TaskListItem /&gt;
+                            &lt;/DataTemplate&gt;
+                        &lt;/ItemsControl.ItemTemplate&gt;
+                    &lt;/ItemsControl&gt;
+                &lt;/StackPanel&gt;
+            &lt;/ScrollViewer&gt;
+        &lt;/Grid&gt;
+    &lt;/Border&gt;
+&lt;/UserControl&gt;
     </pre>
     <script type="text/javascript">
-      highlightRanges([[30,40,30,44,0],[30,45,30,57,0],[39,41,39,45,0],[39,46,39,50,0],[39,55,39,58,0],[44,42,44,46,0],[44,47,44,51,0],[44,56,44,59,0],[49,34,49,38,0],[49,39,49,43,0],[49,48,49,50,0],[54,31,54,35,0],[54,36,54,40,0],[63,9,63,39,0],[64,9,64,10,0],[65,13,65,61,0],[66,13,66,14,0],[68,17,68,52,0],[69,17,69,84,0],[72,17,72,55,0],[72,55,72,76,0],[72,76,72,78,0],[72,17,72,78,0],[73,13,73,14,0],[74,9,74,10,0],[88,9,88,10,0],[90,13,90,56,0],[93,13,94,13,0],[94,13,94,14,0],[94,14,96,17,0],[96,17,96,18,0],[96,18,98,21,0],[98,21,98,85,0],[98,85,99,21,0],[99,21,99,87,0],[99,87,100,21,0],[100,21,100,71,0],[100,71,101,21,0],[101,21,101,117,0],[101,117,104,21,0],[104,21,104,60,0],[104,60,107,21,0],[107,21,107,57,0],[107,57,107,58,0],[107,58,108,25,0],[108,25,108,52,0],[108,52,109,21,0],[109,21,109,22,0],[109,22,109,23,0],[107,21,109,23,0],[109,23,112,21,0],[112,21,112,45,0],[112,45,115,21,0],[115,21,115,74,0],[115,74,116,21,0],[116,21,116,93,0],[116,93,119,21,0],[119,21,119,48,0],[119,48,120,17,0],[120,17,120,18,0],[120,18,122,17,0],[122,17,122,18,0],[122,18,124,21,0],[124,21,124,44,0],[124,44,125,17,0],[125,17,125,18,0],[125,18,126,13,0],[126,13,126,14,0],[126,14,126,16,0],[93,13,126,16,0],[128,13,128,29,0],[129,9,129,10,0]]);
+      highlightRanges([[1,13,1,77,0]]);
     </script>
   </body>
 </html>

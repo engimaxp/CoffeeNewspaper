@@ -2,133 +2,185 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\utilitiestest\datetimeheplertest.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\tasktreeviewcontrol.xaml</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using CN_Core.Utilities;
-using NUnit.Framework;
+&lt;UserControl x:Class=&quot;CN_WPF.TaskTreeViewControl&quot;
+             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
+             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
+             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
+             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
+             mc:Ignorable=&quot;d&quot;
+             d:DesignHeight=&quot;300&quot; d:DesignWidth=&quot;300&quot;
+             d:DataContext=&quot;{x:Static design:TaskTreeDesignModel.Instance}&quot;&gt;
 
-namespace CoffeeNewspaper_UnitTest.UtilitiesTest
-{
-    [TestFixture]
-    public class DateTimeHeplerTest
-    {
-        [Test]
-        public void SecondsAgoTest()
-        {
-            DateTime target = DateTime.Now.AddSeconds(-8);
-            Assert.AreEqual(&quot;Just Now&quot;,target.EarlyTimeFormat());
+    &lt;Border&gt;
+        &lt;Grid Background=&quot;{StaticResource WordLightBlueBrush}&quot;&gt;
+            &lt;Grid.RowDefinitions&gt;
+                &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+                &lt;RowDefinition /&gt;
+            &lt;/Grid.RowDefinitions&gt;
 
-            target = DateTime.Now.AddSeconds(-18);
-            Assert.AreEqual(&quot;Just Now&quot;, target.EarlyTimeFormat());
+            &lt;!-- Chil Tree Control Buttons And Title --&gt;
+            &lt;Grid Grid.Row=&quot;0&quot;&gt;
+                &lt;Grid.ColumnDefinitions&gt;
+                    &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                    &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                    &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                &lt;/Grid.ColumnDefinitions&gt;
+                &lt;!-- Child Tasks Tree View --&gt;
+                &lt;StackPanel ZIndex=&quot;2&quot; Grid.Column=&quot;0&quot; Orientation=&quot;Horizontal&quot;&gt;
+                    &lt;Button Style=&quot;{StaticResource IconGrowButton}&quot;
+                            Content=&quot;{StaticResource FontAwesomeAddIcon}&quot;
+                            Command=&quot;{Binding AddNextTaskCommand}&quot; /&gt;
+                    &lt;Button Style=&quot;{StaticResource IconGrowButton}&quot;
+                            Visibility=&quot;{Binding ItemSeleted,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                            FontFamily=&quot;{StaticResource CNCustomerFont}&quot;
+                            Content=&quot;{StaticResource FontAwesomeAddChildNodeIcon}&quot;
+                            Command=&quot;{Binding AddChildTaskCommand}&quot; /&gt;
+                &lt;/StackPanel&gt;
 
-            target = DateTime.Now.AddSeconds(-59);
-            Assert.AreEqual(&quot;Just Now&quot;, target.EarlyTimeFormat());
-        }
+                &lt;!-- Title --&gt;
+                &lt;TextBlock Grid.Column=&quot;0&quot;
+                           Grid.ColumnSpan=&quot;3&quot;
+                           FontWeight=&quot;Bold&quot;
+                           Foreground=&quot;{StaticResource ForegroundVeryLightBrush}&quot;
+                           FontSize=&quot;{StaticResource FontSizeRegular}&quot;
+                           Text=&quot;MileStones&quot;
+                           VerticalAlignment=&quot;Center&quot;
+                           TextAlignment=&quot;Center&quot; /&gt;
 
-        [Test]
-        public void MiniutesAgoTest()
-        {
-            DateTime target = DateTime.Now.AddMinutes(-1);
-            Assert.AreEqual(&quot;1 Minute Ago&quot;, target.EarlyTimeFormat());
+                &lt;!-- Child Tasks Tree View --&gt;
+                &lt;StackPanel ZIndex=&quot;2&quot; Grid.Column=&quot;2&quot; Orientation=&quot;Horizontal&quot;&gt;
+                    &lt;Button Style=&quot;{StaticResource IconGrowButton}&quot;
+                            Visibility=&quot;{Binding ItemSeleted,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                            Content=&quot;{StaticResource FontAwesomeTrashAltIcon}&quot;
+                            Command=&quot;{Binding DeleteChildTaskCommand}&quot;
+                            FontFamily=&quot;{StaticResource FontAwesomeRegular}&quot; /&gt;
+                &lt;/StackPanel&gt;
+            &lt;/Grid&gt;
+            &lt;!-- Child Tasks Tree View --&gt;
+            &lt;Border BorderBrush=&quot;{StaticResource WordVeryLightBlueBrush}&quot;
+                    BorderThickness=&quot;0 0 1 1&quot;
+                    Grid.Row=&quot;1&quot;&gt;
 
-            target = DateTime.Now.AddMinutes(-9);
-            Assert.AreEqual(&quot;9 Minutes Ago&quot;, target.EarlyTimeFormat());
+                &lt;TreeView
+                    Visibility=&quot;{Binding TreeHasItems,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                    x:Name=&quot;FolderView&quot;
+                    ItemsSource=&quot;{Binding Items}&quot;
+                    Style=&quot;{StaticResource VSTreeView}&quot;&gt;
 
-            target = DateTime.Now.AddMinutes(-18);
-            Assert.AreEqual(&quot;18 Minutes Ago&quot;, target.EarlyTimeFormat());
+                    &lt;TreeView.ItemContainerStyle&gt;
+                        &lt;Style TargetType=&quot;{x:Type TreeViewItem}&quot; BasedOn=&quot;{StaticResource VSTreeViewItem}&quot;&gt;
+                            &lt;Setter Property=&quot;IsExpanded&quot; Value=&quot;True&quot; /&gt;
+                        &lt;/Style&gt;
+                    &lt;/TreeView.ItemContainerStyle&gt;
 
-            target = DateTime.Now.AddMinutes(-59).AddSeconds(-59);
-            Assert.AreEqual(&quot;59 Minutes Ago&quot;, target.EarlyTimeFormat());
-        }
+                    &lt;TreeView.ItemTemplate&gt;
+                        &lt;HierarchicalDataTemplate ItemsSource=&quot;{Binding ChildItems}&quot;&gt;
+                            &lt;Border
+                                Background=&quot;{Binding IsSelected,Converter={local:BooleanToBorderBrushConverter},ConverterParameter=&#39;d7e8ff&#39;}&quot;&gt;
+                                &lt;Grid local:MonitorGridHoverProperty.Value=&quot;True&quot;&gt;
+                                    &lt;Grid.ColumnDefinitions&gt;
+                                        &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                                        &lt;ColumnDefinition Width=&quot;*&quot; /&gt;
+                                        &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                                    &lt;/Grid.ColumnDefinitions&gt;
 
-        [Test]
-        public void HoursAgoTest()
-        {
-            DateTime target = DateTime.Now.AddHours(-1);
-            Assert.AreEqual(&quot;1 Hour Ago&quot;, target.EarlyTimeFormat());
+                                    &lt;Border Grid.Column=&quot;0&quot;
+                                            Width=&quot;4&quot;
+                                            HorizontalAlignment=&quot;Left&quot;
+                                            Background=&quot;{Binding Urgency, Converter={local:TaskUrgencyToBackGroundColorConverter}}&quot; /&gt;
 
-            target = DateTime.Now.AddHours(-6).AddMinutes(-59);
-            Assert.AreEqual(&quot;6 Hours Ago&quot;, target.EarlyTimeFormat());
-        }
+                                    &lt;!-- Actual Title --&gt;
+                                    &lt;Border Grid.Column=&quot;1&quot; Grid.ColumnSpan=&quot;2&quot;
+                                            Padding=&quot;4&quot;
+                                            Visibility=&quot;{Binding IsCompleted,Converter={local:BooleanToVisiblityGoneConverter},ConverterParameter=True}&quot;&gt;
+                                        &lt;Grid&gt;
+                                            &lt;Grid.ColumnDefinitions&gt;
+                                                &lt;ColumnDefinition Width=&quot;Auto&quot; /&gt;
+                                                &lt;ColumnDefinition /&gt;
+                                            &lt;/Grid.ColumnDefinitions&gt;
+                                            &lt;TextBlock Grid.Column=&quot;0&quot;
+                                                       Visibility=&quot;{Binding CurrentStatus,Converter={local:TaskCurrentStatusToVisiblityGoneConverter}}&quot;
+                                                       VerticalAlignment=&quot;Center&quot;
+                                                       Foreground=&quot;{Binding CurrentStatus,Converter={local:TaskStatusToForeGroundConverter}}&quot;
+                                                       Padding=&quot;0 0 5 0&quot;
+                                                       FontFamily=&quot;{StaticResource FontAwesomeSolid}&quot;
+                                                       Text=&quot;{Binding CurrentStatus,Converter={local:TaskStatusToFontCodeConverter}}&quot; /&gt;
+                                            &lt;TextBlock Grid.Column=&quot;1&quot;
+                                                       VerticalAlignment=&quot;Center&quot;
+                                                       TextWrapping=&quot;Wrap&quot;
+                                                       Text=&quot;{Binding Title}&quot; /&gt;
+                                        &lt;/Grid&gt;
+                                    &lt;/Border&gt;
+                                    &lt;!-- Actual Title (Delete)--&gt;
+                                    &lt;Border Grid.Column=&quot;1&quot; Grid.ColumnSpan=&quot;2&quot;
+                                            Padding=&quot;4&quot;
+                                            Visibility=&quot;{Binding IsCompleted,Converter={local:BooleanToVisiblityGoneConverter}}&quot;&gt;
+                                        &lt;TextBlock
+                                            VerticalAlignment=&quot;Center&quot;
+                                            TextWrapping=&quot;Wrap&quot;
+                                            TextDecorations=&quot;StrikeThrough&quot;
+                                            Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot;&gt;
+                                            &lt;Run /&gt;
+                                            &lt;Run Text=&quot;{Binding Title}&quot; /&gt;
+                                        &lt;/TextBlock&gt;
+                                    &lt;/Border&gt;
+                                    &lt;!-- Child Relation Action --&gt;
+                                    &lt;StackPanel
+                                        Visibility=&quot;Hidden&quot;
+                                        x:Name=&quot;BtnPanel&quot; Grid.Column=&quot;2&quot; Orientation=&quot;Horizontal&quot;&gt;
+                                        &lt;Button
+                                            Margin=&quot;0 0 4 0&quot;
+                                            Command=&quot;{Binding UpCommand}&quot;
+                                            Visibility=&quot;{Binding DisplayUpOperator,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
+                                            Style=&quot;{StaticResource TreeViewIconGrowButton}&quot;
+                                            Content=&quot;{StaticResource FontAwesomeChevronCircleUpIcon}&quot; /&gt;
+                                        &lt;Button
+                                            Margin=&quot;0 0 4 0&quot;
+                                            Command=&quot;{Binding LeftCommand}&quot;
+                                            Visibility=&quot;{Binding DisplayLeftOperator,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
 
+                                            Style=&quot;{StaticResource TreeViewIconGrowButton}&quot;
+                                            Content=&quot;{StaticResource FontAwesomeChevronCircleLeftIcon}&quot; /&gt;
+                                        &lt;Button
+                                            Margin=&quot;0 0 4 0&quot;
+                                            Command=&quot;{Binding RightCommand}&quot;
+                                            Visibility=&quot;{Binding DisplayRightOperator,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
 
-        [Test]
-        public void EarlyThisDayTest()
-        {
-            DateTime now = new DateTime(2018,8,3,12,0,0);
-            DateTime target = now.AddHours(-11).AddMinutes(-59).AddSeconds(-59);
-            Assert.AreEqual(&quot;Early Today&quot;, target.EarlyTimeFormat(now));
+                                            Style=&quot;{StaticResource TreeViewIconGrowButton}&quot;
+                                            Content=&quot;{StaticResource FontAwesomeChevronCircleRightIcon}&quot; /&gt;
+                                        &lt;Button
+                                            Margin=&quot;0 0 4 0&quot;
+                                            Command=&quot;{Binding DownCommand}&quot;
+                                            Visibility=&quot;{Binding DisplayDownOperator,Converter={local:BooleanToVisiblityGoneConverter}}&quot;
 
-            target = now.AddHours(-7);
-            Assert.AreEqual(&quot;Early Today&quot;, target.EarlyTimeFormat(now));
-        }
+                                            Style=&quot;{StaticResource TreeViewIconGrowButton}&quot;
+                                            Content=&quot;{StaticResource FontAwesomeChevronCircleDownIcon}&quot; /&gt;
+                                    &lt;/StackPanel&gt;
+                                &lt;/Grid&gt;
+                                &lt;Border.InputBindings&gt;
+                                    &lt;MouseBinding MouseAction=&quot;LeftDoubleClick&quot; Command=&quot;{Binding EditCommand}&quot; /&gt;
+                                    &lt;MouseBinding MouseAction=&quot;LeftClick&quot; Command=&quot;{Binding SelectCommand}&quot; /&gt;
+                                &lt;/Border.InputBindings&gt;
+                            &lt;/Border&gt;
+                        &lt;/HierarchicalDataTemplate&gt;
+                    &lt;/TreeView.ItemTemplate&gt;
 
-        [Test]
-        public void YesterDayTest()
-        {
-            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
-            DateTime target = now.AddHours(-12).AddSeconds(-1);
-            Assert.AreEqual(&quot;Yesterday&quot;, target.EarlyTimeFormat(now));
-
-            target = now.AddHours(-35).AddMinutes(-59).AddSeconds(-59);
-            Assert.AreEqual(&quot;Yesterday&quot;, target.EarlyTimeFormat(now));
-        }
-
-        [Test]
-        public void DayAgoTest()
-        {
-            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
-            DateTime target = now.AddHours(-36).AddSeconds(-1);
-            Assert.AreEqual(&quot;2 Days Ago&quot;, target.EarlyTimeFormat(now));
-
-            target = now.AddDays(-6).AddSeconds(1);
-            Assert.AreEqual(&quot;6 Days Ago&quot;, target.EarlyTimeFormat(now));
-        }
-
-
-        [Test]
-        public void WeekAgoTest()
-        {
-            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
-            DateTime target = now.AddDays(-7);
-            Assert.AreEqual(&quot;1 Week Ago&quot;, target.EarlyTimeFormat(now));
-            
-            target = now.AddMonths(-1).AddSeconds(1);
-            Assert.AreEqual(&quot;4 Weeks Ago&quot;, target.EarlyTimeFormat(now));
-        }
-        
-        [Test]
-        public void MonthAgoTest()
-        {
-            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
-            DateTime target = now.AddMonths(-1).AddSeconds(-1);
-            Assert.AreEqual(&quot;1 Month Ago&quot;, target.EarlyTimeFormat(now));
-
-            target = now.AddMonths(-12).AddSeconds(1);
-            Assert.AreEqual(&quot;12 Months Ago&quot;, target.EarlyTimeFormat(now));
-        }
-
-
-        [Test]
-        public void YearAgoTest()
-        {
-            DateTime now = new DateTime(2018, 8, 3, 12, 0, 0);
-            DateTime target = now.AddYears(-1).AddSeconds(-1);
-            Assert.AreEqual(&quot;1 Year Ago&quot;, target.EarlyTimeFormat(now));
-
-            target = now.AddYears(-12);
-            Assert.AreEqual(&quot;12 Years Ago&quot;, target.EarlyTimeFormat(now));
-        }
-    }
-}
+                &lt;/TreeView&gt;
+            &lt;/Border&gt;
+        &lt;/Grid&gt;
+    &lt;/Border&gt;
+&lt;/UserControl&gt;
     </pre>
     <script type="text/javascript">
-      highlightRanges([[12,9,12,10,1],[13,13,13,59,1],[14,13,14,66,1],[16,13,16,51,1],[17,13,17,67,1],[19,13,19,51,1],[20,13,20,67,1],[21,9,21,10,1],[25,9,25,10,1],[26,13,26,59,1],[27,13,27,71,1],[29,13,29,50,1],[30,13,30,72,1],[32,13,32,51,1],[33,13,33,73,1],[35,13,35,67,1],[36,13,36,73,1],[37,9,37,10,1],[41,9,41,10,1],[42,13,42,57,1],[43,13,43,69,1],[45,13,45,64,1],[46,13,46,70,1],[47,9,47,10,1],[52,9,52,10,1],[53,13,53,58,1],[54,13,54,81,1],[55,13,55,73,1],[57,13,57,39,1],[58,13,58,73,1],[59,9,59,10,1],[63,9,63,10,1],[64,13,64,63,1],[65,13,65,64,1],[66,13,66,71,1],[68,13,68,72,1],[69,13,69,71,1],[70,9,70,10,1],[74,9,74,10,1],[75,13,75,63,1],[76,13,76,64,1],[77,13,77,72,1],[79,13,79,52,1],[80,13,80,72,1],[81,9,81,10,1],[86,9,86,10,1],[87,13,87,63,1],[88,13,88,47,1],[89,13,89,72,1],[91,13,91,54,1],[92,13,92,73,1],[93,9,93,10,1],[97,9,97,10,1],[98,13,98,63,1],[99,13,99,64,1],[100,13,100,73,1],[102,13,102,55,1],[103,13,103,75,1],[104,9,104,10,1],[109,9,109,10,1],[110,13,110,63,1],[111,13,111,63,1],[112,13,112,72,1],[114,13,114,40,1],[115,13,115,74,1],[116,9,116,10,1]]);
+      highlightRanges([[1,13,1,77,0]]);
     </script>
   </body>
 </html>

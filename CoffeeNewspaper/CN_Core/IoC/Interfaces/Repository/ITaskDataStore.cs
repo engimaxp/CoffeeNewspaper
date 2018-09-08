@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CN_Core.Specification;
 
 namespace CN_Core.Interfaces.Repository
 {
@@ -70,6 +71,12 @@ namespace CN_Core.Interfaces.Repository
         /// <returns></returns>
         Task<int> GetMaxSort(int? parentTaskId);
 
+        /// <summary>
+        /// Get Tasks by specification
+        /// </summary>
+        /// <param name="spec"></param>
+        /// <returns></returns>
+        Task<ICollection<CNTask>> GetAllTasksBySpecification(ISpecification<CNTask> spec);
         #endregion
 
         #region Update Methods

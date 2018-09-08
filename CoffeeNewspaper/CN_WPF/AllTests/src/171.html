@@ -2,71 +2,82 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\taskstatustofontcodeconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\domaintest\domaintesthelper.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-
 using System;
-using System.Globalization;
-using System.Windows.Media;
-using CN_Presentation;
-using CN_Presentation.Utilities;
+using CN_Core;
 
-namespace CN_WPF
+namespace CoffeeNewspaper_UnitTest.DomainTest
 {
-    /// &lt;summary&gt;
-    /// A converter that takes in a &lt;see cref=&quot;TaskCurrentStatus&quot;/&gt; and returns 
-    /// the FontAwesome for that Indicator
-    /// &lt;/summary&gt;
-    public class TaskStatusToFontCodeConverter : BaseValueConverter&lt;TaskStatusToFontCodeConverter&gt;
+    public static class DomainTestHelper
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        /// &lt;summary&gt;
+        ///     Get a random task
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static CNTask GetARandomTask(int id = 0)
         {
-            IconType code = IconType.Times;
-            switch ((TaskCurrentStatus)value)
+            var timestamp = DateTime.Now.ToString(&quot;s&quot;);
+            return new CNTask
             {
-                case TaskCurrentStatus.COMPLETE:
-                {
-                    code = IconType.Check;
-                    break;
-                }
-                case TaskCurrentStatus.DELETE:
-                {
-                    code = IconType.Times;
-                    break;
-                }
-                case TaskCurrentStatus.STOP:
-                {
-                    code = IconType.Pause;
-                    break;
-                }
-                case TaskCurrentStatus.UNDERGOING:
-                {
-                    code = IconType.Play;
-                    break;
-                }
-                case TaskCurrentStatus.PENDING:
-                {
-                    code = IconType.HourGlass;
-                    break;
-                }
-            }
-            return code.ToFontAwesomeText();
+                TaskId = id,
+                Content = &quot;Write A Program&quot; + timestamp + Guid.NewGuid().ToString(&quot;N&quot;),
+                CreateTime = DateTime.Now,
+                StartTime = null,
+                EndTime = null,
+                Priority = CNPriority.High,
+                Urgency = CNUrgency.High,
+                Status = CNTaskStatus.TODO,
+                EstimatedDuration = 3600
+            };
         }
 
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        /// &lt;summary&gt;
+        ///     Get a random memo
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static CNMemo GetARandomMemo(bool generateId = false)
         {
-            throw new NotImplementedException();
+            var timestamp = DateTime.Now.ToString(&quot;s&quot;);
+            return new CNMemo
+            {
+                MemoId = generateId? Guid.NewGuid().ToString(&quot;D&quot;) :null,
+                Title = &quot;NewMemo&quot;,
+                Content = &quot;Start with writing tests!&quot; + timestamp + Guid.NewGuid().ToString(&quot;N&quot;)
+            };
+        }
+
+        /// &lt;summary&gt;
+        ///     Get a random tag
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static CNTag GetARandomTag()
+        {
+            var timestamp = DateTime.Now.ToString(&quot;s&quot;);
+            return new CNTag
+            {
+                Title = $&quot;randomtag{timestamp}{Guid.NewGuid():D}&quot;
+            };
+        }
+
+        /// &lt;summary&gt;
+        ///     Get a random timeslice
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;EndTime&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static CNTimeSlice GetARandomTimeSlice(DateTime? EndTime = null)
+        {
+            return new CNTimeSlice(DateTime.Now, null);
         }
     }
 }
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[17,9,17,10,0],[18,13,18,44,0],[19,13,19,46,0],[22,17,22,18,0],[23,21,23,43,0],[24,21,24,27,0],[27,17,27,18,0],[28,21,28,43,0],[29,21,29,27,0],[32,17,32,18,0],[33,21,33,43,0],[34,21,34,27,0],[37,17,37,18,0],[38,21,38,42,0],[39,21,39,27,0],[42,17,42,18,0],[43,21,43,47,0],[44,21,44,27,0],[47,13,47,45,0],[48,9,48,10,0],[51,9,51,10,0],[52,13,52,49,0]]);
+      highlightRanges([[13,9,13,10,1],[14,13,14,56,1],[15,13,26,15,1],[27,9,27,10,1],[34,9,34,10,1],[35,13,35,56,1],[36,13,41,15,1],[42,9,42,10,1],[49,9,49,10,1],[50,13,50,56,1],[51,13,54,15,1],[55,9,55,10,1],[63,9,63,10,1],[64,13,64,56,1],[65,9,65,10,1]]);
     </script>
   </body>
 </html>

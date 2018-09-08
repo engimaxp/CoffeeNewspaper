@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace CN_Core.Interfaces
 {
 
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork 
     {
         Task<bool> Commit();
     }

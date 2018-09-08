@@ -2,567 +2,81 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\taskdatastoretest.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\attachedproperties\monitorhoverproperty.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CN_Core;
-using CN_Repository;
-using CoffeeNewspaper_UnitTest.DomainTest;
-using NUnit.Framework;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using CN_Presentation.ViewModel.Controls;
 
-namespace CoffeeNewspaper_UnitTest.RepositoryTest
+namespace CN_WPF
 {
-    /// &lt;summary&gt;
-    ///     In-Memory integration data persistent test
-    /// &lt;/summary&gt;
-    [TestFixture]
-    public class TaskDataStoreTest : RepositarySetupAndTearDown
+    public class MonitorHoverProperty:BaseAttachedProperty&lt;MonitorHoverProperty,bool&gt;
     {
-        [Test]
-        public async Task GetMaxSort_TopLevel_AllPass()
+        /// &lt;summary&gt;
+        /// When value changed to true bind the proper event
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
+            if (!(sender is ItemsControl grid)) return;
+
+
+            if ((bool)e.NewValue)
             {
-                //Arrange argument to be tested
-                var assesTask = DomainTestHelper.GetARandomTask();
-                assesTask.Sort = 19;
-                //initiate the datastore
-                var taskDataStore = new TaskDataStore(dbcontext);
+                grid.MouseLeave += MouseLeaveGrid;
+                // Wait for panel to load
+                void OnLoaded(object s, RoutedEventArgs ee)
+                {
+                    // Unhook
+                    grid.Loaded -= OnLoaded;
 
-                //do testing action
-                taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
+                    // Loop each child
+                    for (int i = 0; i &lt; grid.Items.Count; i++)
+                    {
+                        UIElement uiElement = (UIElement) grid.ItemContainerGenerator.ContainerFromIndex(i);
+                        uiElement.MouseEnter += MouseEnterButton;
+                    }
+                }
 
-                //query the result from db for assert
-                var result = await taskDataStore.GetMaxSort(null);
-                
-                Assert.AreEqual(19, result);
-            });
+                // Hook into the Loaded event
+                grid.Loaded += OnLoaded;
+
+            }
         }
 
-        [Test]
-        public async Task GetMaxSort_EmptyTopLevel_ReturnZero()
+        /// &lt;summary&gt;
+        /// When mouse enter a button,HighLight it and those whose id is lesser,hollow the others
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;mouseEventArgs&quot;&gt;&lt;/param&gt;
+        private void MouseEnterButton(object sender, MouseEventArgs mouseEventArgs)
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //initiate the datastore
-                var taskDataStore = new TaskDataStore(dbcontext);
-                
-                //query the result from db for assert
-                var result = await taskDataStore.GetMaxSort(null);
-
-                Assert.AreEqual(0, result);
-            });
+            if (!(((ContentPresenter) sender).DataContext is RatingIconButtonViewModel currentHovered)) return;
+            currentHovered.ParentModel.SetChildrensSolidStatus(currentHovered.CurrentPosition);
         }
 
-        [Test]
-        public async Task GetMaxSort_SecondLevel_AllPass()
+        /// &lt;summary&gt;
+        /// When mouse leave the hole parent grid,make it use viewmodel&#39;s val to display highlight
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        private static void MouseLeaveGrid(object sender, RoutedEventArgs e)
         {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //Arrange argument to be tested
-                var assesTask1 = DomainTestHelper.GetARandomTask();
-                assesTask1.Sort = 19;
-                var assesTask2 = DomainTestHelper.GetARandomTask();
-                assesTask2.Sort = 20;
-                assesTask2.ParentTask = assesTask1;
-                //initiate the datastore
-                var taskDataStore = new TaskDataStore(dbcontext);
-
-                //do testing action
-                taskDataStore.AddTask(assesTask1);
-                taskDataStore.AddTask(assesTask2);
-
-                await unitOfWork.Commit();
-                //query the result from db for assert
-                var result = await taskDataStore.GetMaxSort(assesTask2.ParentTaskID);
-
-                Assert.AreEqual(20, result);
-            });
-        }
-
-        [Test]
-        public async Task GetMaxSort_EmptySecondLevel_ReturnZero()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //Arrange argument to be tested
-                var assesTask1 = DomainTestHelper.GetARandomTask();
-                assesTask1.Sort = 19;
-                //initiate the datastore
-                var taskDataStore = new TaskDataStore(dbcontext);
-
-                //do testing action
-                taskDataStore.AddTask(assesTask1);
-
-                await unitOfWork.Commit();
-                //query the result from db for assert
-                var result = await taskDataStore.GetMaxSort(assesTask1.TaskId);
-
-                Assert.AreEqual(0, result);
-            });
-        }
-        [Test]
-        public async Task AddTask_QueryAllTask_QuerySpecifiedTask_AllPass()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                //Arrange argument to be tested
-                var assesTask = DomainTestHelper.GetARandomTask();
-
-                //initiate the datastore
-                var taskDataStore = new TaskDataStore(dbcontext);
-
-                //do testing action
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                //query the result from db for assert
-                var tasks = await taskDataStore.GetAllTask();
-                tasks.ToList().ForEach(Console.WriteLine);
-
-                var firstTask = await taskDataStore.GetTask(tasks.First().TaskId);
-
-                Assert.AreEqual(tasks.First(), firstTask);
-                Assert.AreEqual(tasks.FirstOrDefault(), assesTask);
-            });
-        }
-
-        [Test]
-        public async Task DeleteATask_Success()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                taskDataStore.RemoveTask(addedTask);
-
-                var beforeDeleteResult = await unitOfWork.Commit();
-                Assert.IsTrue(beforeDeleteResult);
-
-                var afterDeleteResult = await taskDataStore.GetTask(addedTask.TaskId);
-                Assert.IsNull(afterDeleteResult);
-            });
-        }
-
-        [Test]
-        public async Task DeleteATask_TaskIdNotExist_Fail()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask(1);
-                taskDataStore.RemoveTask(assesTask);
-                var beforeDeleteResult = await unitOfWork.Commit();
-                Assert.IsFalse(beforeDeleteResult);
-            });
-        }
-
-        [Test]
-        public async Task QuerySpecifiedTaskDoesntExist_ReturnNull()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var firstTask = await taskDataStore.GetTask(1);
-
-                Assert.IsNull(firstTask);
-            });
-        }
-
-        [Test]
-        public async Task UpdateTask()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask =  taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                //update the added task content,make sure its not equal to original task
-                addedTask.Content = &quot;testing update&quot;;
-
-                //update to database ,make sure what ef return is equal to modified task
-                taskDataStore.UpdateTask(addedTask);
-                var updatedResult = await unitOfWork.Commit();
-                Assert.IsTrue(updatedResult);
-                //select from db again ,make sure the task is updated
-                var selectedTask = await taskDataStore.GetTask(addedTask.TaskId);
-                Assert.AreEqual(selectedTask, addedTask);
-            });
-        }
-
-        [Test]
-        public async Task UpdateTask_TaskIdNotExist_Fail()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask(1);
-
-                //update the added task content,make sure its not equal to original task
-                assesTask.Content = &quot;testing update&quot;;
-
-                //update to database ,make sure what ef return is equal to modified task
-                taskDataStore.UpdateTask(assesTask);
-                var updatedResult = await unitOfWork.Commit();
-                Assert.False(updatedResult);
-            });
-        }
-        [Test]
-        public async Task UpdateEndTaskTime_Success()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-                var nowtime = DateTime.Now;
-                taskDataStore.UpdateEndTaskTime(assesTask, nowtime);
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.IsNotNull(finalTask.EndTime);
-                Assert.AreEqual(finalTask.EndTime, nowtime);
-            });
-        }
-        [Test]
-        public async Task UpdateEndTaskTime_OriginalTaskNull_ReturnFalse()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-
-                //update to database ,make sure what ef return is equal to modified task
-                var nowtime = DateTime.Now;
-                taskDataStore.UpdateEndTaskTime(null, nowtime);
-                await unitOfWork.Commit();
-
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.IsNull(finalTask.EndTime);
-            });
-        }
-        [Test]
-        public async Task UpdateEndTaskTime_OriginalTaskEndTimeNull_TargetTimeNull_ReturnFalse()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                 taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-                taskDataStore.UpdateEndTaskTime(assesTask, null);
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.IsNull(finalTask.EndTime);
-            });
-        }
-        [Test]
-        public async Task UpdateEndTaskTime_OriginalTaskEndTimeEqualsTargetTime_ReturnFalse()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var nowtime = DateTime.Now;
-                assesTask.EndTime = nowtime;
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-                taskDataStore.UpdateEndTaskTime(assesTask, nowtime);
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.IsNotNull(finalTask.EndTime);
-                Assert.AreEqual(finalTask.EndTime, nowtime);
-            });
-        }
-
-        [Test]
-        public async Task UpdateStartTaskTime_Success()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-                var nowtime = DateTime.Now;
-                taskDataStore.UpdateStartTaskTime(assesTask, nowtime);
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.IsNotNull(finalTask.StartTime);
-                Assert.AreEqual(finalTask.StartTime, nowtime);
-            });
-        }
-        [Test]
-        public async Task UpdateStartTaskTime_OriginalTaskNull_ReturnFalse()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-                var nowtime = DateTime.Now;
-                taskDataStore.UpdateStartTaskTime(null, nowtime);
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.IsNull(finalTask.StartTime);
-            });
-        }
-        [Test]
-        public async Task UpdateStartTaskTime_OriginalTaskStartTimeNull_TargetTimeNull_ReturnFalse()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-                taskDataStore.UpdateStartTaskTime(assesTask, null);
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.IsNull(finalTask.StartTime);
-            });
-        }
-
-        [Test]
-        public async Task UpdateStartTaskTime_OriginalTaskStartTimeEqualsTargetTime_ReturnFalse()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var nowtime = DateTime.Now;
-                assesTask.StartTime = nowtime;
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-                taskDataStore.UpdateStartTaskTime(assesTask, nowtime);
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.IsNotNull(finalTask.StartTime);
-                Assert.AreEqual(finalTask.StartTime, nowtime);
-            });
-        }
-        [Test]
-        public async Task ExpandTaskTime_TaskisNull_DirectReturn()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                taskDataStore.AddTask(assesTask);
-
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-                var nowtime = DateTime.Now;
-                taskDataStore.ExpandTaskTime(null, nowtime,nowtime.AddDays(1));
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.IsNull(finalTask.StartTime);
-                Assert.IsNull(finalTask.EndTime);
-            });
-        }
-        [Test]
-        public async Task ExpandTaskTime_SmallerOrEqual_DirectReturn()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-
-                var nowtime = DateTime.Now;
-                addedTask.StartTime = nowtime;
-                addedTask.EndTime = nowtime.AddDays(1);
-                taskDataStore.ExpandTaskTime(addedTask, addedTask.StartTime, addedTask.EndTime);
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.AreEqual(finalTask.StartTime, addedTask.StartTime);
-                Assert.AreEqual(finalTask.EndTime, addedTask.EndTime);
-                
-                taskDataStore.ExpandTaskTime(addedTask, nowtime.AddMinutes(1), nowtime.AddDays(1).AddMinutes(-1));
-
-                await unitOfWork.Commit();
-                finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.AreEqual(addedTask.StartTime,finalTask.StartTime);
-                Assert.AreEqual(addedTask.EndTime,finalTask.EndTime);
-            });
-        }
-        [Test]
-        public async Task ExpandTaskTime_StartTimeSmaller_UpdateStartTime()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-
-                var nowtime = DateTime.Now;
-                addedTask.StartTime = nowtime;
-                addedTask.EndTime = nowtime.AddDays(1);
-                taskDataStore.ExpandTaskTime(addedTask, nowtime.AddMilliseconds(-1), addedTask.EndTime);
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.AreEqual(nowtime.AddMilliseconds(-1), finalTask.StartTime);
-                Assert.AreEqual(addedTask.EndTime,finalTask.EndTime);
-            });
-        }
-        [Test]
-        public async Task ExpandTaskTime_EndTimeBigger_UpdateEndTime()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-
-                var nowtime = DateTime.Now;
-                addedTask.StartTime = nowtime;
-                addedTask.EndTime = nowtime.AddDays(1);
-                taskDataStore.ExpandTaskTime(addedTask, addedTask.StartTime, nowtime.AddDays(1).AddMilliseconds(1));
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.AreEqual(addedTask.StartTime, finalTask.StartTime);
-                Assert.AreEqual(nowtime.AddDays(1).AddMilliseconds(1), finalTask.EndTime);
-            });
-        }
-        [Test]
-        public async Task ExpandTaskTime_OriginEndTimeNull_UpdateEndTime()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-
-                var nowtime = DateTime.Now;
-                addedTask.StartTime = nowtime;
-                addedTask.EndTime = null;
-                taskDataStore.ExpandTaskTime(addedTask, addedTask.StartTime, addedTask.EndTime?.AddMilliseconds(1));
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.AreEqual(addedTask.StartTime, finalTask.StartTime);
-                Assert.AreEqual(addedTask.EndTime?.AddMilliseconds(1), finalTask.EndTime);
-            });
-        }
-        [Test]
-        public async Task ExpandTaskTime_TargetEndTimeNull_UpdateEndTime()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = taskDataStore.AddTask(assesTask);
-                //update to database ,make sure what ef return is equal to modified task
-
-                await unitOfWork.Commit();
-                var nowtime = DateTime.Now;
-                addedTask.StartTime = nowtime;
-                addedTask.EndTime = nowtime.AddDays(1);
-                taskDataStore.ExpandTaskTime(addedTask, addedTask.StartTime, null);
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.AreEqual(addedTask.StartTime, finalTask.StartTime);
-                Assert.AreEqual(null, finalTask.EndTime);
-            });
-        }
-        [Test]
-        public async Task ExpandTaskTime_BothEndTimeNull_Return()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask = DomainTestHelper.GetARandomTask();
-                var addedTask = taskDataStore.AddTask(assesTask);
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-
-                var nowtime = DateTime.Now;
-                addedTask.StartTime = nowtime;
-                addedTask.EndTime = null;
-                taskDataStore.ExpandTaskTime(addedTask, addedTask.StartTime, null);
-
-                await unitOfWork.Commit();
-                var finalTask = await taskDataStore.GetTask(assesTask.TaskId);
-                Assert.AreEqual(addedTask.StartTime, finalTask.StartTime);
-                Assert.AreEqual(null, finalTask.EndTime);
-            });
-        }
-        [Test]
-        public async Task RemoveTaskConnector_Success()
-        {
-            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
-            {
-                var taskDataStore = new TaskDataStore(dbcontext);
-                var assesTask1 = DomainTestHelper.GetARandomTask();
-                var assesTask2 = DomainTestHelper.GetARandomTask();
-                var connector = new CNTaskConnector() {PreTask = assesTask2, SufTask = assesTask1};
-                assesTask1.PreTaskConnectors = new List&lt;CNTaskConnector&gt;(){ connector };
-                taskDataStore.AddTask(assesTask1);
-                await unitOfWork.Commit();
-                //update to database ,make sure what ef return is equal to modified task
-
-                taskDataStore.RemoveTaskConnector(connector);
-                await unitOfWork.Commit();
-
-                var finalTask1 = await taskDataStore.GetTask(assesTask1.TaskId);
-                Assert.IsNotNull(finalTask1);
-                Assert.IsTrue(assesTask1.PreTaskConnectors == null || assesTask1.PreTaskConnectors.Count == 0);
-                var finalTask2 = await taskDataStore.GetTask(assesTask2.TaskId);
-                Assert.IsNotNull(finalTask2);
-                Assert.IsTrue(assesTask2.SufTaskConnectors == null || assesTask2.SufTaskConnectors.Count == 0);
-            });
+            if (!(sender is ItemsControl grid)) return;
+            if (!(grid.DataContext is RatingViewModel ratingModel)) return;
+            ratingModel.SetChildrensSolidStatus(ratingModel.SelectedValue-1);
         }
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[20,9,20,10,1],[21,13,22,13,1],[22,13,22,14,1],[22,14,24,17,1],[24,17,24,67,1],[24,67,25,17,1],[25,17,25,37,1],[25,37,27,17,1],[27,17,27,66,1],[27,66,30,17,1],[30,17,30,50,1],[30,50,31,17,1],[31,17,31,43,1],[31,43,34,17,1],[34,17,34,67,1],[34,67,36,17,1],[36,17,36,45,1],[36,45,37,13,1],[37,13,37,14,1],[37,14,37,16,1],[21,13,37,16,1],[38,9,38,10,1],[42,9,42,10,1],[43,13,44,13,1],[44,13,44,14,1],[44,14,46,17,1],[46,17,46,66,1],[46,66,49,17,1],[49,17,49,67,1],[49,67,51,17,1],[51,17,51,44,1],[51,44,52,13,1],[52,13,52,14,1],[52,14,52,16,1],[43,13,52,16,1],[53,9,53,10,1],[57,9,57,10,1],[58,13,59,13,1],[59,13,59,14,1],[59,14,61,17,1],[61,17,61,68,1],[61,68,62,17,1],[62,17,62,38,1],[62,38,63,17,1],[63,17,63,68,1],[63,68,64,17,1],[64,17,64,38,1],[64,38,65,17,1],[65,17,65,52,1],[65,52,67,17,1],[67,17,67,66,1],[67,66,70,17,1],[70,17,70,51,1],[70,51,71,17,1],[71,17,71,51,1],[71,51,73,17,1],[73,17,73,43,1],[73,43,75,17,1],[75,17,75,86,1],[75,86,77,17,1],[77,17,77,45,1],[77,45,78,13,1],[78,13,78,14,1],[78,14,78,16,1],[58,13,78,16,1],[79,9,79,10,1],[83,9,83,10,1],[84,13,85,13,1],[85,13,85,14,1],[85,14,87,17,1],[87,17,87,68,1],[87,68,88,17,1],[88,17,88,38,1],[88,38,90,17,1],[90,17,90,66,1],[90,66,93,17,1],[93,17,93,51,1],[93,51,95,17,1],[95,17,95,43,1],[95,43,97,17,1],[97,17,97,80,1],[97,80,99,17,1],[99,17,99,44,1],[99,44,100,13,1],[100,13,100,14,1],[100,14,100,16,1],[84,13,100,16,1],[101,9,101,10,1],[104,9,104,10,1],[105,13,106,13,1],[106,13,106,14,1],[106,14,108,17,1],[108,17,108,67,1],[108,67,111,17,1],[111,17,111,66,1],[111,66,114,17,1],[114,17,114,50,1],[114,50,116,17,1],[116,17,116,43,1],[116,43,118,17,1],[118,17,118,62,1],[118,62,119,17,1],[119,17,119,59,1],[119,59,121,17,1],[121,17,121,83,1],[121,83,123,17,1],[123,17,123,59,1],[123,59,124,17,1],[124,17,124,68,1],[124,68,125,13,1],[125,13,125,14,1],[125,14,125,16,1],[105,13,125,16,1],[126,9,126,10,1],[130,9,130,10,1],[131,13,132,13,1],[132,13,132,14,1],[132,14,133,17,1],[133,17,133,66,1],[133,66,134,17,1],[134,17,134,67,1],[134,67,135,17,1],[135,17,135,66,1],[135,66,137,17,1],[137,17,137,43,1],[137,43,138,17,1],[138,17,138,53,1],[138,53,140,17,1],[140,17,140,68,1],[140,68,141,17,1],[141,17,141,51,1],[141,51,143,17,1],[143,17,143,87,1],[143,87,144,17,1],[144,17,144,50,1],[144,50,145,13,1],[145,13,145,14,1],[145,14,145,16,1],[131,13,145,16,1],[146,9,146,10,1],[150,9,150,10,1],[151,13,152,13,1],[152,13,152,14,1],[152,14,153,17,1],[153,17,153,66,1],[153,66,154,17,1],[154,17,154,68,1],[154,68,155,17,1],[155,17,155,53,1],[155,53,156,17,1],[156,17,156,68,1],[156,68,157,17,1],[157,17,157,52,1],[157,52,158,13,1],[158,13,158,14,1],[158,14,158,16,1],[151,13,158,16,1],[159,9,159,10,1],[163,9,163,10,1],[164,13,165,13,1],[165,13,165,14,1],[165,14,166,17,1],[166,17,166,66,1],[166,66,167,17,1],[167,17,167,64,1],[167,64,169,17,1],[169,17,169,42,1],[169,42,170,13,1],[170,13,170,14,1],[170,14,170,16,1],[164,13,170,16,1],[171,9,171,10,1],[175,9,175,10,1],[176,13,177,13,1],[177,13,177,14,1],[177,14,178,17,1],[178,17,178,66,1],[178,66,179,17,1],[179,17,179,67,1],[179,67,180,17,1],[180,17,180,67,1],[180,67,181,17,1],[181,17,181,43,1],[181,43,183,17,1],[183,17,183,54,1],[183,54,186,17,1],[186,17,186,53,1],[186,53,187,17,1],[187,17,187,63,1],[187,63,188,17,1],[188,17,188,46,1],[188,46,190,17,1],[190,17,190,82,1],[190,82,191,17,1],[191,17,191,58,1],[191,58,192,13,1],[192,13,192,14,1],[192,14,192,16,1],[176,13,192,16,1],[193,9,193,10,1],[197,9,197,10,1],[198,13,199,13,1],[199,13,199,14,1],[199,14,200,17,1],[200,17,200,66,1],[200,66,201,17,1],[201,17,201,68,1],[201,68,204,17,1],[204,17,204,54,1],[204,54,207,17,1],[207,17,207,53,1],[207,53,208,17,1],[208,17,208,63,1],[208,63,209,17,1],[209,17,209,45,1],[209,45,210,13,1],[210,13,210,14,1],[210,14,210,16,1],[198,13,210,16,1],[211,9,211,10,1],[214,9,214,10,1],[215,13,216,13,1],[216,13,216,14,1],[216,14,217,17,1],[217,17,217,66,1],[217,66,218,17,1],[218,17,218,67,1],[218,67,219,17,1],[219,17,219,50,1],[219,50,221,17,1],[221,17,221,43,1],[221,43,223,17,1],[223,17,223,44,1],[223,44,224,17,1],[224,17,224,69,1],[224,69,225,17,1],[225,17,225,43,1],[225,43,226,17,1],[226,17,226,79,1],[226,79,227,17,1],[227,17,227,53,1],[227,53,228,17,1],[228,17,228,61,1],[228,61,229,13,1],[229,13,229,14,1],[229,14,229,16,1],[215,13,229,16,1],[230,9,230,10,1],[233,9,233,10,1],[234,13,235,13,1],[235,13,235,14,1],[235,14,236,17,1],[236,17,236,66,1],[236,66,237,17,1],[237,17,237,67,1],[237,67,238,17,1],[238,17,238,50,1],[238,50,239,17,1],[239,17,239,43,1],[239,43,242,17,1],[242,17,242,44,1],[242,44,243,17,1],[243,17,243,64,1],[243,64,244,17,1],[244,17,244,43,1],[244,43,246,17,1],[246,17,246,79,1],[246,79,247,17,1],[247,17,247,50,1],[247,50,248,13,1],[248,13,248,14,1],[248,14,248,16,1],[234,13,248,16,1],[249,9,249,10,1],[252,9,252,10,1],[253,13,254,13,1],[254,13,254,14,1],[254,14,255,17,1],[255,17,255,66,1],[255,66,256,17,1],[256,17,256,67,1],[256,67,257,18,1],[257,18,257,51,1],[257,51,258,17,1],[258,17,258,43,1],[258,43,260,17,1],[260,17,260,66,1],[260,66,261,17,1],[261,17,261,43,1],[261,43,262,17,1],[262,17,262,79,1],[262,79,263,17,1],[263,17,263,50,1],[263,50,264,13,1],[264,13,264,14,1],[264,14,264,16,1],[253,13,264,16,1],[265,9,265,10,1],[268,9,268,10,1],[269,13,270,13,1],[270,13,270,14,1],[270,14,271,17,1],[271,17,271,66,1],[271,66,272,17,1],[272,17,272,67,1],[272,67,273,17,1],[273,17,273,44,1],[273,44,274,17,1],[274,17,274,45,1],[274,45,275,17,1],[275,17,275,50,1],[275,50,277,17,1],[277,17,277,43,1],[277,43,279,17,1],[279,17,279,69,1],[279,69,281,17,1],[281,17,281,43,1],[281,43,282,17,1],[282,17,282,79,1],[282,79,283,17,1],[283,17,283,53,1],[283,53,284,17,1],[284,17,284,61,1],[284,61,285,13,1],[285,13,285,14,1],[285,14,285,16,1],[269,13,285,16,1],[286,9,286,10,1],[290,9,290,10,1],[291,13,292,13,1],[292,13,292,14,1],[292,14,293,17,1],[293,17,293,66,1],[293,66,294,17,1],[294,17,294,67,1],[294,67,295,17,1],[295,17,295,50,1],[295,50,297,17,1],[297,17,297,43,1],[297,43,299,17,1],[299,17,299,44,1],[299,44,300,17,1],[300,17,300,71,1],[300,71,302,17,1],[302,17,302,43,1],[302,43,303,17,1],[303,17,303,79,1],[303,79,304,17,1],[304,17,304,55,1],[304,55,305,17,1],[305,17,305,63,1],[305,63,306,13,1],[306,13,306,14,1],[306,14,306,16,1],[291,13,306,16,1],[307,9,307,10,1],[310,9,310,10,1],[311,13,312,13,1],[312,13,312,14,1],[312,14,313,17,1],[313,17,313,66,1],[313,66,314,17,1],[314,17,314,67,1],[314,67,315,17,1],[315,17,315,50,1],[315,50,317,17,1],[317,17,317,43,1],[317,43,319,17,1],[319,17,319,44,1],[319,44,320,17,1],[320,17,320,66,1],[320,66,322,17,1],[322,17,322,43,1],[322,43,323,17,1],[323,17,323,79,1],[323,79,324,17,1],[324,17,324,52,1],[324,52,325,13,1],[325,13,325,14,1],[325,14,325,16,1],[311,13,325,16,1],[326,9,326,10,1],[329,9,329,10,1],[330,13,331,13,1],[331,13,331,14,1],[331,14,332,17,1],[332,17,332,66,1],[332,66,333,17,1],[333,17,333,67,1],[333,67,334,17,1],[334,17,334,50,1],[334,50,336,17,1],[336,17,336,43,1],[336,43,338,17,1],[338,17,338,68,1],[338,68,340,17,1],[340,17,340,43,1],[340,43,341,17,1],[341,17,341,79,1],[341,79,342,17,1],[342,17,342,52,1],[342,52,343,13,1],[343,13,343,14,1],[343,14,343,16,1],[330,13,343,16,1],[344,9,344,10,1],[348,9,348,10,1],[349,13,350,13,1],[350,13,350,14,1],[350,14,351,17,1],[351,17,351,66,1],[351,66,352,17,1],[352,17,352,67,1],[352,67,353,17,1],[353,17,353,44,1],[353,44,354,17,1],[354,17,354,47,1],[354,47,355,17,1],[355,17,355,50,1],[355,50,357,17,1],[357,17,357,43,1],[357,43,359,17,1],[359,17,359,71,1],[359,71,361,17,1],[361,17,361,43,1],[361,43,362,17,1],[362,17,362,79,1],[362,79,363,17,1],[363,17,363,55,1],[363,55,364,17,1],[364,17,364,63,1],[364,63,365,13,1],[365,13,365,14,1],[365,14,365,16,1],[349,13,365,16,1],[366,9,366,10,1],[369,9,369,10,1],[370,13,371,13,1],[371,13,371,14,1],[371,14,372,17,1],[372,17,372,66,1],[372,66,373,17,1],[373,17,373,67,1],[373,67,374,17,1],[374,17,374,50,1],[374,50,376,17,1],[376,17,376,43,1],[376,43,378,17,1],[378,17,378,44,1],[378,44,379,17,1],[379,17,379,80,1],[379,80,381,17,1],[381,17,381,43,1],[381,43,382,17,1],[382,17,382,79,1],[382,79,383,17,1],[383,17,383,52,1],[383,52,384,17,1],[384,17,384,50,1],[384,50,385,13,1],[385,13,385,14,1],[385,14,385,16,1],[370,13,385,16,1],[386,9,386,10,1],[389,9,389,10,1],[390,13,391,13,1],[391,13,391,14,1],[391,14,392,17,1],[392,17,392,66,1],[392,66,393,17,1],[393,17,393,67,1],[393,67,394,17,1],[394,17,394,66,1],[394,66,395,17,1],[395,17,395,43,1],[395,43,398,17,1],[398,17,398,44,1],[398,44,399,17,1],[399,17,399,47,1],[399,47,400,17,1],[400,17,400,56,1],[400,56,401,17,1],[401,17,401,97,1],[401,97,403,17,1],[403,17,403,43,1],[403,43,404,17,1],[404,17,404,79,1],[404,79,405,17,1],[405,17,405,75,1],[405,75,406,17,1],[406,17,406,71,1],[406,71,408,17,1],[408,17,408,115,1],[408,115,410,17,1],[410,17,410,43,1],[410,43,411,17,1],[411,17,411,75,1],[411,75,412,17,1],[412,17,412,74,1],[412,74,413,17,1],[413,17,413,70,1],[413,70,414,13,1],[414,13,414,14,1],[414,14,414,16,1],[390,13,414,16,1],[415,9,415,10,1],[418,9,418,10,1],[419,13,420,13,1],[420,13,420,14,1],[420,14,421,17,1],[421,17,421,66,1],[421,66,422,17,1],[422,17,422,67,1],[422,67,423,17,1],[423,17,423,66,1],[423,66,424,17,1],[424,17,424,43,1],[424,43,427,17,1],[427,17,427,44,1],[427,44,428,17,1],[428,17,428,47,1],[428,47,429,17,1],[429,17,429,56,1],[429,56,430,17,1],[430,17,430,105,1],[430,105,432,17,1],[432,17,432,43,1],[432,43,433,17,1],[433,17,433,79,1],[433,79,434,17,1],[434,17,434,83,1],[434,83,435,17,1],[435,17,435,70,1],[435,70,436,13,1],[436,13,436,14,1],[436,14,436,16,1],[419,13,436,16,1],[437,9,437,10,1],[440,9,440,10,1],[441,13,442,13,1],[442,13,442,14,1],[442,14,443,17,1],[443,17,443,66,1],[443,66,444,17,1],[444,17,444,67,1],[444,67,445,17,1],[445,17,445,66,1],[445,66,446,17,1],[446,17,446,43,1],[446,43,449,17,1],[449,17,449,44,1],[449,44,450,17,1],[450,17,450,47,1],[450,47,451,17,1],[451,17,451,56,1],[451,56,452,17,1],[452,17,452,117,1],[452,117,454,17,1],[454,17,454,43,1],[454,43,455,17,1],[455,17,455,79,1],[455,79,456,17,1],[456,17,456,75,1],[456,75,457,17,1],[457,17,457,91,1],[457,91,458,13,1],[458,13,458,14,1],[458,14,458,16,1],[441,13,458,16,1],[459,9,459,10,1],[462,9,462,10,1],[463,13,464,13,1],[464,13,464,14,1],[464,14,465,17,1],[465,17,465,66,1],[465,66,466,17,1],[466,17,466,67,1],[466,67,467,17,1],[467,17,467,66,1],[467,66,468,17,1],[468,17,468,43,1],[468,43,471,17,1],[471,17,471,44,1],[471,44,472,17,1],[472,17,472,47,1],[472,47,473,17,1],[473,17,473,42,1],[473,42,474,17,1],[474,17,474,117,1],[474,117,476,17,1],[476,17,476,43,1],[476,43,477,17,1],[477,17,477,79,1],[477,79,478,17,1],[478,17,478,75,1],[478,75,479,17,1],[479,17,479,91,1],[479,91,480,13,1],[480,13,480,14,1],[480,14,480,16,1],[463,13,480,16,1],[481,9,481,10,1],[484,9,484,10,1],[485,13,486,13,1],[486,13,486,14,1],[486,14,487,17,1],[487,17,487,66,1],[487,66,488,17,1],[488,17,488,67,1],[488,67,489,17,1],[489,17,489,66,1],[489,66,492,17,1],[492,17,492,43,1],[492,43,493,17,1],[493,17,493,44,1],[493,44,494,17,1],[494,17,494,47,1],[494,47,495,17,1],[495,17,495,56,1],[495,56,496,17,1],[496,17,496,84,1],[496,84,498,17,1],[498,17,498,43,1],[498,43,499,17,1],[499,17,499,79,1],[499,79,500,17,1],[500,17,500,75,1],[500,75,501,17,1],[501,17,501,58,1],[501,58,502,13,1],[502,13,502,14,1],[502,14,502,16,1],[485,13,502,16,1],[503,9,503,10,1],[506,9,506,10,1],[507,13,508,13,1],[508,13,508,14,1],[508,14,509,17,1],[509,17,509,66,1],[509,66,510,17,1],[510,17,510,67,1],[510,67,511,17,1],[511,17,511,66,1],[511,66,512,17,1],[512,17,512,43,1],[512,43,515,17,1],[515,17,515,44,1],[515,44,516,17,1],[516,17,516,47,1],[516,47,517,17,1],[517,17,517,42,1],[517,42,518,17,1],[518,17,518,84,1],[518,84,520,17,1],[520,17,520,43,1],[520,43,521,17,1],[521,17,521,79,1],[521,79,522,17,1],[522,17,522,75,1],[522,75,523,17,1],[523,17,523,58,1],[523,58,524,13,1],[524,13,524,14,1],[524,14,524,16,1],[507,13,524,16,1],[525,9,525,10,1],[528,9,528,10,1],[529,13,530,13,1],[530,13,530,14,1],[530,14,531,17,1],[531,17,531,66,1],[531,66,532,17,1],[532,17,532,68,1],[532,68,533,17,1],[533,17,533,68,1],[533,68,534,17,1],[534,17,534,100,1],[534,100,535,17,1],[535,17,535,89,1],[535,89,536,17,1],[536,17,536,51,1],[536,51,537,17,1],[537,17,537,43,1],[537,43,540,17,1],[540,17,540,62,1],[540,62,541,17,1],[541,17,541,43,1],[541,43,543,17,1],[543,17,543,81,1],[543,81,544,17,1],[544,17,544,46,1],[544,46,545,17,1],[545,17,545,112,1],[545,112,546,17,1],[546,17,546,81,1],[546,81,547,17,1],[547,17,547,46,1],[547,46,548,17,1],[548,17,548,112,1],[548,112,549,13,1],[549,13,549,14,1],[549,14,549,16,1],[529,13,549,16,1],[550,9,550,10,1]]);
+      highlightRanges([[16,9,16,10,0],[17,13,17,48,0],[17,49,17,56,0],[20,13,20,34,0],[21,13,21,14,0],[22,17,22,51,0],[25,17,25,18,0],[27,21,27,45,0],[30,26,30,35,0],[30,37,30,57,0],[30,59,30,62,0],[31,21,31,22,0],[32,25,32,109,0],[33,25,33,66,0],[34,21,34,22,0],[35,17,35,18,0],[38,17,38,41,0],[40,13,40,14,0],[41,9,41,10,0],[49,9,49,10,0],[50,13,50,104,0],[50,105,50,112,0],[51,13,51,96,0],[52,9,52,10,0],[60,9,60,10,0],[61,13,61,48,0],[61,49,61,56,0],[62,13,62,68,0],[62,69,62,76,0],[63,13,63,78,0],[64,9,64,10,0]]);
     </script>
   </body>
 </html>

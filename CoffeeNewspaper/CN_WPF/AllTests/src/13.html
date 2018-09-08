@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_service\serviceimplement\taskservice.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\consoletables.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
@@ -10,433 +10,284 @@
     <pre id="content" class="source-code">
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
-using CN_Core;
-using CN_Core.Interfaces;
-using CN_Core.Interfaces.Repository;
-using CN_Core.Interfaces.Service;
-using CN_Core.Utilities;
+using System.Text;
+using System.Text.RegularExpressions;
+using Console = System.Console;
 
-namespace CN_Service
+namespace CoffeeNewspaper_CLI
 {
-    public class TaskService : ITaskService
+    namespace ConsoleTables
     {
-        #region Construct
-
-        public TaskService(IUnitOfWork UnitOfWork, ITimeSliceDataStore TimeSliceDataStore, ITaskDataStore TaskDataStore)
+        public class ConsoleTable
         {
-            unitOfWork = UnitOfWork;
-            timeSliceDataStore = TimeSliceDataStore;
-            taskDataStore = TaskDataStore;
-        }
+            public IList&lt;object&gt; Columns { get; set; }
+            public IList&lt;object[]&gt; Rows { get; protected set; }
 
-        #endregion
+            public ConsoleTableOptions Options { get; protected set; }
 
-        #region Private Properties
-
-        private readonly IUnitOfWork unitOfWork;
-        private readonly ITaskDataStore taskDataStore;
-        private readonly ITimeSliceDataStore timeSliceDataStore;
-
-        #endregion
-
-        #region Task relevent
-
-        public Task&lt;bool&gt; EditATask(CNTask task)
-        {
-            if (task == null || task.TaskId &lt;= 0) return Task.FromResult(false);
-            if (string.IsNullOrEmpty(task.Content) || string.IsNullOrEmpty(task.Content.Trim()))
-                throw new ArgumentException(&quot;The Content Field is needed&quot;);
-            return EditATaskAsync(task);
-        }
-
-        private async Task&lt;bool&gt; EditATaskAsync(CNTask task)
-        {
-                taskDataStore.UpdateTask(task);
-                return await unitOfWork.Commit();
-        }
-
-        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetAllTasks()
-        {
-                return await taskDataStore.GetAllTask();
-        }
-
-        public async Task&lt;CNTask&gt; GetTaskById(int taskId)
-        {
-                return await taskDataStore.GetTask(taskId);
-        }
-
-        public async Task&lt;CNTask&gt; GetTaskByIdNoTracking(int taskId)
-        {
-                return await taskDataStore.GetTaskNoTracking(taskId);
-        }
-
-        public async Task&lt;int&gt; GetTaskRootParentId(int taskId)
-        {
-                var task = await taskDataStore.GetTask(taskId);
-                while (task.HasParentTask()) task = task.ParentTask;
-                return task.TaskId;
-        }
-
-        public Task&lt;CNTask&gt; CreateATask(CNTask task)
-        {
-            if (string.IsNullOrEmpty(task.Content) || string.IsNullOrEmpty(task.Content.Trim()))
-                throw new ArgumentException(&quot;The Content Field is needed&quot;);
-            return CreateATaskAsync(task);
-        }
-
-        private async Task&lt;CNTask&gt; CreateATaskAsync(CNTask task)
-        {
-                var parentTaskId = task.ParentTask?.TaskId ?? task.ParentTaskID;
-                task.Sort = await taskDataStore.GetMaxSort(parentTaskId) + 1;
-                var result = taskDataStore.AddTask(task);
-                return await unitOfWork.Commit() ? result : null;
-        }
-
-        public async Task&lt;bool&gt; DeleteTask(int taskId, bool force = false)
-        {
-                var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (targetTask.IsDeleted) return true;
-                if (targetTask.ChildTasks.FilterDeletedAndOrderBySortTasks().Any() &amp;&amp; !force)
-                    throw new TaskHasChildTasksException();
-                if (targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask).FilterDeletedAndOrderBySortTasks().Any() &amp;&amp;
-                    !force) throw new TaskHasSufTasksException();
-                //Delete the task itself
-                targetTask.IsDeleted = true;
-                //Delete the tasks children and suffix task
-                foreach (var task in targetTask.ChildTasks.FilterDeletedAndOrderBySortTasks())
-                    await DeleteTask(task.TaskId, force);
-                foreach (var task in targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask)
-                    .FilterDeletedAndOrderBySortTasks()) await DeleteTask(task.TaskId, force);
-                taskDataStore.UpdateTask(targetTask);
-                return await unitOfWork.Commit();
-        }
-
-        public async Task&lt;bool&gt; RecoverATask(int taskId)
-        {
-                var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (!targetTask.IsDeleted) return true;
-
-                //Recover the task itself
-                targetTask.IsDeleted = false;
-                //Recover the tasks children and suffix task
-                foreach (var task in targetTask.ChildTasks) await RecoverATask(task.TaskId);
-                foreach (var task in targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask))
-                    await RecoverATask(task.TaskId);
-                taskDataStore.UpdateTask(targetTask);
-                return await unitOfWork.Commit();
-        }
-
-        public async Task&lt;bool&gt; StartATask(int taskId)
-        {
-                var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (targetTask.IsDeleted) return false;
-                if (targetTask.Status != CNTaskStatus.TODO &amp;&amp; targetTask.Status != CNTaskStatus.PENDING &amp;&amp;
-                    targetTask.Status != CNTaskStatus.DONE)
-                    throw new TaskStatusException(
-                        new List&lt;CNTaskStatus&gt; {CNTaskStatus.TODO, CNTaskStatus.PENDING, CNTaskStatus.DONE},
-                        targetTask.Status);
-                //set status to doing
-                if (targetTask.Status == CNTaskStatus.PENDING) targetTask.PendingReason = null;
-                targetTask.Status = CNTaskStatus.DOING;
-                if (targetTask.IsFail)
-                {
-                    targetTask.FailReason = null;
-                    targetTask.IsFail = false;
-                }
-
-                taskDataStore.UpdateTask(targetTask);
-                //if this is the first start then update targetTask&#39;s startTime
-                //add a timeslice to this task
-                await AddATimeSlice(targetTask.TaskId, new CNTimeSlice(DateTime.Now));
-                return await unitOfWork.Commit();
-        }
-
-        public async Task&lt;bool&gt; PauseATask(int taskId)
-        {
-                var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (targetTask.IsDeleted) return false;
-                if (targetTask.Status != CNTaskStatus.DOING)
-                    throw new TaskStatusException(new List&lt;CNTaskStatus&gt; {CNTaskStatus.DOING}, targetTask.Status);
-                targetTask.Status = CNTaskStatus.TODO;
-                taskDataStore.UpdateTask(targetTask);
-
-            //EndTimeSlices of this task&#39;s children and suffix task
-            return await EndTimeSlice(targetTask.TaskId, DateTime.Now);
-        }
-
-        public async Task&lt;bool&gt; PendingATask(int taskId, string reason)
-        {
-                var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (targetTask.IsDeleted) return false;
-                if (targetTask.Status != CNTaskStatus.DOING
-                    &amp;&amp; targetTask.Status != CNTaskStatus.TODO
-                    &amp;&amp; targetTask.Status != CNTaskStatus.PENDING)
-                    throw new TaskStatusException(
-                        new List&lt;CNTaskStatus&gt; {CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING},
-                        targetTask.Status);
-                //EndTimeSlices of this task&#39;s children and suffix task
-                if (targetTask.Status == CNTaskStatus.DOING) await EndTimeSlice(targetTask.TaskId, DateTime.Now);
-                targetTask.Status = CNTaskStatus.PENDING;
-                targetTask.PendingReason = reason;
-                taskDataStore.UpdateTask(targetTask);
-                return await unitOfWork.Commit();
-        }
-        
-        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetChildTasksNoTracking(int taskId)
-        {
-                return await taskDataStore.GetChildTasksNoTracking(taskId);
-        }
-
-        public async Task&lt;bool&gt; RemoveATask(int taskId, bool force = false)
-        {
-                var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (!targetTask.IsDeleted) return false;
-                if (targetTask.ChildTasks.Any() &amp;&amp; !force) throw new TaskHasChildTasksException();
-                if (targetTask.SufTaskConnectors.Count &gt; 0 &amp;&amp; !force) throw new TaskHasSufTasksException();
-
-                //Remove the tasks children and suffix task
-                foreach (var task in targetTask.ChildTasks) await RemoveATask(task.TaskId, force);
-                foreach (var task in targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask))
-                    await RemoveATask(task.TaskId, force);
-                taskDataStore.RemoveTask(targetTask);
-                return await unitOfWork.Commit();
-        }
-
-        public async Task&lt;bool&gt; FinishATask(int taskId)
-        {
-                var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-                if (targetTask.IsDeleted) return false;
-                if (targetTask.Status == CNTaskStatus.DONE)
-                    throw new TaskStatusException(
-                        new List&lt;CNTaskStatus&gt; {CNTaskStatus.DOING, CNTaskStatus.TODO, CNTaskStatus.PENDING},
-                        targetTask.Status);
-                if (targetTask.Status == CNTaskStatus.PENDING) targetTask.PendingReason = null;
-                targetTask.Status = CNTaskStatus.DONE;
-                if (targetTask.IsFail)
-                {
-                    targetTask.FailReason = null;
-                    targetTask.IsFail = false;
-                }
-
-                taskDataStore.UpdateTask(targetTask);
-
-            //EndTimeSlices of this task&#39;s children and suffix task
-            return await EndTimeSlice(targetTask.TaskId, DateTime.Now);
-        }
-
-        public async Task&lt;bool&gt; FailATask(int taskId, string reason)
-        {
-                var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
-
-                if (targetTask.IsFail)
-                {
-                    targetTask.FailReason = reason;
-                    taskDataStore.UpdateTask(targetTask);
-                    return await unitOfWork.Commit();
+            public ConsoleTable(params string[] columns)
+                : this(new ConsoleTableOptions {Columns = new List&lt;string&gt;(columns)})
+            {
             }
-                else
-                {
-                    //tag this as filed
-                    targetTask.IsFail = true;
-                    targetTask.FailReason = reason;
-                    targetTask.Status = CNTaskStatus.TODO;
-                taskDataStore.UpdateTask(targetTask);
 
-                    //EndTimeSlices of this task&#39;s children and suffix task
-                    return await EndTimeSlice(targetTask.TaskId, DateTime.Now);
+            public ConsoleTable(ConsoleTableOptions options)
+            {
+                Options = options ?? throw new ArgumentNullException(nameof(options));
+                Rows = new List&lt;object[]&gt;();
+                Columns = new List&lt;object&gt;(options.Columns);
+            }
+
+            public ConsoleTable AddColumn(IEnumerable&lt;string&gt; names)
+            {
+                foreach (var name in names)
+                    Columns.Add(name);
+                return this;
+            }
+
+            public ConsoleTable AddRow(params object[] values)
+            {
+                if (values == null)
+                    throw new ArgumentNullException(nameof(values));
+
+                if (!Columns.Any())
+                    throw new Exception(&quot;Please set the columns first&quot;);
+
+                if (Columns.Count != values.Length)
+                    throw new Exception(
+                        $&quot;The number columns in the row ({Columns.Count}) does not match the values ({values.Length}&quot;);
+
+                Rows.Add(values);
+                return this;
+            }
+
+            public static ConsoleTable From&lt;T&gt;(IEnumerable&lt;T&gt; values)
+            {
+                var table = new ConsoleTable();
+
+                var columns = GetColumns&lt;T&gt;();
+
+                var enumerable = columns as string[] ?? columns.ToArray();
+                table.AddColumn(enumerable);
+
+                foreach (var propertyValues in values.Select(value =&gt;
+                    enumerable.Select(column =&gt; GetColumnValue&lt;T&gt;(value, column))))
+                    table.AddRow(propertyValues.ToArray());
+
+                return table;
+            }
+
+            public override string ToString()
+            {
+                var builder = new StringBuilder();
+
+                // find the longest column by searching each row
+                var columnLengths = ColumnLengths();
+
+                // create the string format with padding
+                var format = Enumerable.Range(0, Columns.Count)
+                                 .Select(i =&gt; &quot; | {&quot; + i + &quot;,&quot; + columnLengths[i] + &quot;}&quot;)
+                                 .Aggregate((s, a) =&gt; s + a) + &quot; |&quot;;
+
+                // find the longest formatted line
+                var maxRowLength = Math.Max(0, Rows.Any() ? Rows.Max(row =&gt; string.Format(format, row).Length) : 0);
+                var columnHeaders = string.Format(format, Columns.ToArray());
+
+                // longest line is greater of formatted columnHeader and longest row
+                var longestLine = Math.Max(maxRowLength, columnHeaders.Length);
+
+                // add each row
+                var results = Rows.Select(row =&gt; string.Format(format, row)).ToList();
+
+                // create the divider
+                var divider = &quot; &quot; + string.Join(&quot;&quot;, Enumerable.Repeat(&quot;-&quot;, longestLine - 1)) + &quot; &quot;;
+                builder.AppendLine(divider);
+                builder.AppendLine(columnHeaders);
+
+                foreach (var row in results)
+                {
+                    builder.AppendLine(divider);
+                    builder.AppendLine(row);
                 }
 
-        }
+                builder.AppendLine(divider);
 
-        public async Task&lt;bool&gt; SetParentTask(int targetTaskId, int parentTaskId, int pos)
-        {
-                if (targetTaskId&lt;=0) return false;
-            var targetTask =await taskDataStore.GetTask(targetTaskId);
-            var parentTask = parentTaskId&gt;0?await taskDataStore.GetTask(parentTaskId):null;
-                //directly add to the rear of tasklist
-                if (pos &lt; 0)
+                if (Options.EnableCount)
                 {
-                    targetTask.Sort = await taskDataStore.GetMaxSort(parentTaskId) + 1;
-                }
-                //add to a pos
-                else
-                {
-                    var originOrder = parentTask == null
-                        ? (await GetAllTasks()).ToList()
-                        : parentTask.ChildTasks.FilterDeletedAndOrderBySortTasks().ToList();
-                    if (pos &gt;= originOrder.Count) pos = originOrder.Count - 1;
-                    targetTask.Sort = originOrder[pos].Sort + 1;
-                    for (int i = pos + 1, currentSort = targetTask.Sort; i &lt; originOrder.Count; i++)
-                    {
-                        originOrder[i].Sort = ++currentSort;
-                        await EditATaskAsync(originOrder[i]);
-                    }
+                    builder.AppendLine(&quot;&quot;);
+                    builder.AppendFormat(&quot; Count: {0}&quot;, Rows.Count);
                 }
 
-                targetTask.ParentTaskID = parentTaskId;
-                taskDataStore.UpdateTask(targetTask);
-                return await unitOfWork.Commit();
-        }
+                return builder.ToString();
+            }
 
-        public async Task&lt;bool&gt; AddPreTask(CNTask targetTask, CNTask preTask)
-        {
-                if (targetTask == null || preTask == null) return false;
-                if (targetTask.PreTaskConnectors.Any(r =&gt; r.PreTask.TaskId == preTask.TaskId)) return false;
-                targetTask.PreTaskConnectors.Add(new CNTaskConnector {PreTask = preTask, SufTask = targetTask});
+            public string ToMarkDownString()
+            {
+                return ToMarkDownString(&#39;|&#39;);
+            }
 
-                //if pretask not complete update current task status to pending
-                if (preTask.Status != CNTaskStatus.DONE)
-                    await PendingATask(targetTask.TaskId, CNConstants.PENDINGREASON_PreTaskNotComplete);
-                taskDataStore.UpdateTask(targetTask);
-                return await unitOfWork.Commit();
-        }
+            private string ToMarkDownString(char delimiter)
+            {
+                var builder = new StringBuilder();
 
-        public async Task&lt;bool&gt; DelPreTask(CNTask targetTask, CNTask preTask)
-        {
-                if (targetTask == null || preTask == null) return false;
+                // find the longest column by searching each row
+                var columnLengths = ColumnLengths();
 
-                var preTasks = targetTask.PreTaskConnectors.ToList();
-                var connector = preTasks.FirstOrDefault(r =&gt; r.PreTask.TaskId == preTask.TaskId);
-                if (connector == null) return false;
+                // create the string format with padding
+                var format = Format(columnLengths, delimiter);
 
-                taskDataStore.RemoveTaskConnector(connector);
+                // find the longest formatted line
+                var columnHeaders = string.Format(format, Columns.ToArray());
 
-                var otherPreTasks = preTasks.Where(r =&gt; r.PreTask.TaskId != preTask.TaskId);
-                if (otherPreTasks.Select(y =&gt; y.PreTask).All(x =&gt; x.Status == CNTaskStatus.DONE)
-                    &amp;&amp; targetTask.Status == CNTaskStatus.PENDING)
+                // add each row
+                var results = Rows.Select(row =&gt; string.Format(format, row)).ToList();
+
+                // create the divider
+                var divider = Regex.Replace(columnHeaders, @&quot;[^|]&quot;, &quot;-&quot;);
+
+                builder.AppendLine(columnHeaders);
+                builder.AppendLine(divider);
+                results.ForEach(row =&gt; builder.AppendLine(row));
+
+                return builder.ToString();
+            }
+
+            public string ToMinimalString()
+            {
+                return ToMarkDownString(char.MinValue);
+            }
+
+            public string ToStringAlternative()
+            {
+                var builder = new StringBuilder();
+
+                // find the longest column by searching each row
+                var columnLengths = ColumnLengths();
+
+                // create the string format with padding
+                var format = Format(columnLengths);
+
+                // find the longest formatted line
+                var columnHeaders = string.Format(format, Columns.ToArray());
+
+                // add each row
+                var results = Rows.Select(row =&gt; string.Format(format, row)).ToList();
+
+                // create the divider
+                var divider = Regex.Replace(columnHeaders, @&quot;[^|]&quot;, &quot;-&quot;);
+                var dividerPlus = divider.Replace(&quot;|&quot;, &quot;+&quot;);
+
+                builder.AppendLine(dividerPlus);
+                builder.AppendLine(columnHeaders);
+
+                foreach (var row in results)
                 {
-                    targetTask.Status = CNTaskStatus.TODO;
-                    targetTask.PendingReason = null;
+                    builder.AppendLine(dividerPlus);
+                    builder.AppendLine(row);
                 }
 
-                taskDataStore.UpdateTask(targetTask);
-                return await unitOfWork.Commit();
-        }
+                builder.AppendLine(dividerPlus);
 
-        #endregion
+                return builder.ToString();
+            }
 
-        #region TimeSlices relevent
+            public void WriteAlternateColorTable(Color lineColor1, Color LineColor2)
+            {
+                // find the longest column by searching each row
+                var columnLengths = ColumnLengths();
 
-        public async Task&lt;bool&gt; DeleteAllTimeSlicesOfTask(int taskId)
-        {
-                var targetTask = await taskDataStore.GetTask(taskId);
-                if (targetTask == null) return false;
+                // create the string format with padding
+                var format = Format(columnLengths, char.MinValue);
 
-                foreach (var task in targetTask.ChildTasks ?? new List&lt;CNTask&gt;())
-                    await DeleteAllTimeSlicesOfTask(task.TaskId);
-                foreach (var task in targetTask.SufTaskConnectors.Select(y =&gt; y.SufTask))
-                    await DeleteAllTimeSlicesOfTask(task.TaskId);
-                targetTask.StartTime = null;
-                targetTask.EndTime = null;
-                taskDataStore.UpdateTask(targetTask);
-                timeSliceDataStore.DeleteTimeSliceByTask(targetTask.TaskId);
-                return await unitOfWork.Commit();
-        }
+                // find the longest formatted line
+                var columnHeaders = string.Format(format, Columns.ToArray());
 
-        public async Task&lt;ICollection&lt;CNTimeSlice&gt;&gt; GetTaskTimeSlices(int taskid)
-        {
-                var task = await taskDataStore.GetTask(taskid);
-                if (task == null) return new List&lt;CNTimeSlice&gt;();
-                return await timeSliceDataStore.GetTimeSliceByTaskID(taskid);
-        }
+                // add each row
+                var results = Rows.Select(row =&gt; string.Format(format, row)).ToList();
 
-        public async Task&lt;CNTimeSlice&gt; AddATimeSlice(int taskid, CNTimeSlice timeSlice)
-        {
-                //get original task
-                var task = await taskDataStore.GetTask(taskid);
-                if (task == null) return null;
-
-                //detect conflict
-                if (task.UsedTimeSlices.Any(r =&gt; r.InterceptWith(timeSlice)))
-                    throw new TimeSliceInterveneException();
-
-                //Update Task&#39;s StartTime or EndTime
-                var source = new List&lt;CNTimeSlice&gt;(task.UsedTimeSlices) {timeSlice};
-                source.Sort();
-                taskDataStore.ExpandTaskTime(task, source.First().StartDateTime, source.Last().EndDateTime);
-
-                //Save TimeSlice
-                timeSlice.Task = task;
-                var result = timeSliceDataStore.AddTimeSlice(timeSlice);
-                return await unitOfWork.Commit()?result:null;
-        }
-
-
-        public async Task&lt;bool&gt; DeleteTimeSlices(CNTimeSlice timeSlice)
-        {
-                //Get original slice by id
-                var originSlice = await timeSliceDataStore.GetTimeSliceById(timeSlice.TimeSliceId);
-                if (originSlice == null) return false;
-                //Update Task&#39;s StartTime or EndTime
-                var originDatas = originSlice.Task.UsedTimeSlices.ToList();
-
-                //if only contain one slice
-                if (originDatas.Count == 1)
+                // create the divider
+                var divider = Regex.Replace(columnHeaders, @&quot;[^|]&quot;, &quot;-&quot;);
+                
+                Colorful.Console.WriteLine(columnHeaders);
+                Colorful.Console.WriteLine(divider);
+                for (var index = 0; index &lt; results.Count; index++)
                 {
-                    taskDataStore.UpdateStartTaskTime(originSlice.Task, null);
-                    taskDataStore.UpdateEndTaskTime(originSlice.Task, null);
+                    var row = results[index];
+                    Colorful.Console.WriteLine(row, index%2==0?lineColor1: LineColor2);
                 }
-                else
+            }
+
+            private string Format(List&lt;int&gt; columnLengths, char delimiter = &#39;|&#39;)
+            {
+                var delimiterStr = delimiter == char.MinValue ? string.Empty : delimiter.ToString();
+                var format = (Enumerable.Range(0, Columns.Count)
+                                  .Select(i =&gt; &quot; &quot; + delimiterStr + &quot; {&quot; + i + &quot;,-&quot; + columnLengths[i] + &quot;}&quot;)
+                                  .Aggregate((s, a) =&gt; s + a) + &quot; &quot; + delimiterStr).Trim();
+                return format;
+            }
+
+            private List&lt;int&gt; ColumnLengths()
+            {
+                var columnLengths = Columns
+                    .Select((t, i) =&gt; Rows.Select(x =&gt; x[i])
+                        .Union(new[] {Columns[i]})
+                        .Where(x =&gt; x != null)
+                        .Select(x =&gt; x.ToString().Length).Max())
+                    .ToList();
+                return columnLengths;
+            }
+
+            public void Write(Format format = ConsoleTables.Format.Default)
+            {
+                switch (format)
                 {
-                    //if have mutiple timeslices
-                    originDatas.Sort();
-                    if (Equals(originDatas.First(), timeSlice))
-                    {
-                        originDatas.Remove(timeSlice);
-                        taskDataStore.UpdateStartTaskTime(originSlice.Task, originDatas.First().StartDateTime);
-                    }
-                    else if (Equals(originDatas.Last(), timeSlice))
-                    {
-                        originDatas.Remove(timeSlice);
-                        taskDataStore.UpdateEndTaskTime(originSlice.Task, originDatas.Last().EndDateTime);
-                    }
+                    case ConsoleTables.Format.Default:
+                        Console.WriteLine(ToString());
+                        break;
+                    case ConsoleTables.Format.MarkDown:
+                        Console.WriteLine(ToMarkDownString());
+                        break;
+                    case ConsoleTables.Format.Alternative:
+                        Console.WriteLine(ToStringAlternative());
+                        break;
+                    case ConsoleTables.Format.Minimal:
+                        Console.WriteLine(ToMinimalString());
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(format), format, null);
                 }
+            }
 
+            private static IEnumerable&lt;string&gt; GetColumns&lt;T&gt;()
+            {
+                return typeof(T).GetProperties().Select(x =&gt; x.Name).ToArray();
+            }
 
-                //delete the timeslice
-                timeSliceDataStore.DeleteTimeSlice(originSlice);
-                return await unitOfWork.Commit();
+            private static object GetColumnValue&lt;T&gt;(object target, string column)
+            {
+                return typeof(T).GetProperty(column)?.GetValue(target, null);
+            }
         }
 
-        public async Task&lt;bool&gt; EndTimeSlice(int taskId, DateTime endTime)
+        public class ConsoleTableOptions
         {
-                var originDataTask = await taskDataStore.GetTask(taskId);
-                if (originDataTask?.UsedTimeSlices == null || originDataTask.UsedTimeSlices.Count == 0) return false;
-                var originDatas = originDataTask.UsedTimeSlices.ToList();
-                originDatas.Sort();
-                // if the last timeslice is ended then return true
-                var lastSlice = originDatas.Last();
-                if (lastSlice.EndDateTime != null) return true;
-                // if the last timeslice&#39;s starttime is bigger than endtime return false
-                if (lastSlice.StartDateTime &gt; endTime) return false;
-                lastSlice.EndDateTime = endTime;
-
-                //EndTimeSlices of this task&#39;s children and suffix task
-                foreach (var task in originDataTask.ChildTasks ?? new List&lt;CNTask&gt;())
-                    await EndTimeSlice(task.TaskId, endTime);
-                foreach (var task in originDataTask.SufTaskConnectors.Select(y =&gt; y.SufTask))
-                    await EndTimeSlice(task.TaskId, endTime);
-                taskDataStore.UpdateEndTaskTime(originDataTask, endTime);
-                timeSliceDataStore.UpdateTimeSlice(lastSlice);
-                return await unitOfWork.Commit();
+            public IEnumerable&lt;string&gt; Columns { get; set; } = new List&lt;string&gt;();
+            public bool EnableCount { get; set; } = true;
         }
 
-        #endregion
+        public enum Format
+        {
+            Default = 0,
+            MarkDown = 1,
+            Alternative = 2,
+            Minimal = 3
+        }
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[17,9,17,121,1],[18,9,18,10,1],[19,13,19,37,1],[20,13,20,53,1],[21,13,21,43,1],[22,9,22,10,1],[37,9,37,10,1],[38,13,38,50,1],[38,51,38,81,1],[39,13,39,97,1],[40,17,40,76,1],[41,13,41,41,1],[42,9,42,10,1],[45,9,45,10,1],[46,17,46,48,1],[47,17,47,50,1],[48,9,48,10,1],[51,9,51,10,1],[52,17,52,57,1],[53,9,53,10,1],[56,9,56,10,1],[57,17,57,60,1],[58,9,58,10,1],[61,9,61,10,0],[62,17,62,70,0],[63,9,63,10,0],[66,9,66,10,0],[67,17,67,64,0],[68,17,68,45,0],[68,46,68,69,0],[69,17,69,36,0],[70,9,70,10,0],[73,9,73,10,1],[74,13,74,97,1],[75,17,75,76,1],[76,13,76,43,1],[77,9,77,10,1],[80,9,80,10,1],[81,17,81,81,1],[82,17,82,78,1],[83,17,83,58,1],[84,17,84,66,1],[85,9,85,10,1],[88,9,88,10,1],[89,17,89,70,1],[90,17,90,40,1],[90,41,90,54,1],[91,17,91,42,1],[91,43,91,55,1],[92,17,92,94,1],[93,21,93,60,1],[94,17,94,62,1],[94,62,94,71,1],[94,71,95,28,1],[94,17,95,28,1],[95,29,95,66,1],[97,17,97,45,1],[99,17,99,24,1],[99,26,99,34,1],[99,35,99,37,1],[99,38,99,94,1],[100,21,100,58,1],[101,17,101,24,1],[101,26,101,34,1],[101,35,101,37,1],[101,38,101,79,1],[101,79,101,88,1],[101,88,102,56,1],[101,38,102,56,1],[102,58,102,95,1],[103,17,103,54,1],[104,17,104,50,1],[105,9,105,10,1],[108,9,108,10,1],[109,17,109,70,1],[110,17,110,40,1],[110,41,110,54,1],[111,17,111,43,1],[111,44,111,56,1],[114,17,114,46,1],[116,17,116,24,1],[116,26,116,34,1],[116,35,116,37,1],[116,38,116,59,1],[116,61,116,93,1],[117,17,117,24,1],[117,26,117,34,1],[117,35,117,37,1],[117,38,117,79,1],[117,79,117,88,1],[117,88,117,89,1],[117,38,117,89,1],[118,21,118,53,1],[119,17,119,54,1],[120,17,120,50,1],[121,9,121,10,1],[124,9,124,10,1],[125,17,125,70,1],[126,17,126,40,1],[126,41,126,54,1],[127,17,127,42,1],[127,43,127,56,1],[128,17,129,60,1],[130,21,132,44,1],[134,17,134,63,1],[134,64,134,96,0],[135,17,135,56,1],[136,17,136,39,1],[137,17,137,18,0],[138,21,138,50,0],[139,21,139,47,0],[140,17,140,18,0],[142,17,142,54,1],[145,17,145,87,1],[146,17,146,50,1],[147,9,147,10,1],[150,9,150,10,1],[151,17,151,70,1],[152,17,152,40,1],[152,41,152,54,1],[153,17,153,42,1],[153,43,153,56,1],[154,17,154,61,1],[155,21,155,115,1],[156,17,156,55,1],[157,17,157,54,1],[160,13,160,72,1],[161,9,161,10,1],[164,9,164,10,1],[165,17,165,70,1],[166,17,166,40,1],[166,41,166,54,1],[167,17,167,42,1],[167,43,167,56,1],[168,17,170,66,1],[171,21,173,44,1],[175,17,175,61,1],[175,62,175,114,1],[176,17,176,58,1],[177,17,177,51,1],[178,17,178,54,1],[179,17,179,50,1],[180,9,180,10,1],[183,9,183,10,0],[184,17,184,76,0],[185,9,185,10,0],[188,9,188,10,1],[189,17,189,70,1],[190,17,190,40,1],[190,41,190,54,1],[191,17,191,43,1],[191,44,191,57,1],[192,17,192,59,1],[192,60,192,99,1],[193,17,193,70,1],[193,71,193,108,1],[196,17,196,24,1],[196,26,196,34,1],[196,35,196,37,1],[196,38,196,59,1],[196,61,196,99,1],[197,17,197,24,1],[197,26,197,34,1],[197,35,197,37,1],[197,38,197,79,1],[197,79,197,88,1],[197,88,197,89,1],[197,38,197,89,1],[198,21,198,59,1],[199,17,199,54,1],[200,17,200,50,1],[201,9,201,10,1],[204,9,204,10,1],[205,17,205,70,1],[206,17,206,40,1],[206,41,206,54,1],[207,17,207,42,1],[207,43,207,56,1],[208,17,208,60,1],[209,21,211,44,1],[212,17,212,63,1],[212,64,212,96,0],[213,17,213,55,1],[214,17,214,39,1],[215,17,215,18,0],[216,21,216,50,0],[217,21,217,47,0],[218,17,218,18,0],[220,17,220,54,1],[223,13,223,72,1],[224,9,224,10,1],[227,9,227,10,1],[228,17,228,70,1],[229,17,229,40,1],[229,41,229,54,1],[231,17,231,39,1],[232,17,232,18,1],[233,21,233,52,1],[234,21,234,58,1],[235,21,235,54,1],[238,17,238,18,1],[240,21,240,46,1],[241,21,241,52,1],[242,21,242,59,1],[243,17,243,54,1],[246,21,246,80,1],[249,9,249,10,1],[252,9,252,10,1],[253,17,253,37,1],[253,38,253,51,1],[254,13,254,71,1],[255,13,255,92,1],[257,17,257,29,1],[258,17,258,18,1],[259,21,259,88,1],[260,17,260,18,1],[263,17,263,18,1],[264,21,266,93,1],[267,21,267,50,1],[267,51,267,79,1],[268,21,268,65,1],[269,26,269,41,1],[269,43,269,72,1],[269,74,269,95,1],[269,97,269,100,1],[270,21,270,22,1],[271,25,271,61,1],[272,25,272,62,1],[273,21,273,22,1],[274,17,274,18,1],[276,17,276,56,1],[277,17,277,54,1],[278,17,278,50,1],[279,9,279,10,1],[282,9,282,10,1],[283,17,283,59,1],[283,60,283,73,1],[284,17,284,59,1],[284,59,284,93,1],[284,93,284,95,1],[284,17,284,95,1],[284,96,284,109,1],[285,17,285,113,1],[288,17,288,57,1],[289,21,289,105,1],[290,17,290,54,1],[291,17,291,50,1],[292,9,292,10,1],[295,9,295,10,1],[296,17,296,59,1],[296,60,296,73,1],[298,17,298,70,1],[299,17,299,62,1],[299,62,299,96,1],[299,96,299,98,1],[299,17,299,98,1],[300,17,300,39,1],[300,40,300,53,1],[302,17,302,62,1],[304,17,304,57,1],[304,57,304,91,1],[304,91,304,93,1],[304,17,304,93,1],[305,17,305,47,1],[305,47,305,56,1],[305,56,305,67,1],[305,67,305,96,1],[305,96,306,66,1],[305,17,306,66,1],[307,17,307,18,1],[308,21,308,59,1],[309,21,309,53,1],[310,17,310,18,1],[312,17,312,54,1],[313,17,313,50,1],[314,9,314,10,1],[321,9,321,10,1],[322,17,322,70,1],[323,17,323,40,1],[323,41,323,54,1],[325,17,325,24,1],[325,26,325,34,1],[325,35,325,37,1],[325,38,325,81,1],[326,21,326,66,1],[327,17,327,24,1],[327,26,327,34,1],[327,35,327,37,1],[327,38,327,79,1],[327,79,327,88,1],[327,88,327,89,1],[327,38,327,89,1],[328,21,328,66,1],[329,17,329,45,1],[330,17,330,43,1],[331,17,331,54,1],[332,17,332,77,1],[333,17,333,50,1],[334,9,334,10,1],[337,9,337,10,1],[338,17,338,64,1],[339,17,339,34,1],[339,35,339,66,1],[340,17,340,78,1],[341,9,341,10,1],[344,9,344,10,1],[346,17,346,64,1],[347,17,347,34,1],[347,35,347,47,1],[350,17,350,50,1],[350,50,350,76,1],[350,76,350,78,1],[350,17,350,78,1],[351,21,351,61,1],[354,17,354,85,1],[355,17,355,31,1],[356,17,356,109,1],[359,17,359,39,1],[360,17,360,73,1],[361,17,361,62,1],[362,9,362,10,1],[366,9,366,10,1],[368,17,368,100,1],[369,17,369,41,1],[369,42,369,55,1],[371,17,371,76,1],[374,17,374,44,1],[375,17,375,18,1],[376,21,376,79,1],[377,21,377,77,1],[378,17,378,18,1],[380,17,380,18,1],[382,21,382,40,1],[383,21,383,64,1],[384,21,384,22,1],[385,25,385,55,1],[386,25,386,112,1],[387,21,387,22,1],[388,26,388,68,1],[389,21,389,22,1],[390,25,390,55,1],[391,25,391,107,1],[392,21,392,22,1],[393,17,393,18,1],[397,17,397,65,1],[398,17,398,50,1],[399,9,399,10,1],[402,9,402,10,1],[403,17,403,74,1],[404,17,404,104,1],[404,105,404,118,1],[405,17,405,74,1],[406,17,406,36,1],[408,17,408,52,1],[409,17,409,51,1],[409,52,409,64,1],[411,17,411,55,1],[411,56,411,69,1],[412,17,412,49,1],[415,17,415,24,1],[415,26,415,34,1],[415,35,415,37,1],[415,38,415,85,1],[416,21,416,62,1],[417,17,417,24,1],[417,26,417,34,1],[417,35,417,37,1],[417,38,417,83,1],[417,83,417,92,1],[417,92,417,93,1],[417,38,417,93,1],[418,21,418,62,1],[419,17,419,74,1],[420,17,420,63,1],[421,17,421,50,1],[422,9,422,10,1]]);
+      highlightRanges([[15,44,15,48,0],[15,49,15,53,0],[16,43,16,47,0],[16,48,16,62,0],[18,50,18,54,0],[18,55,18,69,0],[21,19,21,86,0],[22,13,22,14,0],[23,13,23,14,0],[25,13,25,61,0],[26,13,26,14,0],[27,17,27,87,0],[28,17,28,45,0],[29,17,29,61,0],[30,13,30,14,0],[33,13,33,14,0],[34,17,34,24,0],[34,26,34,34,0],[34,35,34,37,0],[34,38,34,43,0],[35,21,35,39,0],[36,17,36,29,0],[37,13,37,14,0],[40,13,40,14,0],[41,17,41,36,0],[42,21,42,69,0],[44,17,44,36,0],[45,21,45,73,0],[47,17,47,52,0],[48,21,49,120,0],[51,17,51,34,0],[52,17,52,29,0],[53,13,53,14,0],[56,13,56,14,0],[57,17,57,48,0],[59,17,59,47,0],[61,17,61,75,0],[62,17,62,45,0],[64,17,64,24,0],[64,26,64,44,0],[64,45,64,47,0],[64,48,65,21,0],[65,21,65,49,0],[65,49,65,81,0],[65,81,65,82,0],[65,21,65,82,0],[65,82,65,83,0],[64,48,65,83,0],[66,21,66,60,0],[68,17,68,30,0],[69,13,69,14,0],[72,13,72,14,0],[73,17,73,51,0],[76,17,76,53,0],[79,17,80,47,0],[80,47,80,88,0],[80,88,81,55,0],[81,55,81,60,0],[81,60,81,69,0],[79,17,81,69,0],[84,17,84,77,0],[84,77,84,110,0],[84,110,84,117,0],[84,17,84,117,0],[85,17,85,78,0],[88,17,88,80,0],[91,17,91,50,0],[91,50,91,76,0],[91,76,91,87,0],[91,17,91,87,0],[94,17,94,100,0],[95,17,95,45,0],[96,17,96,51,0],[98,17,98,24,0],[98,26,98,33,0],[98,34,98,36,0],[98,37,98,44,0],[99,17,99,18,0],[100,21,100,49,0],[101,21,101,45,0],[102,17,102,18,0],[104,17,104,45,0],[106,17,106,41,0],[107,17,107,18,0],[108,21,108,44,0],[109,21,109,69,0],[110,17,110,18,0],[112,17,112,43,0],[113,13,113,14,0],[116,13,116,14,0],[117,17,117,46,0],[118,13,118,14,0],[121,13,121,14,0],[122,17,122,51,0],[125,17,125,53,0],[128,17,128,63,0],[131,17,131,78,0],[134,17,134,50,0],[134,50,134,76,0],[134,76,134,87,0],[134,17,134,87,0],[137,17,137,74,0],[139,17,139,51,0],[140,17,140,45,0],[141,17,141,40,0],[141,40,141,63,0],[141,63,141,65,0],[141,17,141,65,0],[143,17,143,43,0],[144,13,144,14,0],[147,13,147,14,0],[148,17,148,56,0],[149,13,149,14,0],[152,13,152,14,0],[153,17,153,51,0],[156,17,156,53,0],[159,17,159,52,0],[162,17,162,78,0],[165,17,165,50,0],[165,50,165,76,0],[165,76,165,87,0],[165,17,165,87,0],[168,17,168,74,0],[169,17,169,61,0],[171,17,171,49,0],[172,17,172,51,0],[174,17,174,24,0],[174,26,174,33,0],[174,34,174,36,0],[174,37,174,44,0],[175,17,175,18,0],[176,21,176,53,0],[177,21,177,45,0],[178,17,178,18,0],[180,17,180,49,0],[182,17,182,43,0],[183,13,183,14,0],[186,13,186,14,0],[188,17,188,53,0],[191,17,191,67,0],[194,17,194,78,0],[197,17,197,50,0],[197,50,197,76,0],[197,76,197,87,0],[197,17,197,87,0],[200,17,200,74,0],[202,17,202,59,0],[203,17,203,53,0],[204,22,204,35,0],[204,37,204,58,0],[204,60,204,67,0],[205,17,205,18,0],[206,21,206,46,0],[207,21,207,88,0],[208,17,208,18,0],[209,13,209,14,0],[212,13,212,14,0],[213,17,213,101,0],[214,17,215,48,0],[215,48,215,109,0],[215,109,216,56,0],[216,56,216,61,0],[216,61,216,92,0],[214,17,216,92,0],[217,17,217,31,0],[218,13,218,14,0],[221,13,221,14,0],[222,17,223,39,0],[223,39,223,56,0],[223,56,223,60,0],[223,60,225,37,0],[225,37,225,46,0],[225,46,226,38,0],[226,38,226,57,0],[226,57,226,64,0],[223,39,226,64,0],[226,64,227,31,0],[222,17,227,31,0],[228,17,228,38,0],[229,13,229,14,0],[232,13,232,14,0],[233,17,233,32,0],[236,25,236,55,0],[237,25,237,31,0],[239,25,239,63,0],[240,25,240,31,0],[242,25,242,66,0],[243,25,243,31,0],[245,25,245,62,0],[246,25,246,31,0],[248,25,248,93,0],[250,13,250,14,0],[253,13,253,14,0],[254,17,254,62,0],[254,62,254,68,0],[254,68,254,80,0],[254,17,254,80,0],[255,13,255,14,0],[258,13,258,14,0],[259,17,259,78,0],[260,13,260,14,0],[265,50,265,54,0],[265,55,265,59,0],[265,64,265,82,0],[266,39,266,43,0],[266,44,266,48,0],[266,53,266,57,0]]);
     </script>
   </body>
 </html>

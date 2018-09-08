@@ -2,292 +2,39 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\consoletables.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\utilities\expanddetailcontrolhelper.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using Console = System.Console;
+using System.Diagnostics;
+using System.Windows.Controls;
+using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Controls;
 
-namespace CoffeeNewspaper_CLI
+namespace CN_WPF
 {
-    namespace ConsoleTables
+    public static class ExpandDetailControlHelper
     {
-        public class ConsoleTable
+        public static UserControl ViewModelToControl(this BaseViewModel viewModel)
         {
-            public IList&lt;object&gt; Columns { get; set; }
-            public IList&lt;object[]&gt; Rows { get; protected set; }
-
-            public ConsoleTableOptions Options { get; protected set; }
-
-            public ConsoleTable(params string[] columns)
-                : this(new ConsoleTableOptions {Columns = new List&lt;string&gt;(columns)})
+            if (viewModel is TaskExpandDetailViewModel model)
             {
+                return new TaskExpandDetialControl(model);
             }
-
-            public ConsoleTable(ConsoleTableOptions options)
+            else
             {
-                Options = options ?? throw new ArgumentNullException(nameof(options));
-                Rows = new List&lt;object[]&gt;();
-                Columns = new List&lt;object&gt;(options.Columns);
+                Debugger.Break();
+                return null;
             }
-
-            public ConsoleTable AddColumn(IEnumerable&lt;string&gt; names)
-            {
-                foreach (var name in names)
-                    Columns.Add(name);
-                return this;
-            }
-
-            public ConsoleTable AddRow(params object[] values)
-            {
-                if (values == null)
-                    throw new ArgumentNullException(nameof(values));
-
-                if (!Columns.Any())
-                    throw new Exception(&quot;Please set the columns first&quot;);
-
-                if (Columns.Count != values.Length)
-                    throw new Exception(
-                        $&quot;The number columns in the row ({Columns.Count}) does not match the values ({values.Length}&quot;);
-
-                Rows.Add(values);
-                return this;
-            }
-
-            public static ConsoleTable From&lt;T&gt;(IEnumerable&lt;T&gt; values)
-            {
-                var table = new ConsoleTable();
-
-                var columns = GetColumns&lt;T&gt;();
-
-                var enumerable = columns as string[] ?? columns.ToArray();
-                table.AddColumn(enumerable);
-
-                foreach (var propertyValues in values.Select(value =&gt;
-                    enumerable.Select(column =&gt; GetColumnValue&lt;T&gt;(value, column))))
-                    table.AddRow(propertyValues.ToArray());
-
-                return table;
-            }
-
-            public override string ToString()
-            {
-                var builder = new StringBuilder();
-
-                // find the longest column by searching each row
-                var columnLengths = ColumnLengths();
-
-                // create the string format with padding
-                var format = Enumerable.Range(0, Columns.Count)
-                                 .Select(i =&gt; &quot; | {&quot; + i + &quot;,&quot; + columnLengths[i] + &quot;}&quot;)
-                                 .Aggregate((s, a) =&gt; s + a) + &quot; |&quot;;
-
-                // find the longest formatted line
-                var maxRowLength = Math.Max(0, Rows.Any() ? Rows.Max(row =&gt; string.Format(format, row).Length) : 0);
-                var columnHeaders = string.Format(format, Columns.ToArray());
-
-                // longest line is greater of formatted columnHeader and longest row
-                var longestLine = Math.Max(maxRowLength, columnHeaders.Length);
-
-                // add each row
-                var results = Rows.Select(row =&gt; string.Format(format, row)).ToList();
-
-                // create the divider
-                var divider = &quot; &quot; + string.Join(&quot;&quot;, Enumerable.Repeat(&quot;-&quot;, longestLine - 1)) + &quot; &quot;;
-                builder.AppendLine(divider);
-                builder.AppendLine(columnHeaders);
-
-                foreach (var row in results)
-                {
-                    builder.AppendLine(divider);
-                    builder.AppendLine(row);
-                }
-
-                builder.AppendLine(divider);
-
-                if (Options.EnableCount)
-                {
-                    builder.AppendLine(&quot;&quot;);
-                    builder.AppendFormat(&quot; Count: {0}&quot;, Rows.Count);
-                }
-
-                return builder.ToString();
-            }
-
-            public string ToMarkDownString()
-            {
-                return ToMarkDownString(&#39;|&#39;);
-            }
-
-            private string ToMarkDownString(char delimiter)
-            {
-                var builder = new StringBuilder();
-
-                // find the longest column by searching each row
-                var columnLengths = ColumnLengths();
-
-                // create the string format with padding
-                var format = Format(columnLengths, delimiter);
-
-                // find the longest formatted line
-                var columnHeaders = string.Format(format, Columns.ToArray());
-
-                // add each row
-                var results = Rows.Select(row =&gt; string.Format(format, row)).ToList();
-
-                // create the divider
-                var divider = Regex.Replace(columnHeaders, @&quot;[^|]&quot;, &quot;-&quot;);
-
-                builder.AppendLine(columnHeaders);
-                builder.AppendLine(divider);
-                results.ForEach(row =&gt; builder.AppendLine(row));
-
-                return builder.ToString();
-            }
-
-            public string ToMinimalString()
-            {
-                return ToMarkDownString(char.MinValue);
-            }
-
-            public string ToStringAlternative()
-            {
-                var builder = new StringBuilder();
-
-                // find the longest column by searching each row
-                var columnLengths = ColumnLengths();
-
-                // create the string format with padding
-                var format = Format(columnLengths);
-
-                // find the longest formatted line
-                var columnHeaders = string.Format(format, Columns.ToArray());
-
-                // add each row
-                var results = Rows.Select(row =&gt; string.Format(format, row)).ToList();
-
-                // create the divider
-                var divider = Regex.Replace(columnHeaders, @&quot;[^|]&quot;, &quot;-&quot;);
-                var dividerPlus = divider.Replace(&quot;|&quot;, &quot;+&quot;);
-
-                builder.AppendLine(dividerPlus);
-                builder.AppendLine(columnHeaders);
-
-                foreach (var row in results)
-                {
-                    builder.AppendLine(dividerPlus);
-                    builder.AppendLine(row);
-                }
-
-                builder.AppendLine(dividerPlus);
-
-                return builder.ToString();
-            }
-
-            public void WriteAlternateColorTable(Color lineColor1, Color LineColor2)
-            {
-                // find the longest column by searching each row
-                var columnLengths = ColumnLengths();
-
-                // create the string format with padding
-                var format = Format(columnLengths, char.MinValue);
-
-                // find the longest formatted line
-                var columnHeaders = string.Format(format, Columns.ToArray());
-
-                // add each row
-                var results = Rows.Select(row =&gt; string.Format(format, row)).ToList();
-
-                // create the divider
-                var divider = Regex.Replace(columnHeaders, @&quot;[^|]&quot;, &quot;-&quot;);
-                
-                Colorful.Console.WriteLine(columnHeaders);
-                Colorful.Console.WriteLine(divider);
-                for (var index = 0; index &lt; results.Count; index++)
-                {
-                    var row = results[index];
-                    Colorful.Console.WriteLine(row, index%2==0?lineColor1: LineColor2);
-                }
-            }
-
-            private string Format(List&lt;int&gt; columnLengths, char delimiter = &#39;|&#39;)
-            {
-                var delimiterStr = delimiter == char.MinValue ? string.Empty : delimiter.ToString();
-                var format = (Enumerable.Range(0, Columns.Count)
-                                  .Select(i =&gt; &quot; &quot; + delimiterStr + &quot; {&quot; + i + &quot;,-&quot; + columnLengths[i] + &quot;}&quot;)
-                                  .Aggregate((s, a) =&gt; s + a) + &quot; &quot; + delimiterStr).Trim();
-                return format;
-            }
-
-            private List&lt;int&gt; ColumnLengths()
-            {
-                var columnLengths = Columns
-                    .Select((t, i) =&gt; Rows.Select(x =&gt; x[i])
-                        .Union(new[] {Columns[i]})
-                        .Where(x =&gt; x != null)
-                        .Select(x =&gt; x.ToString().Length).Max())
-                    .ToList();
-                return columnLengths;
-            }
-
-            public void Write(Format format = ConsoleTables.Format.Default)
-            {
-                switch (format)
-                {
-                    case ConsoleTables.Format.Default:
-                        Console.WriteLine(ToString());
-                        break;
-                    case ConsoleTables.Format.MarkDown:
-                        Console.WriteLine(ToMarkDownString());
-                        break;
-                    case ConsoleTables.Format.Alternative:
-                        Console.WriteLine(ToStringAlternative());
-                        break;
-                    case ConsoleTables.Format.Minimal:
-                        Console.WriteLine(ToMinimalString());
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(format), format, null);
-                }
-            }
-
-            private static IEnumerable&lt;string&gt; GetColumns&lt;T&gt;()
-            {
-                return typeof(T).GetProperties().Select(x =&gt; x.Name).ToArray();
-            }
-
-            private static object GetColumnValue&lt;T&gt;(object target, string column)
-            {
-                return typeof(T).GetProperty(column)?.GetValue(target, null);
-            }
-        }
-
-        public class ConsoleTableOptions
-        {
-            public IEnumerable&lt;string&gt; Columns { get; set; } = new List&lt;string&gt;();
-            public bool EnableCount { get; set; } = true;
-        }
-
-        public enum Format
-        {
-            Default = 0,
-            MarkDown = 1,
-            Alternative = 2,
-            Minimal = 3
         }
     }
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[15,44,15,48,0],[15,49,15,53,0],[16,43,16,47,0],[16,48,16,62,0],[18,50,18,54,0],[18,55,18,69,0],[21,19,21,86,0],[22,13,22,14,0],[23,13,23,14,0],[25,13,25,61,0],[26,13,26,14,0],[27,17,27,87,0],[28,17,28,45,0],[29,17,29,61,0],[30,13,30,14,0],[33,13,33,14,0],[34,17,34,24,0],[34,26,34,34,0],[34,35,34,37,0],[34,38,34,43,0],[35,21,35,39,0],[36,17,36,29,0],[37,13,37,14,0],[40,13,40,14,0],[41,17,41,36,0],[42,21,42,69,0],[44,17,44,36,0],[45,21,45,73,0],[47,17,47,52,0],[48,21,49,120,0],[51,17,51,34,0],[52,17,52,29,0],[53,13,53,14,0],[56,13,56,14,0],[57,17,57,48,0],[59,17,59,47,0],[61,17,61,75,0],[62,17,62,45,0],[64,17,64,24,0],[64,26,64,44,0],[64,45,64,47,0],[64,48,65,21,0],[65,21,65,49,0],[65,49,65,81,0],[65,81,65,82,0],[65,21,65,82,0],[65,82,65,83,0],[64,48,65,83,0],[66,21,66,60,0],[68,17,68,30,0],[69,13,69,14,0],[72,13,72,14,0],[73,17,73,51,0],[76,17,76,53,0],[79,17,80,47,0],[80,47,80,88,0],[80,88,81,55,0],[81,55,81,60,0],[81,60,81,69,0],[79,17,81,69,0],[84,17,84,77,0],[84,77,84,110,0],[84,110,84,117,0],[84,17,84,117,0],[85,17,85,78,0],[88,17,88,80,0],[91,17,91,50,0],[91,50,91,76,0],[91,76,91,87,0],[91,17,91,87,0],[94,17,94,100,0],[95,17,95,45,0],[96,17,96,51,0],[98,17,98,24,0],[98,26,98,33,0],[98,34,98,36,0],[98,37,98,44,0],[99,17,99,18,0],[100,21,100,49,0],[101,21,101,45,0],[102,17,102,18,0],[104,17,104,45,0],[106,17,106,41,0],[107,17,107,18,0],[108,21,108,44,0],[109,21,109,69,0],[110,17,110,18,0],[112,17,112,43,0],[113,13,113,14,0],[116,13,116,14,0],[117,17,117,46,0],[118,13,118,14,0],[121,13,121,14,0],[122,17,122,51,0],[125,17,125,53,0],[128,17,128,63,0],[131,17,131,78,0],[134,17,134,50,0],[134,50,134,76,0],[134,76,134,87,0],[134,17,134,87,0],[137,17,137,74,0],[139,17,139,51,0],[140,17,140,45,0],[141,17,141,40,0],[141,40,141,63,0],[141,63,141,65,0],[141,17,141,65,0],[143,17,143,43,0],[144,13,144,14,0],[147,13,147,14,0],[148,17,148,56,0],[149,13,149,14,0],[152,13,152,14,0],[153,17,153,51,0],[156,17,156,53,0],[159,17,159,52,0],[162,17,162,78,0],[165,17,165,50,0],[165,50,165,76,0],[165,76,165,87,0],[165,17,165,87,0],[168,17,168,74,0],[169,17,169,61,0],[171,17,171,49,0],[172,17,172,51,0],[174,17,174,24,0],[174,26,174,33,0],[174,34,174,36,0],[174,37,174,44,0],[175,17,175,18,0],[176,21,176,53,0],[177,21,177,45,0],[178,17,178,18,0],[180,17,180,49,0],[182,17,182,43,0],[183,13,183,14,0],[186,13,186,14,0],[188,17,188,53,0],[191,17,191,67,0],[194,17,194,78,0],[197,17,197,50,0],[197,50,197,76,0],[197,76,197,87,0],[197,17,197,87,0],[200,17,200,74,0],[202,17,202,59,0],[203,17,203,53,0],[204,22,204,35,0],[204,37,204,58,0],[204,60,204,67,0],[205,17,205,18,0],[206,21,206,46,0],[207,21,207,88,0],[208,17,208,18,0],[209,13,209,14,0],[212,13,212,14,0],[213,17,213,101,0],[214,17,215,48,0],[215,48,215,109,0],[215,109,216,56,0],[216,56,216,61,0],[216,61,216,92,0],[214,17,216,92,0],[217,17,217,31,0],[218,13,218,14,0],[221,13,221,14,0],[222,17,223,39,0],[223,39,223,56,0],[223,56,223,60,0],[223,60,225,37,0],[225,37,225,46,0],[225,46,226,38,0],[226,38,226,57,0],[226,57,226,64,0],[223,39,226,64,0],[226,64,227,31,0],[222,17,227,31,0],[228,17,228,38,0],[229,13,229,14,0],[232,13,232,14,0],[233,17,233,32,0],[236,25,236,55,0],[237,25,237,31,0],[239,25,239,63,0],[240,25,240,31,0],[242,25,242,66,0],[243,25,243,31,0],[245,25,245,62,0],[246,25,246,31,0],[248,25,248,93,0],[250,13,250,14,0],[253,13,253,14,0],[254,17,254,62,0],[254,62,254,68,0],[254,68,254,80,0],[254,17,254,80,0],[255,13,255,14,0],[258,13,258,14,0],[259,17,259,78,0],[260,13,260,14,0],[265,50,265,54,0],[265,55,265,59,0],[265,64,265,82,0],[266,39,266,43,0],[266,44,266,48,0],[266,53,266,57,0]]);
+      highlightRanges([[11,9,11,10,0],[12,13,12,62,0],[13,13,13,14,0],[14,17,14,59,0],[17,13,17,14,0],[18,17,18,34,0],[19,17,19,29,0],[21,9,21,10,0]]);
     </script>
   </body>
 </html>

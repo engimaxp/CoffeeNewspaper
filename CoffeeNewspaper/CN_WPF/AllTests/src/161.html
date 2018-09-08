@@ -2,55 +2,79 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\attachedproperties\mousewheeleventbubbleupattachedproperty.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\tagdatastore.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
 using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Repository;
+using CN_Core.Specification;
+using Microsoft.EntityFrameworkCore;
 
-namespace CN_WPF
+namespace CN_Repository
 {
-    /// &lt;summary&gt;
-    /// Try to hook the child scroll view to parent scroll view
-    /// &lt;/summary&gt;
-    public class MouseWheelEventBubbleUpAttachedProperty:BaseAttachedProperty&lt;MouseWheelEventBubbleUpAttachedProperty,bool&gt;
+    public class TagDataStore: BaseDataStore, ITagDataStore
     {
-        public override void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        public TagDataStore(CNDbContext dbContext) : base(dbContext)
         {
-            if (!(sender is ScrollViewer scrollViewer)) return;
-            if ((bool) e.NewValue)
-            {
-                scrollViewer.LayoutUpdated += (o, args) =&gt; {
-                    //Hook the event
-                    scrollViewer.FindAndActToAllChild&lt;ScrollViewer&gt;((scrollchildview) =&gt; { scrollchildview.PreviewMouseWheel += (sss, eee) =&gt; PreviewMouseWheel(sss, eee, scrollViewer); });
-                };
-            }
         }
 
-        private void PreviewMouseWheel(object sender, MouseWheelEventArgs e, ScrollViewer scrollViewer)
+        #region Select Methods
+
+        public async Task&lt;ICollection&lt;CNTag&gt;&gt; GetAllTagsBySpecification(ISpecification&lt;CNTag&gt; spec)
         {
-            if (!e.Handled)
-            {
-                e.Handled = true;
-                var eventArg =
-                    new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
-                    {
-                        RoutedEvent = UIElement.MouseWheelEvent,
-                        Source = sender
-                    };
-                scrollViewer.RaiseEvent(eventArg);
-            }
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    // fetch a Queryable that includes all expression-based includes
+                    var queryableResultWithIncludes = spec.Includes
+                        .Aggregate(mDbContext.Set&lt;CNTag&gt;().AsQueryable(),
+                            (current, include) =&gt; current.Include(include));
+
+                    // modify the IQueryable to include any string-based include statements
+                    var secondaryResult = spec.IncludeStrings
+                        .Aggregate(queryableResultWithIncludes,
+                            (current, include) =&gt; current.Include(include));
+
+                    // return the result of the query using the specification&#39;s criteria expression
+                    return await secondaryResult
+                        .Where(spec.Criteria).ToListAsync();
+                });
         }
+
+        public async Task&lt;CNTag&gt; GetFirstTagBySpecification(ISpecification&lt;CNTag&gt; spec)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    // fetch a Queryable that includes all expression-based includes
+                    var queryableResultWithIncludes = spec.Includes
+                        .Aggregate(mDbContext.Set&lt;CNTag&gt;().AsQueryable(),
+                            (current, include) =&gt; current.Include(include));
+
+                    // modify the IQueryable to include any string-based include statements
+                    var secondaryResult = spec.IncludeStrings
+                        .Aggregate(queryableResultWithIncludes,
+                            (current, include) =&gt; current.Include(include));
+
+                    // return the result of the query using the specification&#39;s criteria expression
+                    return await secondaryResult
+                        .Where(spec.Criteria).FirstOrDefaultAsync();
+                });
+        }
+
+        #endregion
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[14,9,14,10,0],[15,13,15,56,0],[15,57,15,64,0],[16,13,16,35,0],[17,13,17,14,0],[18,17,18,60,0],[18,60,18,61,0],[18,61,20,21,0],[20,21,20,90,0],[20,90,20,91,0],[20,91,20,92,0],[20,92,20,143,0],[20,143,20,184,0],[20,184,20,185,0],[20,92,20,185,0],[20,185,20,186,0],[20,186,20,187,0],[20,187,20,189,0],[20,21,20,189,0],[20,189,21,17,0],[21,17,21,18,0],[21,18,21,19,0],[18,17,21,19,0],[22,13,22,14,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,28,0],[28,13,28,14,0],[29,17,29,34,0],[30,17,35,23,0],[36,17,36,51,0],[37,13,37,14,0],[38,9,38,10,0]]);
+      highlightRanges([[14,54,14,69,0],[15,9,15,10,0],[16,9,16,10,0],[21,9,21,10,0],[22,13,24,17,0],[24,17,24,18,0],[24,18,26,21,0],[26,21,28,51,0],[28,51,28,75,0],[28,75,28,77,0],[26,21,28,77,0],[28,77,31,21,0],[31,21,33,51,0],[33,51,33,75,0],[33,75,33,77,0],[31,21,33,77,0],[33,77,36,21,0],[36,21,37,61,0],[37,61,38,17,0],[38,17,38,18,0],[38,18,38,20,0],[22,13,38,20,0],[39,9,39,10,0],[42,9,42,10,0],[43,13,45,17,0],[45,17,45,18,0],[45,18,47,21,0],[47,21,49,51,0],[49,51,49,75,0],[49,75,49,77,0],[47,21,49,77,0],[49,77,52,21,0],[52,21,54,51,0],[54,51,54,75,0],[54,75,54,77,0],[52,21,54,77,0],[54,77,57,21,0],[57,21,58,69,0],[58,69,59,17,0],[59,17,59,18,0],[59,18,59,20,0],[43,13,59,20,0],[60,9,60,10,0]]);
     </script>
   </body>
 </html>

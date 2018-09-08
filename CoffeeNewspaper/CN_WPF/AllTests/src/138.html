@@ -2,39 +2,41 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\taskexpanddetialcontrol.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\icontypetofontawesomeconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Windows.Controls;
-using CN_Presentation.ViewModel.Base;
-using CN_Presentation.ViewModel.Controls;
+
+using System;
+using System.Globalization;
+using CN_Presentation;
+using CN_Presentation.Utilities;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// TaskExpandDetialControl.xaml 的交互逻辑
+    /// A converter that takes in a &lt;see cref=&quot;IconType&quot;/&gt; and returns 
+    /// the FontAwesome string for that icon
     /// &lt;/summary&gt;
-    public partial class TaskExpandDetialControl : UserControl
+    public class IconTypeToFontAwesomeConverter : BaseValueConverter&lt;IconTypeToFontAwesomeConverter&gt;
     {
-        public TaskExpandDetialControl()
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            InitializeComponent();
+                return ((IconType) value).ToFontAwesomeText();
         }
 
-        public TaskExpandDetialControl(TaskExpandDetailViewModel viewModel)
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            InitializeComponent();
-            this.DataContext = viewModel;
+            throw new NotImplementedException();
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[12,9,12,41,0],[13,9,13,10,0],[14,13,14,35,0],[15,9,15,10,0],[17,9,17,76,0],[18,9,18,10,0],[19,13,19,35,0],[20,13,20,42,0],[21,9,21,10,0]]);
+      highlightRanges([[16,9,16,10,0],[17,17,17,63,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,49,0]]);
     </script>
   </body>
 </html>

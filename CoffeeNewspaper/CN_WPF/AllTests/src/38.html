@@ -2,57 +2,91 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\utilities\expressionhelpers.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\utilities\applicationpagehelpers.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Linq.Expressions;
-using System.Reflection;
+using System.Diagnostics;
+using CN_Presentation;
+using CN_Presentation.ViewModel.Application;
 
-namespace CN_Core.Utilities
+namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// A helper for expressions
+    /// Converts the &lt;see cref=&quot;ApplicationPage&quot;/&gt; to an actual view/page
     /// &lt;/summary&gt;
-    public static class ExpressionHelpers
+    public static class ApplicationPageHelpers
     {
         /// &lt;summary&gt;
-        /// Compiles an expression and gets the functions return value
+        /// Takes a &lt;see cref=&quot;ApplicationPage&quot;/&gt; and a view model, if any, and creates the desired page
         /// &lt;/summary&gt;
-        /// &lt;typeparam name=&quot;T&quot;&gt;The type of return value&lt;/typeparam&gt;
-        /// &lt;param name=&quot;lamba&quot;&gt;The expression to compile&lt;/param&gt;
+        /// &lt;param name=&quot;page&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;viewModel&quot;&gt;&lt;/param&gt;
         /// &lt;returns&gt;&lt;/returns&gt;
-        public static T GetPropertyValue&lt;T&gt;(this Expression&lt;Func&lt;T&gt;&gt; lamba)
+        public static BasePage ToBasePage(this ApplicationPage page, object viewModel = null)
         {
-            return lamba.Compile().Invoke();
+            // Find the appropriate page
+            switch (page)
+            {
+                case ApplicationPage.WorkSpace:
+                    return new WorkSpacePage(viewModel as WorkSpaceViewModel);
+
+                case ApplicationPage.MemoList:
+                    return new MemoListPage(viewModel as MemoListViewModel);
+
+                case ApplicationPage.Settings:
+                    return new SettingsPage(viewModel as SettingsViewModel);
+
+                case ApplicationPage.Statistic:
+                    return new StatisticPage(viewModel as StatisticViewModel);
+
+                case ApplicationPage.TagReview:
+                    return new TagReviewPage(viewModel as TagReviewViewModel);
+
+                case ApplicationPage.TasksList:
+                    return new TaskListPage(viewModel as TasksListPageViewModel);
+
+                default:
+                    Debugger.Break();
+                    return null;
+            }
         }
 
         /// &lt;summary&gt;
-        /// Sets the underlying properties value to the given value
-        /// from an expression that contains the property
+        /// Converts a &lt;see cref=&quot;BasePage&quot;/&gt; to the specific &lt;see cref=&quot;ApplicationPage&quot;/&gt; that is for that type of page
         /// &lt;/summary&gt;
-        /// &lt;typeparam name=&quot;T&quot;&gt;The type of value to set&lt;/typeparam&gt;
-        /// &lt;param name=&quot;lamba&quot;&gt;The expression&lt;/param&gt;
-        /// &lt;param name=&quot;value&quot;&gt;The value to set the property to&lt;/param&gt;
-        public static void SetPropertyValue&lt;T&gt;(this Expression&lt;Func&lt;T&gt;&gt; lamba, T value)
+        /// &lt;param name=&quot;page&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static ApplicationPage ToApplicationPage(this BasePage page)
         {
-            // Get the property information so we can set it
-            if (!(lamba.Body is MemberExpression expression)) return;
-            var propertyInfo = (PropertyInfo)expression.Member;
-            var target = Expression.Lambda(expression.Expression).Compile().DynamicInvoke();
+            // Find application page that matches the base page
+            if (page is WorkSpacePage)
+                return ApplicationPage.WorkSpace;
 
-            // Set the property value
-            propertyInfo.SetValue(target, value);
+            if (page is MemoListPage)
+                return ApplicationPage.MemoList;
+
+            if (page is SettingsPage)
+                return ApplicationPage.Settings;
+            if (page is StatisticPage)
+                return ApplicationPage.Statistic;
+            if (page is TagReviewPage)
+                return ApplicationPage.TagReview;
+            if (page is TaskListPage)
+                return ApplicationPage.TasksList;
+
+            // Alert developer of issue
+            Debugger.Break();
+            return default(ApplicationPage);
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[19,9,19,10,0],[20,13,20,45,0],[21,9,21,10,0],[31,9,31,10,0],[33,13,33,62,0],[33,63,33,70,0],[34,13,34,64,0],[35,13,35,93,0],[38,13,38,50,0],[39,9,39,10,0]]);
+      highlightRanges([[19,9,19,10,0],[21,13,21,26,0],[24,21,24,79,0],[27,21,27,77,0],[30,21,30,77,0],[33,21,33,79,0],[36,21,36,79,0],[39,21,39,82,0],[42,21,42,38,0],[43,21,43,33,0],[45,9,45,10,0],[53,9,53,10,0],[55,13,55,39,0],[56,17,56,50,0],[58,13,58,38,0],[59,17,59,49,0],[61,13,61,38,0],[62,17,62,49,0],[63,13,63,39,0],[64,17,64,50,0],[65,13,65,39,0],[66,17,66,50,0],[67,13,67,38,0],[68,17,68,50,0],[71,13,71,30,0],[72,13,72,45,0],[73,9,73,10,0]]);
     </script>
   </body>
 </html>

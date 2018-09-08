@@ -2,120 +2,95 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\memodatastore.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\command\tagcommand.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
-using CN_Core.Interfaces.Repository;
-using Microsoft.EntityFrameworkCore;
+using Colorful;
 
-namespace CN_Repository
+namespace CoffeeNewspaper_CLI
 {
-    public class MemoDataStore : BaseDataStore, IMemoDataStore
+    public class TagCommand : BaseCommand
     {
-        public MemoDataStore(CNDbContext dbContext) : base(dbContext)
+        public TagCommand(BaseState state) : base(state)
         {
+            Name = &quot;tag&quot;;
         }
 
-        #region Delete Methods
-
-        public void DeleteMemo(CNMemo memo)
+        public override async Task&lt;BaseState&gt; Excute(ArgumentParser input)
         {
-            mDbContext.Memos.Remove(memo);
-        }
-
-        #endregion
-
-        #region Update Methods
-
-        public void UpdateMemo(CNMemo memo)
-        {
-            mDbContext.Memos.Update(memo);
-        }
-
-        #endregion
-
-        #region Select Methods
-
-        public async Task&lt;CNMemo&gt; GetMemoById(string memoid)
-        {
-            return await IoC.Task.Run(
-                async () =&gt;
-                {
-                    return await mDbContext.Memos
-                        .Include(x=&gt;x.MemoTaggers)
-                        .Include(x=&gt;x.TaskMemos)
-                        .FirstOrDefaultAsync(r =&gt; string.Equals(r.MemoId, memoid));
-                });
-        }
-
-        public async Task&lt;ICollection&lt;CNMemo&gt;&gt; GetAllGlobalMemos()
-        {
-            return await IoC.Task.Run(
-                async () =&gt;
-                {
-                    return await mDbContext.Memos
-                        .Where(r =&gt; r.TaskMemos.Count == 0)
-                        .ToListAsync();
-                });
-        }
-
-        public async Task&lt;ICollection&lt;CNMemo&gt;&gt; GetAllTaskMemos(int taskid)
-        {
-            return await IoC.Task.Run(
-                async () =&gt;
-                {
-                    return await mDbContext.Memos
-                        .Where(r =&gt; r.TaskMemos.Any(y =&gt; y.TaskId == taskid))
-                        .ToListAsync();
-                });
-        }
-
-        #endregion
-
-        #region Add Methods
-
-        public CNMemo AddMemo(CNMemo memo)
-        {
-            mDbContext.Memos.Add(memo);
-            return memo;
-        }
-
-        public CNMemo CloneAMemo(string memoid)
-        {
-            var originalEntity = mDbContext.Memos.AsNoTracking()
-                .Include(r =&gt; r.MemoTaggers)
-                .Include(x =&gt; x.TaskMemos)
-                .FirstOrDefault(e =&gt; string.Equals(e.MemoId, memoid, StringComparison.Ordinal));
-            if (originalEntity == null) return null;
-            originalEntity.MemoId = null;
-            foreach (var originalEntityMemoTagger in originalEntity.MemoTaggers)
+            await Task.Delay(1);
+            if (State != null &amp;&amp; State.StateObj is CNTask task)
             {
-                originalEntityMemoTagger.MemoId = null;
-                originalEntityMemoTagger.MemoTaggerId = null;
-            }
-            foreach (var originalEntityTaskMemo in originalEntity.TaskMemos)
-            {
-                originalEntityTaskMemo.MemoId = null;
-                originalEntityTaskMemo.TaskMemoId = null;
-            }
-            mDbContext.Memos.Add(originalEntity);
-            return originalEntity;
-        }
+                var addTags = input.Get&lt;string&gt;(&quot;add&quot;).Select(x =&gt; new CNTag {Title = x}).ToList();
+                if (addTags.Any())
+                {
+                    //TODO:Extract to Service Implement
+                    //union to get a non-repeat TagList
+                    var totalTags = addTags.Union(task.TaskTaggers.Select(x =&gt; x.Tag).ToList(), CNTag.TitleComparer);
+                    //select the new tags to be added
+                    var toBeAddedTag = totalTags.Where(x =&gt; string.IsNullOrEmpty(x.TagId));
+                    //add them to task
+                    toBeAddedTag.ToList().ForEach(y =&gt;
+                        task.TaskTaggers.Add(new CNTaskTagger {Tag = y, TaskId = task.TaskId}));
+                }
 
-        #endregion
+                var removeTags = input.Get&lt;string&gt;(&quot;remove&quot;).Select(x =&gt; new CNTag {Title = x}).ToList();
+                if (removeTags.Any())
+                {
+                    var toBeRemovedTag = task.TaskTaggers.Select(x =&gt; x.Tag).ToList()
+                        .Intersect(removeTags, CNTag.TitleComparer).ToList();
+                    toBeRemovedTag.ForEach(x =&gt;
+                        task.TaskTaggers.Remove(task.TaskTaggers.FirstOrDefault(y =&gt; y.TagId == x.TagId)));
+                }
+
+                State.Refresh();
+            }
+            else if (State != null &amp;&amp; State.StateObj is CNMemo memo)
+            {
+                var addTags = input.Get&lt;string&gt;(&quot;add&quot;).Select(x =&gt; new CNTag {Title = x}).ToList();
+                if (addTags.Any())
+                {
+                    //TODO:Extract to Service Implement
+                    //union to get a non-repeat TagList
+                    var totalTags = addTags.Union(memo.MemoTaggers.Select(x =&gt; x.Tag).ToList(), CNTag.TitleComparer);
+                    //select the new tags to be added
+                    var toBeAddedTag = totalTags.Where(x =&gt; string.IsNullOrEmpty(x.TagId));
+                    //add them to memo
+                    toBeAddedTag.ToList().ForEach(y =&gt;
+                        memo.MemoTaggers.Add(new CNMemoTagger {Tag = y, MemoId = memo.MemoId}));
+                }
+
+                var removeTags = input.Get&lt;string&gt;(&quot;remove&quot;).Select(x =&gt; new CNTag {Title = x}).ToList();
+                if (removeTags.Any())
+                {
+                    var toBeRemovedTag = memo.MemoTaggers.Select(x =&gt; x.Tag).ToList()
+                        .Intersect(removeTags, CNTag.TitleComparer).ToList();
+                    toBeRemovedTag.ForEach(x =&gt;
+                        memo.MemoTaggers.Remove(memo.MemoTaggers.FirstOrDefault(y =&gt; y.TagId == x.TagId)));
+                }
+
+                State.Refresh();
+            }
+            else
+            {
+                Console.WriteLine(&quot;wrong parameter&quot;, Color.Red);
+            }
+
+            Console.WriteLine();
+            return State;
+        }
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[13,55,13,70,1],[14,9,14,10,1],[15,9,15,10,1],[20,9,20,10,1],[21,13,21,43,1],[22,9,22,10,1],[29,9,29,10,1],[30,13,30,43,1],[31,9,31,10,1],[38,9,38,10,1],[39,13,41,17,1],[41,17,41,18,1],[41,18,42,21,1],[42,21,45,84,1],[45,84,46,17,1],[46,17,46,18,1],[46,18,46,20,1],[39,13,46,20,1],[47,9,47,10,1],[50,9,50,10,1],[51,13,53,17,1],[53,17,53,18,1],[53,18,54,21,1],[54,21,56,40,1],[56,40,57,17,1],[57,17,57,18,1],[57,18,57,20,1],[51,13,57,20,1],[58,9,58,10,1],[61,9,61,10,1],[62,13,64,17,1],[64,17,64,18,1],[64,18,65,21,1],[65,21,67,40,1],[67,40,68,17,1],[68,17,68,18,1],[68,18,68,20,1],[62,13,68,20,1],[69,9,69,10,1],[76,9,76,10,1],[77,13,77,40,1],[78,13,78,25,1],[79,9,79,10,1],[82,9,82,10,1],[83,13,86,97,1],[87,13,87,40,1],[87,41,87,53,1],[88,13,88,42,1],[89,13,89,20,1],[89,22,89,50,1],[89,51,89,53,1],[89,54,89,80,1],[90,13,90,14,1],[91,17,91,56,1],[92,17,92,62,1],[93,13,93,14,1],[94,13,94,20,1],[94,22,94,48,1],[94,49,94,51,1],[94,52,94,76,1],[95,13,95,14,1],[96,17,96,54,1],[97,17,97,58,1],[98,13,98,14,1],[99,13,99,50,1],[100,13,100,35,1],[101,9,101,10,1]]);
+      highlightRanges([[11,46,11,57,0],[12,9,12,10,0],[13,13,13,26,0],[14,9,14,10,0],[17,9,17,10,0],[18,13,18,33,0],[19,13,19,64,0],[20,13,20,14,0],[21,17,21,68,0],[21,68,21,89,0],[21,89,21,100,0],[21,17,21,100,0],[22,17,22,35,0],[23,17,23,18,0],[26,21,26,80,0],[26,80,26,85,0],[26,85,26,118,0],[26,21,26,118,0],[28,21,28,61,0],[28,61,28,90,0],[28,90,28,92,0],[28,21,28,92,0],[30,21,31,25,0],[31,25,31,95,0],[31,95,31,97,0],[30,21,31,97,0],[32,17,32,18,0],[34,17,34,74,0],[34,74,34,95,0],[34,95,34,106,0],[34,17,34,106,0],[35,17,35,38,0],[36,17,36,18,0],[37,21,37,71,0],[37,71,37,76,0],[37,76,38,78,0],[37,21,38,78,0],[39,21,40,25,0],[40,25,40,86,0],[40,86,40,104,0],[40,104,40,106,0],[40,25,40,106,0],[40,106,40,108,0],[39,21,40,108,0],[41,17,41,18,0],[43,17,43,33,0],[44,13,44,14,0],[45,18,45,69,0],[46,13,46,14,0],[47,17,47,68,0],[47,68,47,89,0],[47,89,47,100,0],[47,17,47,100,0],[48,17,48,35,0],[49,17,49,18,0],[52,21,52,80,0],[52,80,52,85,0],[52,85,52,118,0],[52,21,52,118,0],[54,21,54,61,0],[54,61,54,90,0],[54,90,54,92,0],[54,21,54,92,0],[56,21,57,25,0],[57,25,57,95,0],[57,95,57,97,0],[56,21,57,97,0],[58,17,58,18,0],[60,17,60,74,0],[60,74,60,95,0],[60,95,60,106,0],[60,17,60,106,0],[61,17,61,38,0],[62,17,62,18,0],[63,21,63,71,0],[63,71,63,76,0],[63,76,64,78,0],[63,21,64,78,0],[65,21,66,25,0],[66,25,66,86,0],[66,86,66,104,0],[66,104,66,106,0],[66,25,66,106,0],[66,106,66,108,0],[65,21,66,108,0],[67,17,67,18,0],[69,17,69,33,0],[70,13,70,14,0],[72,13,72,14,0],[73,17,73,65,0],[74,13,74,14,0],[76,13,76,33,0],[77,13,77,26,0],[78,9,78,10,0]]);
     </script>
   </body>
 </html>

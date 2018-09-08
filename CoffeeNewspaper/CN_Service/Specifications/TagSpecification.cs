@@ -29,9 +29,9 @@ namespace CN_Service
         }
     }
 
-    public class TaskSpecification : BaseSpecification<CNTag>
+    public class TaskTagSpecification : BaseSpecification<CNTag>
     {
-        public TaskSpecification(int taskid)
+        public TaskTagSpecification(int taskid)
             : base(x => x.TaskTaggers != null && x.TaskTaggers.Any(y=>y.TaskId == taskid))
         {
         }

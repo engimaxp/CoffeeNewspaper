@@ -60,5 +60,7 @@
         SortCreateTimeReverse = 22,
         Trophy = 23,
         Clock = 24,
+        EllipsisVertical= 25,
+        TrashAlt = 26
     }
 }

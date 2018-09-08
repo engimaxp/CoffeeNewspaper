@@ -2,67 +2,31 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\dialogwindow.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\input\tagaddingcontrol.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Windows;
+using System.Windows.Controls;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// DialogWindow.xaml 的交互逻辑
+    /// TagAddingControl.xaml 的交互逻辑
     /// &lt;/summary&gt;
-    public partial class DialogWindow : Window
+    public partial class TagAddingControl : UserControl
     {
-        #region Private Members
-
-        /// &lt;summary&gt;
-        /// The view model for this window
-        /// &lt;/summary&gt;
-        private DialogWindowViewModel mViewModel;
-
-        #endregion
-
-        #region Public Properties
-
-        /// &lt;summary&gt;
-        /// The view model for this window
-        /// &lt;/summary&gt;
-        public DialogWindowViewModel ViewModel
-        {
-            get =&gt; mViewModel;
-            set
-            {
-                // Set new value
-                mViewModel = value;
-
-                // Update data context
-                DataContext = mViewModel;
-            }
-        }
-
-        #endregion
-
-        #region Constructor
-
-        /// &lt;summary&gt;
-        /// Default constructor
-        /// &lt;/summary&gt;
-        public DialogWindow()
+        public TagAddingControl()
         {
             InitializeComponent();
         }
-
-        #endregion
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[26,20,26,30,0],[28,13,28,14,0],[30,17,30,36,0],[33,17,33,42,0],[34,13,34,14,0],[44,9,44,30,0],[45,9,45,10,0],[46,13,46,35,0],[47,9,47,10,0]]);
+      highlightRanges([[10,9,10,34,0],[11,9,11,10,0],[12,13,12,35,0],[13,9,13,10,0]]);
     </script>
   </body>
 </html>

@@ -2,93 +2,35 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\obj\debug\controls\headmenucontrol.g.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\utilities\cntaskextension.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-#pragma checksum &quot;..\..\..\Controls\HeadMenuControl.xaml&quot; &quot;{ff1816ec-aa5e-4d10-87f7-6f4963833460}&quot; &quot;5311EC98942DF10F2B2103B0C780491D7BF13A27&quot;
-//------------------------------------------------------------------------------
-// &lt;auto-generated&gt;
-//     此代码由工具生成。
-//     运行时版本:4.0.30319.42000
-//
-//     对此文件的更改可能会导致不正确的行为，并且如果
-//     重新生成代码，这些更改将会丢失。
-// &lt;/auto-generated&gt;
-//------------------------------------------------------------------------------
+using System.Collections.Generic;
+using System.Linq;
 
-using CN_Presentation;
-using CN_Presentation.ViewModel.Controls.Design;
-using CN_WPF;
-using System;
-using System.Diagnostics;
-using System.Windows;
-using System.Windows.Automation;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Effects;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Media.TextFormatting;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Shell;
-
-
-namespace CN_WPF {
-    
-    
-    /// &lt;summary&gt;
-    /// HeadMenuControl
-    /// &lt;/summary&gt;
-    public partial class HeadMenuControl : System.Windows.Controls.UserControl, System.Windows.Markup.IComponentConnector {
-        
-        private bool _contentLoaded;
-        
+namespace CN_Core.Utilities
+{
+    public static class CNTaskExtension
+    {
         /// &lt;summary&gt;
-        /// InitializeComponent
+        /// Get Default Selection Filter And Order
         /// &lt;/summary&gt;
-        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
-        public void InitializeComponent() {
-            if (_contentLoaded) {
-                return;
-            }
-            _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri(&quot;/CN_WPF;component/controls/headmenucontrol.xaml&quot;, System.UriKind.Relative);
-            
-            #line 1 &quot;..\..\..\Controls\HeadMenuControl.xaml&quot;
-            System.Windows.Application.LoadComponent(this, resourceLocater);
-            
-            #line default
-            #line hidden
-        }
-        
-        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Design&quot;, &quot;CA1033:InterfaceMethodsShouldBeCallableByChildTypes&quot;)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Maintainability&quot;, &quot;CA1502:AvoidExcessiveComplexity&quot;)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Performance&quot;, &quot;CA1800:DoNotCastUnnecessarily&quot;)]
-        void System.Windows.Markup.IComponentConnector.Connect(int connectionId, object target) {
-            this._contentLoaded = true;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static IOrderedEnumerable&lt;CNTask&gt; FilterDeletedAndOrderBySortTasks(this IEnumerable&lt;CNTask&gt; originEnumerable)
+        {
+            return from c in originEnumerable
+                where !c.IsDeleted
+                orderby c.Sort
+                select c;
         }
     }
 }
-
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[52,43,52,44,0],[53,13,53,32,0],[53,33,53,34,0],[54,17,54,24,0],[56,13,56,35,0],[57,13,57,133,0]]);
+      highlightRanges([[13,9,13,10,1],[14,13,15,23,1],[15,23,15,35,1],[15,35,16,25,1],[16,25,16,31,1],[16,31,17,26,1],[14,13,17,26,1],[18,9,18,10,1]]);
     </script>
   </body>
 </html>

@@ -36,7 +36,7 @@ namespace CN_Service
         public async Task<ICollection<CNTag>> GetAllTagByTaskId(int taskid)
         {
             if(taskid<=0) return new List<CNTag>();
-            return await _tagDataStore.GetAllTagsBySpecification(new TaskSpecification(taskid));
+            return await _tagDataStore.GetAllTagsBySpecification(new TaskTagSpecification(taskid));
         }
 
         public async Task<ICollection<CNTag>> GetAllTagByTaskIdAndTagTitle(int taskid, string tagSubstring)

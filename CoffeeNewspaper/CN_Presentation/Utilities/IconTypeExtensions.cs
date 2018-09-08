@@ -65,6 +65,10 @@
                     return "\uf091";
                 case IconType.Clock:
                     return "\uf017";
+                case IconType.EllipsisVertical:
+                    return "\uf142";
+                case IconType.TrashAlt:
+                    return "\uf2ed";
                 // If none found, return null
                 default:
                     return null;

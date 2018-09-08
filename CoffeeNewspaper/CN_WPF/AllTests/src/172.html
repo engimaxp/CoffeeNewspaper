@@ -2,61 +2,120 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\app.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\domaintest\tasktest.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Threading.Tasks;
-using System.Windows;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using CN_Core;
-using CN_Core.Interfaces;
-using CN_Presentation;
-using CN_Presentation.ViewModel.Controls;
-using CN_Repository;
-using CN_Service;
 
-namespace CN_WPF
+namespace CoffeeNewspaper_UnitTest.DomainTest
 {
-    /// &lt;summary&gt;
-    /// App.xaml 的交互逻辑
-    /// &lt;/summary&gt;
-    public partial class App : Application
+    [TestFixture]
+    public class TaskTest
     {
-        protected override async void OnStartup(StartupEventArgs e)
+        [Test]
+        public void TaskCompare_SameUrgent_SameImportance_OrderByDeadLine()
         {
-            base.OnStartup(e);
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.Normal;
+            task3.Urgency = CNUrgency.Normal;
+            task1.Priority = CNPriority.Normal;
+            task2.Priority = CNPriority.Normal;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
 
-            ApplicationSetupAsync();
-
-            await IoC.Get&lt;TaskListViewModel&gt;().RefreshTaskItems();
-            Current.MainWindow = new MainWindow();
-            Current.MainWindow.Show();
+            var list = new List&lt;CNTask&gt;() { task1,task2,task3};
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task2,list.First());
+            Assert.AreEqual(task1, list.Last());
         }
-        /// &lt;summary&gt;
-        /// Bind DI Container and other Important thing before window shows up
-        /// &lt;/summary&gt;
-        /// &lt;returns&gt;&lt;/returns&gt;
-        private void ApplicationSetupAsync()
+
+        [Test]
+        public void TaskCompare_SameUrgent_OrderByImportance()
         {
-            IoC.Setup();
-            IoC.Kernel.BindInitialViewModel();
-            IoC.Kernel.BindCNDBContext();
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.Normal;
+            task3.Urgency = CNUrgency.Normal;
+            task1.Priority = CNPriority.High;
+            task2.Priority = CNPriority.Low;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
 
-            IoC.Kernel.BindSqliteDataStore();
-            IoC.Kernel.BindServices();
-
-
-            //Bind UI Manager So Could use be used in ViewModel
-            IoC.Kernel.Bind&lt;IUIManager&gt;().ToConstant(new UIManager());
+            var list = new List&lt;CNTask&gt;() { task1, task2, task3 };
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task1, list.First());
+            Assert.AreEqual(task2, list.Last());
         }
+        [Test]
+        public void TaskCompare_OrderByUrgent()
+        {
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.High;
+            task3.Urgency = CNUrgency.Low;
+            task1.Priority = CNPriority.High;
+            task2.Priority = CNPriority.Low;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
+
+            var list = new List&lt;CNTask&gt;() { task1, task2, task3 };
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task2, list.First());
+            Assert.AreEqual(task3, list.Last());
+        }
+
+        [Test]
+        public void TaskCompare_OrderByMixed()
+        {
+            var task1 = DomainTestHelper.GetARandomTask();
+            var task2 = DomainTestHelper.GetARandomTask();
+            var task3 = DomainTestHelper.GetARandomTask();
+            task1.Urgency = CNUrgency.Normal;
+            task2.Urgency = CNUrgency.Normal;
+            task3.Urgency = CNUrgency.Low;
+            task1.Priority = CNPriority.High;
+            task2.Priority = CNPriority.Normal;
+            task3.Priority = CNPriority.Normal;
+            task1.DeadLine = DateTime.Now.AddDays(3);
+            task2.DeadLine = DateTime.Now.AddDays(1);
+            task3.DeadLine = DateTime.Now.AddDays(2);
+
+            var list = new List&lt;CNTask&gt;() { task1, task2, task3 };
+            list.Sort();
+            list.Reverse();
+            Assert.AreEqual(task1, list.First());
+            Assert.AreEqual(task3, list.Last());
+        }
+
     }
- }
+}
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[18,9,18,10,0],[19,13,19,31,0],[21,13,21,37,0],[23,13,23,67,0],[24,13,24,51,0],[25,13,25,39,0],[26,9,26,10,0],[32,9,32,10,0],[33,13,33,25,0],[34,13,34,47,0],[35,13,35,42,0],[37,13,37,46,0],[38,13,38,39,0],[42,13,42,71,0],[43,9,43,10,0]]);
+      highlightRanges([[14,9,14,10,1],[15,13,15,59,1],[16,13,16,59,1],[17,13,17,59,1],[18,13,18,46,1],[19,13,19,46,1],[20,13,20,46,1],[21,13,21,48,1],[22,13,22,48,1],[23,13,23,48,1],[24,13,24,54,1],[25,13,25,54,1],[26,13,26,54,1],[28,13,28,64,1],[29,13,29,25,1],[30,13,30,28,1],[31,13,31,49,1],[32,13,32,49,1],[33,9,33,10,1],[37,9,37,10,1],[38,13,38,59,1],[39,13,39,59,1],[40,13,40,59,1],[41,13,41,46,1],[42,13,42,46,1],[43,13,43,46,1],[44,13,44,46,1],[45,13,45,45,1],[46,13,46,48,1],[47,13,47,54,1],[48,13,48,54,1],[49,13,49,54,1],[51,13,51,67,1],[52,13,52,25,1],[53,13,53,28,1],[54,13,54,50,1],[55,13,55,49,1],[56,9,56,10,1],[59,9,59,10,1],[60,13,60,59,1],[61,13,61,59,1],[62,13,62,59,1],[63,13,63,46,1],[64,13,64,44,1],[65,13,65,43,1],[66,13,66,46,1],[67,13,67,45,1],[68,13,68,48,1],[69,13,69,54,1],[70,13,70,54,1],[71,13,71,54,1],[73,13,73,67,1],[74,13,74,25,1],[75,13,75,28,1],[76,13,76,50,1],[77,13,77,49,1],[78,9,78,10,1],[82,9,82,10,1],[83,13,83,59,1],[84,13,84,59,1],[85,13,85,59,1],[86,13,86,46,1],[87,13,87,46,1],[88,13,88,43,1],[89,13,89,46,1],[90,13,90,48,1],[91,13,91,48,1],[92,13,92,54,1],[93,13,93,54,1],[94,13,94,54,1],[96,13,96,67,1],[97,13,97,25,1],[98,13,98,28,1],[99,13,99,50,1],[100,13,100,49,1],[101,9,101,10,1]]);
     </script>
   </body>
 </html>

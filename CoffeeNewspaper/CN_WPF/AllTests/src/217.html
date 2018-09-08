@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\logging\implementation\debuglogger.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics;
+
+namespace CN_Core.Logging
+{
+    /// &lt;summary&gt;
+    /// Logs the messages to the Debug log
+    /// &lt;/summary&gt;
+    public class DebugLogger : ILogger
+    {
+        /// &lt;summary&gt;
+        /// Logs the given message to the system Console
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;message&quot;&gt;The message to log&lt;/param&gt;
+        /// &lt;param name=&quot;level&quot;&gt;The level of the message&lt;/param&gt;
+        public void Log(string message, LogLevel level)
+        {
+            // The default category
+            var category = default(string);
+
+            // NOTE: The native Debug output has no color
+            //       However if you install the VS extension VSColorOutput
+            //       then this style will color the outputs nicely
+            //
+            //       https://github.com/mike-ward/VSColorOutput
+            //
+
+            // Color console based on level
+            switch (level)
+            {
+                // Debug
+                case LogLevel.Debug:
+                    category = &quot;information&quot;;
+                    break;
+
+                // Verbose
+                case LogLevel.Verbose:
+                    category = &quot;verbose&quot;;
+                    break;
+
+                // Warning
+                case LogLevel.Warning:
+                    category = &quot;warning&quot;;
+                    break;
+
+                // Error
+                case LogLevel.Error:
+                    category = &quot;error&quot;;
+                    break;
+
+                // Success
+                case LogLevel.Success:
+                    category = &quot;-----&quot;;
+                    break;
+            }
+
+            // Write message to console
+            Debug.WriteLine(message, category);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,10,1],[18,13,18,44,1],[28,13,28,27,1],[32,21,32,46,1],[33,21,33,27,1],[37,21,37,42,0],[38,21,38,27,0],[42,21,42,42,0],[43,21,43,27,0],[47,21,47,40,0],[48,21,48,27,0],[52,21,52,40,0],[53,21,53,27,0],[57,13,57,48,1],[58,9,58,10,1]]);
+    </script>
+  </body>
+</html>

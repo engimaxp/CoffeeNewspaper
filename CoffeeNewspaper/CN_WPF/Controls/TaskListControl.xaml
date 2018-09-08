@@ -91,11 +91,11 @@
                         <!-- Filter Icon -->
                         <local:BubbleSelectControl DataContext="{Binding FilterSelectModel}"></local:BubbleSelectControl>
 
-                        <Button Style="{StaticResource IconGrowButton}"
-                                Margin="5 0"
-                                Foreground="{StaticResource ForegroundLightDarkBrush}"
-                                Content="{StaticResource FontAwesomeEllipsisVerticalIcon}"
-                                />
+                        <!-- More Icon -->
+                        <local:BubbleSelectControl
+                            Margin="5 0"
+                            DataContext="{Binding MoreSelectModel}"></local:BubbleSelectControl>
+
                     </StackPanel>
                 </Grid>
                 <!-- Search Activated Tags -->

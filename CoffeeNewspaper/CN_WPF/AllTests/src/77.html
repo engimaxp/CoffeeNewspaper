@@ -2,41 +2,39 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\booleantovisibilityconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\taskexpanddetialcontrol.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Globalization;
-using System.Windows;
+using System.Windows.Controls;
+using CN_Presentation.ViewModel.Base;
+using CN_Presentation.ViewModel.Controls;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// A converter that takes in a boolean and returns a &lt;see cref=&quot;Visibility&quot;/&gt;
+    /// TaskExpandDetialControl.xaml 的交互逻辑
     /// &lt;/summary&gt;
-    public class BooleanToVisiblityConverter : BaseValueConverter&lt;BooleanToVisiblityConverter&gt;
+    public partial class TaskExpandDetialControl : UserControl
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public TaskExpandDetialControl()
         {
-            if (parameter == null)
-                return (bool)value ? Visibility.Hidden : Visibility.Visible;
-            else
-                return (bool)value ? Visibility.Visible : Visibility.Hidden;
+            InitializeComponent();
         }
 
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public TaskExpandDetialControl(TaskExpandDetailViewModel viewModel)
         {
-            throw new NotImplementedException();
+            InitializeComponent();
+            this.DataContext = viewModel;
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[13,9,13,10,0],[14,13,14,35,0],[15,17,15,77,0],[17,17,17,77,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,49,0]]);
+      highlightRanges([[12,9,12,41,0],[13,9,13,10,0],[14,13,14,35,0],[15,9,15,10,0],[17,9,17,76,0],[18,9,18,10,0],[19,13,19,35,0],[20,13,20,42,0],[21,9,21,10,0]]);
     </script>
   </body>
 </html>

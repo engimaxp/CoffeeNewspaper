@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\mutivalueconverter\multiplyconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\mutivalueconverter\basemutivalueconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
@@ -10,35 +10,31 @@
     <pre id="content" class="source-code">
 using System;
 using System.Globalization;
+using System.Windows.Data;
+using System.Windows.Markup;
 
 namespace CN_WPF
 {
-    public class MultiplyConverter : BaseMutiValueConverter&lt;MultiplyConverter&gt;
+    public abstract class BaseMutiValueConverter&lt;T&gt; : MarkupExtension, IMultiValueConverter where T:class,new()
     {
-        
-        public override object Convert(object[] values, Type targetType,
-            object parameter, CultureInfo culture)
-        {
-            double result = 1.0;
-            foreach (var t in values)
-            {
-                if (t is double d)
-                    result *= d;
-            }
+        /// &lt;summary&gt;
+        /// A single static instance of this value converter
+        /// &lt;/summary&gt;
+        private static readonly T Converter = new T();
 
-            return result;
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return Converter ;
         }
 
-        public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract object Convert(object[] values, Type targetType, object parameter, CultureInfo culture);
+
+        public abstract object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture);
     }
-
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[11,9,11,10,0],[12,13,12,33,0],[13,13,13,20,0],[13,22,13,27,0],[13,28,13,30,0],[13,31,13,37,0],[14,13,14,14,0],[15,17,15,35,0],[16,21,16,33,0],[17,13,17,14,0],[19,13,19,27,0],[20,9,20,10,0],[23,9,23,10,0],[24,13,24,49,0]]);
+      highlightRanges([[13,9,13,55,0],[16,9,16,10,0],[17,13,17,31,0],[18,9,18,10,0]]);
     </script>
   </body>
 </html>

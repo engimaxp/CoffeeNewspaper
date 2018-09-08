@@ -2,41 +2,81 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\icontypetofontawesomeconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\domainmodel\cntaskconnector.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-
 using System;
-using System.Globalization;
-using CN_Presentation;
-using CN_Presentation.Utilities;
+using System.Collections.Generic;
 
-namespace CN_WPF
+namespace CN_Core
 {
     /// &lt;summary&gt;
-    /// A converter that takes in a &lt;see cref=&quot;IconType&quot;/&gt; and returns 
-    /// the FontAwesome string for that icon
+    ///     Relation between pretask and suftask is many-to-many
     /// &lt;/summary&gt;
-    public class IconTypeToFontAwesomeConverter : BaseValueConverter&lt;IconTypeToFontAwesomeConverter&gt;
+    public class CNTaskConnector
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        
+
+        #region Constructor
+
+        public CNTaskConnector()
         {
-                return ((IconType) value).ToFontAwesomeText();
+            
+        }
+        #endregion
+
+        #region Public Properties
+
+        /// &lt;summary&gt;
+        ///     Id of this relation
+        /// &lt;/summary&gt;
+        public string TaskConnectorId { get; set; }
+
+        public int PreTaskId { get; set; }
+        public virtual CNTask PreTask { get; set; }
+        public int SufTaskId { get; set; }
+        public virtual CNTask SufTask { get; set; }
+        #endregion
+
+        private sealed class PreTaskIdSufTaskIdEqualityComparer : IEqualityComparer&lt;CNTaskConnector&gt;
+        {
+            public bool Equals(CNTaskConnector x, CNTaskConnector y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return x.PreTaskId == y.PreTaskId &amp;&amp; x.SufTaskId == y.SufTaskId;
+            }
+
+            public int GetHashCode(CNTaskConnector obj)
+            {
+                unchecked
+                {
+                    return (obj.PreTaskId * 397) ^ obj.SufTaskId;
+                }
+            }
         }
 
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public static IEqualityComparer&lt;CNTaskConnector&gt; PreTaskIdSufTaskIdComparer { get; } = new PreTaskIdSufTaskIdEqualityComparer();
+
+        #region Formatting Implement
+
+        public override string ToString()
         {
-            throw new NotImplementedException();
+            return
+                $&quot;{nameof(TaskConnectorId)}: {TaskConnectorId}, {nameof(PreTaskId)}: {PreTaskId}, {nameof(SufTaskId)}: {SufTaskId}&quot;;
         }
+
+        #endregion
     }
 }
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[16,9,16,10,0],[17,17,17,63,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,49,0]]);
+      highlightRanges([[15,9,15,33,1],[16,9,16,10,1],[18,9,18,10,1],[26,41,26,45,1],[26,46,26,50,1],[28,32,28,36,1],[28,37,28,41,1],[29,41,29,45,1],[29,46,29,50,1],[30,32,30,36,1],[30,37,30,41,1],[31,41,31,45,1],[31,46,31,50,1],[37,13,37,14,1],[38,17,38,43,1],[38,44,38,56,0],[39,17,39,46,1],[39,47,39,60,0],[40,17,40,46,1],[40,47,40,60,0],[41,17,41,48,1],[41,49,41,62,0],[42,17,42,81,1],[43,13,43,14,1],[46,13,46,14,1],[48,17,48,18,1],[49,21,49,66,1],[51,13,51,14,1],[54,87,54,91,1],[54,96,54,136,1],[59,9,59,10,0],[60,13,61,133,0],[62,9,62,10,0]]);
     </script>
   </body>
 </html>

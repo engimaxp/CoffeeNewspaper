@@ -2,31 +2,88 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\booleaninvertconverter.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\file\filemanager.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Globalization;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using CN_Core.Interfaces;
 
-namespace CN_WPF
+namespace CN_Core
 {
     /// &lt;summary&gt;
-    /// A converter that takes in a boolean and inverts it
+    /// Handles reading/writing and querying the file system
     /// &lt;/summary&gt;
-    public class BooleanInvertConverter : BaseValueConverter&lt;BooleanInvertConverter&gt;
+    public class FileManager : IFileManager
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture) =&gt; !(bool)value;
+        /// &lt;summary&gt;
+        /// Writes the text to the specified file
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;text&quot;&gt;The text to write&lt;/param&gt;
+        /// &lt;param name=&quot;path&quot;&gt;The path of the file to write to&lt;/param&gt;
+        /// &lt;param name=&quot;append&quot;&gt;If true, writes the text to the end of the file, otherwise overrides any existing file&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public async Task WriteTextToFileAsync(string text, string path, bool append = false)
+        {
+            // TODO: Add exception catching
 
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =&gt; throw new NotImplementedException();
+            // Normalize path
+            path = NormalizePath(path);
+
+            // Resolve to absolute path
+            path = ResolvePath(path);
+
+            // Lock the task
+            await AsyncAwaiter.AwaitAsync(nameof(FileManager) + path, async () =&gt;
+            {
+                // Run the synchronous file access as a new task
+                await IoC.Task.Run(() =&gt;
+                {
+                    // Write the log message to file
+                    using (var fileStream = (TextWriter)new StreamWriter(File.Open(path, append ? FileMode.Append : FileMode.Create)))
+                        fileStream.Write(text);
+                });
+            });
+        }
+
+        /// &lt;summary&gt;
+        /// Normalizing a path based on the current operating system
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;The path to normalize&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public string NormalizePath(string path)
+        {
+            // If on Windows...
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                // Replace any / with \
+                return path?.Replace(&#39;/&#39;, &#39;\\&#39;).Trim();
+            // If on Linux/Mac
+            else
+                // Replace any \ with /
+                return path?.Replace(&#39;\\&#39;, &#39;/&#39;).Trim();
+        }
+
+        /// &lt;summary&gt;
+        /// Resolves any relative elements of the path to absolute
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;The path to resolve&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public string ResolvePath(string path)
+        {
+            // Resolve the path to absolute
+            return Path.GetFullPath(path);
+        }
+
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[11,113,11,125,0],[13,117,13,152,0]]);
+      highlightRanges([[21,9,21,10,0],[25,13,25,40,0],[28,13,28,38,0],[31,13,32,13,0],[32,13,32,14,0],[32,14,34,17,0],[34,17,35,17,0],[35,17,35,18,0],[35,18,37,28,0],[37,28,37,134,0],[37,134,38,25,0],[38,25,38,48,0],[38,48,39,17,0],[39,17,39,18,0],[39,18,39,20,0],[34,17,39,20,0],[39,20,40,13,0],[40,13,40,14,0],[40,14,40,16,0],[31,13,40,16,0],[41,9,41,10,0],[49,9,49,10,0],[51,13,51,69,0],[53,17,53,56,0],[57,17,57,56,0],[58,9,58,10,0],[66,9,66,10,0],[68,13,68,43,0],[69,9,69,10,0]]);
     </script>
   </body>
 </html>

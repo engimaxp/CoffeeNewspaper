@@ -2,498 +2,93 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\animation\storyboardhelpers.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\obj\debug\app.g.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
+#pragma checksum &quot;..\..\App.xaml&quot; &quot;{ff1816ec-aa5e-4d10-87f7-6f4963833460}&quot; &quot;D58BAA7753554F9FE0F40018C19A5BAD90B815FF&quot;
+//------------------------------------------------------------------------------
+// &lt;auto-generated&gt;
+//     此代码由工具生成。
+//     运行时版本:4.0.30319.42000
+//
+//     对此文件的更改可能会导致不正确的行为，并且如果
+//     重新生成代码，这些更改将会丢失。
+// &lt;/auto-generated&gt;
+//------------------------------------------------------------------------------
+
+using CN_WPF;
 using System;
-using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Ink;
+using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
+using System.Windows.Media.TextFormatting;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Windows.Shell;
 
-namespace CN_WPF
-{
+
+namespace CN_WPF {
+    
+    
     /// &lt;summary&gt;
-    /// Animation helpers for &lt;see cref=&quot;StoryBoard&quot;/&gt;
+    /// App
     /// &lt;/summary&gt;
-    public static class StoryboardHelpers
-    {
-        #region Sliding To/From Left
-
+    public partial class App : System.Windows.Application {
+        
+        private bool _contentLoaded;
+        
         /// &lt;summary&gt;
-        /// Adds a slide from left animation to the storyboard
+        /// InitializeComponent
         /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;offset&quot;&gt;The distance to the left to start from&lt;/param&gt;
-        /// &lt;param name=&quot;decelerationRatio&quot;&gt;The rate of deceleration&lt;/param&gt;
-        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same width during animation&lt;/param&gt;
-        public static void AddSlideFromLeft(this Storyboard storyboard, float seconds, double offset, float decelerationRatio = 0.9f, bool keepMargin = true)
-        {
-            // Create the margin animate from right 
-            var animation = new ThicknessAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = new Thickness(-offset, 0, keepMargin ? offset : 0, 0),
-                To = new Thickness(0),
-                DecelerationRatio = decelerationRatio
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Margin&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        /// &lt;summary&gt;
-        /// Adds a slide to left animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;offset&quot;&gt;The distance to the left to end at&lt;/param&gt;
-        /// &lt;param name=&quot;decelerationRatio&quot;&gt;The rate of deceleration&lt;/param&gt;
-        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same width during animation&lt;/param&gt;
-        public static void AddSlideToLeft(this Storyboard storyboard, float seconds, double offset, float decelerationRatio = 0.9f, bool keepMargin = true)
-        {
-            // Create the margin animate from right 
-            var animation = new ThicknessAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = new Thickness(0),
-                To = new Thickness(-offset, 0, keepMargin ? offset : 0, 0),
-                DecelerationRatio = decelerationRatio
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Margin&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        #endregion
-
-        #region Sliding To/From Right
-
-        /// &lt;summary&gt;
-        /// Adds a slide from right animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;offset&quot;&gt;The distance to the right to start from&lt;/param&gt;
-        /// &lt;param name=&quot;decelerationRatio&quot;&gt;The rate of deceleration&lt;/param&gt;
-        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same width during animation&lt;/param&gt;
-        public static void AddSlideFromRight(this Storyboard storyboard, float seconds, double offset, float decelerationRatio = 0.9f, bool keepMargin = true)
-        {
-            // Create the margin animate from right 
-            var animation = new ThicknessAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = new Thickness(keepMargin ? offset : 0, 0, -offset, 0),
-                To = new Thickness(0),
-                DecelerationRatio = decelerationRatio
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Margin&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        /// &lt;summary&gt;
-        /// Adds a slide to right animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;offset&quot;&gt;The distance to the right to end at&lt;/param&gt;
-        /// &lt;param name=&quot;decelerationRatio&quot;&gt;The rate of deceleration&lt;/param&gt;
-        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same width during animation&lt;/param&gt;
-        public static void AddSlideToRight(this Storyboard storyboard, float seconds, double offset, float decelerationRatio = 0.9f, bool keepMargin = true)
-        {
-            // Create the margin animate from right 
-            var animation = new ThicknessAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = new Thickness(0),
-                To = new Thickness(keepMargin ? offset : 0, 0, -offset, 0),
-                DecelerationRatio = decelerationRatio
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Margin&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        #endregion
-
-        #region Sliding To/From Top
-
-        /// &lt;summary&gt;
-        /// Adds a slide from top animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;offset&quot;&gt;The distance to the top to start from&lt;/param&gt;
-        /// &lt;param name=&quot;decelerationRatio&quot;&gt;The rate of deceleration&lt;/param&gt;
-        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same height during animation&lt;/param&gt;
-        public static void AddSlideFromTop(this Storyboard storyboard, float seconds, double offset, float decelerationRatio = 0.9f, bool keepMargin = true)
-        {
-            // Create the margin animate from right 
-            var animation = new ThicknessAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = new Thickness(0, -offset, 0, keepMargin ? offset : 0),
-                To = new Thickness(0),
-                DecelerationRatio = decelerationRatio
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Margin&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        /// &lt;summary&gt;
-        /// Adds a slide to top animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;offset&quot;&gt;The distance to the top to end at&lt;/param&gt;
-        /// &lt;param name=&quot;decelerationRatio&quot;&gt;The rate of deceleration&lt;/param&gt;
-        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same height during animation&lt;/param&gt;
-        public static void AddSlideToTop(this Storyboard storyboard, float seconds, double offset, float decelerationRatio = 0.9f, bool keepMargin = true)
-        {
-            // Create the margin animate from right 
-            var animation = new ThicknessAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = new Thickness(0),
-                To = new Thickness(0, -offset, 0, keepMargin ? offset : 0),
-                DecelerationRatio = decelerationRatio
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Margin&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        #endregion
-
-        #region Sliding To/From Bottom
-
-        /// &lt;summary&gt;
-        /// Adds a slide from bottom animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;offset&quot;&gt;The distance to the bottom to start from&lt;/param&gt;
-        /// &lt;param name=&quot;decelerationRatio&quot;&gt;The rate of deceleration&lt;/param&gt;
-        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same height during animation&lt;/param&gt;
-        public static void AddSlideFromBottom(this Storyboard storyboard, float seconds, double offset, float decelerationRatio = 0.9f, bool keepMargin = true)
-        {
-            // Create the margin animate from right 
-            var animation = new ThicknessAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = new Thickness(0, keepMargin ? offset : 0, 0, -offset),
-                To = new Thickness(0),
-                DecelerationRatio = decelerationRatio
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Margin&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        /// &lt;summary&gt;
-        /// Adds a slide to bottom animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;offset&quot;&gt;The distance to the bottom to end at&lt;/param&gt;
-        /// &lt;param name=&quot;decelerationRatio&quot;&gt;The rate of deceleration&lt;/param&gt;
-        /// &lt;param name=&quot;keepMargin&quot;&gt;Whether to keep the element at the same height during animation&lt;/param&gt;
-        public static void AddSlideToBottom(this Storyboard storyboard, float seconds, double offset, float decelerationRatio = 0.9f, bool keepMargin = true)
-        {
-            // Create the margin animate from right 
-            var animation = new ThicknessAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = new Thickness(0),
-                To = new Thickness(0, keepMargin ? offset : 0, 0, -offset),
-                DecelerationRatio = decelerationRatio
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Margin&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        #endregion
-
-        #region Fade In/Out
-
-        /// &lt;summary&gt;
-        /// Adds a fade in animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;from&quot;&gt;&lt;/param&gt;
-        public static void AddFadeIn(this Storyboard storyboard, float seconds, bool from = false)
-        {
-            // Create the margin animate from right 
-            var animation = new DoubleAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                To = 1,
-            };
-
-            // Animate from if requested
-            if (from)
-                animation.From = 0;
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Opacity&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        /// &lt;summary&gt;
-        /// Adds a fade out animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        public static void AddFadeOut(this Storyboard storyboard, float seconds)
-        {
-            // Create the margin animate from right 
-            var animation = new DoubleAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                To = 0,
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Opacity&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        #endregion
-
-        #region Rotate CW/CCW
-
-        /// &lt;summary&gt;
-        /// Adds a rotate cw animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        public static void AddRotateCW(this Storyboard storyboard, float seconds)
-        {
-            // Create the margin animate from right 
-            var animation = new DoubleAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = 360,
-                To = 180,
-            };
-
-            // Set the target property name
-            // Notice if this targetName is not set ,the animation will fail 
-            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
-            Storyboard.SetTargetName(animation, &quot;rtAngle&quot;);
-            PropertyPath PropP = new PropertyPath(RotateTransform.AngleProperty);
-            Storyboard.SetTargetProperty(animation, PropP);
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        /// &lt;summary&gt;
-        /// Adds a rotate ccw animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        public static void AddRotateCCW(this Storyboard storyboard, float seconds)
-        {
-            // Create the margin animate from right 
-            var animation = new DoubleAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From=180,
-                To = 360,
-            };
-            // Set the target property name
-            // Notice if this targetName is not set ,the animation will fail
-            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
-            Storyboard.SetTargetName(animation, &quot;rtAngle&quot;);
-            PropertyPath PropP = new PropertyPath(RotateTransform.AngleProperty);
-            Storyboard.SetTargetProperty(animation, PropP);
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        #endregion
-
-        #region ScaleY Expand/Shrink
-
-        /// &lt;summary&gt;
-        /// Adds a Scale y expand animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        public static void AddScaleYExpand(this Storyboard storyboard, float seconds)
-        { 
-            var animation = new DoubleAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = 0,
-                To = 1,
-            };
-
-            // Set the target property name
-            // Notice if this targetName is not set ,the animation will fail 
-            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
-            Storyboard.SetTargetName(animation, &quot;stScaleY&quot;);
-            PropertyPath PropP = new PropertyPath(ScaleTransform.ScaleYProperty);
-            Storyboard.SetTargetProperty(animation, PropP);
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        /// &lt;summary&gt;
-        /// Adds a Scale y shrink animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        public static void AddScaleYShrink(this Storyboard storyboard, float seconds)
-        {
-            var animation = new DoubleAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = 1,
-                To = 0,
-            };
-            // Set the target property name
-            // Notice if this targetName is not set ,the animation will fail
-            // Detail refrence https://social.msdn.microsoft.com/Forums/vstudio/en-US/86039bcd-c550-43b9-b588-36859cc96479/why-doesnt-this-rotate
-            Storyboard.SetTargetName(animation, &quot;stScaleY&quot;);
-            PropertyPath PropP = new PropertyPath(ScaleTransform.ScaleYProperty);
-            Storyboard.SetTargetProperty(animation, PropP);
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        #endregion
-
-        #region ScrollView Expand/Shrink
-
-        /// &lt;summary&gt;
-        /// Adds a Scale y expand animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;element&quot;&gt;&lt;/param&gt;
-        public static void AddScrollViewExpand(this Storyboard storyboard, float seconds,  FrameworkElement element)
-        {
-            //Designtime ignore animation ,because it cause error
-            if (DesignerProperties.GetIsInDesignMode(element))
-            {
-                element.SetValue(FrameworkElement.TagProperty, 1);
+        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
+        public void InitializeComponent() {
+            if (_contentLoaded) {
                 return;
             }
-            //Runtime animation
-            var animation = new DoubleAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = 0,
-                To = 1,
-            };
-
-            // Set the target property name
-            PropertyPath PropP = new PropertyPath(&quot;Tag&quot;);
-            Storyboard.SetTargetProperty(animation, PropP);
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
+            _contentLoaded = true;
+            System.Uri resourceLocater = new System.Uri(&quot;/CN_WPF;component/app.xaml&quot;, System.UriKind.Relative);
+            
+            #line 1 &quot;..\..\App.xaml&quot;
+            System.Windows.Application.LoadComponent(this, resourceLocater);
+            
+            #line default
+            #line hidden
         }
-
+        
         /// &lt;summary&gt;
-        /// Adds a ScrollView Container&#39;s Height shrink animation to the storyboard
+        /// Application Entry Point.
         /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;element&quot;&gt;&lt;/param&gt;
-        public static void AddScrollViewShrink(this Storyboard storyboard, float seconds,FrameworkElement element)
-        {
-            //Designtime ignore animation ,because it cause error
-            if (DesignerProperties.GetIsInDesignMode(element))
-            {
-                element.SetValue(FrameworkElement.TagProperty, 0);
-                return;
-            }
-            //Runtime animation
-            var animation = new DoubleAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = 1,
-                To = 0,
-            };
-            // Set the target property name
-            PropertyPath PropP = new PropertyPath(&quot;Tag&quot;);
-            Storyboard.SetTargetProperty(animation, PropP);
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
-        }
-
-        #endregion
-
-        /// &lt;summary&gt;
-        /// Adds a marquee scrolling right to left animation to the storyboard
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;storyboard&quot;&gt;The storyboard to add the animation to&lt;/param&gt;
-        /// &lt;param name=&quot;seconds&quot;&gt;The time the animation will take&lt;/param&gt;
-        /// &lt;param name=&quot;contentOffset&quot;&gt;The inner contents size, to start the marquee as soon as that content has scrolled out of view&lt;/param&gt;
-        /// &lt;param name=&quot;offset&quot;&gt;The offset of the parent to scroll within&lt;/param&gt;
-        public static void AddMarquee(this Storyboard storyboard, float seconds, double offset = 0, double contentOffset = 0)
-        {
-            // Create the margin animate from right to left
-            var animation = new ThicknessAnimation
-            {
-                Duration = new Duration(TimeSpan.FromSeconds(seconds)),
-                From = new Thickness(offset, 0, -offset, 0),
-                To = new Thickness(-contentOffset, 0, contentOffset, 0),
-                RepeatBehavior = RepeatBehavior.Forever
-            };
-
-            // Set the target property name
-            Storyboard.SetTargetProperty(animation, new PropertyPath(&quot;Margin&quot;));
-
-            // Add this to the storyboard
-            storyboard.Children.Add(animation);
+        [System.STAThreadAttribute()]
+        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
+        public static void Main() {
+            CN_WPF.App app = new CN_WPF.App();
+            app.InitializeComponent();
+            app.Run();
         }
     }
 }
 
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[25,9,25,10,0],[27,13,33,15,0],[36,13,36,81,0],[39,13,39,48,0],[40,9,40,10,0],[51,9,51,10,0],[53,13,59,15,0],[62,13,62,81,0],[65,13,65,48,0],[66,9,66,10,0],[81,9,81,10,0],[83,13,89,15,0],[92,13,92,81,0],[95,13,95,48,0],[96,9,96,10,0],[107,9,107,10,0],[109,13,115,15,0],[118,13,118,81,0],[121,13,121,48,0],[122,9,122,10,0],[137,9,137,10,0],[139,13,145,15,0],[148,13,148,81,0],[151,13,151,48,0],[152,9,152,10,0],[163,9,163,10,0],[165,13,171,15,0],[174,13,174,81,0],[177,13,177,48,0],[178,9,178,10,0],[193,9,193,10,0],[195,13,201,15,0],[204,13,204,81,0],[207,13,207,48,0],[208,9,208,10,0],[219,9,219,10,0],[221,13,227,15,0],[230,13,230,81,0],[233,13,233,48,0],[234,9,234,10,0],[247,9,247,10,0],[249,13,253,15,0],[256,13,256,22,0],[257,17,257,36,0],[260,13,260,82,0],[263,13,263,48,0],[264,9,264,10,0],[272,9,272,10,0],[274,13,278,15,0],[281,13,281,82,0],[284,13,284,48,0],[285,9,285,10,0],[297,9,297,10,0],[299,13,304,15,0],[309,13,309,60,0],[310,13,310,82,0],[311,13,311,60,0],[314,13,314,48,0],[315,9,315,10,0],[323,9,323,10,0],[325,13,330,15,0],[334,13,334,60,0],[335,13,335,82,0],[336,13,336,60,0],[338,13,338,48,0],[339,9,339,10,0],[351,9,351,10,0],[352,13,357,15,0],[362,13,362,61,0],[363,13,363,82,0],[364,13,364,60,0],[367,13,367,48,0],[368,9,368,10,0],[376,9,376,10,0],[377,13,382,15,0],[386,13,386,61,0],[387,13,387,82,0],[388,13,388,60,0],[390,13,390,48,0],[391,9,391,10,0],[404,9,404,10,0],[406,13,406,63,0],[407,13,407,14,0],[408,17,408,67,0],[409,17,409,24,0],[412,13,417,15,0],[420,13,420,58,0],[421,13,421,60,0],[424,13,424,48,0],[425,9,425,10,0],[434,9,434,10,0],[436,13,436,63,0],[437,13,437,14,0],[438,17,438,67,0],[439,17,439,24,0],[442,13,447,15,0],[449,13,449,58,0],[450,13,450,60,0],[452,13,452,48,0],[453,9,453,10,0],[465,9,465,10,0],[467,13,473,15,0],[476,13,476,81,0],[479,13,479,48,0],[480,9,480,10,0]]);
+      highlightRanges([[50,43,50,44,0],[51,13,51,32,0],[51,33,51,34,0],[52,17,52,24,0],[54,13,54,35,0],[55,13,55,112,0]]);
     </script>
   </body>
 </html>

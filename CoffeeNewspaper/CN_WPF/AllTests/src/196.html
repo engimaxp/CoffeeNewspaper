@@ -2,91 +2,110 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\obj\debug\dialogwindow.g.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_core\domainmodel\cntag.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-#pragma checksum &quot;..\..\DialogWindow.xaml&quot; &quot;{ff1816ec-aa5e-4d10-87f7-6f4963833460}&quot; &quot;A7E559EE7E73DCC304CBCF3047525A7A16DA48E0&quot;
-//------------------------------------------------------------------------------
-// &lt;auto-generated&gt;
-//     此代码由工具生成。
-//     运行时版本:4.0.30319.42000
-//
-//     对此文件的更改可能会导致不正确的行为，并且如果
-//     重新生成代码，这些更改将会丢失。
-// &lt;/auto-generated&gt;
-//------------------------------------------------------------------------------
-
-using CN_WPF;
 using System;
-using System.Diagnostics;
-using System.Windows;
-using System.Windows.Automation;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Effects;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Media.TextFormatting;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Shell;
+using System.Collections.Generic;
 
+namespace CN_Core
+{
+    public class CNTag : IEquatable&lt;CNTag&gt;
+    {
+        
 
-namespace CN_WPF {
-    
-    
-    /// &lt;summary&gt;
-    /// DialogWindow
-    /// &lt;/summary&gt;
-    public partial class DialogWindow : System.Windows.Window, System.Windows.Markup.IComponentConnector {
-        
-        private bool _contentLoaded;
-        
+        #region Constructor
+
+        public CNTag()
+        {
+            
+        }
+        #endregion
+
+        #region Public Properties
+
         /// &lt;summary&gt;
-        /// InitializeComponent
+        ///     identity of this tag
         /// &lt;/summary&gt;
-        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
-        public void InitializeComponent() {
-            if (_contentLoaded) {
-                return;
+        public string TagId { get; set; }
+
+        /// &lt;summary&gt;
+        ///     Title of this tag
+        /// &lt;/summary&gt;
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        ///     Task relations this tag has appended to
+        /// &lt;/summary&gt;
+        public virtual ICollection&lt;CNTaskTagger&gt; TaskTaggers { get; set; } = new HashSet&lt;CNTaskTagger&gt;();
+
+        /// &lt;summary&gt;
+        ///     Memo relations this tag has appended to
+        /// &lt;/summary&gt;
+        public virtual ICollection&lt;CNMemoTagger&gt; MemoTaggers { get; set; } = new HashSet&lt;CNMemoTagger&gt;();
+
+        #endregion
+
+        #region Interface Implementation
+
+        private sealed class TitleEqualityComparer : IEqualityComparer&lt;CNTag&gt;
+        {
+            public bool Equals(CNTag x, CNTag y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (x == null) return false;
+                if (y == null) return false;
+                return string.Equals(x.Title, y.Title);
             }
-            _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri(&quot;/CN_WPF;component/dialogwindow.xaml&quot;, System.UriKind.Relative);
-            
-            #line 1 &quot;..\..\DialogWindow.xaml&quot;
-            System.Windows.Application.LoadComponent(this, resourceLocater);
-            
-            #line default
-            #line hidden
+
+            public int GetHashCode(CNTag obj)
+            {
+                return (obj.Title != null ? obj.Title.GetHashCode() : 0);
+            }
         }
+
+        public static IEqualityComparer&lt;CNTag&gt; TitleComparer { get; } = new TitleEqualityComparer();
+
+        #region Equatable implementation
         
-        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute(&quot;PresentationBuildTasks&quot;, &quot;4.0.0.0&quot;)]
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Design&quot;, &quot;CA1033:InterfaceMethodsShouldBeCallableByChildTypes&quot;)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Maintainability&quot;, &quot;CA1502:AvoidExcessiveComplexity&quot;)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(&quot;Microsoft.Performance&quot;, &quot;CA1800:DoNotCastUnnecessarily&quot;)]
-        void System.Windows.Markup.IComponentConnector.Connect(int connectionId, object target) {
-            this._contentLoaded = true;
+        public bool Equals(CNTag other)
+        {
+            return string.Equals(TagId, other?.TagId) &amp;&amp; string.Equals(Title, other?.Title);
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((CNTag) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+
+        #endregion
+
+        #region Formatting Implement
+
+        public override string ToString()
+        {
+            return $&quot;{TagId}---{Title}&quot;;
+        }
+
+        #endregion
+
+        #endregion
     }
 }
-
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[50,43,50,44,0],[51,13,51,32,0],[51,33,51,34,0],[52,17,52,24,0],[54,13,54,35,0],[55,13,55,121,0]]);
+      highlightRanges([[12,9,12,23,1],[13,9,13,10,1],[15,9,15,10,1],[23,31,23,35,1],[23,36,23,40,1],[28,31,28,35,1],[28,36,28,40,1],[33,64,33,68,0],[33,69,33,73,0],[33,78,33,105,1],[38,64,38,68,0],[38,69,38,73,0],[38,78,38,105,1],[47,13,47,14,0],[48,17,48,43,0],[48,44,48,56,0],[49,17,49,31,0],[49,32,49,45,0],[50,17,50,31,0],[50,32,50,45,0],[51,17,51,56,0],[52,13,52,14,0],[55,13,55,14,0],[56,17,56,74,0],[57,13,57,14,0],[60,64,60,68,0],[60,73,60,100,1],[65,9,65,10,0],[66,13,66,93,0],[67,9,67,10,0],[70,9,70,10,0],[71,13,71,29,0],[71,30,71,43,0],[72,13,72,44,0],[72,45,72,57,0],[73,13,73,44,0],[73,45,73,58,0],[74,13,74,40,0],[75,9,75,10,0],[78,9,78,10,0],[79,13,79,45,0],[80,9,80,10,0],[87,9,87,10,0],[88,13,88,41,0],[89,9,89,10,0]]);
     </script>
   </body>
 </html>

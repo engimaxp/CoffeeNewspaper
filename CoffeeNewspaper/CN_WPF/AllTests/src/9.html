@@ -2,85 +2,68 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\timeslicedatastore.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\program.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
-using CN_Core.Interfaces.Repository;
-using Microsoft.EntityFrameworkCore;
+using CN_Repository;
+using CN_Service;
 
-namespace CN_Repository
+namespace CoffeeNewspaper_CLI
 {
-    public class TimeSliceDataStore : BaseDataStore, ITimeSliceDataStore
+    class Program
     {
-        public TimeSliceDataStore(CNDbContext dbContext) : base(dbContext)
+        /// &lt;summary&gt;
+        ///     Application entry point
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;args&quot;&gt;Command line arguments&lt;/param&gt;
+        private static void Main(string[] args)
         {
-        }
+            //Ioc Setup
+            IoC.Setup();
+            IoC.Kernel.BindCNDBContext();
+            IoC.Kernel.BindSqliteDataStore();
+            IoC.Kernel.BindServices();
 
-        #region Add Methods
-
-        public CNTimeSlice AddTimeSlice(CNTimeSlice timeSlice)
-        {
-            mDbContext.TimeSlices.Add(timeSlice);
-            return timeSlice;
-        }
-
-        #endregion
-
-        #region Update Methods
-
-        public void UpdateTimeSlice(CNTimeSlice lastSlice)
-        {
-            mDbContext.TimeSlices.Update(lastSlice);
-        }
-
-        #endregion
-
-        #region Select Methods
-
-        public async Task&lt;CNTimeSlice&gt; GetTimeSliceById(string timeSliceTimeSliceId)
-        {
-            return await IoC.Task.Run(
-                async () =&gt;
+            // enable ctrl+c
+            Console.CancelKeyPress += (o, e) =&gt;
+            {
+                Environment.Exit(1);
+            };
+            BaseState currentStatue = new StartState();
+            currentStatue.Display(null);
+            while (true)
+            {
+                currentStatue.InitialCommandList();
+                currentStatue.DisplayCmdLine();
+                string input = Console.ReadLine();
+                if (&quot;exit&quot;.Equals(input))
                 {
-                    return await mDbContext.TimeSlices.Include(x=&gt;x.Task).FirstOrDefaultAsync(r =&gt;
-                        string.Equals(r.TimeSliceId, timeSliceTimeSliceId, StringComparison.Ordinal));
-                });
+                    break;
+                }
+                ArgumentParser parser = new ArgumentParser(input);
+                var statue = currentStatue;
+                var task = Task.Run(async () =&gt; await statue.DoCommand(parser));
+                task.Wait();
+                var nextState =task.Result;
+                if (nextState != currentStatue)
+                {
+                    nextState.Display(currentStatue);
+                    currentStatue = nextState;
+                }
+            }
         }
-
-        public async Task&lt;ICollection&lt;CNTimeSlice&gt;&gt; GetTimeSliceByTaskID(int taskid)
-        {
-            return await IoC.Task.Run(
-                async () =&gt; { return await mDbContext.TimeSlices.Where(r =&gt; r.TaskId == taskid).ToListAsync(); });
-        }
-
-        #endregion
-
-        #region Delete Methods
-
-        public void DeleteTimeSlice(CNTimeSlice originSlice)
-        {
-            mDbContext.TimeSlices.Remove(originSlice);
-        }
-
-        public void DeleteTimeSliceByTask(int taskid)
-        {
-            mDbContext.TimeSlices.RemoveRange(mDbContext.TimeSlices.Where(r =&gt; r.TaskId == taskid));
-        }
-
-        #endregion
     }
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[13,60,13,75,1],[14,9,14,10,1],[15,9,15,10,1],[20,9,20,10,1],[21,13,21,50,1],[22,13,22,30,1],[23,9,23,10,1],[30,9,30,10,1],[31,13,31,53,1],[32,9,32,10,1],[39,9,39,10,1],[40,13,42,17,1],[42,17,42,18,1],[42,18,43,21,1],[43,21,44,103,1],[44,103,45,17,1],[45,17,45,18,1],[45,18,45,20,1],[40,13,45,20,1],[46,9,46,10,1],[49,9,49,10,1],[50,13,51,29,1],[51,29,51,30,1],[51,30,51,31,1],[51,31,51,111,1],[51,111,51,112,1],[51,112,51,113,1],[51,113,51,115,1],[50,13,51,115,1],[52,9,52,10,1],[59,9,59,10,1],[60,13,60,55,1],[61,9,61,10,1],[64,9,64,10,1],[65,13,65,101,1],[66,9,66,10,1]]);
+      highlightRanges([[16,9,16,10,0],[18,13,18,25,0],[19,13,19,42,0],[20,13,20,46,0],[21,13,21,39,0],[24,13,25,13,0],[25,13,25,14,0],[25,14,26,17,0],[26,17,26,37,0],[26,37,27,13,0],[27,13,27,14,0],[27,14,27,15,0],[24,13,27,15,0],[28,13,28,56,0],[29,13,29,41,0],[30,13,30,25,0],[31,13,31,14,0],[32,17,32,52,0],[33,17,33,48,0],[34,17,34,51,0],[35,17,35,42,0],[36,17,36,18,0],[37,21,37,27,0],[39,17,39,67,0],[40,17,40,44,0],[41,17,41,49,0],[41,49,41,79,0],[41,79,41,81,0],[41,17,41,81,0],[42,17,42,29,0],[43,17,43,44,0],[44,17,44,48,0],[45,17,45,18,0],[46,21,46,54,0],[47,21,47,47,0],[48,17,48,18,0],[49,13,49,14,0],[50,9,50,10,0]]);
     </script>
   </body>
 </html>

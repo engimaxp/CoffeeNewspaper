@@ -2,40 +2,64 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\servicetest\servicesetupteardown.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\valueconverters\taskstatustoforegroundconverter.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using CN_Core;
-using CN_Core.Interfaces.Service;
-using CN_Service;
-using Ninject.MockingKernel.NSubstitute;
-using NUnit.Framework;
 
-namespace CoffeeNewspaper_UnitTest.ServiceTest
+using System;
+using System.Globalization;
+using System.Windows.Media;
+using CN_Presentation;
+using CN_Presentation.Utilities;
+
+namespace CN_WPF
 {
-    public class ServiceSetupTearDown
+    /// &lt;summary&gt;
+    /// A converter that takes in a &lt;see cref=&quot;TaskCurrentStatus&quot;/&gt; and returns 
+    /// the ColorBrush for that Indicator
+    /// &lt;/summary&gt;
+    public class TaskStatusToForeGroundConverter : BaseValueConverter&lt;TaskStatusToForeGroundConverter&gt;
     {
-        protected readonly NSubstituteMockingKernel _kernel;
-        public ServiceSetupTearDown()
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            _kernel = new NSubstituteMockingKernel();
-            _kernel.Bind&lt;ITaskService&gt;().To&lt;TaskService&gt;();
-            _kernel.Bind&lt;IMemoService&gt;().To&lt;MemoService&gt;();
+            UserColorType userColor = UserColorType.WordLightBlue;
+            if (value != null)
+                switch ((TaskCurrentStatus) value)
+                {
+                    case TaskCurrentStatus.COMPLETE:
+                    {
+                        userColor = UserColorType.WordGreen;
+                        break;
+                    }
+                    case TaskCurrentStatus.DELETE:
+                    {
+                        userColor = UserColorType.WordRed;
+                        break;
+                    }
+                    case TaskCurrentStatus.STOP:
+                    case TaskCurrentStatus.UNDERGOING:
+                    case TaskCurrentStatus.PENDING:
+                        {
+                        userColor = UserColorType.WordLightBlue;
+                        break;
+                    }
+                }
+            return (SolidColorBrush)(new BrushConverter().ConvertFrom($&quot;#{userColor.ToColorText()}&quot;));
         }
-        [SetUp]
-        public void SetUp()
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            _kernel.Reset();
+            throw new NotImplementedException();
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[12,9,12,38,1],[13,9,13,10,1],[14,13,14,54,1],[15,13,15,60,1],[16,13,16,60,1],[17,9,17,10,1],[20,9,20,10,1],[21,13,21,29,1],[22,9,22,10,1]]);
+      highlightRanges([[17,9,17,10,0],[18,13,18,67,0],[19,13,19,31,0],[20,17,20,51,0],[23,21,23,22,0],[24,25,24,61,0],[25,25,25,31,0],[28,21,28,22,0],[29,25,29,59,0],[30,25,30,31,0],[35,25,35,26,0],[36,25,36,65,0],[37,25,37,31,0],[40,13,40,103,0],[41,9,41,10,0],[44,9,44,10,0],[45,13,45,49,0]]);
     </script>
   </body>
 </html>

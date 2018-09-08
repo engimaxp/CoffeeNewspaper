@@ -2,63 +2,221 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\ratingcontrol.xaml</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\taskdatastore.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-&lt;UserControl x:Class=&quot;CN_WPF.RatingControl&quot;
-             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
-             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
-             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
-             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
-             xmlns:local=&quot;clr-namespace:CN_WPF&quot;
-             xmlns:design=&quot;clr-namespace:CN_Presentation.ViewModel.Controls.Design;assembly=CN_Presentation&quot;
-             mc:Ignorable=&quot;d&quot;
-             d:DesignWidth=&quot;200&quot;&gt;
-    &lt;Grid &gt;
-        &lt;Grid.ColumnDefinitions&gt;
-            &lt;ColumnDefinition Width=&quot;Auto&quot;&gt;&lt;/ColumnDefinition&gt;
-            &lt;ColumnDefinition Width=&quot;*&quot;&gt;&lt;/ColumnDefinition&gt;
-        &lt;/Grid.ColumnDefinitions&gt;
-        &lt;ItemsControl
-            Grid.Column=&quot;0&quot;
-            local:MonitorHoverProperty.Value=&quot;True&quot;
-            d:DataContext=&quot;{x:Static design:RatingDesignModel.Instance}&quot;
-            ItemsSource=&quot;{Binding IconButtons}&quot;&gt;
-            &lt;ItemsControl.ItemsPanel&gt;
-                &lt;ItemsPanelTemplate&gt;
-                    &lt;StackPanel Orientation=&quot;Horizontal&quot; /&gt;
-                &lt;/ItemsPanelTemplate&gt;
-            &lt;/ItemsControl.ItemsPanel&gt;
-            &lt;ItemsControl.ItemTemplate&gt;
-                &lt;DataTemplate&gt;
-                    &lt;Button
-                            Style=&quot;{StaticResource RatingButton}&quot;
-                            Foreground=&quot;{Binding ColorType,Converter={local:ColorTypeToColorConverter}}&quot;
-                            Content=&quot;{Binding CurrentIconType,Converter={local:IconTypeToFontAwesomeConverter}}&quot;
-                            FontFamily=&quot;{Binding CurrentFontFamilyType,Converter={local:FontFamilyTypeToFontFamilyConverter}}&quot;
-                            FontSize=&quot;{StaticResource FontSizeLarge}&quot;
-                        Command=&quot;{Binding RateClickCommand}&quot;
-                        HorizontalAlignment=&quot;Left&quot;
-                        /&gt;
-                &lt;/DataTemplate&gt;
-            &lt;/ItemsControl.ItemTemplate&gt;
-        &lt;/ItemsControl&gt;
-        &lt;TextBlock
-            Grid.Column=&quot;1&quot; 
-            x:Name=&quot;NameColumn&quot;
-                   Text=&quot;{Binding SelectedValueTxt}&quot;
-                   VerticalAlignment=&quot;Center&quot;
-                   FontSize=&quot;{StaticResource FontSizeLarge}&quot;
-                   HorizontalAlignment=&quot;Right&quot;
-            Foreground=&quot;{StaticResource ForegroundDarkBrush}&quot;&gt;&lt;/TextBlock&gt;
-    &lt;/Grid&gt;
-&lt;/UserControl&gt;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CN_Core;
+using CN_Core.Interfaces.Repository;
+using CN_Core.Specification;
+using Microsoft.EntityFrameworkCore;
+
+namespace CN_Repository
+{
+    public class TaskDataStore : BaseDataStore, ITaskDataStore
+    {
+        public TaskDataStore(CNDbContext dbContext) : base(dbContext)
+        {
+        }
+
+        #region Delete Methods
+
+        public void RemoveTask(CNTask targetTask)
+        {
+            mDbContext.Tasks.Remove(targetTask);
+        }
+
+        public void RemoveTaskConnector(CNTaskConnector connector)
+        {
+            mDbContext.TaskConnectors.Remove(connector);
+        }
+
+        #endregion
+
+        #region Add Methods
+
+        public CNTask AddTask(CNTask targetTask)
+        {
+            mDbContext.Tasks.Add(targetTask);
+            return targetTask;
+        }
+
+        #endregion
+
+        #region Update Methods
+
+        public void UpdateTask(CNTask targetTask)
+        {
+            var existingTask = mDbContext.Tasks
+                .Include(b =&gt; b.TaskTaggers)
+                .FirstOrDefault(b =&gt; b.TaskId == targetTask.TaskId);
+
+            if (existingTask == null)
+            {
+                IoC.Logger.Log($&quot;targetTask id {targetTask.TaskId} not exists&quot;);
+            }
+            else
+            {
+                mDbContext.Entry(existingTask).CurrentValues.SetValues(targetTask);
+                foreach (var taskTagger in targetTask.TaskTaggers)
+                {
+                    var existingTaskTagger = existingTask.TaskTaggers
+                        .FirstOrDefault(p =&gt; p.TaskTaggerId == taskTagger.TaskTaggerId);
+
+                    if (existingTaskTagger == null)
+                    {
+                        existingTask.TaskTaggers.Add(taskTagger);
+                    }
+                    else
+                    {
+                        mDbContext.Entry(existingTaskTagger).CurrentValues.SetValues(taskTagger);
+                    }
+                }
+
+                foreach (var taskTagger in existingTask.TaskTaggers)
+                {
+                    if (targetTask.TaskTaggers.All(p =&gt; p.TaskTaggerId != taskTagger.TaskTaggerId))
+                    {
+                        mDbContext.Remove(taskTagger);
+                    }
+                }
+            }
+        }
+
+        public void UpdateEndTaskTime(CNTask originDataTask, DateTime? targetEndTime)
+        {
+            if (originDataTask == null) return;
+            if (originDataTask.EndTime == null &amp;&amp; targetEndTime == null) return;
+            if (originDataTask.EndTime != null &amp;&amp; originDataTask.EndTime.Equals(targetEndTime)) return;
+            originDataTask.EndTime = targetEndTime;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        public void UpdateStartTaskTime(CNTask originDataTask, DateTime? targetStartTime)
+        {
+            if (originDataTask == null) return;
+            if (originDataTask.StartTime == null &amp;&amp; targetStartTime == null) return;
+            if (originDataTask.StartTime != null &amp;&amp; originDataTask.StartTime.Equals(targetStartTime)) return;
+            originDataTask.StartTime = targetStartTime;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        public void ExpandTaskTime(CNTask originDataTask, DateTime? targetStartTime, DateTime? targetEndTime)
+        {
+            //origintask null return
+            if (originDataTask == null) return;
+            //if this condition is fulfilled,than new time is smaller-or-equal compare to old ,do noting and return
+            if (originDataTask.StartTime != null &amp;&amp; originDataTask.EndTime != null &amp;&amp;
+                !(originDataTask.StartTime &gt; targetStartTime) &amp;&amp; !(originDataTask.EndTime &lt; targetEndTime) &amp;&amp;
+                targetEndTime != null) return;
+
+            //flag for update db
+            var needUpdate = false;
+            if (originDataTask.StartTime == null || originDataTask.StartTime &gt; targetStartTime)
+            {
+                originDataTask.StartTime = targetStartTime;
+                needUpdate = true;
+            }
+
+            if (originDataTask.EndTime == null &amp;&amp; targetEndTime != null || //Pause A Task
+                originDataTask.EndTime != null &amp;&amp; targetEndTime == null || //Start A Task
+                originDataTask.EndTime != null &amp;&amp; targetEndTime != null &amp;&amp;
+                originDataTask.EndTime &lt; targetEndTime
+            ) //Update A Task timeslice
+            {
+                originDataTask.EndTime = targetEndTime;
+                needUpdate = true;
+            }
+
+            if (!needUpdate) return;
+            mDbContext.Tasks.Update(originDataTask);
+        }
+
+        #endregion
+
+        #region Select Methods
+
+        public async Task&lt;CNTask&gt; GetTaskNoTracking(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await mDbContext.Tasks.Include(x=&gt;x.ParentTask).Include(x=&gt;x.TaskTaggers).ThenInclude(y=&gt;y.Tag).AsNoTracking()
+                        .FirstOrDefaultAsync(r =&gt; r.TaskId == taskid)
+            );
+        }
+
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetChildTasksNoTracking(int taskId)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await mDbContext.Tasks.Include(x =&gt; x.TaskTaggers).ThenInclude(y =&gt; y.Tag).AsNoTracking()
+                        .Where(r =&gt; r.ParentTaskID == taskId).ToListAsync()
+            );
+        }
+
+        public async Task&lt;int&gt; GetMaxSort(int? parentTaskId)
+        {
+            return await IoC.Task.Run(
+                async () =&gt; 
+                    await (from c in mDbContext.Tasks
+                        where c.ParentTaskID == parentTaskId
+                        select c.Sort).DefaultIfEmpty().MaxAsync()
+            );
+        }
+
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetAllTasksBySpecification(ISpecification&lt;CNTask&gt; spec)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                {
+                    // fetch a Queryable that includes all expression-based includes
+                    var queryableResultWithIncludes = spec.Includes
+                        .Aggregate(mDbContext.Set&lt;CNTask&gt;().AsQueryable(),
+                            (current, include) =&gt; current.Include(include));
+
+                    // modify the IQueryable to include any string-based include statements
+                    var secondaryResult = spec.IncludeStrings
+                        .Aggregate(queryableResultWithIncludes,
+                            (current, include) =&gt; current.Include(include));
+
+                    // return the result of the query using the specification&#39;s criteria expression
+                    return await secondaryResult
+                        .Where(spec.Criteria).ToListAsync();
+                });
+        }
+
+        public async Task&lt;ICollection&lt;CNTask&gt;&gt; GetAllTask()
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await (from c in mDbContext.Tasks
+                        where !c.IsDeleted
+                        orderby c.Sort
+                        select c).ToListAsync()
+            );
+        }
+
+        public async Task&lt;CNTask&gt; GetTask(int taskid)
+        {
+            return await IoC.Task.Run(
+                async () =&gt;
+                    await mDbContext.Tasks
+                        .FirstOrDefaultAsync(r =&gt; r.TaskId == taskid)
+            );
+        }
+
+        #endregion
+    }
+}
     </pre>
     <script type="text/javascript">
-      highlightRanges([[1,13,1,77,0]]);
+      highlightRanges([[14,55,14,70,1],[15,9,15,10,1],[16,9,16,10,1],[21,9,21,10,1],[22,13,22,49,1],[23,9,23,10,1],[26,9,26,10,1],[27,13,27,57,1],[28,9,28,10,1],[35,9,35,10,1],[36,13,36,46,1],[37,13,37,31,1],[38,9,38,10,1],[45,9,45,10,1],[46,13,48,69,1],[50,13,50,38,1],[51,13,51,14,1],[52,17,52,81,1],[53,13,53,14,1],[55,13,55,14,1],[56,17,56,84,1],[57,17,57,24,1],[57,26,57,40,1],[57,41,57,43,1],[57,44,57,66,1],[58,17,58,18,1],[59,21,60,46,1],[60,46,60,87,1],[60,87,60,89,1],[59,21,60,89,1],[62,21,62,52,1],[63,21,63,22,0],[64,25,64,66,0],[65,21,65,22,0],[67,21,67,22,1],[68,25,68,98,1],[69,21,69,22,1],[70,17,70,18,1],[72,17,72,24,1],[72,26,72,40,1],[72,41,72,43,1],[72,44,72,68,1],[73,17,73,18,1],[74,21,74,57,1],[74,57,74,98,1],[74,98,74,100,1],[74,21,74,100,1],[75,21,75,22,0],[76,25,76,55,0],[77,21,77,22,0],[78,17,78,18,1],[79,13,79,14,1],[80,9,80,10,1],[83,9,83,10,1],[84,13,84,40,1],[84,41,84,48,1],[85,13,85,73,1],[85,74,85,81,1],[86,13,86,96,1],[86,97,86,104,1],[87,13,87,52,1],[88,13,88,53,1],[89,9,89,10,1],[92,9,92,10,1],[93,13,93,40,1],[93,41,93,48,1],[94,13,94,77,1],[94,78,94,85,1],[95,13,95,102,1],[95,103,95,110,1],[96,13,96,56,1],[97,13,97,53,1],[98,9,98,10,1],[101,9,101,10,1],[103,13,103,40,1],[103,41,103,48,1],[105,13,107,39,1],[107,40,107,47,1],[110,13,110,36,1],[111,13,111,96,1],[112,13,112,14,1],[113,17,113,60,1],[114,17,114,35,1],[115,13,115,14,1],[117,13,121,14,1],[122,13,122,14,1],[123,17,123,56,1],[124,17,124,35,1],[125,13,125,14,1],[127,13,127,29,1],[127,30,127,37,1],[128,13,128,53,1],[129,9,129,10,1],[136,9,136,10,0],[137,13,139,21,0],[139,21,140,70,0],[140,70,141,15,0],[137,13,141,15,0],[142,9,142,10,0],[145,9,145,10,0],[146,13,148,21,0],[148,21,149,76,0],[149,76,150,15,0],[146,13,150,15,0],[151,9,151,10,0],[154,9,154,10,1],[155,13,157,21,1],[157,21,159,67,1],[159,67,160,15,1],[155,13,160,15,1],[161,9,161,10,1],[164,9,164,10,0],[165,13,167,17,0],[167,17,167,18,0],[167,18,169,21,0],[169,21,171,51,0],[171,51,171,75,0],[171,75,171,77,0],[169,21,171,77,0],[171,77,174,21,0],[174,21,176,51,0],[176,51,176,75,0],[176,75,176,77,0],[174,21,176,77,0],[176,77,179,21,0],[179,21,180,61,0],[180,61,181,17,0],[181,17,181,18,0],[181,18,181,20,0],[165,13,181,20,0],[182,9,182,10,0],[185,9,185,10,1],[186,13,188,21,1],[188,21,191,48,1],[191,48,192,15,1],[186,13,192,15,1],[193,9,193,10,1],[196,9,196,10,1],[197,13,199,21,1],[199,21,200,70,1],[200,70,201,15,1],[197,13,201,15,1],[202,9,202,10,1]]);
     </script>
   </body>
 </html>

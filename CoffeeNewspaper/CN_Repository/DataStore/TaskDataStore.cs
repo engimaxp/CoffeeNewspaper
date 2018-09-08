@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
 using CN_Core.Interfaces.Repository;
+using CN_Core.Specification;
 using Microsoft.EntityFrameworkCore;
 
 namespace CN_Repository
@@ -157,6 +158,27 @@ namespace CN_Repository
                         where c.ParentTaskID == parentTaskId
                         select c.Sort).DefaultIfEmpty().MaxAsync()
             );
+        }
+
+        public async Task<ICollection<CNTask>> GetAllTasksBySpecification(ISpecification<CNTask> spec)
+        {
+            return await IoC.Task.Run(
+                async () =>
+                {
+                    // fetch a Queryable that includes all expression-based includes
+                    var queryableResultWithIncludes = spec.Includes
+                        .Aggregate(mDbContext.Set<CNTask>().AsQueryable(),
+                            (current, include) => current.Include(include));
+
+                    // modify the IQueryable to include any string-based include statements
+                    var secondaryResult = spec.IncludeStrings
+                        .Aggregate(queryableResultWithIncludes,
+                            (current, include) => current.Include(include));
+
+                    // return the result of the query using the specification's criteria expression
+                    return await secondaryResult
+                        .Where(spec.Criteria).ToListAsync();
+                });
         }
 
         public async Task<ICollection<CNTask>> GetAllTask()

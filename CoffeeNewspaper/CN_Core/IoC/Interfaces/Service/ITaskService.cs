@@ -22,6 +22,12 @@ namespace CN_Core.Interfaces.Service
         Task<bool> DeleteTask(int taskId, bool force = false);
 
         /// <summary>
+        ///     Delete all complete tasks (root level tasks only)
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> ClearAllCompleteTasks();
+
+        /// <summary>
         ///     Remove a Task from db physical delete
         /// </summary>
         /// <param name="taskId"></param>
@@ -186,7 +192,5 @@ namespace CN_Core.Interfaces.Service
         /// <param name="reason"></param>
         /// <returns></returns>
         Task<bool> PendingATask(int taskId, string reason);
-        
-        
     }
 }

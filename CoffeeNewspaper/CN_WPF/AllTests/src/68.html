@@ -2,95 +2,544 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\command\tagcommand.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\utilities\windowresizer.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using CN_Core;
-using Colorful;
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
 
-namespace CoffeeNewspaper_CLI
+namespace CN_WPF
 {
-    public class TagCommand : BaseCommand
+    /// &lt;summary&gt;
+    /// The dock position of the window
+    /// &lt;/summary&gt;
+    public enum WindowDockPosition
     {
-        public TagCommand(BaseState state) : base(state)
+        /// &lt;summary&gt;
+        /// Not docked
+        /// &lt;/summary&gt;
+        Undocked = 0,
+        /// &lt;summary&gt;
+        /// Docked to the left of the screen
+        /// &lt;/summary&gt;
+        Left = 1,
+        /// &lt;summary&gt;
+        /// Docked to the right of the screen
+        /// &lt;/summary&gt;
+        Right = 2,
+        /// &lt;summary&gt;
+        /// Docked to the top/bottom of the screen
+        /// &lt;/summary&gt;
+        TopBottom = 3,
+        /// &lt;summary&gt;
+        /// Docked to the top-left of the screen
+        /// &lt;/summary&gt;
+        TopLeft = 4,
+        /// &lt;summary&gt;
+        /// Docked to the top-right of the screen
+        /// &lt;/summary&gt;
+        TopRight = 5,
+        /// &lt;summary&gt;
+        /// Docked to the bottom-left of the screen
+        /// &lt;/summary&gt;
+        BottomLeft = 6,
+        /// &lt;summary&gt;
+        /// Docked to the bottom-right of the screen
+        /// &lt;/summary&gt;
+        BottomRight = 7,
+    }
+
+
+    /// &lt;summary&gt;
+    /// Fixes the issue with Windows of Style &lt;see cref=&quot;WindowStyle.None&quot;/&gt; covering the taskbar
+    /// &lt;/summary&gt;
+    public class WindowResizer
+    {
+        #region Private Members
+
+        /// &lt;summary&gt;
+        /// The window to handle the resizing for
+        /// &lt;/summary&gt;
+        private Window mWindow;
+
+        /// &lt;summary&gt;
+        /// The last calculated available screen size
+        /// &lt;/summary&gt;
+        private Rect mScreenSize = new Rect();
+
+        /// &lt;summary&gt;
+        /// How close to the edge the window has to be to be detected as at the edge of the screen
+        /// &lt;/summary&gt;
+        private int mEdgeTolerance = 1;
+
+        /// &lt;summary&gt;
+        /// The transform matrix used to convert WPF sizes to screen pixels
+        /// &lt;/summary&gt;
+        private DpiScale? mMonitorDpi;
+
+        /// &lt;summary&gt;
+        /// The last screen the window was on
+        /// &lt;/summary&gt;
+        private IntPtr mLastScreen;
+
+        /// &lt;summary&gt;
+        /// The last known dock position
+        /// &lt;/summary&gt;
+        private WindowDockPosition mLastDock = WindowDockPosition.Undocked;
+
+        /// &lt;summary&gt;
+        /// A flag indicating if the window is currently being moved/dragged
+        /// &lt;/summary&gt;
+        private bool mBeingMoved = false;
+
+        #endregion
+
+        #region DLL Imports
+
+        [DllImport(&quot;user32.dll&quot;)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetCursorPos(out POINT lpPoint);
+
+        [DllImport(&quot;user32.dll&quot;)]
+        static extern bool GetMonitorInfo(IntPtr hMonitor, MONITORINFO lpmi);
+
+        [DllImport(&quot;user32.dll&quot;, SetLastError = true)]
+        static extern IntPtr MonitorFromPoint(POINT pt, MonitorOptions dwFlags);
+
+        [DllImport(&quot;user32.dll&quot;)]
+        static extern IntPtr MonitorFromWindow(IntPtr hwnd, MonitorOptions dwFlags);
+
+        #endregion
+
+        #region Public Events
+
+        /// &lt;summary&gt;
+        /// Called when the window dock position changes
+        /// &lt;/summary&gt;
+        public event Action&lt;WindowDockPosition&gt; WindowDockChanged = (dock) =&gt; { };
+
+        /// &lt;summary&gt;
+        /// Called when the window starts being moved/dragged
+        /// &lt;/summary&gt;
+        public event Action WindowStartedMove = () =&gt; { };
+
+        /// &lt;summary&gt;
+        /// Called when the window has been moved/dragged and then finished
+        /// &lt;/summary&gt;
+        public event Action WindowFinishedMove = () =&gt; { };
+
+        #endregion
+
+        #region Public Properties
+
+        /// &lt;summary&gt;
+        /// The size and position of the current monitor the window is on
+        /// &lt;/summary&gt;
+        public Rectangle CurrentMonitorSize { get; set; } = new Rectangle();
+
+        /// &lt;summary&gt;
+        /// The margin around the window for the current window to compensate for any non-usable area
+        /// such as the task bar
+        /// &lt;/summary&gt;
+        public Thickness CurrentMonitorMargin { get; private set; } = new Thickness();
+
+        /// &lt;summary&gt;
+        /// The size and position of the current screen in relation to the multi-screen desktop
+        /// For example a second monitor on the right will have a Left position of
+        /// the X resolution of the screens on the left
+        /// &lt;/summary&gt;
+        public Rect CurrentScreenSize =&gt; mScreenSize;
+
+        #endregion
+
+        #region Constructor
+
+        /// &lt;summary&gt;
+        /// Default constructor
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;window&quot;&gt;The window to monitor and correctly maximize&lt;/param&gt;
+        /// &lt;param name=&quot;adjustSize&quot;&gt;The callback for the host to adjust the maximum available size if needed&lt;/param&gt;
+        public WindowResizer(Window window)
         {
-            Name = &quot;tag&quot;;
+            mWindow = window;
+
+            // Listen out for source initialized to setup
+            mWindow.SourceInitialized += Window_SourceInitialized;
+
+            // Monitor for edge docking
+            mWindow.SizeChanged += Window_SizeChanged;
+            mWindow.LocationChanged += Window_LocationChanged;
         }
 
-        public override async Task&lt;BaseState&gt; Excute(ArgumentParser input)
+        #endregion
+
+        #region Initialize
+
+        /// &lt;summary&gt;
+        /// Initialize and hook into the windows message pump
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        private void Window_SourceInitialized(object sender, System.EventArgs e)
         {
-            await Task.Delay(1);
-            if (State != null &amp;&amp; State.StateObj is CNTask task)
-            {
-                var addTags = input.Get&lt;string&gt;(&quot;add&quot;).Select(x =&gt; new CNTag {Title = x}).ToList();
-                if (addTags.Any())
-                {
-                    //TODO:Extract to Service Implement
-                    //union to get a non-repeat TagList
-                    var totalTags = addTags.Union(task.TaskTaggers.Select(x =&gt; x.Tag).ToList(), CNTag.TitleComparer);
-                    //select the new tags to be added
-                    var toBeAddedTag = totalTags.Where(x =&gt; string.IsNullOrEmpty(x.TagId));
-                    //add them to task
-                    toBeAddedTag.ToList().ForEach(y =&gt;
-                        task.TaskTaggers.Add(new CNTaskTagger {Tag = y, TaskId = task.TaskId}));
-                }
+            // Get the handle of this window
+            var handle = (new WindowInteropHelper(mWindow)).Handle;
+            var handleSource = HwndSource.FromHwnd(handle);
 
-                var removeTags = input.Get&lt;string&gt;(&quot;remove&quot;).Select(x =&gt; new CNTag {Title = x}).ToList();
-                if (removeTags.Any())
-                {
-                    var toBeRemovedTag = task.TaskTaggers.Select(x =&gt; x.Tag).ToList()
-                        .Intersect(removeTags, CNTag.TitleComparer).ToList();
-                    toBeRemovedTag.ForEach(x =&gt;
-                        task.TaskTaggers.Remove(task.TaskTaggers.FirstOrDefault(y =&gt; y.TagId == x.TagId)));
-                }
+            // If not found, end
+            if (handleSource == null)
+                return;
 
-                State.Refresh();
-            }
-            else if (State != null &amp;&amp; State.StateObj is CNMemo memo)
-            {
-                var addTags = input.Get&lt;string&gt;(&quot;add&quot;).Select(x =&gt; new CNTag {Title = x}).ToList();
-                if (addTags.Any())
-                {
-                    //TODO:Extract to Service Implement
-                    //union to get a non-repeat TagList
-                    var totalTags = addTags.Union(memo.MemoTaggers.Select(x =&gt; x.Tag).ToList(), CNTag.TitleComparer);
-                    //select the new tags to be added
-                    var toBeAddedTag = totalTags.Where(x =&gt; string.IsNullOrEmpty(x.TagId));
-                    //add them to memo
-                    toBeAddedTag.ToList().ForEach(y =&gt;
-                        memo.MemoTaggers.Add(new CNMemoTagger {Tag = y, MemoId = memo.MemoId}));
-                }
+            // Hook into it&#39;s Windows messages
+            handleSource.AddHook(WindowProc);
+        }
 
-                var removeTags = input.Get&lt;string&gt;(&quot;remove&quot;).Select(x =&gt; new CNTag {Title = x}).ToList();
-                if (removeTags.Any())
-                {
-                    var toBeRemovedTag = memo.MemoTaggers.Select(x =&gt; x.Tag).ToList()
-                        .Intersect(removeTags, CNTag.TitleComparer).ToList();
-                    toBeRemovedTag.ForEach(x =&gt;
-                        memo.MemoTaggers.Remove(memo.MemoTaggers.FirstOrDefault(y =&gt; y.TagId == x.TagId)));
-                }
+        #endregion
 
-                State.Refresh();
-            }
+        #region Edge Docking
+
+        /// &lt;summary&gt;
+        /// Monitor for moving of the window and constantly check for docked positions
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        private void Window_LocationChanged(object sender, EventArgs e)
+        {
+            Window_SizeChanged(null, null);
+        }
+
+        /// &lt;summary&gt;
+        /// Monitors for size changes and detects if the window has been docked (Aero snap) to an edge
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            // Make sure our monitor info is up-to-date
+            WmGetMinMaxInfo(IntPtr.Zero, IntPtr.Zero);
+
+            // Get the monitor transform for the current position
+            mMonitorDpi = VisualTreeHelper.GetDpi(mWindow);
+
+            // Cannot calculate size until we know monitor scale
+            if (mMonitorDpi == null)
+                return;
+
+            // Get window rectangle
+            var top = mWindow.Top;
+            var left = mWindow.Left;
+            var bottom = top + mWindow.Height;
+            var right = left + mWindow.Width;
+
+            // Get window position/size in device pixels
+            var windowTopLeft = new Point(left * mMonitorDpi.Value.DpiScaleX, top * mMonitorDpi.Value.DpiScaleX);
+            var windowBottomRight = new Point(right * mMonitorDpi.Value.DpiScaleX, bottom * mMonitorDpi.Value.DpiScaleX);
+
+            // Check for edges docked
+            var edgedTop = windowTopLeft.Y &lt;= (mScreenSize.Top + mEdgeTolerance) &amp;&amp; windowTopLeft.Y &gt;= (mScreenSize.Top - mEdgeTolerance);
+            var edgedLeft = windowTopLeft.X &lt;= (mScreenSize.Left + mEdgeTolerance) &amp;&amp; windowTopLeft.X &gt;= (mScreenSize.Left - mEdgeTolerance);
+            var edgedBottom = windowBottomRight.Y &gt;= (mScreenSize.Bottom - mEdgeTolerance) &amp;&amp; windowBottomRight.Y &lt;= (mScreenSize.Bottom + mEdgeTolerance);
+            var edgedRight = windowBottomRight.X &gt;= (mScreenSize.Right - mEdgeTolerance) &amp;&amp; windowBottomRight.X &lt;= (mScreenSize.Right + mEdgeTolerance);
+
+            // Get docked position
+            var dock = WindowDockPosition.Undocked;
+
+            // Left docking
+            if (edgedTop &amp;&amp; edgedBottom &amp;&amp; edgedLeft)
+                dock = WindowDockPosition.Left;
+            // Right docking
+            else if (edgedTop &amp;&amp; edgedBottom &amp;&amp; edgedRight)
+                dock = WindowDockPosition.Right;
+            // Top/bottom
+            else if (edgedTop &amp;&amp; edgedBottom)
+                dock = WindowDockPosition.TopBottom;
+            // Top-left
+            else if (edgedTop &amp;&amp; edgedLeft)
+                dock = WindowDockPosition.TopLeft;
+            // Top-right
+            else if (edgedTop &amp;&amp; edgedRight)
+                dock = WindowDockPosition.TopRight;
+            // Bottom-left
+            else if (edgedBottom &amp;&amp; edgedLeft)
+                dock = WindowDockPosition.BottomLeft;
+            // Bottom-right
+            else if (edgedBottom &amp;&amp; edgedRight)
+                dock = WindowDockPosition.BottomRight;
+
+            // None
             else
+                dock = WindowDockPosition.Undocked;
+
+            // If dock has changed
+            if (dock != mLastDock)
+                // Inform listeners
+                WindowDockChanged(dock);
+
+            // Save last dock position
+            mLastDock = dock;
+        }
+
+        #endregion
+
+        #region Windows Message Pump
+
+        /// &lt;summary&gt;
+        /// Listens out for all windows messages for this window
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;hwnd&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;msg&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;wParam&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;lParam&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;handled&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            switch (msg)
             {
-                Console.WriteLine(&quot;wrong parameter&quot;, Color.Red);
+                // Handle the GetMinMaxInfo of the Window
+                case 0x0024: // WM_GETMINMAXINFO
+                    WmGetMinMaxInfo(hwnd, lParam);
+                    handled = true;
+                    break;
+
+                // Once the window starts being moved
+                case 0x0231: // WM_ENTERSIZEMOVE
+                    mBeingMoved = true;
+                    WindowStartedMove();
+                    break;
+
+                // Once the window has finished being moved
+                case 0x0232: // WM_EXITSIZEMOVE
+                    mBeingMoved = false;
+                    WindowFinishedMove();
+                    break;
             }
 
-            Console.WriteLine();
-            return State;
+            return (IntPtr)0;
+        }
+
+        #endregion
+
+        /// &lt;summary&gt;
+        /// Get the min/max window size for this window
+        /// Correctly accounting for the task bar size and position
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;hwnd&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;lParam&quot;&gt;&lt;/param&gt;
+        private void WmGetMinMaxInfo(System.IntPtr hwnd, System.IntPtr lParam)
+        {
+            // Get the point position to determine what screen we are on
+            GetCursorPos(out var lMousePosition);
+
+            // Now get the current screen
+            var lCurrentScreen = mBeingMoved ?
+                // If being dragged get it from the mouse position
+                MonitorFromPoint(lMousePosition, MonitorOptions.MONITOR_DEFAULTTONULL) :
+                // Otherwise get it from the window position (for example being moved via Win + Arrow)
+                // in case the mouse is on another monitor
+                MonitorFromWindow(hwnd, MonitorOptions.MONITOR_DEFAULTTONULL);
+
+            var lPrimaryScreen = MonitorFromPoint(new POINT(0, 0), MonitorOptions.MONITOR_DEFAULTTOPRIMARY);
+
+            // Try and get the current screen information
+            var lCurrentScreenInfo = new MONITORINFO();
+            if (GetMonitorInfo(lCurrentScreen, lCurrentScreenInfo) == false)
+                return;
+
+            // Try and get the primary screen information
+            var lPrimaryScreenInfo = new MONITORINFO();
+            if (GetMonitorInfo(lPrimaryScreen, lPrimaryScreenInfo) == false)
+                return;
+
+            // NOTE: Always update it
+            // If this has changed from the last one, update the transform
+            //if (lCurrentScreen != mLastScreen || mMonitorDpi == null)
+            mMonitorDpi = VisualTreeHelper.GetDpi(mWindow);
+
+            // Store last know screen
+            mLastScreen = lCurrentScreen;
+
+            // Get work area sizes and rations
+            var currentX = lCurrentScreenInfo.RCWork.Left - lCurrentScreenInfo.RCMonitor.Left;
+            var currentY = lCurrentScreenInfo.RCWork.Top - lCurrentScreenInfo.RCMonitor.Top;
+            var currentWidth = (lCurrentScreenInfo.RCWork.Right - lCurrentScreenInfo.RCWork.Left);
+            var currentHeight = (lCurrentScreenInfo.RCWork.Bottom - lCurrentScreenInfo.RCWork.Top);
+            var currentRatio = (float)currentWidth / (float)currentHeight;
+
+            var primaryX = lPrimaryScreenInfo.RCWork.Left - lPrimaryScreenInfo.RCMonitor.Left;
+            var primaryY = lPrimaryScreenInfo.RCWork.Top - lPrimaryScreenInfo.RCMonitor.Top;
+            var primaryWidth = (lPrimaryScreenInfo.RCWork.Right - lPrimaryScreenInfo.RCWork.Left);
+            var primaryHeight = (lPrimaryScreenInfo.RCWork.Bottom - lPrimaryScreenInfo.RCWork.Top);
+            var primaryRatio = (float)primaryWidth / (float)primaryHeight;
+
+            if (lParam != IntPtr.Zero)
+            {
+                // Get min/max structure to fill with information
+                var lMmi = (MINMAXINFO)Marshal.PtrToStructure(lParam, typeof(MINMAXINFO));
+
+                //
+                //   NOTE: The below setting of max sizes we no longer do
+                //         as through observations, it appears Windows works
+                //         correctly only when the max window size is set to
+                //         EXACTLY the size of the primary window
+                // 
+                //         Anything else and the behavior is wrong and the max
+                //         window width on a secondary monitor if larger than the
+                //         primary then goes too large
+                //
+                //          lMmi.PointMaxPosition.X = 0;
+                //          lMmi.PointMaxPosition.Y = 0;
+                //          lMmi.PointMaxSize.X = lCurrentScreenInfo.RCMonitor.Right - lCurrentScreenInfo.RCMonitor.Left;
+                //          lMmi.PointMaxSize.Y = lCurrentScreenInfo.RCMonitor.Bottom - lCurrentScreenInfo.RCMonitor.Top;
+                //
+                //         Instead we now just add a margin to the window itself
+                //         to compensate when maximized
+                // 
+                //
+                // NOTE: rcMonitor is the monitor size
+                //       rcWork is the available screen size (so the area inside the task bar start menu for example)
+
+                // Size limits (used by Windows when maximized)
+                // relative to 0,0 being the current screens top-left corner
+
+                // Set to primary monitor size
+                lMmi.PointMaxPosition.X = lPrimaryScreenInfo.RCMonitor.Left;
+                lMmi.PointMaxPosition.Y = lPrimaryScreenInfo.RCMonitor.Top;
+                lMmi.PointMaxSize.X = lPrimaryScreenInfo.RCMonitor.Right;
+                lMmi.PointMaxSize.Y = lPrimaryScreenInfo.RCMonitor.Bottom;
+
+                // Set min size
+                var minSize = new Point(mWindow.MinWidth * mMonitorDpi.Value.DpiScaleX, mWindow.MinHeight * mMonitorDpi.Value.DpiScaleX);
+                lMmi.PointMinTrackSize.X = (int)minSize.X;
+                lMmi.PointMinTrackSize.Y = (int)minSize.Y;
+
+                // Now we have the max size, allow the host to tweak as needed
+                Marshal.StructureToPtr(lMmi, lParam, true);
+            }
+
+            // Set monitor size
+            CurrentMonitorSize = new Rectangle(currentX, currentY, currentWidth + currentX, currentHeight + currentY);
+
+            // Get margin around window
+            CurrentMonitorMargin = new Thickness(
+                (lCurrentScreenInfo.RCMonitor.Left - lCurrentScreenInfo.RCWork.Left) / mMonitorDpi.Value.DpiScaleX,
+                (lCurrentScreenInfo.RCMonitor.Top - lCurrentScreenInfo.RCWork.Top) / mMonitorDpi.Value.DpiScaleY,
+                (lCurrentScreenInfo.RCMonitor.Right - lCurrentScreenInfo.RCWork.Right) / mMonitorDpi.Value.DpiScaleX,
+                (lCurrentScreenInfo.RCMonitor.Bottom - lCurrentScreenInfo.RCWork.Bottom) / mMonitorDpi.Value.DpiScaleY
+                );
+
+            // Store new size
+            mScreenSize = new Rect(lCurrentScreenInfo.RCWork.Left, lCurrentScreenInfo.RCWork.Top, currentWidth, currentHeight);
+        }
+
+        /// &lt;summary&gt;
+        /// Gets the current cursor position in screen coordinates relative to an entire multi-desktop position
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public Point GetCursorPosition()
+        {
+            // Get mouse position
+            GetCursorPos(out var lMousePosition);
+
+            // Apply DPI scaling
+            return new Point(lMousePosition.X / mMonitorDpi.Value.DpiScaleX, lMousePosition.Y / mMonitorDpi.Value.DpiScaleY);
         }
     }
+
+    #region DLL Helper Structures
+
+    public enum MonitorOptions : uint
+    {
+        MONITOR_DEFAULTTONULL = 0x00000000,
+        MONITOR_DEFAULTTOPRIMARY = 0x00000001,
+        MONITOR_DEFAULTTONEAREST = 0x00000002
+    }
+
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    public class MONITORINFO
+    {
+#pragma warning disable IDE1006 // Naming Styles
+        public int CBSize = Marshal.SizeOf(typeof(MONITORINFO));
+        public Rectangle RCMonitor = new Rectangle();
+        public Rectangle RCWork = new Rectangle();
+        public int DWFlags = 0;
+#pragma warning restore IDE1006 // Naming Styles
+    }
+
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Rectangle
+    {
+#pragma warning disable IDE1006 // Naming Styles
+        public int Left, Top, Right, Bottom;
+#pragma warning restore IDE1006 // Naming Styles
+
+        public Rectangle(int left, int top, int right, int bottom)
+        {
+            Left = left;
+            Top = top;
+            Right = right;
+            Bottom = bottom;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MINMAXINFO
+    {
+#pragma warning disable IDE1006 // Naming Styles
+        public POINT PointReserved;
+        public POINT PointMaxSize;
+        public POINT PointMaxPosition;
+        public POINT PointMinTrackSize;
+        public POINT PointMaxTrackSize;
+#pragma warning restore IDE1006 // Naming Styles
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct POINT
+    {
+        /// &lt;summary&gt;
+        /// x coordinate of point.
+        /// &lt;/summary&gt;
+#pragma warning disable IDE1006 // Naming Styles
+        public int X;
+#pragma warning restore IDE1006 // Naming Styles
+
+        /// &lt;summary&gt;
+        /// y coordinate of point.
+        /// &lt;/summary&gt;
+#pragma warning disable IDE1006 // Naming Styles
+        public int Y;
+#pragma warning restore IDE1006 // Naming Styles
+
+        /// &lt;summary&gt;
+        /// Construct a point of coordinates (x,y).
+        /// &lt;/summary&gt;
+        public POINT(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public override string ToString()
+        {
+            return $&quot;{X} {Y}&quot;;
+        }
+    }
+
+    #endregion
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[11,46,11,57,0],[12,9,12,10,0],[13,13,13,26,0],[14,9,14,10,0],[17,9,17,10,0],[18,13,18,33,0],[19,13,19,64,0],[20,13,20,14,0],[21,17,21,68,0],[21,68,21,89,0],[21,89,21,100,0],[21,17,21,100,0],[22,17,22,35,0],[23,17,23,18,0],[26,21,26,80,0],[26,80,26,85,0],[26,85,26,118,0],[26,21,26,118,0],[28,21,28,61,0],[28,61,28,90,0],[28,90,28,92,0],[28,21,28,92,0],[30,21,31,25,0],[31,25,31,95,0],[31,95,31,97,0],[30,21,31,97,0],[32,17,32,18,0],[34,17,34,74,0],[34,74,34,95,0],[34,95,34,106,0],[34,17,34,106,0],[35,17,35,38,0],[36,17,36,18,0],[37,21,37,71,0],[37,71,37,76,0],[37,76,38,78,0],[37,21,38,78,0],[39,21,40,25,0],[40,25,40,86,0],[40,86,40,104,0],[40,104,40,106,0],[40,25,40,106,0],[40,106,40,108,0],[39,21,40,108,0],[41,17,41,18,0],[43,17,43,33,0],[44,13,44,14,0],[45,18,45,69,0],[46,13,46,14,0],[47,17,47,68,0],[47,68,47,89,0],[47,89,47,100,0],[47,17,47,100,0],[48,17,48,35,0],[49,17,49,18,0],[52,21,52,80,0],[52,80,52,85,0],[52,85,52,118,0],[52,21,52,118,0],[54,21,54,61,0],[54,61,54,90,0],[54,90,54,92,0],[54,21,54,92,0],[56,21,57,25,0],[57,25,57,95,0],[57,95,57,97,0],[56,21,57,97,0],[58,17,58,18,0],[60,17,60,74,0],[60,74,60,95,0],[60,95,60,106,0],[60,17,60,106,0],[61,17,61,38,0],[62,17,62,18,0],[63,21,63,71,0],[63,71,63,76,0],[63,76,64,78,0],[63,21,64,78,0],[65,21,66,25,0],[66,25,66,86,0],[66,86,66,104,0],[66,104,66,106,0],[66,25,66,106,0],[66,106,66,108,0],[65,21,66,108,0],[67,17,67,18,0],[69,17,69,33,0],[70,13,70,14,0],[72,13,72,14,0],[73,17,73,65,0],[74,13,74,14,0],[76,13,76,33,0],[77,13,77,26,0],[78,9,78,10,0]]);
+      highlightRanges([[65,9,65,47,0],[70,9,70,40,0],[85,9,85,76,0],[90,9,90,42,0],[116,9,116,79,0],[116,79,116,80,0],[116,80,116,81,0],[116,81,116,82,0],[116,82,116,83,0],[116,9,116,83,0],[121,9,121,55,0],[121,55,121,56,0],[121,56,121,57,0],[121,57,121,58,0],[121,58,121,59,0],[121,9,121,59,0],[126,9,126,56,0],[126,56,126,57,0],[126,57,126,58,0],[126,58,126,59,0],[126,59,126,60,0],[126,9,126,60,0],[135,47,135,51,0],[135,52,135,56,0],[135,61,135,76,0],[141,49,141,53,0],[141,54,141,66,0],[141,71,141,86,0],[148,42,148,53,0],[159,9,159,44,0],[160,9,160,10,0],[161,13,161,30,0],[164,13,164,67,0],[167,13,167,55,0],[168,13,168,63,0],[169,9,169,10,0],[181,9,181,10,0],[183,13,183,68,0],[184,13,184,60,0],[187,13,187,38,0],[188,17,188,24,0],[191,13,191,46,0],[192,9,192,10,0],[204,9,204,10,0],[205,13,205,44,0],[206,9,206,10,0],[214,9,214,10,0],[216,13,216,55,0],[219,13,219,60,0],[222,13,222,37,0],[223,17,223,24,0],[226,13,226,35,0],[227,13,227,37,0],[228,13,228,47,0],[229,13,229,46,0],[232,13,232,114,0],[233,13,233,122,0],[236,13,236,139,0],[237,13,237,142,0],[238,13,238,156,0],[239,13,239,153,0],[242,13,242,52,0],[245,13,245,54,0],[246,17,246,48,0],[248,18,248,60,0],[249,17,249,49,0],[251,18,251,46,0],[252,17,252,53,0],[254,18,254,44,0],[255,17,255,51,0],[257,18,257,45,0],[258,17,258,52,0],[260,18,260,47,0],[261,17,261,54,0],[263,18,263,48,0],[264,17,264,55,0],[268,17,268,52,0],[271,13,271,35,0],[273,17,273,41,0],[276,13,276,30,0],[277,9,277,10,0],[293,9,293,10,0],[294,13,294,25,0],[298,21,298,51,0],[299,21,299,36,0],[300,21,300,27,0],[304,21,304,40,0],[305,21,305,41,0],[306,21,306,27,0],[310,21,310,41,0],[311,21,311,42,0],[312,21,312,27,0],[315,13,315,30,0],[316,9,316,10,0],[327,9,327,10,0],[329,13,329,50,0],[332,13,337,79,0],[339,13,339,109,0],[342,13,342,56,0],[343,13,343,77,0],[344,17,344,24,0],[347,13,347,56,0],[348,13,348,77,0],[349,17,349,24,0],[354,13,354,60,0],[357,13,357,42,0],[360,13,360,95,0],[361,13,361,93,0],[362,13,362,99,0],[363,13,363,100,0],[364,13,364,75,0],[366,13,366,95,0],[367,13,367,93,0],[368,13,368,99,0],[369,13,369,100,0],[370,13,370,75,0],[372,13,372,39,0],[373,13,373,14,0],[375,17,375,91,0],[403,17,403,77,0],[404,17,404,76,0],[405,17,405,74,0],[406,17,406,75,0],[409,17,409,138,0],[410,17,410,59,0],[411,17,411,59,0],[414,17,414,60,0],[415,13,415,14,0],[418,13,418,119,0],[421,13,426,19,0],[429,13,429,128,0],[430,9,430,10,0],[437,9,437,10,0],[439,13,439,50,0],[442,13,442,126,0],[443,9,443,10,0],[460,9,460,65,0],[461,9,461,54,0],[462,9,462,51,0],[463,9,463,32,0],[476,9,476,10,0],[477,13,477,25,0],[478,13,478,23,0],[479,13,479,27,0],[480,13,480,29,0],[481,9,481,10,0],[517,9,517,10,0],[518,13,518,19,0],[519,13,519,19,0],[520,9,520,10,0],[523,9,523,10,0],[524,13,524,31,0],[525,9,525,10,0]]);
     </script>
   </body>
 </html>

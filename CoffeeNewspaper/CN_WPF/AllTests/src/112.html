@@ -2,50 +2,61 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\ratingcontrol.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\app.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
+using CN_Core;
+using CN_Core.Interfaces;
+using CN_Presentation;
+using CN_Presentation.ViewModel.Controls;
+using CN_Repository;
+using CN_Service;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// RatingControl.xaml 的交互逻辑
+    /// App.xaml 的交互逻辑
     /// &lt;/summary&gt;
-    public partial class RatingControl : UserControl
+    public partial class App : Application
     {
-        public static readonly DependencyProperty DisplayTxtProperty = DependencyProperty.Register(
-            nameof(DisplayTxt), typeof(bool), typeof(RatingControl), new PropertyMetadata(false,null,DisplayTxtChanged));
-
-        private static object DisplayTxtChanged(DependencyObject d, object basevalue)
+        protected override async void OnStartup(StartupEventArgs e)
         {
-            var rc = d as RatingControl;
-            if (rc?.NameColumn == null) return basevalue;
-            rc?.NameColumn.SetValue(VisibilityProperty, (bool)basevalue?Visibility.Visible:Visibility.Collapsed);
-            return basevalue;
+            base.OnStartup(e);
+
+            ApplicationSetupAsync();
+
+            await IoC.Get&lt;TaskListViewModel&gt;().RefreshTaskItems();
+            Current.MainWindow = new MainWindow();
+            Current.MainWindow.Show();
         }
-
-        public bool DisplayTxt
+        /// &lt;summary&gt;
+        /// Bind DI Container and other Important thing before window shows up
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private void ApplicationSetupAsync()
         {
-            get { return (bool) GetValue(DisplayTxtProperty); }
-            set { SetValue(DisplayTxtProperty, value); }
-        }
+            IoC.Setup();
+            IoC.Kernel.BindInitialViewModel();
+            IoC.Kernel.BindCNDBContext();
+
+            IoC.Kernel.BindSqliteDataStore();
+            IoC.Kernel.BindServices();
 
 
-        public RatingControl()
-        {
-            InitializeComponent();
+            //Bind UI Manager So Could use be used in ViewModel
+            IoC.Kernel.Bind&lt;IUIManager&gt;().ToConstant(new UIManager());
         }
     }
-}
+ }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[11,9,12,122,0],[15,9,15,10,0],[16,13,16,41,0],[17,13,17,40,0],[17,41,17,58,0],[18,13,18,114,0],[19,13,19,30,0],[20,9,20,10,0],[24,17,24,18,0],[24,19,24,62,0],[24,63,24,64,0],[25,17,25,18,0],[25,19,25,55,0],[25,56,25,57,0],[29,9,29,31,0],[30,9,30,10,0],[31,13,31,35,0],[32,9,32,10,0]]);
+      highlightRanges([[18,9,18,10,0],[19,13,19,31,0],[21,13,21,37,0],[23,13,23,67,0],[24,13,24,51,0],[25,13,25,39,0],[26,9,26,10,0],[32,9,32,10,0],[33,13,33,25,0],[34,13,34,47,0],[35,13,35,42,0],[37,13,37,46,0],[38,13,38,39,0],[42,13,42,71,0],[43,9,43,10,0]]);
     </script>
   </body>
 </html>

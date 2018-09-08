@@ -2,44 +2,89 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\dialogs\promptdialogbox.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\coffeenewspaper_unittest\integrationtest\repositorytest\relationtest\tasktagrelationtest.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using CN_Core;
+using CN_Repository;
+using CoffeeNewspaper_UnitTest.DomainTest;
+using NUnit.Framework;
 
-namespace CN_WPF
+namespace CoffeeNewspaper_UnitTest.RepositoryTest.RelationTest
 {
+
     /// &lt;summary&gt;
-    /// PromptDialogBox.xaml 的交互逻辑
+    ///     In-Memory integration data persistent test
     /// &lt;/summary&gt;
-    public partial class PromptDialogBox : BaseDialogUserControl
+    [TestFixture]
+    public class TaskTagRelationTest : RepositarySetupAndTearDown
     {
-        public PromptDialogBox()
+        /// &lt;summary&gt;
+        /// Get a tag-already-bind task
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;bindTagCount&quot;&gt;how many tag is bind to this task&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private CNTask GetTagBindTestTask(int bindTagCount)
         {
-            InitializeComponent();
+            var assesTask = DomainTestHelper.GetARandomTask();
+            Enumerable.Range(0, bindTagCount).ToList().ForEach(x =&gt;
+            {
+                var assesTag = DomainTestHelper.GetARandomTag();
+                assesTask.TaskTaggers.Add(new CNTaskTagger() { Tag = assesTag, Task = assesTask }); 
+            });
+            return assesTask;
+        }
+        [Test]
+        public async Task DeleteATaskTagRelation_BothTaskAndTagStillExist()
+        {
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetTagBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                taskDataStore.AddTask(assesTask);
+
+                await unitOfWork.Commit();
+                assesTask.TaskTaggers.Remove(assesTask.TaskTaggers.First());
+                taskDataStore.UpdateTask(assesTask);
+
+                await unitOfWork.Commit();
+                Assert.AreEqual(1,dbcontext.Tags.Count());
+                Assert.AreEqual(1, dbcontext.Tasks.Count());
+                Assert.AreEqual(0,dbcontext.TaskTaggers.Count());
+            });
+        }
+        [Test]
+        public async Task AddDupplicateTaskTagRelation_ReturnFalse()
+        {
+            await UseMemoryContextRun(async (dbcontext,unitOfWork) =&gt;
+            {
+                //initiate the datastore
+                var assesTask = GetTagBindTestTask(1);
+                var taskDataStore = new TaskDataStore(dbcontext);
+                taskDataStore.AddTask(assesTask);
+
+                await unitOfWork.Commit();
+                assesTask.TaskTaggers.Add(new CNTaskTagger(){TagId = assesTask.TaskTaggers.First().TagId,TaskId = assesTask.TaskId});
+                 taskDataStore.UpdateTask(assesTask);
+
+                var result = await unitOfWork.Commit();
+                Assert.IsFalse(result);
+                Assert.AreEqual(1, dbcontext.Tags.Count());
+                Assert.AreEqual(1, dbcontext.Tasks.Count());
+                Assert.AreEqual(1, dbcontext.TaskTaggers.Count());
+            });
         }
     }
 }
-
     </pre>
     <script type="text/javascript">
-      highlightRanges([[23,9,23,33,0],[24,9,24,10,0],[25,13,25,35,0],[26,9,26,10,0]]);
+      highlightRanges([[23,9,23,10,1],[24,13,24,63,1],[25,13,26,13,1],[26,13,26,14,1],[26,14,27,17,1],[27,17,27,65,1],[27,65,28,17,1],[28,17,28,100,1],[28,100,29,13,1],[29,13,29,14,1],[29,14,29,16,1],[25,13,29,16,1],[30,13,30,30,1],[31,9,31,10,1],[34,9,34,10,1],[35,13,36,13,1],[36,13,36,14,1],[36,14,38,17,1],[38,17,38,55,1],[38,55,39,17,1],[39,17,39,66,1],[39,66,40,17,1],[40,17,40,50,1],[40,50,42,17,1],[42,17,42,43,1],[42,43,43,17,1],[43,17,43,77,1],[43,77,44,17,1],[44,17,44,53,1],[44,53,46,17,1],[46,17,46,43,1],[46,43,47,17,1],[47,17,47,59,1],[47,59,48,17,1],[48,17,48,61,1],[48,61,49,17,1],[49,17,49,66,1],[49,66,50,13,1],[50,13,50,14,1],[50,14,50,16,1],[35,13,50,16,1],[51,9,51,10,1],[54,9,54,10,1],[55,13,56,13,1],[56,13,56,14,1],[56,14,58,17,1],[58,17,58,55,1],[58,55,59,17,1],[59,17,59,66,1],[59,66,60,17,1],[60,17,60,50,1],[60,50,62,17,1],[62,17,62,43,1],[62,43,63,17,1],[63,17,63,134,1],[63,134,64,18,1],[64,18,64,54,1],[64,54,66,17,1],[66,17,66,56,1],[66,56,67,17,1],[67,17,67,40,1],[67,40,68,17,1],[68,17,68,60,1],[68,60,69,17,1],[69,17,69,61,1],[69,61,70,17,1],[70,17,70,67,1],[70,67,71,13,1],[71,13,71,14,1],[71,14,71,16,1],[55,13,71,16,1],[72,9,72,10,1]]);
     </script>
   </body>
 </html>

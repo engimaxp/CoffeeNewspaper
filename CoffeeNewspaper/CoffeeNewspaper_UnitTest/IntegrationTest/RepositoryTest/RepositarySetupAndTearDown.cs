@@ -29,11 +29,9 @@ namespace CoffeeNewspaper_UnitTest.RepositoryTest
             if (context == null) return;
             context.Database.OpenConnection();
             context.Database.EnsureCreated();
-            using (var unitOfWork = new UnitOfWork(context))
-            {
-                //Do that task
-                await function.Invoke(context, unitOfWork);
-            }
+            var unitOfWork = new UnitOfWork(context);
+            //Do that task
+            await function.Invoke(context, unitOfWork);
         }
     }
 }

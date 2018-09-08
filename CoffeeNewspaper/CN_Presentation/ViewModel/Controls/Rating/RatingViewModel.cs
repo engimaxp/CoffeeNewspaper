@@ -8,7 +8,6 @@ namespace CN_Presentation.ViewModel.Controls
     {
 
         private int _selectedValue;
-        private string _selectedValueTxt;
 
         #region Public Methods
 
@@ -61,15 +60,7 @@ namespace CN_Presentation.ViewModel.Controls
             }
         }
 
-        public string SelectedValueTxt
-        {
-            get
-            {
-                _selectedValueTxt = Enum.GetNames(EnumType)[_selectedValue - 1]; 
-                return _selectedValueTxt;
-            }
-            set => _selectedValueTxt = value;
-        }
+        public string SelectedValueTxt => Enum.GetNames(EnumType)[_selectedValue - 1];
 
         public Type EnumType { get; set; }
 

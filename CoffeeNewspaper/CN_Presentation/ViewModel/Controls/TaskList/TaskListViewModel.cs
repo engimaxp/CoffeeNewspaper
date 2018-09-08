@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CN_Core;
-using CN_Core.Interfaces;
 using CN_Core.Interfaces.Service;
 using CN_Core.Utilities;
-using CN_Presentation.Utilities;
 using CN_Presentation.ViewModel.Base;
-using CN_Presentation.ViewModel.Dialog;
 
 namespace CN_Presentation.ViewModel.Controls
 {
@@ -25,8 +21,9 @@ namespace CN_Presentation.ViewModel.Controls
             AutoCompleteBoxUpCommand = new RelayCommand(AutoCompleteBoxUp);
             AutoCompleteBoxDownCommand = new RelayCommand(AutoCompleteBoxDown);
 
-            FilterSelectModel = CreateBubbleSelectViewModel();
+            FilterSelectModel = CreateFilterSelectViewModel();
             SortSelectModel = CreateSortSelectViewModel();
+            MoreSelectModel = CreateMoreSelectViewModel();
         }
 
         #endregion
@@ -42,7 +39,7 @@ namespace CN_Presentation.ViewModel.Controls
                 {"*basic*", (item, str) => item?.TaskInfo?.Content != null}
             };
 
-        private Func<CNTask, CNTask,int> sortSetting = (x, y) =>
+        private Func<CNTask, CNTask, int> sortSetting = (x, y) =>
         {
             if (x.TaskId > y.TaskId) return 1;
             else if (x.TaskId == y.TaskId) return 0;
@@ -103,7 +100,7 @@ namespace CN_Presentation.ViewModel.Controls
         public ObservableCollection<TaskListItemViewModel> Items
         {
             get => _items;
-            set
+            protected set
             {
                 _items = value;
                 ApplyFilterAndSort();
@@ -120,13 +117,16 @@ namespace CN_Presentation.ViewModel.Controls
 
         public BubbleSelectViewModel SortSelectModel { get; set; }
 
+        public BubbleSelectViewModel MoreSelectModel { get; set; }
+
         public bool IsFilterListEmpty => FilteredItems.Count == 0;
+
         #endregion
 
         #region Commands
 
         public ICommand SearchCommand { get; set; }
-        
+
         public ICommand AutoCompleteBoxUpCommand { get; set; }
 
         public ICommand AutoCompleteBoxDownCommand { get; set; }
@@ -170,7 +170,10 @@ namespace CN_Presentation.ViewModel.Controls
                     }
                 }
 
-                foreach (var tobeDeletedItem in Items.Where(x => !x.Refreshed)) Items.Remove(tobeDeletedItem);
+                foreach (var tobeDeletedItem in Items.Where(x=>!x.Refreshed).ToList())
+                {
+                    RemoveItemOfTaskId(tobeDeletedItem.TaskInfo.TaskId);
+                }
             }
         }
 
@@ -238,7 +241,7 @@ namespace CN_Presentation.ViewModel.Controls
             };
         }
 
-        private BubbleSelectViewModel CreateBubbleSelectViewModel()
+        private BubbleSelectViewModel CreateFilterSelectViewModel()
         {
             return new BubbleSelectViewModel
             {
@@ -253,89 +256,94 @@ namespace CN_Presentation.ViewModel.Controls
                             IconType.ThLarge,
                             "Display All",
                             async btn =>
+                            {
+                                ClearSelectOfBubbleMenu(FilterSelectModel);
+                                btn.IsSelected = true;
+                                if (searchFilters.ContainsKey("*RemoveFail*")) searchFilters.Remove("*RemoveFail*");
+
+                                if (searchFilters.ContainsKey("*RemoveComplete*"))
+                                    searchFilters.Remove("*RemoveComplete*");
+
+                                if (searchFilters.ContainsKey("*RemovePending*"))
+                                    searchFilters.Remove("*RemovePending*");
+
+                                ApplyFilterAndSort();
+                                await Task.Delay(1000);
+                            })
                         {
-                            ClearSelectOfBubbleMenu(FilterSelectModel);
-                            btn.IsSelected = true;
-                            if (searchFilters.ContainsKey("*RemoveFail*"))
-                            {
-                                searchFilters.Remove("*RemoveFail*");
-                            }
-
-                            if (searchFilters.ContainsKey("*RemoveComplete*"))
-                            {
-                                searchFilters.Remove("*RemoveComplete*");
-                            }
-
-                            if (searchFilters.ContainsKey("*RemovePending*"))
-                            {
-                                searchFilters.Remove("*RemovePending*");
-                            }
-
-                            ApplyFilterAndSort();
-                            await Task.Delay(1000);
-                        })
-                        {
-                            IsSelected = true,
+                            IsSelected = true
                         },
                         new BubbleMenuButtonViewModel(FontFamilyType.FontAwesomeSolid,
                             IconType.Times,
                             "Dont Display Fail",
                             async btn =>
-                        {
-                            ClearSelectOfTargetBubbleMenu(FilterSelectModel, "Display All");
-                            btn.IsSelected ^= true;
-                            if (btn.IsSelected)
                             {
-                                searchFilters.Add("*RemoveFail*", (task, str) => !task.TaskInfo.IsFail);
-                            }
-                            else if (searchFilters.ContainsKey("*RemoveFail*"))
-                            {
-                                searchFilters.Remove("*RemoveFail*");
-                            }
-                            ApplyFilterAndSort();
-                            await Task.Delay(1);
-                        }),
+                                ClearSelectOfTargetBubbleMenu(FilterSelectModel, "Display All");
+                                btn.IsSelected ^= true;
+                                if (btn.IsSelected)
+                                    searchFilters.Add("*RemoveFail*", (task, str) => !task.TaskInfo.IsFail);
+                                else if (searchFilters.ContainsKey("*RemoveFail*"))
+                                    searchFilters.Remove("*RemoveFail*");
+                                ApplyFilterAndSort();
+                                await Task.Delay(1);
+                            }),
                         new BubbleMenuButtonViewModel(
                             FontFamilyType.FontAwesomeSolid,
                             IconType.Check,
-                            "Dont Display Complete",async btn =>
-                        {
-                            ClearSelectOfTargetBubbleMenu(FilterSelectModel, "Display All");
-                            btn.IsSelected ^= true;
-                            if (btn.IsSelected)
+                            "Dont Display Complete", async btn =>
                             {
-                                searchFilters.Add("*RemoveComplete*",
-                                    (task, str) => task.TaskInfo.Status != CNTaskStatus.DONE);
-                            }
-                            else if (searchFilters.ContainsKey("*RemoveComplete*"))
-                            {
-                                searchFilters.Remove("*RemoveComplete*");
-                            }
+                                ClearSelectOfTargetBubbleMenu(FilterSelectModel, "Display All");
+                                btn.IsSelected ^= true;
+                                if (btn.IsSelected)
+                                    searchFilters.Add("*RemoveComplete*",
+                                        (task, str) => task.TaskInfo.Status != CNTaskStatus.DONE);
+                                else if (searchFilters.ContainsKey("*RemoveComplete*"))
+                                    searchFilters.Remove("*RemoveComplete*");
 
-                            ApplyFilterAndSort();
-                            await Task.Delay(1);
-                        }),
+                                ApplyFilterAndSort();
+                                await Task.Delay(1);
+                            }),
                         new BubbleMenuButtonViewModel(
                             FontFamilyType.FontAwesomeSolid,
                             IconType.HourGlass,
-                            "Dont Display Pending",async btn =>
-                        {
-                            ClearSelectOfTargetBubbleMenu(FilterSelectModel, "Display All");
-                            btn.IsSelected ^= true;
-                            if (btn.IsSelected)
+                            "Dont Display Pending", async btn =>
                             {
-                                searchFilters.Add("*RemovePending*",
-                                    (task, str) => task.TaskInfo.Status != CNTaskStatus.PENDING);
-                            }
-                            else if (searchFilters.ContainsKey("*RemovePending*"))
+                                ClearSelectOfTargetBubbleMenu(FilterSelectModel, "Display All");
+                                btn.IsSelected ^= true;
+                                if (btn.IsSelected)
+                                    searchFilters.Add("*RemovePending*",
+                                        (task, str) => task.TaskInfo.Status != CNTaskStatus.PENDING);
+                                else if (searchFilters.ContainsKey("*RemovePending*"))
+                                    searchFilters.Remove("*RemovePending*");
+
+                                ApplyFilterAndSort();
+                                await Task.Delay(1);
+                            })
+                    }
+                }
+            };
+        }
+
+        private BubbleSelectViewModel CreateMoreSelectViewModel()
+        {
+            return new BubbleSelectViewModel
+            {
+                DefaultIconFontFamily = FontFamilyType.FontAwesomeSolid,
+                DefaultIconFontText = IconType.EllipsisVertical,
+                ToolTip = "More",
+                BubbleMenuViewModel = new BubbleMenuViewModel
+                {
+                    Buttons = new ObservableCollection<BubbleMenuButtonViewModel>
+                    {
+                        new BubbleMenuButtonViewModel(FontFamilyType.FontAwesomeSolid,
+                            IconType.TrashAlt,
+                            "Delete All Complete Tasks",
+                            async btn =>
                             {
-                                searchFilters.Remove("*RemovePending*");
-                            }
-
-                            ApplyFilterAndSort();
-                            await Task.Delay(1);
-
-                        })
+                                await IoC.Get<ITaskService>().ClearAllCompleteTasks();
+                                MoreSelectModel.BubbleMenuViewModel.IsOpen = false;
+                                await IoC.Get<TaskListViewModel>().RefreshTaskItems();
+                            })
                     }
                 }
             };
@@ -349,23 +357,17 @@ namespace CN_Presentation.ViewModel.Controls
 
         private void ClearSelectOfBubbleMenu(BubbleSelectViewModel viewModel)
         {
-            if (viewModel?.BubbleMenuViewModel == null || viewModel.BubbleMenuViewModel.Buttons == null) return;
+            if (viewModel?.BubbleMenuViewModel?.Buttons == null) return;
             foreach (var bubbleMenuButtonViewModel in viewModel.BubbleMenuViewModel.Buttons)
-            {
                 bubbleMenuButtonViewModel.IsSelected = false;
-            }
         }
 
-        private void ClearSelectOfTargetBubbleMenu(BubbleSelectViewModel viewModel,string title)
+        private void ClearSelectOfTargetBubbleMenu(BubbleSelectViewModel viewModel, string title)
         {
-            if (viewModel?.BubbleMenuViewModel == null || viewModel.BubbleMenuViewModel.Buttons == null) return;
+            if (viewModel?.BubbleMenuViewModel?.Buttons == null) return;
             foreach (var bubbleMenuButtonViewModel in viewModel.BubbleMenuViewModel.Buttons)
-            {
                 if (bubbleMenuButtonViewModel.ButtonText == title)
-                {
                     bubbleMenuButtonViewModel.IsSelected = false;
-                }
-            }
         }
 
         private void AddItem(TaskListItemViewModel itemViewModel)
@@ -374,14 +376,17 @@ namespace CN_Presentation.ViewModel.Controls
             if (PassFilter(itemViewModel)) FilteredItems.Add(itemViewModel);
         }
 
-        private void RemoveItemAt(int index)
+        private void RemoveItemOfTaskId(int taskid)
         {
-            if (index >= Items.Count || index < 0) return;
+            var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == taskid);
+            if (index < 0) return;
+
             if (FilteredItems.Contains(Items[index]))
             {
                 FilteredItems.Remove(Items[index]);
                 OnPropertyChanged(nameof(IsFilterListEmpty));
             }
+
             Items.RemoveAt(index);
         }
 
@@ -391,7 +396,7 @@ namespace CN_Presentation.ViewModel.Controls
             //Apply Search
             foreach (var searchFilter in searchFilters.Keys)
                 tempItems = tempItems.Where(x => searchFilters[searchFilter](x, searchFilter))
-                    .OrderBy(y=>y.TaskInfo, ComparerBuilder<CNTask>.Builder(sortSetting));
+                    .OrderBy(y => y.TaskInfo, ComparerBuilder<CNTask>.Builder(sortSetting));
             FilteredItems = new ObservableCollection<TaskListItemViewModel>(tempItems);
         }
 
@@ -409,8 +414,7 @@ namespace CN_Presentation.ViewModel.Controls
         {
             if (task.IsDeleted)
             {
-                var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == task.TaskId);
-                if (index >= 0) RemoveItemAt(index);
+                 RemoveItemOfTaskId(task.TaskId);
             }
             else
             {
@@ -443,7 +447,7 @@ namespace CN_Presentation.ViewModel.Controls
             var index = Items.ToList().FindIndex(x => (x.TaskInfo?.TaskId ?? 0) == parentTaskId);
             if (index >= 0) Items[index].RefreshExpanderView(taskid);
         }
-        
+
 
         private void Search()
         {
@@ -503,7 +507,6 @@ namespace CN_Presentation.ViewModel.Controls
 
             SelectedSearchAutoComplete = seachoptions[index];
         }
-        
 
         #endregion
     }

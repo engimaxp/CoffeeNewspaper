@@ -2,79 +2,61 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_repository\datastore\tagdatastore.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_cli\command\taskcommand.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using CN_Core;
-using CN_Core.Interfaces.Repository;
-using CN_Core.Specification;
-using Microsoft.EntityFrameworkCore;
+using CN_Core.Interfaces.Service;
+using CN_Service;
+using CoffeeNewspaper_CLI.ConsoleTables;
+using Colorful;
 
-namespace CN_Repository
+namespace CoffeeNewspaper_CLI
 {
-    public class TagDataStore: BaseDataStore, ITagDataStore
+    public class TaskCommand : BaseCommand
     {
-        public TagDataStore(CNDbContext dbContext) : base(dbContext)
+        public TaskCommand(BaseState state) : base(state)
         {
+            Name = &quot;task&quot;;
         }
 
-        #region Select Methods
-
-        public async Task&lt;ICollection&lt;CNTag&gt;&gt; GetAllTagsBySpecification(ISpecification&lt;CNTag&gt; spec)
+        public override async Task&lt;BaseState&gt; Excute(ArgumentParser input)
         {
-            return await IoC.Task.Run(
-                async () =&gt;
-                {
-                    // fetch a Queryable that includes all expression-based includes
-                    var queryableResultWithIncludes = spec.Includes
-                        .Aggregate(mDbContext.Set&lt;CNTag&gt;().AsQueryable(),
-                            (current, include) =&gt; current.Include(include));
+            if (input.Defined(&quot;add&quot;))
+            {
+                return new TaskEditState();
+            }
+            if (input.Defined(&quot;l&quot;))
+            {
+                var lst = await IoC.Get&lt;ITaskService&gt;().GetAllTasks();
+                ConsoleTable tables = ConsoleTable.From(lst.Select(x =&gt; new {TaskID = x.TaskId, Content = x.Content}));
+                tables.WriteAlternateColorTable(Color.LightGoldenrodYellow, Color.White);
+                Console.WriteLine();
+                return State;
+            }
+            if (input.Defined(&quot;more&quot;))
+            {
+                var taskid = input.GetSingle&lt;int&gt;(&quot;more&quot;);
+                var atsk = await IoC.Get&lt;ITaskService&gt;().GetTaskById(taskid);
+                var state = new TaskEditState {StateObj =atsk};
+                return state;
+            }
 
-                    // modify the IQueryable to include any string-based include statements
-                    var secondaryResult = spec.IncludeStrings
-                        .Aggregate(queryableResultWithIncludes,
-                            (current, include) =&gt; current.Include(include));
-
-                    // return the result of the query using the specification&#39;s criteria expression
-                    return await secondaryResult
-                        .Where(spec.Criteria).ToListAsync();
-                });
+            Console.WriteLine(&quot;wrong parameter&quot;, Color.Red);
+            Console.WriteLine();
+            return State;
         }
-
-        public async Task&lt;CNTag&gt; GetFirstTagBySpecification(ISpecification&lt;CNTag&gt; spec)
-        {
-            return await IoC.Task.Run(
-                async () =&gt;
-                {
-                    // fetch a Queryable that includes all expression-based includes
-                    var queryableResultWithIncludes = spec.Includes
-                        .Aggregate(mDbContext.Set&lt;CNTag&gt;().AsQueryable(),
-                            (current, include) =&gt; current.Include(include));
-
-                    // modify the IQueryable to include any string-based include statements
-                    var secondaryResult = spec.IncludeStrings
-                        .Aggregate(queryableResultWithIncludes,
-                            (current, include) =&gt; current.Include(include));
-
-                    // return the result of the query using the specification&#39;s criteria expression
-                    return await secondaryResult
-                        .Where(spec.Criteria).FirstOrDefaultAsync();
-                });
-        }
-
-        #endregion
     }
 }
     </pre>
     <script type="text/javascript">
-      highlightRanges([[14,54,14,69,0],[15,9,15,10,0],[16,9,16,10,0],[21,9,21,10,0],[22,13,24,17,0],[24,17,24,18,0],[24,18,26,21,0],[26,21,28,51,0],[28,51,28,75,0],[28,75,28,77,0],[26,21,28,77,0],[28,77,31,21,0],[31,21,33,51,0],[33,51,33,75,0],[33,75,33,77,0],[31,21,33,77,0],[33,77,36,21,0],[36,21,37,61,0],[37,61,38,17,0],[38,17,38,18,0],[38,18,38,20,0],[22,13,38,20,0],[39,9,39,10,0],[42,9,42,10,0],[43,13,45,17,0],[45,17,45,18,0],[45,18,47,21,0],[47,21,49,51,0],[49,51,49,75,0],[49,75,49,77,0],[47,21,49,77,0],[49,77,52,21,0],[52,21,54,51,0],[54,51,54,75,0],[54,75,54,77,0],[52,21,54,77,0],[54,77,57,21,0],[57,21,58,69,0],[58,69,59,17,0],[59,17,59,18,0],[59,18,59,20,0],[43,13,59,20,0],[60,9,60,10,0]]);
+      highlightRanges([[14,47,14,58,0],[15,9,15,10,0],[16,13,16,27,0],[17,9,17,10,0],[20,9,20,10,0],[21,13,21,38,0],[22,13,22,14,0],[23,17,23,44,0],[25,13,25,36,0],[26,13,26,14,0],[27,17,27,71,0],[28,17,28,73,0],[28,73,28,117,0],[28,117,28,120,0],[28,17,28,120,0],[29,17,29,90,0],[30,17,30,37,0],[31,17,31,30,0],[33,13,33,39,0],[34,13,34,14,0],[35,17,35,59,0],[36,17,36,78,0],[37,17,37,64,0],[38,17,38,30,0],[41,13,41,61,0],[42,13,42,33,0],[43,13,43,26,0],[44,9,44,10,0]]);
     </script>
   </body>
 </html>

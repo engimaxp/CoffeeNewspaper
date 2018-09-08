@@ -2,63 +2,41 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_service\specifications\tagspecification.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\headmenucontrol.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Linq;
-using CN_Core;
-using CN_Core.Specification;
+using System.ComponentModel;
+using System.Windows.Controls;
+using CN_Presentation.ViewModel.Controls.Design;
 
-namespace CN_Service
+namespace CN_WPF
 {
-    public class TagSpecification : BaseSpecification&lt;CNTag&gt;
+    /// &lt;summary&gt;
+    /// HeaderMenuControl.xaml 的交互逻辑
+    /// &lt;/summary&gt;
+    public partial class HeadMenuControl : UserControl
     {
-        public TagSpecification(string tagStart)
-            : base(b =&gt; b.Title.ToLower().Contains(tagStart.ToLower()))
+        public HeadMenuControl()
         {
+            InitializeComponent();
+            if (!DesignerProperties.GetIsInDesignMode(this))
+            {
+                DataContext = ViewModelLocator.HeadMenuViewModel;
+            }
+            else
+            {
+                DataContext = HeadMenuDesignModel.Instance;
+            }
         }
     }
-
-    public class TaskBoundedTagsSpecification : BaseSpecification&lt;CNTag&gt;
-    {
-        public TaskBoundedTagsSpecification()
-            : base(x =&gt; x.TaskTaggers != null &amp;&amp; x.TaskTaggers.Any(y =&gt; !y.Task.IsDeleted))
-        {
-        }
-    }
-    
-    public class TagTitleSpecification : BaseSpecification&lt;CNTag&gt;
-    {
-        public TagTitleSpecification(string tagTitle)
-            : base(x =&gt; x.Title == tagTitle)
-        {
-        }
-    }
-
-    public class TaskSpecification : BaseSpecification&lt;CNTag&gt;
-    {
-        public TaskSpecification(int taskid)
-            : base(x =&gt; x.TaskTaggers != null &amp;&amp; x.TaskTaggers.Any(y=&gt;y.TaskId == taskid))
-        {
-        }
-    }
-    public class TagAndTaskSpecification : BaseSpecification&lt;CNTag&gt;
-    {
-        public TagAndTaskSpecification(int taskid,string tagStart)
-    : base(b =&gt; b.Title.ToLower().Contains(tagStart.ToLower()) &amp;&amp; b.TaskTaggers != null &amp;&amp; b.TaskTaggers.Any(y =&gt; y.TaskId == taskid))
-    {
-        }
-    }
-
-
 }
+
     </pre>
     <script type="text/javascript">
-      highlightRanges([[11,15,11,72,0],[12,9,12,10,0],[13,9,13,10,0],[19,15,19,92,0],[20,9,20,10,0],[21,9,21,10,0],[27,15,27,45,0],[28,9,28,10,0],[29,9,29,10,0],[35,15,35,91,0],[36,9,36,10,0],[37,9,37,10,0],[42,7,42,135,0],[43,5,43,6,0],[44,9,44,10,0]]);
+      highlightRanges([[12,9,12,33,0],[13,9,13,10,0],[14,13,14,35,0],[15,13,15,61,0],[16,13,16,14,0],[17,17,17,66,0],[18,13,18,14,0],[20,13,20,14,0],[21,17,21,60,0],[22,13,22,14,0],[23,9,23,10,0]]);
     </script>
   </body>
 </html>

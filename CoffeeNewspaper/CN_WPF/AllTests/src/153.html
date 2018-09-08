@@ -2,46 +2,38 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\controls\tasklistcontrol.xaml.cs</title>
+    <title>e:\githubproject\coffeenewspaper\coffeenewspaper\cn_wpf\forms\taskdetailformcontrol.xaml.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using CN_Presentation.ViewModel.Controls.Design;
+using CN_Presentation.ViewModel.Base;
 
 namespace CN_WPF
 {
     /// &lt;summary&gt;
-    /// TaskListControl.xaml 的交互逻辑
+    /// TaskDetailFormControl.xaml 的交互逻辑
     /// &lt;/summary&gt;
-    public partial class TaskListControl : UserControl
+    public partial class TaskDetailFormControl : UserControl
     {
-        public TaskListControl()
+        public TaskDetailFormControl()
         {
             InitializeComponent();
+        }
+
+        public TaskDetailFormControl(BaseViewModel VM)
+        {
+            InitializeComponent();
+            this.DataContext = VM;
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[25,9,25,33,0],[26,9,26,10,0],[27,13,27,35,0],[28,9,28,10,0]]);
+      highlightRanges([[11,9,11,39,0],[12,9,12,10,0],[13,13,13,35,0],[14,9,14,10,0],[16,9,16,55,0],[17,9,17,10,0],[18,13,18,35,0],[19,13,19,35,0],[20,9,20,10,0]]);
     </script>
   </body>
 </html>
