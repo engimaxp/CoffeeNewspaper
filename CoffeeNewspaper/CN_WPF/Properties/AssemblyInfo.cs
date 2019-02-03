@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("CN_WPF")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Enigmaxp")]
 [assembly: AssemblyProduct("CN_WPF")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]

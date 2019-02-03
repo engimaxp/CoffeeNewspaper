@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CN_WPF", "CN_WPF\CN_WPF.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CN_Presentation", "CN_Presentation\CN_Presentation.csproj", "{12B25FF8-2AFA-4049-8F15-1B013A83505F}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "CoffeeNewspaperInstaller", "CoffeeNewspaperInstaller\CoffeeNewspaperInstaller.vdproj", "{8E50B814-11E7-427F-B7CE-9B86C30176E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,8 @@ Global
 		{12B25FF8-2AFA-4049-8F15-1B013A83505F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12B25FF8-2AFA-4049-8F15-1B013A83505F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12B25FF8-2AFA-4049-8F15-1B013A83505F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E50B814-11E7-427F-B7CE-9B86C30176E6}.Debug|Any CPU.ActiveCfg = Debug
+		{8E50B814-11E7-427F-B7CE-9B86C30176E6}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
