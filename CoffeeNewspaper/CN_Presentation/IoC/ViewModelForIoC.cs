@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using CN_Presentation.ViewModel.Application;
 using CN_Presentation.ViewModel.Base;
 using CN_Presentation.ViewModel.Controls;
@@ -25,9 +26,12 @@ namespace CN_Presentation
         ///     Bind the ViewModel
         ///     shall do this at the beginning of app start
         /// </summary>
-        public static void BindInitialViewModel(this IKernel Kernel)
+        public static async Task BindInitialViewModel(this IKernel Kernel)
         {
             Kernel.BindViewModel(new TaskListViewModel());
+            var memoListControlViewModel = new MemoListControlViewModel();
+            await memoListControlViewModel.FirstLoad();
+            Kernel.BindViewModel(memoListControlViewModel);
             Kernel.BindViewModel(new HeadMenuViewModel
             {
                 NavButtonItems = new List<HeadMenuButtonViewModel>

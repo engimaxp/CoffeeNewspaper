@@ -23,7 +23,7 @@ namespace CN_Presentation.ViewModel.Controls
         {
             ExpandTaskCommand = new RelayCommand(ExpandTask);
             OpenEditDialogCommand = new RelayCommand(async ()=>await OpenEditDialog());
-            SelectTaskCommand = new RelayCommand(SelectTask);
+            SelectTaskCommand = new RelayCommand(async()=>await SelectTask());
             DisplayMoreOpCommand = new RelayCommand(DisplayMoreOp);
             PendingCommand = new RelayCommand(Pending);
             FailingCommand = new RelayCommand(Failing);
@@ -224,13 +224,14 @@ namespace CN_Presentation.ViewModel.Controls
             });
         }
 
-        private void SelectTask()
+        private async Task SelectTask()
         {
             IsSelected = true;
             //other task deselct
             foreach (var model in IoC.Get<TaskListViewModel>().Items
                 .Where(x => x.TaskInfo?.TaskId != TaskInfo?.TaskId && x.IsSelected))
                 model.IsSelected = false;
+            await IoC.Get<MemoListControlViewModel>().LoadTaskMemos(TaskInfo.TaskId);
         }
 
         private void DisplayMoreOp()

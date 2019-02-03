@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -188,7 +187,7 @@ namespace CN_WPF
             {
                 base.OnStartup(e);
 
-                ApplicationSetupAsync();
+                await ApplicationSetupAsync();
 
                 await IoC.Get<TaskListViewModel>().RefreshTaskItems();
                 Current.MainWindow = new MainWindow();
@@ -199,15 +198,15 @@ namespace CN_WPF
         /// Bind DI Container and other Important thing before window shows up
         /// </summary>
         /// <returns></returns>
-        private void ApplicationSetupAsync()
+        private async Task ApplicationSetupAsync()
         {
             IoC.Setup();
-            IoC.Kernel.BindInitialViewModel();
             IoC.Kernel.BindCNDBContext();
 
             IoC.Kernel.BindSqliteDataStore();
             IoC.Kernel.BindServices();
 
+            await IoC.Kernel.BindInitialViewModel();
 
             //Bind UI Manager So Could use be used in ViewModel
             IoC.Kernel.Bind<IUIManager>().ToConstant(new UIManager());

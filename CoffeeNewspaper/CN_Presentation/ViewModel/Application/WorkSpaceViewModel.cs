@@ -15,9 +15,9 @@ namespace CN_Presentation.ViewModel.Application
         public bool SideTaskMenuVisible { get; set; } = true;
 
         public TaskListViewModel TasksListViewModel { get; set; }= IoC.Get<TaskListViewModel>();
-   
-
-    #endregion
+        
+        public MemoListControlViewModel MemoListControlViewModel { get; set; } = IoC.Get<MemoListControlViewModel>();
+        #endregion
 
 
         #region Constructor

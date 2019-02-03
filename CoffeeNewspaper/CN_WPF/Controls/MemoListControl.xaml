@@ -10,7 +10,7 @@
     <Border Padding="0 10 0 0"
             Background="Transparent">
         <Grid 
-              DataContext="{x:Static design:MemoListControlDesignModel.Instance}">
+              d:DataContext="{x:Static design:MemoListControlDesignModel.Instance}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30" />
                 <RowDefinition Height="Auto" />
@@ -34,7 +34,8 @@
                     <Button Style="{StaticResource IconDarkerButton}"
                             Content="{StaticResource FontAwesomeFileIcon}"
                             FontFamily="{StaticResource FontAwesomeRegular}"
-                            FontSize="{StaticResource FontSizeLarge}" />
+                            FontSize="{StaticResource FontSizeLarge}" 
+                            Command="{Binding AddAMemoCommand}"/>
 
                     <Button Style="{StaticResource IconDarkerButton}"
                             Content="{StaticResource FontAwesomeTrashAltIcon}"

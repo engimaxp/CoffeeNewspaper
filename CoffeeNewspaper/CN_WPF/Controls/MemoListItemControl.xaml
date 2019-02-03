@@ -41,7 +41,7 @@
                                         <TextBox
                                             Padding="0"
                                             Margin="0"
-                                            Text="过去的和未来的同样重要"
+                                            Text="{Binding MemoTitle,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"
                                             VerticalAlignment="Center"
                                             FontSize="{StaticResource FontSizeRegular}"
                                             />
@@ -68,7 +68,8 @@
                                         <Button Style="{StaticResource IconDarkerButton}"
                                                 Content="{StaticResource FontAwesomeTrashAltIcon}"
                                                 FontFamily="{StaticResource FontAwesomeRegular}"
-                                                FontSize="{StaticResource FontSizeLarge}" />
+                                                FontSize="{StaticResource FontSizeLarge}"
+                                                Command="{Binding DeleteCommand}"/>
                                     </StackPanel>
                                 </Grid>
                                 <!-- Content -->
@@ -76,7 +77,8 @@
                                          Style="{StaticResource MemoContent}"
                                          TextWrapping="Wrap"
                                          AcceptsReturn="True"
-                                         FontSize="{StaticResource FontSizeRegular}" />
+                                         FontSize="{StaticResource FontSizeRegular}"
+                                         Text="{Binding MemoContent,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                                 <!-- Tags -->
                                 <local:TagPanelControl 
                                     Grid.Row="2" 

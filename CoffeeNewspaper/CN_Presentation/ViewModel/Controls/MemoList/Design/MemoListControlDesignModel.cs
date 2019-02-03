@@ -53,6 +53,8 @@ namespace CN_Presentation.ViewModel.Controls.Design
         /// </summary>
         public MemoListItemDesignModel()
         {
+            MemoTitle = "ninninininin";
+            MemoContent = "asdasdasdasdasdasda";
         }
         #endregion
     }

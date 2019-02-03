@@ -56,7 +56,7 @@
 
         <!--Memo List-->
 
-        <local:MemoListControl
+        <local:MemoListControl DataContext="{Binding MemoListControlViewModel}"
             Grid.Column="2" />
 
     </Grid>
