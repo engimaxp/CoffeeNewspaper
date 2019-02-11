@@ -470,7 +470,7 @@ namespace CN_Service
         public async Task<bool> EndTimeSlice(int taskId, DateTime endTime)
         {
             var originDataTask = await taskDataStore.GetTask(taskId);
-            if (originDataTask?.UsedTimeSlices == null || originDataTask.UsedTimeSlices.Count == 0) return false;
+            if (originDataTask?.UsedTimeSlices == null || originDataTask.UsedTimeSlices.Count == 0) return await unitOfWork.Commit();
             var originDatas = originDataTask.UsedTimeSlices.ToList();
             originDatas.Sort();
             // if the last timeslice is ended then return true

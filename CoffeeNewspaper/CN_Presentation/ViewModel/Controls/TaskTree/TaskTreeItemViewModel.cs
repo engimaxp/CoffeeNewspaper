@@ -29,6 +29,7 @@ namespace CN_Presentation.ViewModel
             RightCommand = new RelayCommand(async () => await Right());
             UpCommand = new RelayCommand(async () => await Up());
             DownCommand = new RelayCommand(async ()=>await Down());
+            CompleteCommand = new RelayCommand(async () => await Finish());
 
             this.Subscriber = Subscriber;
 
@@ -48,6 +49,7 @@ namespace CN_Presentation.ViewModel
                 DisplayDownOperator =
                     TaskInfo.ParentTask.ChildTasks.FilterDeletedAndOrderBySortTasks().Last().TaskId != TaskInfo.TaskId;
             }
+            DisplayCompleteOperator = TaskInfo.Status != CNTaskStatus.DONE;
         }
 
         #endregion
@@ -107,7 +109,7 @@ namespace CN_Presentation.ViewModel
 
         public bool DisplayDownOperator { get; set; }
 
-
+        public bool DisplayCompleteOperator { get; set; }
         #endregion
 
         #region Commands
@@ -124,6 +126,7 @@ namespace CN_Presentation.ViewModel
 
         public ICommand DownCommand { get; set; }
 
+        public ICommand CompleteCommand { get; set; }
         #endregion
 
         #region Private Methods
@@ -217,6 +220,17 @@ namespace CN_Presentation.ViewModel
 
             //refresh view display
             await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(taskinfo.TaskId);
+        }
+
+        private async Task Finish()
+        {
+            await TaskOperatorHelper.WrapException(async () =>
+            {
+                if (TaskInfo == null) return;
+                await IoC.Get<ITaskService>().FinishATask(TaskInfo.TaskId);
+                //refresh task
+                await IoC.Get<TaskListViewModel>().RefreshSpecificTaskItem(TaskInfo.TaskId);
+            });
         }
 
         #endregion

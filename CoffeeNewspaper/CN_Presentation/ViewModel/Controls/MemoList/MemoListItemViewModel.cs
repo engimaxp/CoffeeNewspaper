@@ -83,6 +83,9 @@ namespace CN_Presentation.ViewModel.Controls
                     SecondaryMessage = "you may recover this memo from db",
                 });
             }
+            else {
+                await DeleteMemo(this.memo?.MemoId)();
+            }
         }
 
         private Func<Task<bool>> DeleteMemo(string memoId)

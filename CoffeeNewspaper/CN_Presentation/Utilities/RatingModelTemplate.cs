@@ -16,9 +16,9 @@ namespace CN_Presentation.ViewModel.Controls
         {
             switch (controlType)
             {
-                case RatingControlType.Priority:
-                    return new RatingDesignModel2(selectedValue, rateChangedEvent);
                 case RatingControlType.Urgency:
+                    return new RatingDesignModel2(selectedValue, rateChangedEvent);
+                case RatingControlType.Priority:
                     return new RatingDesignModel(selectedValue, rateChangedEvent);
                 default:
                     Debugger.Break();
