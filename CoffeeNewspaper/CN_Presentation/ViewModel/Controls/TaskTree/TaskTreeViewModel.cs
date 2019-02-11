@@ -117,9 +117,9 @@ namespace CN_Presentation.ViewModel
         {
             //find selected item
             var selectedItem = NodeItems.FirstOrDefault(x => x.IsSelected);
-            if (selectedItem != null) return selectedItem.TaskInfo.ParentTaskID??0;
+            if (selectedItem != null) return selectedItem.TaskInfo.ParentTaskID??(_taskinfo?.TaskId ?? 0);
             //if not find a selected item, add to root _taskinfo
-            return 0;
+            return _taskinfo?.TaskId ?? 0;
         }
 
         private int GetSelectedItemTaskId()
